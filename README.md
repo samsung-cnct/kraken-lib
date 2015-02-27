@@ -93,7 +93,7 @@ aab430f9...	10.1.1.101	role=master
 
 If you do not see similar IPs and roles, contact <leetchang@gmail.com> and he'll help you sort it out.
 
-### Access to each node can be accomplished through `vagrant`
+Access to each node can be accomplished through `vagrant`
 ```bash
 vagrant ssh <node-name>
 ```
