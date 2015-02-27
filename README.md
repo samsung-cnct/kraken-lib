@@ -87,6 +87,18 @@ aab430f9...	10.1.1.101	role=master
 
 If you do not see similar IPs and roles, contact <leetchang@gmail.com> and he'll help you sort it out.
 
+### Access to each node can be accomplished through `vagrant`
+```bash
+vagrant ssh <node-name>
+```
+
+You also `ssh` directly by adding the lines from the _ssh_config_ file to `~/.ssh/config`
+This will add the correct ssh params and keys to your ssh agent. You can simply run
+```bash
+ssh node-master
+ssh node-01
+``` 
+
 
 _Caveats_
 > Auto reboot of coreos after updates is NOT enabled
