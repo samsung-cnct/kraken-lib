@@ -8,15 +8,15 @@ Deploy kubernetes cluster on coreos using vagrant
  
  Bits that you will need to run a Kubernetes + Coreos cluster on your machine.
 
- * Virtualbox to run local vms such as Coreos
- * `vagrant`
+ * [Virtualbox](https://www.virtualbox.org/) to run VMs
+ * `vagrant` get it [here](https://www.vagrantup.com/downloads.html)
  * `kubectl`
  * AWS environment variables for deploying to AWS (optional for deploying to AWS - TODO)
 
 ### kubectl
 
 Download and install the latest kubectl into your /opt directory.
-You can locate the lates binaries [here](https://github.com/GoogleCloudPlatform/kubernetes/releases/latest)
+You can locate the latest binaries [here](https://github.com/GoogleCloudPlatform/kubernetes/releases/latest)
 All other release including archives are found [here](https://github.com/GoogleCloudPlatform/kubernetes/releases)
 
 ```bash
@@ -27,8 +27,13 @@ curl -L https://github.com/GoogleCloudPlatform/kubernetes/releases/download/v0.1
 * kubectl user documentation can be found [here](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/kubectl.md)
 *  kubectl [FAQ](https://github.com/GoogleCloudPlatform/kubernetes/wiki/User-FAQ)
 
-## Deploy
-Deploy everything by
+## Download and Deploy
+Download __kraken__ into your working directory 
+```bash
+git clonehttps://github.com/onemorehill/kraken.git
+cd kraken
+```
+Deploy everything by running `vagrant` commands while in the __kraken__ directory
 
 ```bash
 vagrant up
@@ -46,7 +51,7 @@ kubernetes          component=apiserver,provider=kubernetes   <none>            
 kubernetes-ro       component=apiserver,provider=kubernetes   <none>              10.100.0.1          801
 ```
 
-Check on your minion by running
+Check on your minion(s) by running
 ```bash
 kubectl get minions
 ```
