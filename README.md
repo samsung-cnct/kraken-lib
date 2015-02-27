@@ -63,6 +63,10 @@ kubernetes          component=apiserver,provider=kubernetes   <none>            
 kubernetes-ro       component=apiserver,provider=kubernetes   <none>              10.100.0.1          80
 ```
 
+## Working with local files
+Everything in the __kraken__ directory is shared under the `/vagrant` mount on each node. You have full read write access to that directory allowing easy transfer of files to and from each node.
+
+
 ```bash
 vagrant destroy --force
 ```
