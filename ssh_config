@@ -1,0 +1,59 @@
+# SSH tunneling fun
+# Rename this file to ~/.ssh/config
+# Be sure and change the IdentityFile to the location of 
+# key you are using for each network
+
+# Some basic SSH global niceties
+ForwardAgent yes
+# Keep connection alive for 10 mins even if network blips
+TCPKeepAlive no
+ServerAliveInterval 60
+ServerAliveCountMax 10
+
+# Kubernetes sandbox cluster on AWS
+Host 10.1.1.*
+  ProxyCommand ssh core@sandy-kub.soundopts.com -W %h:%p
+  IdentityFile ~/.ssh/keys/kubernete-sandbox.pem
+  StrictHostKeyCHecking no
+  UserKnownHostsFile /dev/null
+  User core
+  HashKnownHosts no
+
+# Local vagrant cluster from kraken
+# This assume that the vagrant generated IdentityFile is in the default vagrant install 
+# location. If not you will need to update it
+Host node-master
+  HostName 10.1.1.101
+  StrictHostKeyCHecking no
+  IdentityFile ~/.vagrant.d/insecure_private_key
+  UserKnownHostsFile /dev/null
+  IdentitiesOnly yes
+  User core
+  HashKnownHosts no
+
+Host node-01
+  HostName 10.1.1.101
+  StrictHostKeyCHecking no
+  IdentityFile ~/.vagrant.d/insecure_private_key
+  UserKnownHostsFile /dev/null
+  IdentitiesOnly yes
+  User core
+  HashKnownHosts no
+
+Host node-01
+  HostName 10.1.1.101
+  StrictHostKeyCHecking no
+  IdentityFile ~/.vagrant.d/insecure_private_key
+  UserKnownHostsFile /dev/null
+  IdentitiesOnly yes
+  User core
+  HashKnownHosts no
+
+Host node-03
+  HostName 10.1.1.101
+  StrictHostKeyCHecking no
+  IdentityFile ~/.vagrant.d/insecure_private_key
+  UserKnownHostsFile /dev/null
+  IdentitiesOnly yes
+  User core
+  HashKnownHosts no
