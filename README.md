@@ -13,7 +13,7 @@ Deploy kubernetes cluster on coreos using vagrant
  * `kubectl`
  * AWS environment variables for deploying to AWS (optional for deploying to AWS - TODO)
 
-### kubectl
+### `kubectl`
 
 Download and install the latest kubectl into your /opt directory.
 You can locate the latest binaries [here](https://github.com/GoogleCloudPlatform/kubernetes/releases/latest)
@@ -63,10 +63,10 @@ kubernetes          component=apiserver,provider=kubernetes   <none>            
 kubernetes-ro       component=apiserver,provider=kubernetes   <none>              10.100.0.1          80
 ```
 
-## Working with local files
+### Working with local files
 Everything in the __kraken__ directory is shared under the `/vagrant` mount on each node. You have full read write access to that directory allowing easy transfer of files to and from each node.
 
-## Shutting down and cleaning up
+### Shutting down and cleaning up
 Once you are down with everything. Shutdown all VirtualBox VMs via `vagrant`
 
 ```bash
