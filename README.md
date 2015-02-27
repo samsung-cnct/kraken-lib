@@ -66,6 +66,8 @@ kubernetes-ro       component=apiserver,provider=kubernetes   <none>            
 ## Working with local files
 Everything in the __kraken__ directory is shared under the `/vagrant` mount on each node. You have full read write access to that directory allowing easy transfer of files to and from each node.
 
+## Shutting down and cleaning up
+Once you are down with everything. Shutdown all VirtualBox VMs via `vagrant`
 
 ```bash
 vagrant destroy --force
