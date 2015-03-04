@@ -1,7 +1,7 @@
 
 # kraken
 
-Kubernetes Made Easy(KubME)<sup>tm</sup>
+Kubernetes Made Easy(KubeME)<sup>tm</sup>
 Deploy kubernetes cluster on coreos using vagrant
 
 ## Pre-requisites
