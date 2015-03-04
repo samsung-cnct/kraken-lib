@@ -16,16 +16,14 @@ write_files:
 coreos:
   fleet:
     public-ip: $public_ipv4
+    metadata: kubmaster
   units:
     - name: setup-network-environment.service
       command: start
       content: |
         [Unit]
-        Description=Setup Network Environment
-        Documentation=https://github.com/kelseyhightower/setup-network-environment
         Requires=network-online.target
         After=network-online.target
-
         [Service]
         ExecStartPre=/usr/bin/mkdir -p /opt/bin
         ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/k8s/setup-network-environment 
@@ -37,10 +35,8 @@ coreos:
       command: start
       content: |
         [Unit]
-        Description=etcd
         Requires=setup-network-environment.service
         After=setup-network-environment.service
-
         [Service]
         EnvironmentFile=/etc/network-environment
         User=etcd
@@ -65,12 +61,10 @@ coreos:
       command: start
       content: |
         [Unit]
-        Description=fleet daemon
         Wants=etcd.service
         After=etcd.service
         Wants=fleet.socket
         After=fleet.socket
-
         [Service]
         Environment="FLEET_ETCD_SERVERS=http://127.0.0.1:4001"
         Environment="FLEET_METADATA=role=master"
@@ -81,13 +75,11 @@ coreos:
       command: start
       content: |
         [Unit]
-        Description=etcd waiter
         Wants=network-online.target
         Wants=etcd.service
         After=etcd.service
         After=network-online.target
         Before=flannel.service
-
         [Service]
         ExecStartPre=/usr/bin/chmod +x /opt/bin/waiter.sh
         ExecStart=/usr/bin/bash /opt/bin/waiter.sh
@@ -97,12 +89,10 @@ coreos:
       command: start
       content: |
         [Unit]
-        Description=Docker cache proxy
         Wants=network-online.target
         Wants=docker.service
         After=docker.service
         After=docker-online.target
-
         [Service]
         ExecStart=/usr/bin/docker run --net host -d --name docker-registry \
         -e STANDALONE=false \
@@ -121,8 +111,6 @@ coreos:
         After=etcd.service
         After=network-online.target
         Wants=network-online.target
-        Description=flannel is an etcd backed overlay network for containers
-
         [Service]
         Type=notify
         ExecStartPre=-/usr/bin/mkdir -p /opt/bin
@@ -136,25 +124,18 @@ coreos:
         [Unit]
         After=flannel.service
         Wants=flannel.service
-        Description=Docker Application Container Engine
-        Documentation=http://docs.docker.io
-
         [Service]
         EnvironmentFile=/run/flannel/subnet.env
         ExecStartPre=/bin/mount --make-rprivate /
         ExecStart=/usr/bin/docker -d --bip=${FLANNEL_SUBNET} --mtu=${FLANNEL_MTU} -s=overlay -H fd://
-
         [Install]
         WantedBy=multi-user.target
     - name: kube-apiserver.service
       command: start
       content: |
         [Unit]
-        Description=Kubernetes API Server
-        Documentation=https://github.com/GoogleCloudPlatform/kubernetes
         Requires=etcd.service
         After=etcd.service
-
         [Service]
         ExecStartPre=-/usr/bin/mkdir -p /opt/bin
         ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/v0.11.0/bin/linux/amd64/kube-apiserver
@@ -162,7 +143,6 @@ coreos:
         ExecStart=/opt/bin/kube-apiserver \
         --address=0.0.0.0 \
         --port=8080 \
-        --portal_net=10.100.0.0/16 \
         --etcd_servers=http://127.0.0.1:4001 \
         --public_address_override=172.17.8.101 \
         --logtostderr=true
@@ -172,11 +152,8 @@ coreos:
       command: start
       content: |
         [Unit]
-        Description=Kubernetes Controller Manager
-        Documentation=https://github.com/GoogleCloudPlatform/kubernetes
         Requires=kube-apiserver.service
         After=kube-apiserver.service
-
         [Service]
         ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/v0.11.0/bin/linux/amd64/kube-controller-manager
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-controller-manager
@@ -189,11 +166,8 @@ coreos:
       command: start
       content: |
         [Unit]
-        Description=Kubernetes Scheduler
-        Documentation=https://github.com/GoogleCloudPlatform/kubernetes
         Requires=kube-apiserver.service
         After=kube-apiserver.service
-
         [Service]
         ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/v0.11.0/bin/linux/amd64/kube-scheduler
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-scheduler
@@ -204,13 +178,10 @@ coreos:
       command: start
       content: |
         [Unit]
-        Description=Kubernetes Registration Service
-        Documentation=https://github.com/kelseyhightower/kube-register
         Requires=kube-apiserver.service
         After=kube-apiserver.service
         Requires=fleet.service
         After=fleet.service
-
         [Service]
         ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/k8s/kube-register
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-register
@@ -222,4 +193,4 @@ coreos:
         RestartSec=10
   update:
     group: alpha
-    reboot-strategy: off
+    reboot-strategy: on
