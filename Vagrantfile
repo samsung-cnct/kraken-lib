@@ -48,13 +48,6 @@ Vagrant.configure("2") do |config|
       serialFile = File.join(logdir, "%s-serial.txt" % vm_master_name)
       FileUtils.touch(serialFile)
 
-      config.vm.provider :vmware_fusion do |v, override|
-        v.vmx["serial0.present"] = "TRUE"
-        v.vmx["serial0.fileType"] = "file"
-        v.vmx["serial0.fileName"] = serialFile
-        v.vmx["serial0.tryNoRxLoss"] = "FALSE"
-      end
-
       config.vm.provider :virtualbox do |vb, override|
         vb.customize ["modifyvm", :id, "--uart1", "0x3F8", "4"]
         vb.customize ["modifyvm", :id, "--uartmode1", serialFile]
@@ -75,14 +68,13 @@ Vagrant.configure("2") do |config|
     config.vm.synced_folder ".", "/vagrant", disabled: false
     system('./local_startup.sh')
 
-    ip = "10.1.1.101"
+    ip = "172.16.1.101"
     config.vm.network :private_network, ip: ip
 
     if File.exist?(MASTER_YAML)
       config.vm.provision :file, :source => "#{MASTER_YAML}", :destination => "/tmp/vagrantfile-user-data"
       config.vm.provision :shell, :inline => "mv /tmp/vagrantfile-user-data /var/lib/coreos-vagrant/", :privileged => true
     end
-
   end
 
   (1..$node_instances).each do |i|
@@ -116,7 +108,7 @@ Vagrant.configure("2") do |config|
         vb.cpus = $vm_node_cpus
       end
 
-      ip = "10.1.1.#{i+101}"
+      ip = "172.16.1.#{i+101}"
       config.vm.network :private_network, ip: ip
 
       # Uncomment below to enable NFS for sharing the host machine into the coreos-vagrant VM.
@@ -127,7 +119,6 @@ Vagrant.configure("2") do |config|
         config.vm.provision :file, :source => "#{NODE_YAML}", :destination => "/tmp/vagrantfile-user-data"
         config.vm.provision :shell, :inline => "mv /tmp/vagrantfile-user-data /var/lib/coreos-vagrant/", :privileged => true
       end
-
     end
   end
 end

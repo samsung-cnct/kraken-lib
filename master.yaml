@@ -4,6 +4,7 @@
 # Taken from many sources that I will have to attribute - TODO
 # All nodes will talk directly to node-master for etcd and fleet information
 # First section of this yaml is a directive to wait for etcd to come up before proceeding
+
 # NOTE: All kubernetes bits are pulled from google servers as those are compile vs
 # from github locations
 # NOTE2: Auto reboot is not enabled
@@ -16,7 +17,7 @@ write_files:
 coreos:
   fleet:
     public-ip: $public_ipv4
-    metadata: kubmaster
+    metadata: role=kubmaster
   units:
     - name: setup-network-environment.service
       command: start
@@ -143,8 +144,8 @@ coreos:
         ExecStart=/opt/bin/kube-apiserver \
         --address=0.0.0.0 \
         --port=8080 \
+        --kubelet_port=10250 \
         --etcd_servers=http://127.0.0.1:4001 \
-        --public_address_override=172.17.8.101 \
         --logtostderr=true
         Restart=always
         RestartSec=10
@@ -193,4 +194,4 @@ coreos:
         RestartSec=10
   update:
     group: alpha
-    reboot-strategy: on
+    reboot-strategy: best-effort

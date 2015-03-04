@@ -14,7 +14,7 @@ coreos:
         Wants=fleet.socket
         After=fleet.socket
         [Service]
-        Environment="FLEET_ETCD_SERVERS=http://10.1.1.101:4001"
+        Environment="FLEET_ETCD_SERVERS=http://172.16.1.101:4001"
         Environment="FLEET_METADATA=role=kubernetes"
         ExecStart=/usr/bin/fleetd
         Restart=always
@@ -30,7 +30,7 @@ coreos:
         ExecStartPre=/usr/bin/mkdir -p /opt/bin
         ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/k8s/flanneld
         ExecStartPre=/usr/bin/chmod +x /opt/bin/flanneld
-        ExecStart=/opt/bin/flanneld --iface=eth1 --etcd-endpoints http://10.1.1.101:4001
+        ExecStart=/opt/bin/flanneld --iface=eth1 --etcd-endpoints http://172.16.1.101:4001
     - name: docker.service
       command: start
       content: |
@@ -66,7 +66,7 @@ coreos:
         ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/v0.11.0/bin/linux/amd64/kube-proxy
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-proxy
         ExecStart=/opt/bin/kube-proxy \
-        --etcd_servers=http://10.1.1.101:4001 \
+        --etcd_servers=http://172.16.1.101:4001 \
         --logtostderr=true
         Restart=always
         RestartSec=10
@@ -84,10 +84,10 @@ coreos:
         --address=0.0.0.0 \
         --port=10250 \
         --hostname_override=$public_ipv4 \
-        --etcd_servers=http://10.1.1.101:4001 \
+        --etcd_servers=http://172.16.1.101:4001 \
         --logtostderr=true
         Restart=always
         RestartSec=10
   update:
     group: alpha
-    reboot-strategy: off
+    reboot-strategy: best-effort

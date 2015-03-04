@@ -10,9 +10,19 @@ TCPKeepAlive no
 ServerAliveInterval 60
 ServerAliveCountMax 10
 
+# This is the gateway
+Host sandy-kub
+  Hostname sandy-kub.soundopts.com
+  IdentityFile ~/.ssh/keys/kubernete-sandbox.pem
+  StrictHostKeyCHecking no
+  UserKnownHostsFile /dev/null
+  User core
+  HashKnownHosts no
+
 # Kubernetes sandbox cluster on AWS
 Host 10.1.1.*
-  ProxyCommand ssh core@sandy-kub.soundopts.com -W %h:%p
+  ProxyCommand ssh sandy-kub -W %h:%p
+  StrictHostKeyCHecking no
   IdentityFile ~/.ssh/keys/kubernete-sandbox.pem
   StrictHostKeyCHecking no
   UserKnownHostsFile /dev/null
@@ -23,7 +33,7 @@ Host 10.1.1.*
 # This assume that the vagrant generated IdentityFile is in the default vagrant install 
 # location. If not you will need to update it
 Host node-master
-  HostName 10.1.1.101
+  HostName 172.16.1.101
   StrictHostKeyCHecking no
   IdentityFile ~/.vagrant.d/insecure_private_key
   UserKnownHostsFile /dev/null
@@ -32,7 +42,7 @@ Host node-master
   HashKnownHosts no
 
 Host node-01
-  HostName 10.1.1.101
+  HostName 172.16.1.102
   StrictHostKeyCHecking no
   IdentityFile ~/.vagrant.d/insecure_private_key
   UserKnownHostsFile /dev/null
@@ -40,8 +50,8 @@ Host node-01
   User core
   HashKnownHosts no
 
-Host node-01
-  HostName 10.1.1.101
+Host node-02
+  HostName 172.16.1.103
   StrictHostKeyCHecking no
   IdentityFile ~/.vagrant.d/insecure_private_key
   UserKnownHostsFile /dev/null
@@ -50,7 +60,7 @@ Host node-01
   HashKnownHosts no
 
 Host node-03
-  HostName 10.1.1.101
+  HostName 172.16.1.104
   StrictHostKeyCHecking no
   IdentityFile ~/.vagrant.d/insecure_private_key
   UserKnownHostsFile /dev/null
