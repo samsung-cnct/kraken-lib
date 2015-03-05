@@ -145,6 +145,8 @@ coreos:
         --address=0.0.0.0 \
         --port=8080 \
         --kubelet_port=10250 \
+        --portal_net=10.100.0.0/16 \
+        --public_address_override=172.16.1.101 \
         --etcd_servers=http://127.0.0.1:4001 \
         --logtostderr=true
         Restart=always
