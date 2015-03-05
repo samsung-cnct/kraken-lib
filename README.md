@@ -99,7 +99,7 @@ vagrant ssh <node-name>
 ```
 
 You also `ssh` directly by adding the lines from the _ssh_config_ file to `~/.ssh/config`
-This will add the correct ssh params and keys to your ssh agent. You can simply run
+This will add the correct ssh params and keys to your ssh agent allowing ssh from other environments. You can simply run
 ```bash
 ssh node-master
 ssh node-01
