@@ -30,7 +30,7 @@ curl -L https://github.com/GoogleCloudPlatform/kubernetes/releases/download/v0.1
 ## Download and Deploy
 Download __kraken__ into your working directory 
 ```bash
-git clonehttps://github.com/onemorehill/kraken.git
+git clone https://github.com/onemorehill/kraken.git
 cd kraken
 ```
 Deploy everything by running `vagrant` commands while in the __kraken__ directory
