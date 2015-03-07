@@ -66,7 +66,7 @@ Vagrant.configure("2") do |config|
 
     # Enable file sharing between host machine and guest and run local startup scrip.
     config.vm.synced_folder ".", "/vagrant", disabled: false
-    system('./local_startup.sh')
+    system('. local_startup.sh')
 
     ip = "172.16.1.101"
     config.vm.network :private_network, ip: ip

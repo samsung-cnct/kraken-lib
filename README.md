@@ -38,6 +38,14 @@ Deploy everything by running `vagrant` commands while in the __kraken__ director
 ```bash
 vagrant up
 ```
+
+### Environment variables
+Add all the vagrant kubernetes environment variables to your current session by
+
+```bash 
+. local_startup.sh
+```
+
 ## Validate install
 Everything should by operational. To verify run
 
