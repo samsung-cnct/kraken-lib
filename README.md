@@ -40,7 +40,7 @@ vagrant up
 ```
 
 ### Environment variables
-Add the vagrant kubernetes environment variables to your current session by
+Add the vagrant kubernetes environment variables to your current session by running the following command.
 
 ```bash 
 . local_startup.sh
