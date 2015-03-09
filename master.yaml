@@ -1,13 +1,6 @@
 #cloud-config
 
 ---
-# Taken from many sources that I will have to attribute - TODO
-# All nodes will talk directly to node-master for etcd and fleet information
-# First section of this yaml is a directive to wait for etcd to come up before proceeding
-
-# NOTE: All kubernetes bits are pulled from google servers as those are compile vs
-# from github locations
-# NOTE2: Auto reboot is not enabled
 write_files:
 - path: /opt/bin/wait.sh
   owner: root
@@ -17,12 +10,12 @@ write_files:
 coreos:
   fleet:
     public-ip: $public_ipv4
-    metadata: role=kube-master
   units:
     - name: setup-network-environment.service
       command: start
       content: |
         [Unit]
+        Description=Setup the networking environment using kelseyhightower's work from Coreos
         Requires=network-online.target
         After=network-online.target
         [Service]
@@ -36,6 +29,7 @@ coreos:
       command: start
       content: |
         [Unit]
+        Description=etcd
         Requires=setup-network-environment.service
         After=setup-network-environment.service
         [Service]
@@ -62,6 +56,7 @@ coreos:
       command: start
       content: |
         [Unit]
+        Description=Cores' fleet service
         Wants=etcd.service
         After=etcd.service
         Wants=fleet.socket
@@ -76,7 +71,8 @@ coreos:
       command: start
       content: |
         [Unit]
-        Wants=network-online.target1
+        Description=Wait for etcd to come up on master
+        Wants=network-online.target
         Wants=etcd.service
         After=etcd.service
         After=network-online.target
@@ -90,6 +86,7 @@ coreos:
       command: start
       content: |
         [Unit]
+        Description=Docker's cache service 
         Wants=network-online.target
         Wants=docker.service
         After=docker.service
@@ -125,6 +122,7 @@ coreos:
         [Unit]
         After=flannel.service
         Wants=flannel.service
+        Description=Docker Application Container Engine
         [Service]
         EnvironmentFile=/run/flannel/subnet.env
         ExecStartPre=/bin/mount --make-rprivate /
@@ -135,6 +133,7 @@ coreos:
       command: start
       content: |
         [Unit]
+        Description=Kubernetes API Server
         Requires=etcd.service
         After=etcd.service
         [Service]
@@ -145,16 +144,16 @@ coreos:
         --address=0.0.0.0 \
         --port=8080 \
         --portal_net=10.100.0.0/16 \
-        --public_address_override=172.16.1.101 \
         --etcd_servers=http://127.0.0.1:4001 \
+        --public_address_override=$public_ipv4 \
         --logtostderr=true
-        --v=0
         Restart=always
         RestartSec=10
     - name: kube-controller-manager.service 
       command: start
       content: |
         [Unit]
+        Description=Kubernetes Controller Manager
         Requires=kube-apiserver.service
         After=kube-apiserver.service
         [Service]
@@ -162,14 +161,15 @@ coreos:
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-controller-manager
         ExecStart=/opt/bin/kube-controller-manager \
         --master=127.0.0.1:8080 \
-        --logtostderr=true \
-        --v=0
+        --logtostderr=true
         Restart=always
         RestartSec=10
     - name: kube-scheduler.service
       command: start
       content: |
         [Unit]
+        Description=Kubernetes Scheduler
+        Documentation=https://github.com/GoogleCloudPlatform/kubernetes
         Requires=kube-apiserver.service
         After=kube-apiserver.service
         [Service]
@@ -182,6 +182,8 @@ coreos:
       command: start
       content: |
         [Unit]
+        Description=Kubernetes Registration Service
+        Documentation=https://github.com/kelseyhightower/kube-register
         Requires=kube-apiserver.service
         After=kube-apiserver.service
         Requires=fleet.service

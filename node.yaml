@@ -1,16 +1,13 @@
 #cloud-config
-# NOTE auto reboot is not enabled
----
 write_files:
 - path: /opt/bin/wait.sh
   owner: root
   content: |
     #! /usr/bin/bash
-    until curl http://172.16.1.101:8080/api/v1beta1/services?namespace=default; do sleep 10; done
+    until curl http://172.16.1.101:8080/api/v1beta1/services?namespace=default; do sleep 2; done
 coreos:
   fleet:
     public-ip: $public_ipv4
-    metadata: role=kube-node
   units:
     - name: etcd.service
       mask: true
@@ -18,6 +15,7 @@ coreos:
       command: start
       content: |
         [Unit]
+        Description=cores' fleet daemon
         Wants=fleet.socket
         After=fleet.socket
         [Service]
@@ -47,13 +45,14 @@ coreos:
         [Service]
         EnvironmentFile=/run/flannel/subnet.env
         ExecStartPre=/bin/mount --make-rprivate /
-        ExecStart=/usr/bin/docker -d --registry-mirror=http://172.16.1.101:5000 --bip=${FLANNEL_SUBNET} --mtu=${FLANNEL_MTU} -s=overlay -H fd://
+        ExecStart=/usr/bin/docker -d --bip=${FLANNEL_SUBNET} --mtu=${FLANNEL_MTU} -s=overlay -H fd://
         [Install]
         WantedBy=multi-user.target
     - name: setup-network-environment.service
       command: start
       content: |
         [Unit]
+        Description=Setup the networking environment using kelseyhightower's work from Coreos
         Requires=network-online.target
         After=network-online.target
         [Service]
@@ -63,10 +62,25 @@ coreos:
         ExecStart=/opt/bin/setup-network-environment
         RemainAfterExit=yes
         Type=oneshot
+    - name: kub-apiserver-wait.service
+      command: start
+      content: |
+        [Unit]
+        Description=wait for the apiserver on the master to come up before proceeding
+        Wants=network-online.target
+        Wants=etcd.service
+        After=etcd.service
+        After=network-online.target
+        [Service]
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/wait.sh
+        ExecStart=/usr/bin/bash /opt/bin/wait.sh
+        RemainAfterExit=true
+        Type=oneshot
     - name: kube-proxy.service
       command: start
       content: |
         [Unit]
+        Description=Kubernete's proxy service
         Requires=setup-network-environment.service
         After=setup-network-environment.service
         [Service]
@@ -77,24 +91,11 @@ coreos:
         --logtostderr=true
         Restart=always
         RestartSec=10
-    - name: kube-apiserver-wait.service
-      command: start
-      content: |
-        [Unit]
-        Wants=network-online.target
-        Wants=kube-proxy.service
-        After=kube-proxy.service
-        After=network-online.target
-        Before=kube-kubelet.service
-        [Service]
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/wait.sh
-        ExecStart=/usr/bin/bash /opt/bin/wait.sh
-        RemainAfterExit=true
-        Type=oneshot
     - name: kube-kubelet.service
       command: start
       content: |
         [Unit]
+        Description=Kubernete's kubelet service
         Requires=setup-network-environment.service
         After=setup-network-environment.service
         [Service]
@@ -106,8 +107,7 @@ coreos:
         --port=10250 \
         --hostname_override=$public_ipv4 \
         --api_servers=172.16.1.101:8080 \
-        --logtostderr=true \
-        --v=0
+        --logtostderr=true
         Restart=always
         RestartSec=10
   update:
