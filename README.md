@@ -1,3 +1,4 @@
+# kubernetes release *v0.12.0*
 
 # kraken
 
@@ -17,11 +18,11 @@ Deploy kubernetes cluster on coreos using vagrant
 
 Download and install the latest kubectl into your /opt directory.
 You can locate the latest binaries [here](https://github.com/GoogleCloudPlatform/kubernetes/releases/latest)
-All other release including archives are found [here](https://github.com/GoogleCloudPlatform/kubernetes/releases)
+All other releases including archives are found [here](https://github.com/GoogleCloudPlatform/kubernetes/releases)
 
 ```bash
 cd /opt
-curl -L https://github.com/GoogleCloudPlatform/kubernetes/releases/download/v0.11.0/kubernetes.tar.gz | tar xv
+curl -L https://github.com/GoogleCloudPlatform/kubernetes/releases/download/v0.12.0/kubernetes.tar.gz | tar xv
 ```
 ### Helpful `kubectl` links
 * kubectl user documentation can be found [here](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/kubectl.md)

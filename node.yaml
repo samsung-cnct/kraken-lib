@@ -1,9 +1,16 @@
 #cloud-config
 # NOTE auto reboot is not enabled
+---
+write_files:
+- path: /opt/bin/wait.sh
+  owner: root
+  content: |
+    #! /usr/bin/bash
+    until curl http://172.16.1.101:8080/api/v1beta1/services?namespace=default; do sleep 10; done
 coreos:
   fleet:
     public-ip: $public_ipv4
-    metadata: role=kubnode
+    metadata: role=kube-node
   units:
     - name: etcd.service
       mask: true
@@ -40,7 +47,7 @@ coreos:
         [Service]
         EnvironmentFile=/run/flannel/subnet.env
         ExecStartPre=/bin/mount --make-rprivate /
-        ExecStart=/usr/bin/docker --registry-mirror=http://10.1.1.101:5000 -d --bip=${FLANNEL_SUBNET} --mtu=${FLANNEL_MTU} -s=overlay -H fd://
+        ExecStart=/usr/bin/docker -d --registry-mirror=http://172.16.1.101:5000 --bip=${FLANNEL_SUBNET} --mtu=${FLANNEL_MTU} -s=overlay -H fd://
         [Install]
         WantedBy=multi-user.target
     - name: setup-network-environment.service
@@ -63,13 +70,27 @@ coreos:
         Requires=setup-network-environment.service
         After=setup-network-environment.service
         [Service]
-        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/v0.11.0/bin/linux/amd64/kube-proxy
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/v0.12.0/bin/linux/amd64/kube-proxy
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-proxy
         ExecStart=/opt/bin/kube-proxy \
         --etcd_servers=http://172.16.1.101:4001 \
         --logtostderr=true
         Restart=always
         RestartSec=10
+    - name: kube-apiserver-wait.service
+      command: start
+      content: |
+        [Unit]
+        Wants=network-online.target
+        Wants=kube-proxy.service
+        After=kube-proxy.service
+        After=network-online.target
+        Before=kube-kubelet.service
+        [Service]
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/wait.sh
+        ExecStart=/usr/bin/bash /opt/bin/wait.sh
+        RemainAfterExit=true
+        Type=oneshot
     - name: kube-kubelet.service
       command: start
       content: |
@@ -78,16 +99,17 @@ coreos:
         After=setup-network-environment.service
         [Service]
         EnvironmentFile=/etc/network-environment
-        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/v0.11.0/bin/linux/amd64/kubelet
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/v0.12.0/bin/linux/amd64/kubelet
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kubelet
         ExecStart=/opt/bin/kubelet \
         --address=0.0.0.0 \
         --port=10250 \
         --hostname_override=$public_ipv4 \
-        --etcd_servers=http://172.16.1.101:4001 \
-        --logtostderr=true
+        --api_servers=172.16.1.101:8080 \
+        --logtostderr=true \
+        --v=0
         Restart=always
         RestartSec=10
   update:
     group: alpha
-    reboot-strategy: best-effort
+    reboot-strategy: off
