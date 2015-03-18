@@ -1,4 +1,5 @@
-# kubernetes release *v0.12.0*
+# kubernetes release *v0.10.1*
+# Coreos channel *alpha* *618.0.0*
 
 # kraken
 
@@ -56,8 +57,8 @@ kubectl get services
 Output should look something like
 ```
 NAME                LABELS                                    SELECTOR            IP                  PORT
-kubernetes          component=apiserver,provider=kubernetes   <none>              10.100.0.2          443
-kubernetes-ro       component=apiserver,provider=kubernetes   <none>              10.100.0.1          801
+kubernetes          component=apiserver,provider=kubernetes   <none*              10.100.0.2          443
+kubernetes-ro       component=apiserver,provider=kubernetes   <none*              10.100.0.1          801
 ```
 
 Check on your minion(s) by running
@@ -68,8 +69,8 @@ kubectl get minions
 You will get back something that looks like
 ```bash
 NAME                LABELS                                    SELECTOR            IP                  PORT
-kubernetes          component=apiserver,provider=kubernetes   <none>              10.100.0.2          443
-kubernetes-ro       component=apiserver,provider=kubernetes   <none>              10.100.0.1          80
+kubernetes          component=apiserver,provider=kubernetes   <none*              10.100.0.2          443
+kubernetes-ro       component=apiserver,provider=kubernetes   <none*              10.100.0.1          80
 ```
 
 ### Working with local files
@@ -100,7 +101,7 @@ MACHINE		IP		METADATA
 aab430f9...	10.1.1.101	role=master
 ```
 
-If you do not see similar IPs and roles, contact <leetchang@gmail.com> and he'll help you sort it out.
+If you do not see similar IPs and roles, contact <leetchang@gmail.com* and he'll help you sort it out.
 
 Access to each node can be accomplished through `vagrant`
 ```bash
@@ -116,7 +117,9 @@ ssh node-01
 
 
 _Caveats_
-> Auto reboot of coreos after updates is NOT enabled
-> Errors are not outputted by kubernetes
-> kubectl status reports are not consistent
-> Exposing services to the public is a blackart
+* Auto reboot of coreos after updates is NOT enabled ```kube v0.10.1```
+* Errors are not outputted by kubernetes ```kube v0.10.1```
+* kubectl status reports are not consistent ```kube v0.10.1```
+* Exposing services to the public is a blackart ```kube v0.10.1```
+* Pods are can land on the same minion ```kube v0.10.1```
+* Replication Controller can SPAM pods ```kube v0.10.1```

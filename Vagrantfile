@@ -1,123 +1,241 @@
 # -*- mode: ruby -*-
-# # vi: set ft=ruby :
+# vi: set ft=ruby :
 
 require 'fileutils'
+require 'net/http'
+require 'open-uri'
 
+class Module
+  def redefine_const(name, value)
+    __send__(:remove_const, name) if const_defined?(name)
+    const_set(name, value)
+  end
+end
+
+required_plugins = %w(vagrant-triggers)
+required_plugins.each do |plugin|
+  need_restart = false
+  unless Vagrant.has_plugin? plugin
+    system "vagrant plugin install #{plugin}"
+    need_restart = true
+  end
+  exec "vagrant #{ARGV.join(' ')}" if need_restart
+end
+
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
 Vagrant.require_version ">= 1.6.0"
 
 MASTER_YAML = File.join(File.dirname(__FILE__), "master.yaml")
 NODE_YAML = File.join(File.dirname(__FILE__), "node.yaml")
 
-# Define parameters for cluster
-# node_instances is the number of worker or minion nodes in
-# ADDITION to the node-master
-# Adjust these params according to the resources available on your
-# machine
-$node_instances = 3
-$update_channel = "alpha"
-$enable_serial_logging = false
-$vm_master_memory = 512
-$vm_master_cpus = 1
-$vm_node_memory = 1024
-$vm_node_cpus = 1
+DOCKERCFG = File.expand_path(ENV['DOCKERCFG'] || "~/.dockercfg")
 
-Vagrant.configure("2") do |config|
-  # Yes we are still using vagrant old insecure key. So don't expose these instances outside
-  # your box.
-  # YOU HAVE BEEN WARNED.
+KUBERNETES_VERSION = ENV['KUBERNETES_VERSION'] || '0.10.1'
+if KUBERNETES_VERSION == "latest"
+  url = "https://get.k8s.io"
+  Object.redefine_const(:KUBERNETES_VERSION,
+    open(url).read().scan(/release=.*/)[0].gsub('release=v', ''))
+end
+
+CHANNEL = ENV['CHANNEL'] || 'alpha'
+if CHANNEL != 'alpha'
+  puts "============================================================================="
+  puts "As this is a fastly evolving technology CoreOS' alpha channel is the only one"
+  puts "expected to behave reliably. While one can invoke the beta or stable channels"
+  puts "please be aware that your mileage may vary a whole lot."
+  puts "So, before submitting a bug, in this project, or upstreams (either kubernetes"
+  puts "or CoreOS) please make sure it (also) happens in the (default) alpha channel."
+  puts "============================================================================="
+end
+
+COREOS_VERSION = ENV['COREOS_VERSION'] || '618.0.0'
+upstream = "http://#{CHANNEL}.release.core-os.net/amd64-usr/#{COREOS_VERSION}"
+if COREOS_VERSION == "latest"
+  upstream = "http://#{CHANNEL}.release.core-os.net/amd64-usr/current"
+  url = "#{upstream}/version.txt"
+  Object.redefine_const(:COREOS_VERSION,
+    open(url).read().scan(/COREOS_VERSION=.*/)[0].gsub('COREOS_VERSION=', ''))
+end
+
+NUM_INSTANCES = ENV['NUM_INSTANCES'] || 2
+
+MASTER_MEM = ENV['MASTER_MEM'] || 512
+MASTER_CPUS = ENV['MASTER_CPUS'] || 1
+
+NODE_MEM= ENV['NODE_MEM'] || 1024
+NODE_CPUS = ENV['NODE_CPUS'] || 1
+
+ETCD_CLUSTER_SIZE = ENV['ETCD_CLUSTER_SIZE'] || 3
+
+SERIAL_LOGGING = (ENV['SERIAL_LOGGING'].to_s.downcase == 'true')
+GUI = (ENV['GUI'].to_s.downcase == 'true')
+
+(1..(NUM_INSTANCES.to_i + 1)).each do |i|
+  case i
+  when 1
+    ETCD_SEED_CLUSTER = ""
+    hostname = "master"
+  else
+    hostname = ",node-%02d" % (i - 1)
+  end
+  if i <= ETCD_CLUSTER_SIZE
+    ETCD_SEED_CLUSTER.concat("#{hostname}=http://172.17.8.#{i+100}:2380")
+  end
+end
+
+# Read YAML file with mountpoint details
+# MOUNT_POINTS = YAML::load_file('synced_folders.yaml')
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  # always use Vagrants' insecure key
   config.ssh.insert_key = false
+  config.ssh.forward_agent = true
 
-  config.vm.box = "coreos-%s" % $update_channel
-  config.vm.box_version = ">= 612.0.0"
-  config.vm.box_url = "http://%s.release.core-os.net/amd64-usr/current/coreos_production_vagrant.json" % $update_channel
+  config.vm.box = "coreos-#{CHANNEL}"
+  config.vm.box_version = ">= #{COREOS_VERSION}"
+  config.vm.box_url = "#{upstream}/coreos_production_vagrant.json"
+
+  config.trigger.after [:up, :resume] do
+    info "making sure ssh agent has the default vagrant key..."
+    system "ssh-add ~/.vagrant.d/insecure_private_key"
+  end
+
+  ["vmware_fusion", "vmware_workstation"].each do |vmware|
+    config.vm.provider vmware do |v, override|
+      override.vm.box_url = "#{upstream}/coreos_production_vagrant_vmware_fusion.json"
+    end
+  end
+
+  config.vm.provider :parallels do |vb, override|
+    override.vm.box = "AntonioMeireles/coreos-#{CHANNEL}"
+    override.vm.box_url = "https://vagrantcloud.com/AntonioMeireles/coreos-#{CHANNEL}"
+  end
 
   config.vm.provider :virtualbox do |v|
-    # Do not use VirtualBox guest tools or additions.
+    # On VirtualBox, we don't have guest additions or a functional vboxsf
+    # in CoreOS, so tell Vagrant that so it can be smarter.
     v.check_guest_additions = false
     v.functional_vboxsf     = false
   end
-
-
-  config.vm.define vm_master_name = "node-master" do |config|
-    config.vm.hostname = vm_master_name
-
-    if $enable_serial_logging
-      logdir = File.join(File.dirname(__FILE__), "log")
-      FileUtils.mkdir_p(logdir)
-
-      serialFile = File.join(logdir, "%s-serial.txt" % vm_master_name)
-      FileUtils.touch(serialFile)
-
-      config.vm.provider :virtualbox do |vb, override|
-        vb.customize ["modifyvm", :id, "--uart1", "0x3F8", "4"]
-        vb.customize ["modifyvm", :id, "--uartmode1", serialFile]
-      end
-    end
-
-    if $expose_docker_tcp
-      config.vm.network "forwarded_port", guest: 2375, host: ($expose_docker_tcp + i - 1), auto_correct: true
-    end
-
-    config.vm.provider :virtualbox do |vb|
-      vb.gui = $vm_gui
-      vb.memory = $vm_master_memory
-      vb.cpus = $vm_master_cpus
-    end
-
-    # Enable file sharing between host machine and guest and run local startup scrip.
-    config.vm.synced_folder ".", "/vagrant", disabled: false
-    system('. local_startup.sh')
-
-    ip = "172.16.1.101"
-    config.vm.network :private_network, ip: ip
-
-    if File.exist?(MASTER_YAML)
-      config.vm.provision :file, :source => "#{MASTER_YAML}", :destination => "/tmp/vagrantfile-user-data"
-      config.vm.provision :shell, :inline => "mv /tmp/vagrantfile-user-data /var/lib/coreos-vagrant/", :privileged => true
-    end
+  config.vm.provider :parallels do |p|
+    p.update_guest_tools = false
+    p.check_guest_tools = false
   end
 
-  (1..$node_instances).each do |i|
-    config.vm.define vm_node_name = "node-%02d" % i do |config|
-      config.vm.hostname = vm_node_name
-      # Create
-      if $enable_serial_logging
+  # plugin conflict
+  if Vagrant.has_plugin?("vagrant-vbguest") then
+    config.vbguest.auto_update = false
+  end
+
+  (1..(NUM_INSTANCES.to_i + 1)).each do |i|
+    if i == 1
+      hostname = "master"
+      cfg = MASTER_YAML
+      memory = MASTER_MEM
+      cpus = MASTER_CPUS
+    else
+      hostname = "node-%02d" % (i - 1)
+      cfg = NODE_YAML
+      memory = NODE_MEM
+      cpus = NODE_CPUS
+    end
+
+    config.vm.define vmName = hostname do |kHost|
+      kHost.vm.hostname = vmName
+
+      if SERIAL_LOGGING
         logdir = File.join(File.dirname(__FILE__), "log")
         FileUtils.mkdir_p(logdir)
 
-        serialFile = File.join(logdir, "%s-serial.txt" % vm_node_name)
+        serialFile = File.join(logdir, "#{vmName}-serial.txt")
         FileUtils.touch(serialFile)
 
-        config.vm.provider :virtualbox do |vb, override|
+        ["vmware_fusion", "vmware_workstation"].each do |vmware|
+          kHost.vm.provider vmware do |v, override|
+            v.vmx["serial0.present"] = "TRUE"
+            v.vmx["serial0.fileType"] = "file"
+            v.vmx["serial0.fileName"] = serialFile
+            v.vmx["serial0.tryNoRxLoss"] = "FALSE"
+          end
+        end
+        kHost.vm.provider :virtualbox do |vb, override|
           vb.customize ["modifyvm", :id, "--uart1", "0x3F8", "4"]
           vb.customize ["modifyvm", :id, "--uartmode1", serialFile]
         end
+        # supported since vagrant-parallels 1.3.7
+        # https://github.com/Parallels/vagrant-parallels/issues/164
+        kHost.vm.provider :parallels do |v|
+          v.customize("post-import",
+            ["set", :id, "--device-add", "serial", "--output", serialFile])
+          v.customize("pre-boot",
+            ["set", :id, "--device-set", "serial0", "--output", serialFile])
+        end
       end
 
-      if $expose_docker_tcp
-        config.vm.network "forwarded_port", guest: 2375, host: ($expose_docker_tcp + i - 1), auto_correct: true
+      ["vmware_fusion", "vmware_workstation", "virtualbox"].each do |h|
+        kHost.vm.provider h do |vb|
+          vb.gui = GUI
+        end
+      end
+      ["parallels", "virtualbox"].each do |h|
+        kHost.vm.provider h do |n|
+          n.memory = memory
+          n.cpus = cpus
+        end
       end
 
-      config.vm.provider :vmware_fusion do |vb|
-        vb.gui = $vm_gui
+      kHost.vm.network :private_network, ip: "172.17.8.#{i+100}"
+      # you can override this in synced_folders.yaml
+      kHost.vm.synced_folder ".", "/vagrant", disabled: true
+
+      begin
+        MOUNT_POINTS.each do |mount|
+          mount_options = ""
+          disabled = false
+          nfs =  true
+          if mount['mount_options']
+            mount_options = mount['mount_options']
+          end
+          if mount['disabled']
+            disabled = mount['disabled']
+          end
+          if mount['nfs']
+            nfs = mount['nfs']
+          end
+          if File.exist?(File.expand_path("#{mount['source']}"))
+            if mount['destination']
+              kHost.vm.synced_folder "#{mount['source']}", "#{mount['destination']}",
+                id: "#{mount['name']}",
+                disabled: disabled,
+                mount_options: ["#{mount_options}"],
+                nfs: nfs
+            end
+          end
+        end
+      rescue
       end
 
-      config.vm.provider :virtualbox do |vb|
-        vb.gui = $vm_gui
-        vb.memory = $vm_node_memory
-        vb.cpus = $vm_node_cpus
+      if File.exist?(DOCKERCFG)
+        kHost.vm.provision :file, run: "always",
+         :source => "#{DOCKERCFG}", :destination => "/home/core/.dockercfg"
+
+        kHost.vm.provision :shell, run: "always" do |s|
+          s.inline = "cp /home/core/.dockercfg /.dockercfg"
+          s.privileged = true
+        end
       end
 
-      ip = "172.16.1.#{i+101}"
-      config.vm.network :private_network, ip: ip
-
-      # Uncomment below to enable NFS for sharing the host machine into the coreos-vagrant VM.
-      #config.vm.synced_folder ".", "/home/core/share", id: "core", :nfs => true, :mount_options => ['nolock,vers=3,udp']
-      config.vm.synced_folder ".", "/vagrant", disabled: true
-
-      if File.exist?(NODE_YAML)
-        config.vm.provision :file, :source => "#{NODE_YAML}", :destination => "/tmp/vagrantfile-user-data"
-        config.vm.provision :shell, :inline => "mv /tmp/vagrantfile-user-data /var/lib/coreos-vagrant/", :privileged => true
+      if File.exist?(cfg)
+        kHost.vm.provision :file, :source => "#{cfg}", :destination => "/tmp/vagrantfile-user-data"
+        kHost.vm.provision :shell, :privileged => true,
+        inline: <<-EOF
+          sed -i "s,__RELEASE__,v#{KUBERNETES_VERSION},g" /tmp/vagrantfile-user-data
+          sed -i "s,__CHANNEL__,v#{CHANNEL},g" /tmp/vagrantfile-user-data
+          sed -i "s,__NAME__,#{hostname},g" /tmp/vagrantfile-user-data
+          sed -i "s|__ETCD_SEED_CLUSTER__|#{ETCD_SEED_CLUSTER}|g" /tmp/vagrantfile-user-data
+          mv /tmp/vagrantfile-user-data /var/lib/coreos-vagrant/
+        EOF
       end
     end
   end
