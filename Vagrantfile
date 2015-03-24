@@ -29,27 +29,11 @@ Vagrant.require_version ">= 1.6.0"
 MASTER_YAML = File.join(File.dirname(__FILE__), "master.yaml")
 NODE_YAML = File.join(File.dirname(__FILE__), "node.yaml")
 
-DOCKERCFG = File.expand_path(ENV['DOCKERCFG'] || "~/.dockercfg")
+KUBERNETES_VERSION = '0.13.2'
 
-KUBERNETES_VERSION = ENV['KUBERNETES_VERSION'] || '0.10.1'
-if KUBERNETES_VERSION == "latest"
-  url = "https://get.k8s.io"
-  Object.redefine_const(:KUBERNETES_VERSION,
-    open(url).read().scan(/release=.*/)[0].gsub('release=v', ''))
-end
+CHANNEL = 'alpha'
 
-CHANNEL = ENV['CHANNEL'] || 'alpha'
-if CHANNEL != 'alpha'
-  puts "============================================================================="
-  puts "As this is a fastly evolving technology CoreOS' alpha channel is the only one"
-  puts "expected to behave reliably. While one can invoke the beta or stable channels"
-  puts "please be aware that your mileage may vary a whole lot."
-  puts "So, before submitting a bug, in this project, or upstreams (either kubernetes"
-  puts "or CoreOS) please make sure it (also) happens in the (default) alpha channel."
-  puts "============================================================================="
-end
-
-COREOS_VERSION = ENV['COREOS_VERSION'] || '618.0.0'
+COREOS_VERSION = 'latest'
 upstream = "http://#{CHANNEL}.release.core-os.net/amd64-usr/#{COREOS_VERSION}"
 if COREOS_VERSION == "latest"
   upstream = "http://#{CHANNEL}.release.core-os.net/amd64-usr/current"
@@ -58,15 +42,13 @@ if COREOS_VERSION == "latest"
     open(url).read().scan(/COREOS_VERSION=.*/)[0].gsub('COREOS_VERSION=', ''))
 end
 
-NUM_INSTANCES = ENV['NUM_INSTANCES'] || 2
+MASTER_IP = '172.16.1.101'
+NUM_INSTANCES = 2
+MASTER_MEM =  512
+MASTER_CPUS = 1
 
-MASTER_MEM = ENV['MASTER_MEM'] || 512
-MASTER_CPUS = ENV['MASTER_CPUS'] || 1
-
-NODE_MEM= ENV['NODE_MEM'] || 1024
-NODE_CPUS = ENV['NODE_CPUS'] || 1
-
-ETCD_CLUSTER_SIZE = ENV['ETCD_CLUSTER_SIZE'] || 3
+NODE_MEM= 1024
+NODE_CPUS = 1
 
 SERIAL_LOGGING = (ENV['SERIAL_LOGGING'].to_s.downcase == 'true')
 GUI = (ENV['GUI'].to_s.downcase == 'true')
@@ -74,18 +56,14 @@ GUI = (ENV['GUI'].to_s.downcase == 'true')
 (1..(NUM_INSTANCES.to_i + 1)).each do |i|
   case i
   when 1
-    ETCD_SEED_CLUSTER = ""
     hostname = "master"
   else
     hostname = ",node-%02d" % (i - 1)
   end
-  if i <= ETCD_CLUSTER_SIZE
-    ETCD_SEED_CLUSTER.concat("#{hostname}=http://172.17.8.#{i+100}:2380")
-  end
 end
 
 # Read YAML file with mountpoint details
-# MOUNT_POINTS = YAML::load_file('synced_folders.yaml')
+MOUNT_POINTS = YAML::load_file('synced_folders.yaml')
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # always use Vagrants' insecure key
@@ -99,17 +77,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.trigger.after [:up, :resume] do
     info "making sure ssh agent has the default vagrant key..."
     system "ssh-add ~/.vagrant.d/insecure_private_key"
-  end
-
-  ["vmware_fusion", "vmware_workstation"].each do |vmware|
-    config.vm.provider vmware do |v, override|
-      override.vm.box_url = "#{upstream}/coreos_production_vagrant_vmware_fusion.json"
-    end
-  end
-
-  config.vm.provider :parallels do |vb, override|
-    override.vm.box = "AntonioMeireles/coreos-#{CHANNEL}"
-    override.vm.box_url = "https://vagrantcloud.com/AntonioMeireles/coreos-#{CHANNEL}"
   end
 
   config.vm.provider :virtualbox do |v|
@@ -151,41 +118,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         serialFile = File.join(logdir, "#{vmName}-serial.txt")
         FileUtils.touch(serialFile)
 
-        ["vmware_fusion", "vmware_workstation"].each do |vmware|
-          kHost.vm.provider vmware do |v, override|
-            v.vmx["serial0.present"] = "TRUE"
-            v.vmx["serial0.fileType"] = "file"
-            v.vmx["serial0.fileName"] = serialFile
-            v.vmx["serial0.tryNoRxLoss"] = "FALSE"
-          end
-        end
         kHost.vm.provider :virtualbox do |vb, override|
           vb.customize ["modifyvm", :id, "--uart1", "0x3F8", "4"]
           vb.customize ["modifyvm", :id, "--uartmode1", serialFile]
         end
-        # supported since vagrant-parallels 1.3.7
-        # https://github.com/Parallels/vagrant-parallels/issues/164
-        kHost.vm.provider :parallels do |v|
-          v.customize("post-import",
-            ["set", :id, "--device-add", "serial", "--output", serialFile])
-          v.customize("pre-boot",
-            ["set", :id, "--device-set", "serial0", "--output", serialFile])
-        end
       end
 
-      ["vmware_fusion", "vmware_workstation", "virtualbox"].each do |h|
-        kHost.vm.provider h do |vb|
-          vb.gui = GUI
-        end
-      end
-      ["parallels", "virtualbox"].each do |h|
-        kHost.vm.provider h do |n|
-          n.memory = memory
-          n.cpus = cpus
-        end
-      end
-
-      kHost.vm.network :private_network, ip: "172.17.8.#{i+100}"
+      kHost.vm.network :private_network, ip: "172.16.1.#{i+100}"
       # you can override this in synced_folders.yaml
       kHost.vm.synced_folder ".", "/vagrant", disabled: true
 
@@ -216,16 +155,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       rescue
       end
 
-      if File.exist?(DOCKERCFG)
-        kHost.vm.provision :file, run: "always",
-         :source => "#{DOCKERCFG}", :destination => "/home/core/.dockercfg"
-
-        kHost.vm.provision :shell, run: "always" do |s|
-          s.inline = "cp /home/core/.dockercfg /.dockercfg"
-          s.privileged = true
-        end
-      end
-
       if File.exist?(cfg)
         kHost.vm.provision :file, :source => "#{cfg}", :destination => "/tmp/vagrantfile-user-data"
         kHost.vm.provision :shell, :privileged => true,
@@ -233,7 +162,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           sed -i "s,__RELEASE__,v#{KUBERNETES_VERSION},g" /tmp/vagrantfile-user-data
           sed -i "s,__CHANNEL__,v#{CHANNEL},g" /tmp/vagrantfile-user-data
           sed -i "s,__NAME__,#{hostname},g" /tmp/vagrantfile-user-data
-          sed -i "s|__ETCD_SEED_CLUSTER__|#{ETCD_SEED_CLUSTER}|g" /tmp/vagrantfile-user-data
+          sed -i "s,__MASTER_IP__,#{MASTER_IP},g" /tmp/vagrantfile-user-data
           mv /tmp/vagrantfile-user-data /var/lib/coreos-vagrant/
         EOF
       end

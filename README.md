@@ -1,10 +1,11 @@
-# kubernetes release *v0.10.1*
-# Coreos channel *alpha* *618.0.0*
+# kubernetes release -v0.13.2-
+# Coreos channel *alpha* -lastest-
+# examples/cassandra kubernetes release -v0.13.2-
 
 # kraken
 
 Kubernetes Made Easy(KubeME)<sup>tm</sup>
-Deploy kubernetes cluster on coreos using vagrant
+Deploy kubernetes cluster on coreos using vagrant. Majority of this project has been cribbed from [Pires](https://github.com/pires/kubernetes-vagrant-coreos-cluster).
 
 ## Pre-requisites
  
@@ -23,7 +24,7 @@ All other releases including archives are found [here](https://github.com/Google
 
 ```bash
 cd /opt
-curl -L https://github.com/GoogleCloudPlatform/kubernetes/releases/download/v0.12.0/kubernetes.tar.gz | tar xv
+curl -L https://github.com/GoogleCloudPlatform/kubernetes/releases/download/v0.13.2/kubernetes.tar.gz | tar xv
 ```
 ### Helpful `kubectl` links
 * kubectl user documentation can be found [here](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/kubectl.md)
@@ -117,9 +118,9 @@ ssh node-01
 
 
 _Caveats_
-* Auto reboot of coreos after updates is NOT enabled ```kube v0.10.1```
-* Errors are not outputted by kubernetes ```kube v0.10.1```
-* kubectl status reports are not consistent ```kube v0.10.1```
-* Exposing services to the public is a blackart ```kube v0.10.1```
-* Pods are can land on the same minion ```kube v0.10.1```
-* Replication Controller can SPAM pods ```kube v0.10.1```
+* Auto reboot of coreos after updates is NOT enabled ```kube v0.13.2```
+* Errors are not outputted by kubernetes ```kube v0.13.2```
+* kubectl status reports are not consistent ```kube v0.13.2```
+* Exposing services to the public is a blackart ```kube v0.13.2```
+* Pods are can land on the same minion ```kube v0.13.2```
+* Replication Controller can SPAM pods ```kube v0.13.2```
