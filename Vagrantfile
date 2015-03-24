@@ -48,7 +48,7 @@ MASTER_MEM =  512
 MASTER_CPUS = 1
 NODE_MEM= 1024
 NODE_CPUS = 1
-REBOOT_STRAT = 'no'
+REBOOT_STRAT = 'off'
 
 SERIAL_LOGGING = (ENV['SERIAL_LOGGING'].to_s.downcase == 'true')
 GUI = (ENV['GUI'].to_s.downcase == 'true')
