@@ -46,9 +46,9 @@ MASTER_IP = '172.16.1.101'
 NUM_INSTANCES = 2
 MASTER_MEM =  512
 MASTER_CPUS = 1
-
 NODE_MEM= 1024
 NODE_CPUS = 1
+REBOOT_STRAT = 'no'
 
 SERIAL_LOGGING = (ENV['SERIAL_LOGGING'].to_s.downcase == 'true')
 GUI = (ENV['GUI'].to_s.downcase == 'true')
@@ -163,6 +163,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           sed -i "s,__CHANNEL__,v#{CHANNEL},g" /tmp/vagrantfile-user-data
           sed -i "s,__NAME__,#{hostname},g" /tmp/vagrantfile-user-data
           sed -i "s,__MASTER_IP__,#{MASTER_IP},g" /tmp/vagrantfile-user-data
+          sed -i "s,__REBOOT_STRAT__,#{REBOOT_STRAT},g" /tmp/vagrantfile-user-data
           mv /tmp/vagrantfile-user-data /var/lib/coreos-vagrant/
         EOF
       end
