@@ -12,7 +12,7 @@ class Module
   end
 end
 
-required_plugins = %w(vagrant-triggers)
+required_plugins = %w(vagrant-triggers, )
 required_plugins.each do |plugin|
   need_restart = false
   unless Vagrant.has_plugin? plugin
@@ -28,9 +28,7 @@ Vagrant.require_version ">= 1.6.0"
 
 MASTER_YAML = File.join(File.dirname(__FILE__), "master.yaml")
 NODE_YAML = File.join(File.dirname(__FILE__), "node.yaml")
-
 KUBERNETES_VERSION = '0.13.2'
-
 CHANNEL = 'alpha'
 
 COREOS_VERSION = 'latest'
