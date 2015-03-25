@@ -12,7 +12,7 @@ class Module
   end
 end
 
-required_plugins = %w(vagrant-triggers, )
+required_plugins = %w(vagrant-triggers landrush )
 required_plugins.each do |plugin|
   need_restart = false
   unless Vagrant.has_plugin? plugin
@@ -22,16 +22,22 @@ required_plugins.each do |plugin|
   exec "vagrant #{ARGV.join(' ')}" if need_restart
 end
 
-# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
-VAGRANTFILE_API_VERSION = "2"
-Vagrant.require_version ">= 1.6.0"
-
+# Cluster parameters
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 MASTER_YAML = File.join(File.dirname(__FILE__), "master.yaml")
 NODE_YAML = File.join(File.dirname(__FILE__), "node.yaml")
 KUBERNETES_VERSION = '0.13.2'
 CHANNEL = 'alpha'
-
 COREOS_VERSION = 'latest'
+MASTER_IP = '172.16.1.101'
+NUM_INSTANCES = 2
+MASTER_MEM =  512
+MASTER_CPUS = 1
+NODE_MEM= 1024
+NODE_CPUS = 1
+REBOOT_STRAT = 'off'
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
 upstream = "http://#{CHANNEL}.release.core-os.net/amd64-usr/#{COREOS_VERSION}"
 if COREOS_VERSION == "latest"
   upstream = "http://#{CHANNEL}.release.core-os.net/amd64-usr/current"
@@ -40,16 +46,10 @@ if COREOS_VERSION == "latest"
     open(url).read().scan(/COREOS_VERSION=.*/)[0].gsub('COREOS_VERSION=', ''))
 end
 
-MASTER_IP = '172.16.1.101'
-NUM_INSTANCES = 2
-MASTER_MEM =  512
-MASTER_CPUS = 1
-NODE_MEM= 1024
-NODE_CPUS = 1
-REBOOT_STRAT = 'off'
-
 SERIAL_LOGGING = (ENV['SERIAL_LOGGING'].to_s.downcase == 'true')
 GUI = (ENV['GUI'].to_s.downcase == 'true')
+
+Vagrant.require_version ">= 1.6.0"
 
 (1..(NUM_INSTANCES.to_i + 1)).each do |i|
   case i
@@ -63,7 +63,7 @@ end
 # Read YAML file with mountpoint details
 MOUNT_POINTS = YAML::load_file('synced_folders.yaml')
 
-Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+Vagrant.configure(2) do |config|
   # always use Vagrants' insecure key
   config.ssh.insert_key = false
   config.ssh.forward_agent = true
