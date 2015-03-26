@@ -29,7 +29,7 @@ NODE_CPUS = 1
 REBOOT_STRAT = 'off'
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-# Need to install a local version of landrush
+# Need to install a local version of landrush and not the one from rubygems
 unless Vagrant.has_plugin? 'landrush'
   system "vagrant plugin install #{LOCAL_LANDRUSH}"
   need_restart = true
@@ -118,7 +118,7 @@ Vagrant.configure(2) do |config|
     end
 
     config.vm.define vmName = hostname do |kHost|
-      #kHost.vm.hostname = vmName
+      kHost.vm.hostname = vmName
       # Do not run landrush on vms because of IPTABlES not being on coreos natively
       kHost.landrush.guest_redirect_dns = false      
       
