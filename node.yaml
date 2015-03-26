@@ -150,7 +150,7 @@ coreos:
         Requires=cadvisor.service
         Requires=kube-apiserver-waiter.service
         After=kube-apiserver-waiter.service
-        
+
         [Service]
         ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/__RELEASE__/bin/linux/amd64/kube-proxy
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-proxy
@@ -179,7 +179,7 @@ coreos:
         --port=10250 \
         --hostname_override=$public_ipv4 \
         --allow_privileged=true
-        --api_servers=__MASTER_IP__:8080 \
+        --api_server=__MASTER_IP__:8080 \
         --logtostderr=true
         --v=0
         Restart=on-failure
