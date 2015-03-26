@@ -167,7 +167,6 @@ coreos:
         --logtostderr=true
         --cors_allowed_origins=.*
         --allow_privileged=true
-        --v=0
         Restart=always
         RestartSec=10
     - name: kube-controller-manager.service

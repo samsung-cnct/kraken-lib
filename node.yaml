@@ -38,6 +38,7 @@ coreos:
         Description=etcd waiter
         Wants=network-online.target
         After=network-online.target
+        
         [Service]
         ExecStartPre=/usr/bin/chmod +x /opt/bin/etcd-waiter.sh
         ExecStart=/usr/bin/bash /opt/bin/etcd-waiter.sh
@@ -50,6 +51,7 @@ coreos:
         Description=docker cache waiter
         Wants=network-online.target
         After=network-online.target
+        
         [Service]
         ExecStartPre=/usr/bin/chmod +x /opt/bin/docker-cache-waiter.sh
         ExecStart=/usr/bin/bash /opt/bin/docker-cache-waiter.sh
@@ -62,6 +64,7 @@ coreos:
         Description=Kubernetes API Server waiter
         Wants=network-online.target
         After=network-online.target
+        
         [Service]
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-apiserver-waiter.sh
         ExecStart=/usr/bin/bash /opt/bin/kube-apiserver-waiter.sh
@@ -76,6 +79,7 @@ coreos:
         After=fleet.socket
         Wants=etcd-waiter.service
         After=etcd-waiter.service
+        
         [Service]
         ExecStart=/usr/bin/fleetd
         Restart=always
@@ -88,6 +92,7 @@ coreos:
         Documentation=https://github.com/kelseyhightower/setup-network-environment
         Requires=network-online.target
         After=network-online.target
+        
         [Service]
         ExecStartPre=-/usr/bin/mkdir -p /opt/bin
         ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/k8s/setup-network-environment
@@ -103,6 +108,7 @@ coreos:
         After=setup-network-environment.service
         Wants=etcd-waiter.service
         After=etcd-waiter.service
+        
         [Service]
         Type=notify
         ExecStartPre=/usr/bin/mkdir -p /opt/bin
@@ -119,6 +125,7 @@ coreos:
         After=docker-cache-waiter.service
         Description=Docker Application Container Engine
         Documentation=http://docs.docker.io
+        
         [Service]
         EnvironmentFile=/run/flannel/subnet.env
         ExecStartPre=/bin/mount --make-rprivate /
@@ -132,6 +139,7 @@ coreos:
         Description=Google Container Advisor
         After=docker.service
         Requires=docker.service
+        
         [Service]
         Restart=on-failure
         RestartSec=5
@@ -158,7 +166,7 @@ coreos:
         --master=__MASTER_IP__:8080 \
         --logtostderr=true
         Restart=on-failure
-        RestartSec=10
+        RestartSec=5
     - name: kube-kubelet.service
       command: start
       content: |
@@ -179,11 +187,10 @@ coreos:
         --port=10250 \
         --hostname_override=$public_ipv4 \
         --allow_privileged=true
-        --api_server=__MASTER_IP__:8080 \
+        --api_servers=__MASTER_IP__:8080 \
         --logtostderr=true
-        --v=0
         Restart=on-failure
-        RestartSec=10
+        RestartSec=5
     - name: rpc-statd.service
       command: start
       enable: true
