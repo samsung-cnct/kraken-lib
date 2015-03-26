@@ -166,6 +166,8 @@ coreos:
         --public_address_override=__MASTER__ \
         --logtostderr=true
         --cors_allowed_origins=.*
+        --allow_privileged=true
+        --v=0
         Restart=always
         RestartSec=10
     - name: kube-controller-manager.service

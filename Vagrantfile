@@ -60,9 +60,6 @@ Vagrant.require_version ">= 1.6.0"
   end
 end
 
-# Read YAML file with mountpoint details
-MOUNT_POINTS = YAML::load_file('synced_folders.yaml')
-
 Vagrant.configure(2) do |config|
   # always use Vagrants' insecure key
   config.ssh.insert_key = false
@@ -76,6 +73,11 @@ Vagrant.configure(2) do |config|
     info "making sure ssh agent has the default vagrant key..."
     system "ssh-add ~/.vagrant.d/insecure_private_key"
   end
+
+  # Getting landrush going
+  config.landrush.enabled = true
+  config.landrush.tld = 'kube'
+  config.landrush.host 'sandy.mycluster.kube', '172.16.1.101'
 
   config.vm.provider :virtualbox do |v|
     # On VirtualBox, we don't have guest additions or a functional vboxsf
@@ -107,8 +109,10 @@ Vagrant.configure(2) do |config|
     end
 
     config.vm.define vmName = hostname do |kHost|
-      kHost.vm.hostname = vmName
-
+      #kHost.vm.hostname = vmName
+      # Do not run landrush on vms because of IPTABlES not being on coreos natively
+      kHost.landrush.guest_redirect_dns = false      
+      
       if SERIAL_LOGGING
         logdir = File.join(File.dirname(__FILE__), "log")
         FileUtils.mkdir_p(logdir)
@@ -123,35 +127,6 @@ Vagrant.configure(2) do |config|
       end
 
       kHost.vm.network :private_network, ip: "172.16.1.#{i+100}"
-      # you can override this in synced_folders.yaml
-      kHost.vm.synced_folder ".", "/vagrant", disabled: true
-
-      begin
-        MOUNT_POINTS.each do |mount|
-          mount_options = ""
-          disabled = false
-          nfs =  true
-          if mount['mount_options']
-            mount_options = mount['mount_options']
-          end
-          if mount['disabled']
-            disabled = mount['disabled']
-          end
-          if mount['nfs']
-            nfs = mount['nfs']
-          end
-          if File.exist?(File.expand_path("#{mount['source']}"))
-            if mount['destination']
-              kHost.vm.synced_folder "#{mount['source']}", "#{mount['destination']}",
-                id: "#{mount['name']}",
-                disabled: disabled,
-                mount_options: ["#{mount_options}"],
-                nfs: nfs
-            end
-          end
-        end
-      rescue
-      end
 
       if File.exist?(cfg)
         kHost.vm.provision :file, :source => "#{cfg}", :destination => "/tmp/vagrantfile-user-data"
