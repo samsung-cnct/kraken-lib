@@ -38,7 +38,7 @@ coreos:
         Description=etcd waiter
         Wants=network-online.target
         After=network-online.target
-        
+
         [Service]
         ExecStartPre=/usr/bin/chmod +x /opt/bin/etcd-waiter.sh
         ExecStart=/usr/bin/bash /opt/bin/etcd-waiter.sh
@@ -51,7 +51,7 @@ coreos:
         Description=docker cache waiter
         Wants=network-online.target
         After=network-online.target
-        
+
         [Service]
         ExecStartPre=/usr/bin/chmod +x /opt/bin/docker-cache-waiter.sh
         ExecStart=/usr/bin/bash /opt/bin/docker-cache-waiter.sh
@@ -64,7 +64,7 @@ coreos:
         Description=Kubernetes API Server waiter
         Wants=network-online.target
         After=network-online.target
-        
+
         [Service]
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-apiserver-waiter.sh
         ExecStart=/usr/bin/bash /opt/bin/kube-apiserver-waiter.sh
@@ -79,7 +79,7 @@ coreos:
         After=fleet.socket
         Wants=etcd-waiter.service
         After=etcd-waiter.service
-        
+
         [Service]
         ExecStart=/usr/bin/fleetd
         Restart=always
@@ -92,7 +92,7 @@ coreos:
         Documentation=https://github.com/kelseyhightower/setup-network-environment
         Requires=network-online.target
         After=network-online.target
-        
+
         [Service]
         ExecStartPre=-/usr/bin/mkdir -p /opt/bin
         ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/k8s/setup-network-environment
@@ -108,7 +108,7 @@ coreos:
         After=setup-network-environment.service
         Wants=etcd-waiter.service
         After=etcd-waiter.service
-        
+
         [Service]
         Type=notify
         ExecStartPre=/usr/bin/mkdir -p /opt/bin
@@ -125,24 +125,24 @@ coreos:
         After=docker-cache-waiter.service
         Description=Docker Application Container Engine
         Documentation=http://docs.docker.io
-        
+
         [Service]
         EnvironmentFile=/run/flannel/subnet.env
         ExecStartPre=/bin/mount --make-rprivate /
         ExecStart=/usr/bin/docker --registry-mirror=http://__MASTER_IP__:5000 -d --bip=${FLANNEL_SUBNET} --mtu=${FLANNEL_MTU} -s=overlay -H fd://
+
         [Install]
         WantedBy=multi-user.target
     - name: cadvisor.service
       command: start
       content: |
         [Unit]
-        Description=Google Container Advisor
+        Description=cAdvisor Service
         After=docker.service
         Requires=docker.service
-        
+
         [Service]
-        Restart=on-failure
-        RestartSec=5
+        Restart=always
         ExecStartPre=-/usr/bin/docker kill cadvisor
         ExecStartPre=-/usr/bin/docker rm -f cadvisor
         ExecStartPre=/usr/bin/docker pull google/cadvisor
@@ -152,7 +152,7 @@ coreos:
       command: start
       content: |
         [Unit]
-        Description=Kubernetes Proxy Server
+        Description=Kubernetes Proxy
         Documentation=https://github.com/GoogleCloudPlatform/kubernetes
         After=cadvisor.service
         Requires=cadvisor.service
@@ -165,16 +165,16 @@ coreos:
         ExecStart=/opt/bin/kube-proxy \
         --master=__MASTER_IP__:8080 \
         --logtostderr=true
-        Restart=on-failure
-        RestartSec=5
+        Restart=always
+        RestartSec=10
     - name: kube-kubelet.service
       command: start
       content: |
         [Unit]
-        Description=Kubernetes Kubelet Server
+        Description=Kubernetes Kubelet
         Documentation=https://github.com/GoogleCloudPlatform/kubernetes
-        After=docker.service cadvisor.service
-        Requires=docker.service
+        After=cadvisor.service
+        Requires=cadvisor.service
         Requires=kube-apiserver-waiter.service
         After=kube-apiserver-waiter.service
 
@@ -186,11 +186,10 @@ coreos:
         --address=0.0.0.0 \
         --port=10250 \
         --hostname_override=$public_ipv4 \
-        --allow_privileged=true
         --api_servers=__MASTER_IP__:8080 \
         --logtostderr=true
-        Restart=on-failure
-        RestartSec=5
+        Restart=always
+        RestartSec=10
     - name: rpc-statd.service
       command: start
       enable: true
