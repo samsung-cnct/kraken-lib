@@ -12,20 +12,11 @@ class Module
   end
 end
 
-required_plugins = %w(vagrant-triggers landrush )
-required_plugins.each do |plugin|
-  need_restart = false
-  unless Vagrant.has_plugin? plugin
-    system "vagrant plugin install #{plugin}"
-    need_restart = true
-  end
-  exec "vagrant #{ARGV.join(' ')}" if need_restart
-end
-
 # Cluster parameters
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 MASTER_YAML = File.join(File.dirname(__FILE__), "master.yaml")
 NODE_YAML = File.join(File.dirname(__FILE__), "node.yaml")
+LOCAL_LANDRUSH = "landrush-0.18.13.gem"
 KUBERNETES_VERSION = '0.13.2'
 CHANNEL = 'alpha'
 COREOS_VERSION = 'latest'
@@ -37,6 +28,24 @@ NODE_MEM= 1024
 NODE_CPUS = 1
 REBOOT_STRAT = 'off'
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+# Need to install a local version of landrush
+unless Vagrant.has_plugin? 'landrush'
+  system "vagrant plugin install #{LOCAL_LANDRUSH}"
+  need_restart = true
+  exec "vagrant #{ARGV.join(' ')}"
+end
+
+# Install all other plugins(gems)
+required_plugins = %w(vagrant-triggers)
+required_plugins.each do |plugin|
+  need_restart = false
+  unless Vagrant.has_plugin? plugin
+    system "vagrant plugin install #{plugin}"
+    need_restart = true
+  end
+  exec "vagrant #{ARGV.join(' ')}" if need_restart
+end
 
 upstream = "http://#{CHANNEL}.release.core-os.net/amd64-usr/#{COREOS_VERSION}"
 if COREOS_VERSION == "latest"
