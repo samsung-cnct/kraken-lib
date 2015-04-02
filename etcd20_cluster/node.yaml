@@ -4,7 +4,7 @@ coreos:
   fleet:
     etcd-servers: http://$private_ipv4:4001
     public-ip: $private_ipv4
-    metadata: "role=etcd"
+    metadata: "role=etcd-node"
   units:
     - name: etcd.service
       command: start
@@ -19,21 +19,21 @@ coreos:
         SyslogIdentifier=writer_process
         ExecStartPre=-/usr/bin/docker kill etcd
         ExecStartPre=-/usr/bin/docker rm etcd
-        ExecStartPre=/usr/bin/docker pull quay.io/coreos/etcd:v2.0.8
+        ExecStartPre=/usr/bin/docker pull quay.io/coreos/etcd:__ETCD_VERSION__
         ExecStart=/bin/bash -c "/usr/bin/docker run \
           -p 2379:2379 \
           -p 2380:2380 \
           --name etcd \
           -v /opt/etcd:/opt/etcd \
           -v /usr/share/ca-certificates/:/etc/ssl/certs \
-          quay.io/coreos/etcd:v2.0.8 \
+          quay.io/coreos/etcd:__ETCD_VERSION__ \
           -data-dir /opt/etcd \
           -name %H \
           -listen-client-urls http://0.0.0.0:2379 \
           -advertise-client-urls http://$COREOS_PRIVATE_IPV4:2379 \
           -listen-peer-urls http://0.0.0.0:2380 \
           -initial-advertise-peer-urls http://$COREOS_PRIVATE_IPV4:2380 \
-          -initial-cluster core-01=http://172.16.1.101:2380,core-02=http://172.16.1.102:2380,core-03=http://172.16.1.103:2380\
+          -initial-cluster node-01=http://172.16.1.101:2380,node-02=http://172.16.1.102:2380,node-03=http://172.16.1.103:2380\
           -initial-cluster-state new"
         ExecStop=/usr/bin/docker kill etcd
         Restart=always
@@ -51,16 +51,19 @@ coreos:
         EnvironmentFile=/etc/environment
         TimeoutStartSec=0
         SyslogIdentifier=writer_process
-        ExecStartPre=/usr/bin/docker pull quay.io/coreos/etcd:v2.0.8
+        ExecStartPre=/usr/bin/docker pull quay.io/coreos/etcd:__ETCD_VERSION__
         ExecStart=/bin/bash -c "/usr/bin/docker run \
           -p 4001:4001 \
           --name etcd-proxy \
-          quay.io/coreos/etcd:v2.0.8 \
+          quay.io/coreos/etcd:__ETCD_VERSION__ \
           -proxy on \
           -listen-client-urls http://0.0.0.0:4001 \
-          -initial-cluster core-01=http://172.16.1.101:2380,core-02=http://172.16.1.102:2380,core-03=http://172.16.1.103:2380"
+          -initial-cluster node-01=http://172.16.1.101:2380,node-02=http://172.16.1.102:2380,node-03=http://172.16.1.103:2380"
         ExecStop=/usr/bin/docker kill etcd-proxy
         Restart=always
         RestartSec=10
     - name: fleet.service
       command: start
+  update:
+    group: alpha
+    reboot-strategy: __REBOOT_STRAT__      
