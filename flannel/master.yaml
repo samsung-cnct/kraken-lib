@@ -1,5 +1,12 @@
 #cloud-config
 
+---
+write_files:
+- path: /opt/bin/wait4etcd.sh
+  owner: root
+  content: |
+    #! /usr/bin/bash
+    until curl http://127.0.0.1:4001/v2/machines; do sleep 2; done
 coreos:
   fleet:
     etcd-servers: http://$private_ipv4:4001
@@ -63,8 +70,50 @@ coreos:
         ExecStop=/usr/bin/docker kill etcd-proxy
         Restart=always
         RestartSec=10
+    - name: etcd-wait4etcd.service
+      command: start
+      content: |
+        [Unit]
+        Description=etcd wait4etcd
+        Wants=network-online.target
+        Wants=etcd.service
+        After=etcd.service
+        After=network-online.target
+        Before=fleet.service
+
+        [Service]
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4etcd.sh
+        ExecStart=/usr/bin/bash /opt/bin/wait4etcd.sh
+        RemainAfterExit=true
+        Type=oneshot
+    - name: setup-network-environment.service
+      command: start
+      content: |
+        [Unit]
+        Description=Setup Network Environment
+        Documentation=https://github.com/kelseyhightower/setup-network-environment
+        Requires=network-online.target
+        After=network-online.target
+        Before=fleet.service
+
+        [Service]
+        ExecStartPre=-/usr/bin/mkdir -p /opt/bin
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/k8s/setup-network-environment 
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/setup-network-environment
+        ExecStart=/opt/bin/setup-network-environment
+        RemainAfterExit=yes
+        Type=oneshot
     - name: fleet.service
       command: start
+    - name: flanneld.service
+      command: start
+      drop-ins:
+        - name: 50-network-config.conf
+          content: |
+            [Unit]
+            Requires=fleet.service
+            [Service]
+            ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{"Network":"10.244.0.0/16", "Backend": {"Type": "vxlan"}}'      
   update:
     group: alpha
     reboot-strategy: __REBOOT_STRAT__

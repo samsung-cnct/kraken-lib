@@ -6,7 +6,7 @@ write_files:
   owner: root
   content: |
     #! /usr/bin/bash
-    until curl http://__MASTER_IP__:4001/v2/machines; do sleep2; done
+    until curl http://__MASTER_IP__:4001/v2/machines; do sleep 2; done
 coreos:
   fleet:
     etcd-servers: http://$private_ipv4:4001
@@ -21,7 +21,6 @@ coreos:
         Wants=network-online.target
         After=network-online.target
         Before=etcd.service
-
         [Service]
         ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4ectd.sh
         ExecStart=/usr/bin/bash /opt/bin/wait4ectd.sh
@@ -53,6 +52,34 @@ coreos:
         RestartSec=10
     - name: fleet.service
       command: start
+    - name: setup-network-environment.service
+      command: start
+      content: |
+        [Unit]
+        Description=Setup Network Environment
+        Documentation=https://github.com/kelseyhightower/setup-network-environment
+        Requires=network-online.target
+        After=network-online.target
+        Before=fleet.service
+
+        [Service]
+        ExecStartPre=-/usr/bin/mkdir -p /opt/bin
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/k8s/setup-network-environment 
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/setup-network-environment
+        ExecStart=/opt/bin/setup-network-environment
+        RemainAfterExit=yes
+        Type=oneshot
+    - name: fleet.service
+      command: start
+    - name: flanneld.service
+      command: start
+      drop-ins:
+        - name: 50-network-config.conf
+          content: |
+            [Unit]
+            Requires=fleet.service
+            [Service]
+            ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{"Network":"10.244.0.0/16", "Backend": {"Type": "vxlan"}}'      
   update:
     group: alpha
     reboot-strategy: __REBOOT_STRAT__
