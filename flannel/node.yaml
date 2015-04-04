@@ -30,8 +30,9 @@ coreos:
       command: start
       content: |
         Description=etcd 2.0 proxy service
+        Requires=early-docker.service
+        After=early-docker.service
         Before=fleet.service
-        After=wait4etcd.service
 
         [Service]
         EnvironmentFile=/etc/environment

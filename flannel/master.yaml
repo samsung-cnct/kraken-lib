@@ -17,7 +17,8 @@ coreos:
       command: start
       content: |
         Description=etcd 2.0 service
-        After=docker.service
+        Requires=early-docker.service
+        After=early-docker.service
         Before=etcd-proxy.service
 
         [Service]
