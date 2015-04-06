@@ -1,6 +1,7 @@
 #Boot2docker using Vagrant
 
-Getting a docker daemon running on your desktop using vagrant
+##useage
+To get a docker daemon running on your desktop using vagrant run the following commands.
 
 ```bash
 cd <path that this README is located>
