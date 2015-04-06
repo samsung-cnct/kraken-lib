@@ -16,7 +16,7 @@ end
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 MASTER_YAML = File.join(File.dirname(__FILE__), "master.yaml")
 NODE_YAML = File.join(File.dirname(__FILE__), "node.yaml")
-LOCAL_LANDRUSH = ".plugins/landrush-0.18.13.gem"
+LOCAL_LANDRUSH = "./plugins/landrush-0.18.13.gem"
 KUBERNETES_VERSION = '0.13.2'
 CHANNEL = 'alpha'
 COREOS_VERSION = 'latest'
