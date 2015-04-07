@@ -42,7 +42,7 @@ coreos:
         Documentation=https://github.com/kelseyhightower/setup-network-environment
         Requires=network-online.target
         After=network-online.target
-        Before=fleet.service
+        Before=flanneld.service
 
         [Service]
         ExecStartPre=-/usr/bin/mkdir -p /opt/bin
@@ -58,16 +58,58 @@ coreos:
           content: |
             [Unit]
             Requires=wait4etcd.service
-            Before=etcd.service
+            After=wait4etcd.service
+            Before=docker.service
+    - name: docker-cache.service
+      command: start
+      content: |
+        [Unit]
+        Description=Docker cache proxy
+        Requires=early-docker.service
+        After=early-docker.service
+        Before=early-docker.target
+
+        [Service]
+        Environment="TMPDIR=/var/tmp/"
+        Environment="DOCKER_HOST=unix:///var/run/early-docker.sock"
+        ExecStartPre=-/usr/bin/docker kill docker-registry
+        ExecStartPre=-/usr/bin/docker rm docker-registry
+        ExecStartPre=/usr/bin/docker pull quay.io/devops/docker-registry:latest
+        # GUNICORN_OPTS is an workaround for
+        # https://github.com/docker/docker-registry/issues/892
+        ExecStart=/usr/bin/docker run --rm --net host --name docker-registry \
+            -e STANDALONE=false \
+            -e GUNICORN_OPTS=[--preload] \
+            -e MIRROR_SOURCE=https://registry-1.docker.io \
+            -e MIRROR_SOURCE_INDEX=https://index.docker.io \
+            -e MIRROR_TAGS_CACHE_TTL=1800 \
+            quay.io/devops/docker-registry:latest
+        Restart=always
+        TimeoutStartSec=0
+        RestartSec=5
+    - name: docker.service
+      drop-ins:
+        - name: 51-docker-mirror.conf
+          content: |
+            [Unit]
+            # making sure that docker-cache is up and that flanneld finished
+            # startup, otherwise containers won't land in flannel's network...
+            Requires=docker-cache.service flanneld.service
+            After=docker-cache.service flanneld.service
+
+            [Service]
+            Environment=DOCKER_OPTS='--registry-mirror=http://$private_ipv4:5000'
     - name: etcd.service
       command: start
       content: |
+        [Unit]
         Description=etcd 2.0 proxy service
+        Requires=docker.service
+        After=docker.service
         Before=fleet.service
 
         [Service]
         EnvironmentFile=/etc/environment
-        TimeoutStartSec=0
         SyslogIdentifier=writer_process
         ExecStartPre=/usr/bin/docker pull quay.io/coreos/etcd:__ETCD_VERSION__
         ExecStart=/bin/bash -c "/usr/bin/docker run \
@@ -82,6 +124,7 @@ coreos:
         ExecStop=/usr/bin/docker kill etcd-proxy
         Restart=always
         RestartSec=10
+        TimeoutStartSec=0
     - name: wait4ectdproxy.service
       command: start
       content: |
@@ -90,6 +133,7 @@ coreos:
         Wants=network-online.target
         After=network-online.target
         Before=etcd.service
+
         [Service]
         ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4ectdproxy.sh
         ExecStart=/usr/bin/bash /opt/bin/wait4ectdproxy.sh
