@@ -14,19 +14,18 @@ end
 
 # Cluster parameters
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-MASTER_YAML = File.join(File.dirname(__FILE__), "master.yaml")
-NODE_YAML = File.join(File.dirname(__FILE__), "node.yaml")
+ETCD_YAML = File.join(File.dirname(__FILE__), "etcd.yaml")
+FLANNEL_YAML = File.join(File.dirname(__FILE__), "flannel.yaml")
 LOCAL_LANDRUSH = "landrush-0.18.13.gem"
-KUBERNETES_VERSION = '0.13.2'
 CHANNEL = 'alpha'
 COREOS_VERSION = 'latest'
 ETCD_VERSION = 'v2.0.8'
-MASTER_IP = '172.16.1.101'
+ETCD_IP = '172.16.1.101'
 NUM_INSTANCES = 2
-MASTER_MEM =  512
-MASTER_CPUS = 1
-NODE_MEM= 1024
-NODE_CPUS = 1
+ETCD_MEM =  512
+ETCD_CPUS = 1
+FLANNEL_MEM= 1024
+FLANNEL_CPUS = 1
 REBOOT_STRAT = 'off'
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
@@ -64,9 +63,9 @@ Vagrant.require_version ">= 1.6.0"
 (1..(NUM_INSTANCES.to_i + 1)).each do |i|
   case i
   when 1
-    hostname = "master"
+    hostname = "etcd"
   else
-    hostname = ",node-%02d" % (i - 1)
+    hostname = ",flannel-%02d" % (i - 1)
   end
 end
 
@@ -107,15 +106,15 @@ Vagrant.configure(2) do |config|
 
   (1..(NUM_INSTANCES.to_i + 1)).each do |i|
     if i == 1
-      hostname = "master"
-      cfg = MASTER_YAML
-      memory = MASTER_MEM
-      cpus = MASTER_CPUS
+      hostname = "etcd-node"
+      cfg = ETCD_YAML
+      memory = ETCD_MEM
+      cpus = ETCD_CPUS
     else
-      hostname = "node-%02d" % (i - 1)
-      cfg = NODE_YAML
-      memory = NODE_MEM
-      cpus = NODE_CPUS
+      hostname = "flannel-%02d" % (i - 1)
+      cfg = FLANNEL_YAML
+      memory = FLANNEL_MEM
+      cpus = FLANNEL_CPUS
     end
 
     config.vm.define vmName = hostname do |kHost|
@@ -142,10 +141,9 @@ Vagrant.configure(2) do |config|
         kHost.vm.provision :file, :source => "#{cfg}", :destination => "/tmp/vagrantfile-user-data"
         kHost.vm.provision :shell, :privileged => true,
         inline: <<-EOF
-          sed -i "s,__RELEASE__,v#{KUBERNETES_VERSION},g" /tmp/vagrantfile-user-data
           sed -i "s,__CHANNEL__,v#{CHANNEL},g" /tmp/vagrantfile-user-data
           sed -i "s,__NAME__,#{hostname},g" /tmp/vagrantfile-user-data
-          sed -i "s,__MASTER_IP__,#{MASTER_IP},g" /tmp/vagrantfile-user-data
+          sed -i "s,__ETCD_IP__,#{ETCD_IP},g" /tmp/vagrantfile-user-data
           sed -i "s,__REBOOT_STRAT__,#{REBOOT_STRAT},g" /tmp/vagrantfile-user-data
           sed -i "s,__ETCD_VERSION__,#{ETCD_VERSION},g" /tmp/vagrantfile-user-data          
           mv /tmp/vagrantfile-user-data /var/lib/coreos-vagrant/
