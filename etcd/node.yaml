@@ -1,22 +1,10 @@
 #cloud-config
 
----
-write_files:
-- path: /opt/bin/wait4etcdproxy.sh
-  owner: root
-  content: |
-    #! /usr/bin/bash
-    until curl http://127.0.0.1:4001/v2/machines; do sleep 2; done
-- path: /opt/bin/flannelconfig.sh
-  owner: root
-  content: |
-    #! /usr/bin/bash
-    /usr/bin/etcdctl set /coreos.com/network/config '{"Network":"10.244.0.0/16", "Backend": {"Type": "vxlan"}}'     
 coreos:
   fleet:
     etcd-servers: http://$private_ipv4:4001
     public-ip: $private_ipv4
-    metadata: "role=etcd-cluster"
+    metadata: "role=etcd-node"
   units:
     - name: etcd.service
       command: start
@@ -47,11 +35,11 @@ coreos:
           -advertise-client-urls http://$COREOS_PRIVATE_IPV4:2379 \
           -listen-peer-urls http://0.0.0.0:2380 \
           -initial-advertise-peer-urls http://$COREOS_PRIVATE_IPV4:2380 \
-          -initial-cluster etcd-node=http://__ETCD_IP__:2380 \
+          -initial-cluster node-01=http://172.16.1.101:2380,node-02=http://172.16.1.102:2380,node-03=http://172.16.1.103:2380\
           -initial-cluster-state new"
         ExecStop=/usr/bin/docker kill etcd
         Restart=always
-        RestartSec=5
+        RestartSec=10
 
         [X-Fleet]
         Conflicts=etcd*
@@ -60,7 +48,6 @@ coreos:
       content: |
         [Unit]
         Description=etcd 2.0 proxy service
-        Before=fleet.service
         After=etcd.service
 
         [Service]
@@ -74,41 +61,12 @@ coreos:
           quay.io/coreos/etcd:__ETCD_VERSION__ \
           -proxy on \
           -listen-client-urls http://0.0.0.0:4001 \
-          -initial-cluster etcd-node=http://__ETCD_IP__:2380"
+          -initial-cluster node-01=http://172.16.1.101:2380,node-02=http://172.16.1.102:2380,node-03=http://172.16.1.103:2380"
         ExecStop=/usr/bin/docker kill etcd-proxy
         Restart=always
-        RestartSec=5
-    - name: wait4etcdproxy.service
-      command: start
-      content: |
-        [Unit]
-        Description=etcd wait4etcdproxy
-        Wants=network-online.target
-        Wants=etcd.service
-        After=etcd.service
-        After=network-online.target
-        Before=fleet.service
-
-        [Service]
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4etcdproxy.sh
-        ExecStart=/usr/bin/bash /opt/bin/wait4etcdproxy.sh
-        RemainAfterExit=true
-        Type=oneshot
+        RestartSec=10
     - name: fleet.service
       command: start
-    - name: flannelconfig.service
-      command: start
-      content: |
-        [Unit]
-        Description=write flannel network to etcd
-        Wants=etcd-proxy.service
-        After=etcd-proxy.service
-
-        [Service]
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/flannelconfig.sh
-        ExecStart=/usr/bin/bash /opt/bin/flannelconfig.sh
-        RemainAfterExit=true
-        Type=oneshot
   update:
     group: alpha
-    reboot-strategy: __REBOOT_STRAT__
+    reboot-strategy: __REBOOT_STRAT__      
