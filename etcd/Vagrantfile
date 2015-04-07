@@ -14,32 +14,17 @@ end
 
 # Cluster parameters
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-ETCD_YAML = File.join(File.dirname(__FILE__), "../flannel/etcd.yaml")
-MASTER_YAML = File.join(File.dirname(__FILE__), "master.yaml")
-MINION_YAML = File.join(File.dirname(__FILE__), "minion.yaml")
+NODE_YAML = File.join(File.dirname(__FILE__), "node.yaml")
 LOCAL_LANDRUSH = "landrush-0.18.13.gem"
 KUBERNETES_VERSION = '0.13.2'
-CHANNEL = 'alpha'
+ETCD_VERSION = 'v2.0.8'
 COREOS_VERSION = 'latest'
-ETCD_VERSION = '2.0.8'
-ETCD_IP = '172.16.1.101'
-ETCD_MEM =  512
-ETCD_CPUS = 1
-MASTER_IP = '172.16.1.102'
-MASTER_MEM =  512
-MASTER_CPUS = 1
-NUM_MINIONS = 2
-MINION_MEM= 1024
-MINION_CPUS = 1
+CHANNEL = 'alpha'
+NUM_INSTANCES = 2
+NODE_MEM= 1024
+NODE_CPUS = 1
 REBOOT_STRAT = 'off'
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
-# Need to install a local version of landrush and not the one from rubygems
-unless Vagrant.has_plugin? 'landrush'
-  system "vagrant plugin install #{LOCAL_LANDRUSH}"
-  need_restart = true
-  exec "vagrant #{ARGV.join(' ')}"
-end
 
 # Install all other plugins(gems)
 required_plugins = %w(vagrant-triggers)
@@ -65,19 +50,11 @@ GUI = (ENV['GUI'].to_s.downcase == 'true')
 
 Vagrant.require_version ">= 1.6.0"
 
-(1..(NUM_MINIONS.to_i + 2)).each do |i|
-  case i
-  when 1
-    hostname = "etcd-node"
-  when 2
-    hostname = "master-node"
-  else
-    hostname = "minion-%02d" % (i - 2)
-  end
+(1..(NUM_INSTANCES.to_i + 1)).each do |i|
+  hostname = ",node-%02d" % i
 end
 
 Vagrant.configure(2) do |config|
-
   # always use Vagrants' insecure key
   config.ssh.insert_key = false
   config.ssh.forward_agent = true
@@ -90,11 +67,6 @@ Vagrant.configure(2) do |config|
     info "making sure ssh agent has the default vagrant key..."
     system "ssh-add ~/.vagrant.d/insecure_private_key"
   end
-
-  # Getting landrush going
-  config.landrush.enabled = true
-  config.landrush.tld = 'kube'
-  config.landrush.host 'sandy.mycluster.kube', '172.16.1.101'
 
   config.vm.provider :virtualbox do |v|
     # On VirtualBox, we don't have guest additions or a functional vboxsf
@@ -112,24 +84,11 @@ Vagrant.configure(2) do |config|
     config.vbguest.auto_update = false
   end
 
-  (1..(NUM_MINIONS.to_i + 2)).each do |i|
-    case i
-    when 1
-      hostname = "etcd-node"
-      cfg = ETCD_YAML
-      memory = ETCD_MEM
-      cpus = ETCD_CPUS
-    when 2
-      hostname = "master-node"
-      cfg = MASTER_YAML
-      memory = MASTER_MEM
-      cpus = MASTER_CPUS
-    else      
-      hostname = "minion-%02d" % (i - 2)
-      cfg = MINION_YAML
-      memory = MINION_MEM
-      cpus = MINION_CPUS
-    end
+  (1..(NUM_INSTANCES.to_i + 1)).each do |i|
+    hostname = "node-%02d" % i
+    cfg = NODE_YAML
+    memory = NODE_MEM
+    cpus = NODE_CPUS
 
     config.vm.define vmName = hostname do |kHost|
       kHost.vm.hostname = vmName
@@ -157,11 +116,9 @@ Vagrant.configure(2) do |config|
         inline: <<-EOF
           sed -i "s,__RELEASE__,v#{KUBERNETES_VERSION},g" /tmp/vagrantfile-user-data
           sed -i "s,__CHANNEL__,v#{CHANNEL},g" /tmp/vagrantfile-user-data
-          sed -i "s,__ETCD_VERSION__,v#{ETCD_VERSION},g" /tmp/vagrantfile-user-data
           sed -i "s,__NAME__,#{hostname},g" /tmp/vagrantfile-user-data
-          sed -i "s,__ETCD_IP__,#{ETCD_IP},g" /tmp/vagrantfile-user-data
-          sed -i "s,__MASTER_IP__,#{MASTER_IP},g" /tmp/vagrantfile-user-data
           sed -i "s,__REBOOT_STRAT__,#{REBOOT_STRAT},g" /tmp/vagrantfile-user-data
+          sed -i "s,__ETCD_VERSION__,#{ETCD_VERSION},g" /tmp/vagrantfile-user-data
           mv /tmp/vagrantfile-user-data /var/lib/coreos-vagrant/
         EOF
       end
