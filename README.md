@@ -1,11 +1,17 @@
-# kubernetes release -v0.13.2-
-# Coreos channel *alpha* -lastest-
-# examples/cassandra kubernetes release -v0.13.2-
 
 # kraken
 
 Kubernetes Made Easy(KubeME)<sup>tm</sup>
 Deploy kubernetes cluster on coreos using vagrant. Majority of this project has been cribbed from [Pires](https://github.com/pires/kubernetes-vagrant-coreos-cluster).
+
+## NOTICE
+Many Quality of Life Improvements have been added. You must re-read this doc.
+---
+
+### In this release
+ * kubernetes release -v0.13.2-
+ * Coreos channel *alpha* -lastest-
+ * examples/cassandra kubernetes release -v0.13.2-
 
 ## Pre-requisites
  
@@ -40,13 +46,6 @@ Deploy everything by running `vagrant` commands while in the __kraken__ director
 
 ```bash
 vagrant up
-```
-
-### Environment variables
-Add the vagrant kubernetes environment variables to your current session by running the following command.
-
-```bash 
-. local_startup.sh
 ```
 
 ## Validate install

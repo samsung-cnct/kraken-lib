@@ -34,6 +34,16 @@ MINION_CPUS = 1
 REBOOT_STRAT = 'off'
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+# Find the lastest stable release of kubernetes
+if KUBERNETES_VERSION == "latest"
+  txt = "https://storage.googleapis.com/kubernetes-release/release/stable.txt"
+  Object.redefine_const(:KUBERNETES_VERSION,
+    open(txt).read().gsub('v','').chomp)
+  puts "\n" * 2 + ("+" * 61 + "\n") * 2 + "++++" + "\s" * 53 + "++++" + "\n"
+  puts "+" * 12 + ">>    Kubernetes Version #{KUBERNETES_VERSION}    <<" + "+" * 12 + "\n"
+  puts "++++" + "\s" * 53 + "++++" + "\n" + ("+" * 61 + "\n") * 2 + "\n" * 2
+end
+
 # Need to install a local version of landrush and not the one from rubygems
 unless Vagrant.has_plugin? 'landrush'
   system "vagrant plugin install #{LOCAL_LANDRUSH}"
@@ -155,7 +165,7 @@ Vagrant.configure(2) do |config|
         kHost.vm.provision :file, :source => "#{cfg}", :destination => "/tmp/vagrantfile-user-data"
         kHost.vm.provision :shell, :privileged => true,
         inline: <<-EOF
-          sed -i "s,__RELEASE__,v#{KUBERNETES_VERSION},g" /tmp/vagrantfile-user-data
+          sed -i "s,__KUBE_VERSION__,v#{KUBERNETES_VERSION},g" /tmp/vagrantfile-user-data
           sed -i "s,__CHANNEL__,v#{CHANNEL},g" /tmp/vagrantfile-user-data
           sed -i "s,__ETCD_VERSION__,v#{ETCD_VERSION},g" /tmp/vagrantfile-user-data
           sed -i "s,__NAME__,#{hostname},g" /tmp/vagrantfile-user-data
