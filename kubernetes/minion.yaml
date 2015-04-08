@@ -12,11 +12,16 @@ write_files:
   content: |
     #! /usr/bin/bash
     until curl http://127.0.0.1:4001/v2/machines; do sleep 2; done
+- path: /opt/bin/wait4apiserver.sh
+  owner: root
+  content: |
+    #! /usr/bin/bash
+    until curl http://__MASTER_IP__:8080; do sleep 2; done
 coreos:
   fleet:
     etcd-servers: http://$private_ipv4:4001
     public-ip: $private_ipv4
-    metadata: "role=flannel-node"
+    metadata: "role=minion"
   flannel:
     etcd-endpoints: http://__ETCD_IP__:4001
     interface: $private_ipv4
@@ -141,6 +146,57 @@ coreos:
         Type=oneshot
     - name: fleet.service
       command: start
+    - name: wait4apiserver.service
+      command: start
+      content: |
+        [Unit]
+        Description=Wait for etcd proxy to come up
+        Wants=network-online.target
+        After=network-online.target
+
+        [Service]
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4apiserver.sh
+        ExecStart=/usr/bin/bash /opt/bin/wait4apiserver.sh
+        RemainAfterExit=true
+        Type=oneshot
+    - name: kube-proxy.service
+      command: start
+      content: |
+        [Unit]
+        Description=Kubernetes Proxy
+        Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+        Requires=wait4apiserver.service
+        After=wait4apiserver.service
+
+        [Service]
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/__KUBE_VERSION__/bin/linux/amd64/kube-proxy
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-proxy
+        ExecStart=/opt/bin/kube-proxy \
+        --master=__MASTER_IP__:8080 \
+        --logtostderr=true
+        Restart=always
+        RestartSec=10
+    - name: kube-kubelet.service
+      command: start
+      content: |
+        [Unit]
+        Description=Kubernetes Kubelet
+        Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+        Requires=wait4apiserver.service
+        After=wait4apiserver.service
+
+        [Service]
+        EnvironmentFile=/etc/network-environment
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/__KUBE_VERSION__/bin/linux/amd64/kubelet
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/kubelet
+        ExecStart=/opt/bin/kubelet \
+        --address=0.0.0.0 \
+        --port=10250 \
+        --hostname_override=$public_ipv4 \
+        --api_servers=__MASTER_IP__:8080 \
+        --logtostderr=true
+        Restart=always
+        RestartSec=10
   update:
     group: alpha
     reboot-strategy: __REBOOT_STRAT__

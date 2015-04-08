@@ -16,7 +16,7 @@ coreos:
   fleet:
     etcd-servers: http://$private_ipv4:4001
     public-ip: $private_ipv4
-    metadata: "role=etcd-cluster"
+    metadata: "role=etcd"
   units:
     - name: etcd.service
       command: start

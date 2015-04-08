@@ -1,3 +1,5 @@
 README.html
 .vagrant*
 README_local*
+tls*
+temp_*
