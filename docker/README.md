@@ -11,7 +11,9 @@ Run the following commands
 cd <path that this README is located>
 vagrant up
 . export.sh
+docker ps
 ```
+You should see an empty list of docker containers with no errors
 
 ###Step two
 Start hacking away
