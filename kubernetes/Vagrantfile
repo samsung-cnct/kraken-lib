@@ -14,13 +14,6 @@ end
 
 # Cluster parameters
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-ETCD_YAML = File.join(File.dirname(__FILE__), "../flannel/etcd.yaml")
-MASTER_YAML = File.join(File.dirname(__FILE__), "master.yaml")
-MINION_YAML = File.join(File.dirname(__FILE__), "minion.yaml")
-LOCAL_LANDRUSH = "landrush-0.18.13.gem"
-KUBERNETES_VERSION = '0.14.2'
-CHANNEL = 'alpha'
-COREOS_VERSION = 'latest'
 ETCD_VERSION = '2.0.8'
 ETCD_IP = '172.16.1.101'
 ETCD_MEM =  512
@@ -32,6 +25,13 @@ NUM_MINIONS = 2
 MINION_MEM= 1024
 MINION_CPUS = 1
 REBOOT_STRAT = 'off'
+ETCD_YAML = File.join(File.dirname(__FILE__), "../flannel/etcd.yaml")
+MASTER_YAML = File.join(File.dirname(__FILE__), "master.yaml")
+MINION_YAML = File.join(File.dirname(__FILE__), "minion.yaml")
+LOCAL_LANDRUSH = "landrush-0.18.13.gem"
+KUBERNETES_VERSION = '0.14.2'
+CHANNEL = 'alpha'
+COREOS_VERSION = 'latest'
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 # Find the lastest stable release of kubernetes
