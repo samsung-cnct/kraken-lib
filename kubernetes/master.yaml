@@ -160,7 +160,8 @@ coreos:
         --portal_net=10.100.0.0/16 \
         --etcd_servers=http://127.0.0.1:4001 \
         --public_address_override=$private_ipv4 \
-        --logtostderr=true
+        --logtostderr=true \
+        --cors_allowed_origins=.*
         Restart=always
         RestartSec=10
     - name: kube-controller-manager.service
@@ -213,6 +214,25 @@ coreos:
         --api-endpoint=http://127.0.0.1:8080
         Restart=always
         RestartSec=10
+    - name: kubernetes-ui.service
+      command: start
+      content: |
+        [Unit]
+        Description=Kubernetes UI Service
+        Requires=kube-apiserver.service
+        After=kube-apiserver.service
+
+        [Service]
+        TimeoutStartSec=0
+        SyslogIdentifier=writer_process
+        ExecStartPre=/usr/bin/docker pull l337ch/docker-kubernetes-ui
+        ExecStart=/bin/bash -c "/usr/bin/docker run \
+          -p 8900:8900 \
+          --name kubernetes-ui \
+          l337ch/docker-kubernetes-ui"
+        ExecStop=/usr/bin/docker kill kubernetes-ui
+        Restart=always
+        RestartSec=5
   update:
     group: alpha
     reboot-strategy: __REBOOT_STRAT__

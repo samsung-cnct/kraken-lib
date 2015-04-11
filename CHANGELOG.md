@@ -1,10 +1,20 @@
 #Changelog
 
+##0.2.0
+
+###Features
+* Added support for Kubernetes UI in the API server
+* Added Kubernetes UI available at http://172.16.1.102:8900
+* README clean up
+
+###Bug fixes
+* Corrected host IP Addresses in export file
+
 ##0.1.3
 
-##Features
+###Features
 
-##Bug fixes
+###Bug fixes
 * disabled landrush to support windows users and because it may be causing some users to hang on ```vagrant <cmd>```
 
 ##0.1.2

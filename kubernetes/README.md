@@ -10,9 +10,8 @@ The default settings will create 4 nodes:
 ```bash
 vagrant up
 ```
-
-## Validate
-Everything should b operational. Run the following commands within this working directory.
+### Validate
+Spinning up all the nodes may take some time depending on hardware and network. Given ample time, verything should be operational. Run the following commands within this working directory.
 
 Make sure the API server is avaible to take requests.
 
@@ -31,9 +30,11 @@ NAME                LABELS              STATUS
 172.16.1.103        <none>              Ready
 172.16.1.104        <none>              Ready
 ```
+### Kubernetes UI
+The Kubernetes UI is available at http://172.16.1.102:8900.
 
 ### Working with local files
-Everything in the __kraken__ directory is shared under the `/vagrant` mount on each node. You have full read write access to that directory allowing easy transfer of files to and from each node.
+Everything in the __kraken/kubernetes__ directory is shared under the `/vagrant` mount on each node. You have full read write access to that directory allowing easy transfer of files to and from each node.
 
 ### Shutting down and cleaning up
 Once you are down with everything. Shutdown all VirtualBox VMs via `vagrant`
@@ -42,11 +43,16 @@ Once you are down with everything. Shutdown all VirtualBox VMs via `vagrant`
 vagrant destroy --force
 ```
 
+Access to each node can be accomplished through `vagrant`
+```bash
+vagrant ssh <node-name>
+```
+
 ## Troubleshooting
 
 On the slim chance that things go awry. Here are some troubleshooting tips to hopefully sort you out.
 
-Verify that `fleet` has set up and can talk to all the nodes in the cluster
+Verify that `fleet` has set up the nodes correctly and can commincate with them.
 ```
 fleetctl list-machines
 ```
@@ -54,22 +60,10 @@ fleetctl list-machines
 Output should look something like this
 ```
 MACHINE		IP		METADATA
-3dba3ebc...	10.1.1.102	role=kubernetes
-625f15c6...	10.1.1.103	role=kubernetes
-71b82a1b...	10.1.1.104	role=kubernetes
-aab430f9...	10.1.1.101	role=master
+46a55004...	172.16.1.102	role=master
+69b8310d...	172.16.1.104	role=minion
+9b062820...	172.16.1.103	role=minion
+f3e10ae7...	172.16.1.101	role=etcd
 ```
 
-If you do not see similar IPs and roles, contact <leetchang@gmail.com* and he'll help you sort it out.
-
-Access to each node can be accomplished through `vagrant`
-```bash
-vagrant ssh <node-name>
-```
-
-You also `ssh` directly by adding the lines from the _ssh_config_ file to `~/.ssh/config`
-This will add the correct ssh params and keys to your ssh agent allowing ssh from other environments. You can simply run
-```bash
-ssh node-master
-ssh node-01
-``` 
+If you do not see similar IPs and roles, contact <leetchang@gmail.com> and he'll help you sort it out. Or even better, file an issue [here](https://github.com/Samsung-AG/kraken/issues)
