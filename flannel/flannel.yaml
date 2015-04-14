@@ -70,6 +70,8 @@ coreos:
         EnvironmentFile=/etc/environment
         TimeoutStartSec=0
         SyslogIdentifier=writer_process
+        ExecStartPre=-/usr/bin/docker kill etcd
+        ExecStartPre=-/usr/bin/docker rm etcd
         ExecStartPre=/usr/bin/docker pull quay.io/coreos/etcd:__ETCD_VERSION__
         ExecStart=/bin/bash -c "/usr/bin/docker run \
           -p 4001:4001 \
