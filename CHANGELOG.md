@@ -1,5 +1,9 @@
 #Changelog
 
+##0.2.1
+###Bug fixes
+* Bug where pinning Coreos versions failed to work after previous changes
+
 ##0.2.0
 
 ###Features
