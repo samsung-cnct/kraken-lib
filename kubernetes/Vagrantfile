@@ -31,7 +31,7 @@ MINION_YAML = File.join(File.dirname(__FILE__), "minion.yaml")
 LOCAL_LANDRUSH = "landrush-0.18.13.gem"
 KUBERNETES_VERSION = '0.14.2'
 CHANNEL = 'alpha'
-COREOS_VERSION = 'latest'
+COREOS_VERSION = '647.0.0'
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 # Find the lastest stable release of kubernetes
@@ -79,9 +79,9 @@ Vagrant.require_version ">= 1.6.0"
 (1..(NUM_MINIONS.to_i + 2)).each do |i|
   case i
   when 1
-    hostname = "etcd-node"
+    hostname = "etcd"
   when 2
-    hostname = "master-node"
+    hostname = "master"
   else
     hostname = "minion-%02d" % (i - 2)
   end
@@ -94,7 +94,7 @@ Vagrant.configure(2) do |config|
   config.ssh.forward_agent = true
 
   config.vm.box = "coreos-#{CHANNEL}"
-  config.vm.box_version = ">= #{COREOS_VERSION}"
+  config.vm.box_version = "= #{COREOS_VERSION}"
   config.vm.box_url = "#{upstream}/coreos_production_vagrant.json"
 
   config.trigger.after [:up, :resume] do
