@@ -1,5 +1,12 @@
 #Changelog
 
+##0.3.2
+###Features
+* Updated docker to 1.6.0
+
+###Bug fixes
+* Fixed docker cert generation
+
 ##0.3.1
 ###Features
 * Flannel builds using etcd2.0 native
