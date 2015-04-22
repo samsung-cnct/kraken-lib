@@ -1,5 +1,9 @@
 #Changelog
 
+##0.3.1
+###Features
+* Flannel builds using etcd2.0 native
+
 ##0.3.0
 ###Features
 * Renamed kuburnetes vms from etcd-node and master-node to etcd and master respectively
