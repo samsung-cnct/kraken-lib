@@ -118,6 +118,9 @@ coreos:
             # startup, otherwise containers won't land in flannel's network...
             Requires=flanneld.service
             After=flanneld.service
+
+            [Service]
+            Environment=DOCKER_OPTS='--registry-mirror=http://172.16.1.101:5000'
     - name: fleet.service
       command: start
     - name: kube-apiserver.service
@@ -208,6 +211,7 @@ coreos:
         ExecStartPre=-/usr/bin/docker rm config-collector
         ExecStartPre=/usr/bin/docker pull vasbala/config-collector
         ExecStart=/bin/bash -c "/usr/bin/docker run \
+          --net=host \
           -p 5555:5555 \
           --name config-collector \
           vasbala/config-collector"
