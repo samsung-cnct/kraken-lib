@@ -31,7 +31,7 @@ MINION_YAML = File.join(File.dirname(__FILE__), "minion.yaml")
 LOCAL_LANDRUSH = "landrush-0.18.13.gem"
 KUBERNETES_VERSION = '0.14.2'
 CHANNEL = 'alpha'
-COREOS_VERSION = '647.0.0'
+COREOS_VERSION = 'latest'
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 # Find the lastest stable release of kubernetes
@@ -127,12 +127,12 @@ Vagrant.configure(2) do |config|
   (1..(NUM_MINIONS.to_i + 2)).each do |i|
     case i
     when 1
-      hostname = "etcd-node"
+      hostname = "etcd"
       cfg = ETCD_YAML
       memory = ETCD_MEM
       cpus = ETCD_CPUS
     when 2
-      hostname = "master-node"
+      hostname = "master"
       cfg = MASTER_YAML
       memory = MASTER_MEM
       cpus = MASTER_CPUS

@@ -1,5 +1,16 @@
 #Changelog
 
+##0.3.0
+###Features
+* Renamed kuburnetes vms from etcd-node and master-node to etcd and master respectively
+* Docker cache is now on master
+* Moved to using etcd2 native
+* Add config-collector container on master
+* Docker REST service is now listening on port 4243
+
+
+###Bug fixes
+
 ##0.2.1
 ###Bug fixes
 * Bug where pinning Coreos versions failed to work after previous changes

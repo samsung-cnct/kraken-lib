@@ -18,6 +18,10 @@ write_files:
     #! /usr/bin/bash
     until curl http://__MASTER_IP__:8080; do sleep 2; done
 coreos:
+  etcd2:
+    proxy: on
+    listen-client-urls: http://0.0.0.0:4001
+    initial-cluster: etcd=http://__ETCD_IP__:2380
   fleet:
     etcd-servers: http://$private_ipv4:4001
     public-ip: $private_ipv4
@@ -26,6 +30,20 @@ coreos:
     etcd-endpoints: http://__ETCD_IP__:4001
     interface: $private_ipv4
   units:
+    - name: docker-tcp.socket
+      command: start
+      enable: true
+      content: |
+        [Unit]
+        Description=Docker Socket for the API
+
+        [Socket]
+        ListenStream=0.0.0.0:4243
+        BindIPv6Only=both
+        Service=docker.service
+
+        [Install]
+        WantedBy=sockets.target
     - name: wait4etcd.service
       command: start
       content: |
@@ -65,81 +83,24 @@ coreos:
             Requires=wait4etcd.service
             After=wait4etcd.service
             Before=docker.service
-    - name: docker-cache.service
-      command: start
-      content: |
-        [Unit]
-        Description=Docker cache proxy
-        Requires=early-docker.service
-        After=early-docker.service
-        Before=early-docker.target
-
-        [Service]
-        Environment="TMPDIR=/var/tmp/"
-        Environment="DOCKER_HOST=unix:///var/run/early-docker.sock"
-        ExecStartPre=-/usr/bin/docker kill docker-registry
-        ExecStartPre=-/usr/bin/docker rm docker-registry
-        ExecStartPre=/usr/bin/docker pull quay.io/devops/docker-registry:latest
-        # GUNICORN_OPTS is an workaround for
-        # https://github.com/docker/docker-registry/issues/892
-        ExecStart=/usr/bin/docker run --rm --net host --name docker-registry \
-            -e STANDALONE=false \
-            -e GUNICORN_OPTS=[--preload] \
-            -e MIRROR_SOURCE=https://registry-1.docker.io \
-            -e MIRROR_SOURCE_INDEX=https://index.docker.io \
-            -e MIRROR_TAGS_CACHE_TTL=1800 \
-            quay.io/devops/docker-registry:latest
-        Restart=always
-        TimeoutStartSec=0
-        RestartSec=5
     - name: docker.service
       drop-ins:
-        - name: 51-docker-mirror.conf
+        - name: 51-docker-flannel.conf
           content: |
             [Unit]
-            # making sure that docker-cache is up and that flanneld finished
             # startup, otherwise containers won't land in flannel's network...
-            Requires=docker-cache.service flanneld.service
-            After=docker-cache.service flanneld.service
+            Requires=flanneld.service
+            After=flanneld.service
 
             [Service]
-            Environment=DOCKER_OPTS='--registry-mirror=http://$private_ipv4:5000'
-    - name: etcd.service
-      command: start
-      content: |
-        [Unit]
-        Description=etcd 2.0 proxy service
-        Requires=docker.service
-        After=docker.service
-        Before=fleet.service
-
-        [Service]
-        EnvironmentFile=/etc/environment
-        SyslogIdentifier=writer_process
-        ExecStartPre=-/usr/bin/docker kill etcd
-        ExecStartPre=-/usr/bin/docker rm etcd
-        ExecStartPre=/usr/bin/docker pull quay.io/coreos/etcd:__ETCD_VERSION__
-        ExecStart=/bin/bash -c "/usr/bin/docker run \
-          -p 4001:4001 \
-          -p 2380:2380 \
-          -p 2379:2379 \
-          --name etcd \
-          quay.io/coreos/etcd:__ETCD_VERSION__ \
-          -proxy on \
-          -listen-client-urls http://0.0.0.0:4001 \
-          -initial-cluster etcd-node=http://__ETCD_IP__:2380"
-        ExecStop=/usr/bin/docker kill etcd-proxy
-        Restart=always
-        RestartSec=10
-        TimeoutStartSec=0
+            Environment=DOCKER_OPTS='--registry-mirror=http://172.16.1.101:5000'
     - name: wait4ectdproxy.service
       command: start
       content: |
         [Unit]
         Description=Wait for etcd proxy to come up
-        Wants=network-online.target
-        After=network-online.target
-        Before=etcd.service
+        Wants=etcd2.service
+        After=etcd2.service
 
         [Service]
         ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4ectdproxy.sh
