@@ -14,22 +14,20 @@ end
 
 # Cluster parameters
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-ETCD_VERSION = '2.0.8'
 ETCD_IP = '172.16.1.101'
 ETCD_MEM =  512
 ETCD_CPUS = 1
 MASTER_IP = '172.16.1.102'
 MASTER_MEM =  512
 MASTER_CPUS = 1
-NUM_MINIONS = 2
+NUM_MINIONS = 3
 MINION_MEM= 1024
 MINION_CPUS = 1
 REBOOT_STRAT = 'off'
 ETCD_YAML = File.join(File.dirname(__FILE__), "../flannel/etcd.yaml")
 MASTER_YAML = File.join(File.dirname(__FILE__), "master.yaml")
-MINION_YAML = File.join(File.dirname(__FILE__), "minion.yaml")
-LOCAL_LANDRUSH = "landrush-0.18.13.gem"
-KUBERNETES_VERSION = '0.14.2'
+MINION_YAML = File.join(File.dirname(__FILE__), "node.yaml")
+KUBERNETES_VERSION = '0.15.0'
 CHANNEL = 'alpha'
 COREOS_VERSION = 'latest'
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -83,7 +81,7 @@ Vagrant.require_version ">= 1.6.0"
   when 2
     hostname = "master"
   else
-    hostname = "minion-%02d" % (i - 2)
+    hostname = "node-%02d" % (i - 2)
   end
 end
 
@@ -137,7 +135,7 @@ Vagrant.configure(2) do |config|
       memory = MASTER_MEM
       cpus = MASTER_CPUS
     else      
-      hostname = "minion-%02d" % (i - 2)
+      hostname = "node-%02d" % (i - 2)
       cfg = MINION_YAML
       memory = MINION_MEM
       cpus = MINION_CPUS
@@ -171,7 +169,6 @@ Vagrant.configure(2) do |config|
         inline: <<-EOF
           sed -i "s,__KUBE_VERSION__,v#{KUBERNETES_VERSION},g" /tmp/vagrantfile-user-data
           sed -i "s,__CHANNEL__,v#{CHANNEL},g" /tmp/vagrantfile-user-data
-          sed -i "s,__ETCD_VERSION__,v#{ETCD_VERSION},g" /tmp/vagrantfile-user-data
           sed -i "s,__NAME__,#{hostname},g" /tmp/vagrantfile-user-data
           sed -i "s,__ETCD_IP__,#{ETCD_IP},g" /tmp/vagrantfile-user-data
           sed -i "s,__MASTER_IP__,#{MASTER_IP},g" /tmp/vagrantfile-user-data
