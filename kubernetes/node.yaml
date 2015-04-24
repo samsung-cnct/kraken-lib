@@ -25,7 +25,7 @@ coreos:
   fleet:
     etcd-servers: http://$private_ipv4:4001
     public-ip: $private_ipv4
-    metadata: "role=minion"
+    metadata: "role=node"
   flannel:
     etcd-endpoints: http://__ETCD_IP__:4001
     interface: $private_ipv4
@@ -157,6 +157,9 @@ coreos:
         --port=10250 \
         --hostname_override=$public_ipv4 \
         --api_servers=__MASTER_IP__:8080 \
+        --healthz_bind_address=0.0.0.0 \
+        --healthz_port=10254 \
+        --cadvisor_port=4194 \
         --logtostderr=true
         Restart=always
         RestartSec=10

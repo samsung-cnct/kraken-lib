@@ -1,5 +1,12 @@
 #Changelog
 
+##69.0.0
+###Features
+* Change version scheme to number of days since start of project followed by semantic versioning
+* Bumped Kubernetes to release 0.15.0
+* Bumped kube-register to 0.0.3
+* Added healthz settings
+
 ##0.3.2
 ###Features
 * Updated docker to 1.6.0
