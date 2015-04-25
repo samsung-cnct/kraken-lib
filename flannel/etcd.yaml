@@ -14,11 +14,11 @@ coreos:
     initial-cluster: etcd=http://$private_ipv4:2380
     initial-advertise-peer-urls: http://$private_ipv4:2380
     listen-peer-urls: http://$private_ipv4:2380,http://$private_ipv4:7001
-    advertise-client-urls: http://$public_ipv4:2379,http://$public_ipv4:4001
+    advertise-client-urls: http://$private_ipv4:2379,http://$private_ipv4:4001
     initial-cluster-state: new
   fleet:
     etcd-servers: http://0.0.0.0:4001
-    public-ip: $public_ipv4
+    public-ip: $private_ipv4
     metadata: "role=etcd"
   units:
     - name: wait4etcdproxy.service
@@ -65,4 +65,4 @@ coreos:
       command: start
   update:
     group: alpha
-    reboot-strategy: __REBOOT_STRAT__
+    reboot-strategy: $REBOOT_STRATEGY

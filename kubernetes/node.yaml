@@ -6,7 +6,7 @@ write_files:
   owner: root
   content: |
     #! /usr/bin/bash
-    until curl http://__ETCD_IP__:4001/v2/machines; do sleep 2; done
+    until curl http://$ETCD_IP:4001/v2/machines; do sleep 2; done
 - path: /opt/bin/wait4ectdproxy.sh
   owner: root
   content: |
@@ -16,18 +16,18 @@ write_files:
   owner: root
   content: |
     #! /usr/bin/bash
-    until curl http://__MASTER_IP__:8080; do sleep 2; done
+    until curl http://$MASTER_IP:8080; do sleep 2; done
 coreos:
   etcd2:
     proxy: on
     listen-client-urls: http://0.0.0.0:4001
-    initial-cluster: etcd=http://__ETCD_IP__:2380
+    initial-cluster: etcd=http://$ETCD_IP:2380
   fleet:
     etcd-servers: http://$private_ipv4:4001
     public-ip: $private_ipv4
     metadata: "role=node"
   flannel:
-    etcd-endpoints: http://__ETCD_IP__:4001
+    etcd-endpoints: http://$ETCD_IP:4001
     interface: $private_ipv4
   units:
     - name: docker-tcp.socket
@@ -132,10 +132,10 @@ coreos:
         After=wait4apiserver.service
 
         [Service]
-        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/__KUBE_VERSION__/bin/linux/amd64/kube-proxy
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/$KUBERNETES_VERSION/bin/linux/amd64/kube-proxy
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-proxy
         ExecStart=/opt/bin/kube-proxy \
-        --master=__MASTER_IP__:8080 \
+        --master=$MASTER_IP:8080 \
         --logtostderr=true
         Restart=always
         RestartSec=10
@@ -150,13 +150,13 @@ coreos:
 
         [Service]
         EnvironmentFile=/etc/network-environment
-        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/__KUBE_VERSION__/bin/linux/amd64/kubelet
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/$KUBERNETES_VERSION/bin/linux/amd64/kubelet
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kubelet
         ExecStart=/opt/bin/kubelet \
         --address=0.0.0.0 \
         --port=10250 \
         --hostname_override=$public_ipv4 \
-        --api_servers=__MASTER_IP__:8080 \
+        --api_servers=$MASTER_IP:8080 \
         --healthz_bind_address=0.0.0.0 \
         --healthz_port=10254 \
         --cadvisor_port=4194 \
@@ -165,4 +165,4 @@ coreos:
         RestartSec=10
   update:
     group: alpha
-    reboot-strategy: __REBOOT_STRAT__
+    reboot-strategy: $REBOOT_STRATEGY
