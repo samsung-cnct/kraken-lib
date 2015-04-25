@@ -5,15 +5,17 @@ require 'tempfile'
 require 'fileutils'
 require 'socket'
 
-AWS_ACCESS_KEY_ID = 'AKIAJXLSFWEIFOHDZGAQ'
-AWS_SECRET_ACCESS_KEY = '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'
+# Cluster parameters
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+AWS_ACCESS_KEY_ID = ''
+AWS_SECRET_ACCESS_KEY = ''
 AWS_SESSION_TOKEN = ''
 AWS_KEYPAIR = 'kubernetes-demo'
-AWS_AMI = 'ami-3283825a'
+AWS_AMI = ''
 AWS_INSTANCE_TYPE = 'm3.xlarge'
 AWS_REGION = 'us-east-1'
-AWS_SECURITY_GROUPS = ['sg-3ebff75a']
-AWS_SUBNET_ID = 'subnet-a4eb7bfd'
+AWS_SECURITY_GROUPS = ['']
+AWS_SUBNET_ID = ''
 AWS_ASSOCIATE_PUBLIC_IP = 'true'
 
 AWS_KEYPAIR_PATH = '~/.ssh/keys/kubernetes-demo.pem'
@@ -29,7 +31,7 @@ MASTER_IP = '10.1.1.102'
 MASTER_PUBLIC_IP = '52.5.55.15'
 CHANNEL = ''
 REBOOT_STRATEGY = 'off'
-
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 # Check for needed gems
 required_plugins = %w(vagrant-aws)
