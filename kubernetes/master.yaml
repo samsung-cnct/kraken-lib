@@ -17,6 +17,18 @@ write_files:
   content: |
     #! /usr/bin/bash
     /usr/bin/etcdctl set /coreos.com/network/config '{"Network":"10.244.0.0/16", "Backend": {"Type": "vxlan"}}' 
+- path: /opt/bin/kube2sky.sh
+  owner: root
+  content: |
+    #! /usr/bin/bash
+    /usr/bin/wget https://github.com/l337ch/provision_kubeskydns/archive/v0.0.1.tar.gz \
+    -O - | tar -xz -C /opt/bin
+    /opt/bin/provision_kubeskydns-0.0.1/bin/linux/kubectl \
+    --server=http://$MASTER_IP:8080 \
+    create -f /opt/bin/provision_kubeskydns-0.0.1/skydns-rc.yaml
+    /opt/bin/provision_kubeskydns-0.0.1/bin/linux/kubectl \
+    --server=http://$MASTER_IP:8080 \
+    create -f /opt/bin/provision_kubeskydns-0.0.1/skydns-svc.yaml
 coreos:
   etcd2:
     proxy: on
@@ -52,6 +64,7 @@ coreos:
         Wants=network-online.target
         After=network-online.target
         Before=flannel.service
+
         [Service]
         ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4etcd.sh
         ExecStart=/usr/bin/bash /opt/bin/wait4etcd.sh
@@ -200,19 +213,33 @@ coreos:
         --healthz-port=10254
         Restart=always
         RestartSec=10
+    - name: kube-skydns.service
+      command: start
+      content: |
+        [Unit]
+        Description=Kubernetes local DNS service
+        Requires=kube-register.service
+        After=kube-register.service
+
+        [Service]
+        TimeoutStartSec=0
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/kube2sky.sh
+        ExecStart=/usr/bin/bash /opt/bin/kube2sky.sh
+        RemainAfterExit=true
+        Type=oneshot
     - name: config-collector.service
       command: start
       content: |
         [Unit]
         Description=Docker configuration config-collector
-        Requires=kube-apiserver.service
-        After=kube-apiserver.service
+        Requires=kube-register.service
+        After=kube-register.service
 
         [Service]
         TimeoutStartSec=0
         SyslogIdentifier=writer_process
-        ExecStartPre=-/usr/bin/docker kill config-collector
-        ExecStartPre=-/usr/bin/docker rm config-collector
+        ExecStartPre=/usr/bin/docker kill config-collector
+        ExecStartPre=/usr/bin/docker rm config-collector
         ExecStartPre=/usr/bin/docker pull vasbala/config-collector
         ExecStart=/bin/bash -c "/usr/bin/docker run \
           --net=host \
@@ -227,14 +254,14 @@ coreos:
       content: |
         [Unit]
         Description=Kubernetes UI Service
-        Requires=kube-apiserver.service
-        After=kube-apiserver.service
+        Requires=kube-register.service
+        After=kube-register.service
 
         [Service]
         TimeoutStartSec=0
         SyslogIdentifier=writer_process
-        ExecStartPre=-/usr/bin/docker kill kubernetes-ui
-        ExecStartPre=-/usr/bin/docker rm kubernetes-ui
+        ExecStartPre=/usr/bin/docker kill kubernetes-ui
+        ExecStartPre=/usr/bin/docker rm kubernetes-ui
         ExecStartPre=/usr/bin/docker pull l337ch/docker-kubernetes-ui
         ExecStart=/bin/bash -c "/usr/bin/docker run \
           -p 8900:8900 \

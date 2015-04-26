@@ -141,12 +141,12 @@ Vagrant.configure(2) do |config|
       cpus = MINION_CPUS
     end
 
-    config.vm.define vmName = hostname do |kHost|
-      kHost.vm.hostname = vmName
+    config.vm.define vmName = hostname do |config2|
+      config2.vm.hostname = vmName
       # Do not run landrush on vms because of IPTABlES not being on coreos natively
       # Disabled for now to support windows
       # Disable for Windows support
-      #kHost.landrush.guest_redirect_dns = false      
+      #config2.landrush.guest_redirect_dns = false      
       
       if SERIAL_LOGGING
         logdir = File.join(File.dirname(__FILE__), "log")
@@ -155,17 +155,17 @@ Vagrant.configure(2) do |config|
         serialFile = File.join(logdir, "#{vmName}-serial.txt")
         FileUtils.touch(serialFile)
 
-        kHost.vm.provider :virtualbox do |vb, override|
+        config2.vm.provider :virtualbox do |vb, override|
           vb.customize ["modifyvm", :id, "--uart1", "0x3F8", "4"]
           vb.customize ["modifyvm", :id, "--uartmode1", serialFile]
         end
       end
 
-      kHost.vm.network :private_network, ip: "172.16.1.#{i+100}"
+      config2.vm.network :private_network, ip: "172.16.1.#{i+100}"
 
       if File.exist?(cfg)
-        kHost.vm.provision :file, :source => "#{cfg}", :destination => "/tmp/vagrantfile-user-data"
-        kHost.vm.provision :shell, :privileged => true,
+        config2.vm.provision :file, :source => "#{cfg}", :destination => "/tmp/vagrantfile-user-data"
+        config2.vm.provision :shell, :privileged => true,
         inline: <<-EOF
           sed -i "s,__KUBE_VERSION__,v#{KUBERNETES_VERSION},g" /tmp/vagrantfile-user-data
           sed -i "s,__CHANNEL__,v#{CHANNEL},g" /tmp/vagrantfile-user-data
