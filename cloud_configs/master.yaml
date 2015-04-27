@@ -1,0 +1,315 @@
+#cloud-config
+
+---
+write_files:
+- path: /opt/bin/wait4etcd.sh
+  owner: root
+  content: |
+    #! /usr/bin/bash
+    until curl http://$ETCD_IP:4001/v2/machines; do sleep 2; done
+- path: /opt/bin/wait4ectdproxy.sh
+  owner: root
+  content: |
+    #! /usr/bin/bash
+    until curl http://127.0.0.1:4001/v2/machines; do sleep 2; done
+- path: /opt/bin/flannelconfig.sh
+  owner: root
+  content: |
+    #! /usr/bin/bash
+    /usr/bin/etcdctl set /coreos.com/network/config '{"Network":"10.244.0.0/16", "Backend": {"Type": "vxlan"}}' 
+- path: /opt/bin/kube2sky.sh
+  owner: root
+  content: |
+    #! /usr/bin/bash
+    /usr/bin/wget https://github.com/l337ch/deploy-kube-srv/archive/v0.0.7.tar.gz \
+    -O - | tar -xz -C /opt/bin
+    /opt/bin/deploy-kube-srv-0.0.7/bin/linux/kubectl \
+    --server=http://$MASTER_IP:8080 \
+    create -f /opt/bin/deploy-kube-srv-0.0.7/skydns/skydns-rc.yaml
+    /opt/bin/deploy-kube-srv-0.0.7/bin/linux/kubectl \
+    --server=http://$MASTER_IP:8080 \
+    create -f /opt/bin/deploy-kube-srv-0.0.7/skydns/skydns-svc.yaml
+- path: /opt/bin/guestbook_example.sh
+  owner: root
+  content: |
+    #! /usr/bin/bash
+    sed -i -- 's,$SERVICE_IP,$SERVICE_PUBLIC_IP,g' /opt/bin/deploy-kube-srv-0.0.7/guestbook/frontend-service.json
+    /opt/bin/deploy-kube-srv-0.0.7/bin/linux/kubectl \
+    --server=http://$MASTER_IP:8080 \
+    create -f /opt/bin/deploy-kube-srv-0.0.7/guestbook/redis-master.json
+    /opt/bin/deploy-kube-srv-0.0.7/bin/linux/kubectl \
+    --server=http://$MASTER_IP:8080 \
+    create -f /opt/bin/deploy-kube-srv-0.0.7/guestbook/redis-master-service.json
+    sleep 30
+    /opt/bin/deploy-kube-srv-0.0.7/bin/linux/kubectl \
+    --server=http://$MASTER_IP:8080 \
+    create -f /opt/bin/deploy-kube-srv-0.0.7/guestbook/redis-slave-controller.json
+    /opt/bin/deploy-kube-srv-0.0.7/bin/linux/kubectl \
+    --server=http://$MASTER_IP:8080 \
+    create -f /opt/bin/deploy-kube-srv-0.0.7/guestbook/redis-slave-service.json
+    sleep 30
+    /opt/bin/deploy-kube-srv-0.0.7/bin/linux/kubectl \
+    --server=http://$MASTER_IP:8080 \
+    create -f /opt/bin/deploy-kube-srv-0.0.7/guestbook/frontend-controller.json
+    /opt/bin/deploy-kube-srv-0.0.7/bin/linux/kubectl \
+    --server=http://$MASTER_IP:8080 \
+    create -f /opt/bin/deploy-kube-srv-0.0.7/guestbook/frontend-service.json
+coreos:
+  etcd2:
+    proxy: on
+    listen-client-urls: http://0.0.0.0:4001
+    initial-cluster: etcd=http://$ETCD_IP:2380
+  fleet:
+    etcd-servers: http://$private_ipv4:4001
+    public-ip: $public_ipv4
+    metadata: "role=master"
+  flannel:
+    etcd-endpoints: http://$ETCD_IP:4001
+    interface: $private_ipv4
+  units:
+    - name: docker-tcp.socket
+      command: start
+      enable: true
+      content: |
+        [Unit]
+        Description=Docker TCP Socket for the API
+
+        [Socket]
+        ListenStream=0.0.0.0:4243
+        BindIPv6Only=both
+        Service=docker.service
+
+        [Install]
+        WantedBy=sockets.target
+    - name: wait4etcd.service
+      command: start
+      content: |
+        [Unit]
+        Description=Wait for etcd to come up
+        Wants=network-online.target
+        After=network-online.target
+        Before=flannel.service
+
+        [Service]
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4etcd.sh
+        ExecStart=/usr/bin/bash /opt/bin/wait4etcd.sh
+        RemainAfterExit=true
+        Type=oneshot
+    - name: setup-network-environment.service
+      command: start
+      content: |
+        [Unit]
+        Description=Setup Network Environment
+        Documentation=https://github.com/kelseyhightower/setup-network-environment
+        Requires=network-online.target
+        After=network-online.target
+        Before=flanneld.service
+
+        [Service]
+        ExecStartPre=-/usr/bin/mkdir -p /opt/bin
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/k8s/setup-network-environment 
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/setup-network-environment
+        ExecStart=/opt/bin/setup-network-environment
+        RemainAfterExit=yes
+        Type=oneshot
+    - name: wait4ectdproxy.service
+      command: start
+      content: |
+        [Unit]
+        Description=Wait for etcd proxy to come up
+        Wants=etcd2.service
+        After=etcd2.service
+        Before=fleet.service
+
+        [Service]
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4ectdproxy.sh
+        ExecStart=/usr/bin/bash /opt/bin/wait4ectdproxy.sh
+        RemainAfterExit=true
+        Type=oneshot
+    - name: flannelconfig.service
+      command: start
+      content: |
+        [Unit]
+        Description=write flannel network to etcd
+        Wants=etcd2.service
+        After=etcd2.service
+
+        [Service]
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/flannelconfig.sh
+        ExecStart=/usr/bin/bash /opt/bin/flannelconfig.sh
+        RemainAfterExit=true
+        Type=oneshot
+    - name: flanneld.service
+      command: start
+      drop-ins:
+        - name: 50-network-config.conf
+          content: |
+            [Unit]
+            Requires=wait4etcd.service
+            After=wait4etcd.service
+            Before=docker.service
+    - name: docker.service
+      drop-ins:
+        - name: 51-docker-flannel.conf
+          content: |
+            [Unit]
+            # startup, otherwise containers won't land in flannel's network...
+            Requires=flanneld.service
+            After=flanneld.service
+
+            [Service]
+            Environment=DOCKER_OPTS='--registry-mirror=http://$DOCKER_CACHE:5000'
+    - name: fleet.service
+      command: start
+    - name: kube-apiserver.service
+      command: start
+      content: |
+        [Unit]
+        Description=Kubernetes API Server
+        Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+        Requires=fleet.service
+        After=wait4ectdproxy.service
+
+        [Service]
+        ExecStartPre=-/usr/bin/mkdir -p /opt/bin
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/$KUBERNETES_VERSION/bin/linux/amd64/kube-apiserver
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-apiserver
+        ExecStart=/opt/bin/kube-apiserver \
+        --insecure_bind_address=$private_ipv4 \
+        --insecure_port=8080 \
+        --portal_net=10.100.0.0/16 \
+        --etcd_servers=http://127.0.0.1:4001 \
+        --public_address_override=$private_ipv4 \
+        --logtostderr=true \
+        --cors_allowed_origins=.* \
+        --runtime_config=api/v1beta3
+        Restart=always
+        RestartSec=10
+    - name: kube-controller-manager.service
+      command: start
+      content: |
+        [Unit]
+        Description=Kubernetes Controller Manager
+        Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+        Requires=kube-apiserver.service
+        After=kube-apiserver.service
+
+        [Service]
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/$KUBERNETES_VERSION/bin/linux/amd64/kube-controller-manager
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-controller-manager
+        ExecStart=/opt/bin/kube-controller-manager \
+        --master=$private_ipv4:8080 \
+        --pod_eviction_timeout=1m \
+        --resource_quota_sync_period=20s \
+        --logtostderr=true
+        Restart=always
+        RestartSec=10
+    - name: kube-scheduler.service
+      command: start
+      content: |
+        [Unit]
+        Description=Kubernetes Scheduler
+        Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+        Requires=kube-apiserver.service
+        After=kube-apiserver.service
+
+        [Service]
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/$KUBERNETES_VERSION/bin/linux/amd64/kube-scheduler
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-scheduler
+        ExecStart=/opt/bin/kube-scheduler --master=$private_ipv4:8080
+        Restart=always
+        RestartSec=10
+    - name: kube-register.service
+      command: start
+      content: |
+        [Unit]
+        Description=Kubernetes Registration Service
+        Documentation=https://github.com/kelseyhightower/kube-register
+        Requires=kube-apiserver.service
+        After=kube-apiserver.service
+
+        [Service]
+        ExecStartPre=/usr/bin/wget -O /opt/bin/kube-register \
+          https://github.com/kelseyhightower/kube-register/releases/download/v0.0.3/kube-register-0.0.3-linux-amd64
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-register
+        ExecStart=/opt/bin/kube-register \
+        --metadata=role=node \
+        --fleet-endpoint=unix:///var/run/fleet.sock \
+        --api-endpoint=http://$private_ipv4:8080 \
+        --healthz-port=10254
+        Restart=always
+        RestartSec=10
+    - name: kube-skydns.service
+      command: start
+      content: |
+        [Unit]
+        Description=Kubernetes local DNS service
+        Requires=kube-register.service
+        After=kube-register.service
+
+        [Service]
+        TimeoutStartSec=0
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/kube2sky.sh
+        ExecStart=/usr/bin/bash /opt/bin/kube2sky.sh
+        RemainAfterExit=true
+        Type=oneshot
+    - name: config-collector.service
+      command: start
+      content: |
+        [Unit]
+        Description=Docker configuration config-collector
+        Requires=kube-register.service
+        After=kube-register.service
+
+        [Service]
+        TimeoutStartSec=0
+        SyslogIdentifier=writer_process
+        ExecStartPre=-/usr/bin/docker kill config-collector
+        ExecStartPre=-/usr/bin/docker rm config-collector
+        ExecStartPre=/usr/bin/docker pull vasbala/config-collector
+        ExecStart=/bin/bash -c "/usr/bin/docker run \
+          --net=host \
+          -p 5555:5555 \
+          --name config-collector \
+          vasbala/config-collector"
+        ExecStop=/usr/bin/docker kill config-collector
+        Restart=always
+        RestartSec=10
+    - name: kubernetes-ui.service
+      command: start
+      content: |
+        [Unit]
+        Description=Kubernetes UI Service
+        Requires=kube-register.service
+        After=kube-register.service
+
+        [Service]
+        TimeoutStartSec=0
+        SyslogIdentifier=writer_process
+        ExecStartPre=-/usr/bin/docker kill kubernetes-ui
+        ExecStartPre=-/usr/bin/docker rm kubernetes-ui
+        ExecStartPre=/usr/bin/docker pull l337ch/docker-kubernetes-ui
+        ExecStart=/bin/bash -c "/usr/bin/docker run \
+          -p 8900:8900 \
+          --name kubernetes-ui \
+          l337ch/docker-kubernetes-ui"
+        ExecStop=/usr/bin/docker kill kubernetes-ui
+        Restart=always
+        RestartSec=10
+    - name: guestbook-example.service
+      command: $RUN_EXAMPLES
+      content: |
+        [Unit]
+        Description=Kubernetes guestbook example
+        Requires=config-collector.service
+        After=config-collector.service
+
+        [Service]
+        TimeoutStartSec=0
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/guestbook_example.sh
+        ExecStart=/usr/bin/bash /opt/bin/guestbook_example.sh
+        RemainAfterExit=true
+        Type=oneshot
+  update:
+    group: alpha
+    reboot-strategy: $REBOOT_STRATEGY
