@@ -4,37 +4,50 @@
 require 'tempfile'
 require 'fileutils'
 require 'socket'
+require 'ipaddr'
 
 # Cluster parameters
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+#-=-AWS parameters=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 AWS_ACCESS_KEY = ENV['AWS_ACCESS_KEY_ID']
 AWS_SECRET_ACCESS = ENV['AWS_SECRET_ACCESS_KEY']
 AWS_SESSION_TOKEN = ''
-AWS_KEYPAIR = 'kubernetes-demo'
 AWS_AMI = ENV['AWS_AMI_ID']
-AWS_INSTANCE_TYPE = 'm3.xlarge'
+AWS_INSTANCE = ENV['AWS_INSTANCE_TYPE']
 AWS_REGION = ENV['AWS_REGION_ID']
 AWS_SECURITY_GROUPS = eval(ENV['AWS_SECURITY_GROUP_IDS'])
 AWS_SUBNET = ENV['AWS_SUBNET_ID']
 AWS_ASSOCIATE_PUBLIC_IP = 'true'
-
 AWS_KEYPAIR_PATH = '~/.ssh/keys/kubernetes-demo.pem'
-
-CLOUD_PROVIDER = 'vagrant'
+AWS_KEYPAIR = 'kubernetes-demo'
+MASTER_PUB_IP = ENV['MASTER_PUBLIC_IP']
+NODE_PUB_IP = ENV['NODE_PUBLIC_IP']
 USER_MACHINE = Socket.gethostname
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+NETWORK = '10.1.100.0/24'
+RUN_GUESTBOOK=true
+CLOUD_PROVIDER = 'vagrant'
 NUM_NODES = 3
 DNS_DOMAIN='kubernetes.local'
-ETCD_YAML = File.join(File.dirname(__FILE__), "../flannel/etcd.yaml")
-MASTER_YAML = File.join(File.dirname(__FILE__), "../kubernetes/master.yaml")
-NODE_YAML = File.join(File.dirname(__FILE__), "../kubernetes/node.yaml")
+ETCD_YAML = File.join(File.dirname(__FILE__), "../cloud_configs/etcd.yaml")
+MASTER_YAML = File.join(File.dirname(__FILE__), "../cloud_configs/master.yaml")
+NODE_YAML = File.join(File.dirname(__FILE__), "../cloud_configs/node.yaml")
 KUBERNETES_VERSION = '0.15.0'
-ETCD_IP = '10.1.1.101'
-MASTER_IP = '10.1.1.102'
-MASTER_PUBLIC_IP = '52.5.55.15'
-NODE_PUBLIC_IP = '52.4.100.84'
 CHANNEL = ''
 REBOOT_STRATEGY = 'off'
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+BASE_IP_ADDRESS = IPAddr.new(NETWORK).to_s.chomp("0")
+ETCD_IP_ADDRESS=BASE_IP_ADDRESS + "#{1+100}"
+MASTER_IP_ADDRESS=BASE_IP_ADDRESS + "#{2+100}"
+NODE_01_PRIVATE_IP = BASE_IP_ADDRESS + "#{3+100}"
+
+if RUN_GUESTBOOK
+	MASK_EXAMPLES = "start"
+else 
+	MASK_EXAMPLES = "stop"
+end
 
 # Check for needed gems
 required_plugins = %w(vagrant-aws)
@@ -77,12 +90,14 @@ Vagrant.configure(2) do |config|
 		# Transform yaml files
 		tmp_user_data = "/tmp/#{hostname}-vagrantfile-user-data"
 		replacements = {
-			'$ETCD_IP' => ETCD_IP,
-			'$MASTER_IP' => MASTER_IP,
+			'$ETCD_IP' => ETCD_IP_ADDRESS,
+			'$MASTER_IP' => MASTER_IP_ADDRESS,
 			'$KUBERNETES_VERSION' => 'v' + KUBERNETES_VERSION,
 			'$REBOOT_STRATEGY' => REBOOT_STRATEGY,
 			'$CLOUD_PROVIDER' => CLOUD_PROVIDER,
-			'$DNS_DOMAIN' => DNS_DOMAIN
+			'$DNS_DOMAIN' => DNS_DOMAIN,
+			'$SERVICE_PUBLIC_IP' => NODE_01_PRIVATE_IP,
+			'$RUN_EXAMPLES' => MASK_EXAMPLES
 		}
 		
 		regexp = Regexp.new replacements.keys.map {|k| Regexp.quote(k) }.join('|')
@@ -108,18 +123,18 @@ Vagrant.configure(2) do |config|
 		    #aws.session_token = AWS_SESSION_TOKEN
 		    aws.keypair_name = AWS_KEYPAIR
 		    aws.ami = AWS_AMI
-		    aws.instance_type = AWS_INSTANCE_TYPE
+		    aws.instance_type = AWS_INSTANCE
 		    aws.region = AWS_REGION
 		    aws.security_groups = AWS_SECURITY_GROUPS
 		    aws.subnet_id = AWS_SUBNET
-		    aws.private_ip_address = "10.1.1.#{i+100}"
+		    aws.private_ip_address = BASE_IP_ADDRESS + "#{i+100}"
 		    aws.associate_public_ip = AWS_ASSOCIATE_PUBLIC_IP
 		    
 		    case hostname
 		    when 'master'
-		    	aws.elastic_ip = MASTER_PUBLIC_IP
+		    	aws.elastic_ip = MASTER_PUB_IP
 		    when 'node-01'
-		    	aws.elastic_ip = NODE_PUBLIC_IP
+		    	aws.elastic_ip = NODE_PUB_IP
 		    end
 
 		    aws.user_data = File.read(tmp_user_data)
