@@ -1,5 +1,19 @@
 #Changelog
 
+##72.0.0
+###Features
+* Add guestbook example to boot process
+* Ability to assign AWS EIP to master
+* Ability to assign AWS EIP to node-01
+* Ability to assign CIDR network to AWS cluster
+* Ability to assign CIDR network to Virtual Box cluster
+* Using kubernetes release 0.15.0
+* SkyDNS with kube2skydns now on vagrant and AWS deploys
+* Building a kubernetes on AWS or Virtual Box VMS uses the same cloud-config files
+
+###Bug fixes
+* Fixed occasional flannel failures by changing flannelconfig service dependency
+
 ##69.0.0
 ###Features
 * Change version scheme to number of days since start of project followed by semantic versioning
