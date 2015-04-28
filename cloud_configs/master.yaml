@@ -288,7 +288,7 @@ coreos:
         SyslogIdentifier=writer_process
         ExecStartPre=-/usr/bin/docker kill kubernetes-ui
         ExecStartPre=-/usr/bin/docker rm kubernetes-ui
-        ExecStartPre=/usr/bin/docker pull l337ch/docker-kubernetes-ui
+        ExecStartPre=/usr/bin/docker pull quay.io/l337ch/kubernetes-ui
         ExecStart=/bin/bash -c "/usr/bin/docker run \
           -p 8900:8900 \
           --name kubernetes-ui \
