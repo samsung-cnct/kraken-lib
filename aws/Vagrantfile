@@ -1,0 +1,152 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require 'tempfile'
+require 'fileutils'
+require 'socket'
+require 'ipaddr'
+
+# Cluster parameters
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+#-=-AWS parameters=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+AWS_ACCESS_KEY = ENV['AWS_ACCESS_KEY_ID']
+AWS_SECRET_ACCESS = ENV['AWS_SECRET_ACCESS_KEY']
+AWS_SESSION_TOKEN = ''
+AWS_AMI = ENV['AWS_AMI_ID']
+AWS_INSTANCE = ENV['AWS_INSTANCE_TYPE']
+AWS_REGION = ENV['AWS_REGION_ID']
+AWS_SECURITY_GROUPS = eval(ENV['AWS_SECURITY_GROUP_IDS'])
+AWS_SUBNET = ENV['AWS_SUBNET_ID']
+AWS_ASSOCIATE_PUBLIC_IP = 'true'
+AWS_KEYPAIR_PATH = '~/.ssh/keys/kubernetes-demo.pem'
+AWS_KEYPAIR = 'kubernetes-demo'
+MASTER_PUB_IP = ENV['MASTER_PUBLIC_IP']
+NODE_PUB_IP = ENV['NODE_PUBLIC_IP']
+USER_MACHINE = Socket.gethostname
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+NETWORK = '10.1.100.0/24'
+RUN_GUESTBOOK=true
+CLOUD_PROVIDER = 'vagrant'
+NUM_NODES = 3
+DNS_DOMAIN='kubernetes.local'
+ETCD_YAML = File.join(File.dirname(__FILE__), "../cloud_configs/etcd.yaml")
+MASTER_YAML = File.join(File.dirname(__FILE__), "../cloud_configs/master.yaml")
+NODE_YAML = File.join(File.dirname(__FILE__), "../cloud_configs/node.yaml")
+KUBERNETES_VERSION = '0.15.0'
+CHANNEL = ''
+REBOOT_STRATEGY = 'off'
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+BASE_IP_ADDRESS = IPAddr.new(NETWORK).to_s.chomp("0")
+ETCD_IP_ADDRESS=BASE_IP_ADDRESS + "#{1+100}"
+MASTER_IP_ADDRESS=BASE_IP_ADDRESS + "#{2+100}"
+NODE_01_PRIVATE_IP = BASE_IP_ADDRESS + "#{3+100}"
+
+if RUN_GUESTBOOK
+	MASK_EXAMPLES = "start"
+else 
+	MASK_EXAMPLES = "stop"
+end
+
+# Check for needed gems
+required_plugins = %w(vagrant-aws)
+required_plugins.each do |plugin|
+  need_restart = false
+  unless Vagrant.has_plugin? plugin
+    system "vagrant plugin install #{plugin}"
+    need_restart = true
+  end
+  exec "vagrant #{ARGV.join(' ')}" if need_restart
+end
+
+# Find the lastest stable release of kubernetes
+if KUBERNETES_VERSION == "latest"
+  txt = "https://storage.googleapis.com/kubernetes-release/release/stable.txt"
+  Object.redefine_const(:KUBERNETES_VERSION,
+    open(txt).read().gsub('v','').chomp)
+  puts "\n" * 2 + ("+" * 61 + "\n") * 2 + "++++" + "\s" * 53 + "++++" + "\n"
+  puts "+" * 12 + ">>    Kubernetes Version #{KUBERNETES_VERSION}    <<" + "+" * 12 + "\n"
+  puts "++++" + "\s" * 53 + "++++" + "\n" + ("+" * 61 + "\n") * 2 + "\n" * 2
+end
+
+Vagrant.configure(2) do |config|
+  config.vm.box = "aws.box"
+ 	config.vm.synced_folder ".", "/vagrant", disabled: true
+
+  (1..(NUM_NODES.to_i + 2)).each do |i|
+    case i
+    when 1
+      hostname = "etcd"
+      user_data = ETCD_YAML
+    when 2
+      hostname = "master"
+      user_data = MASTER_YAML
+    else
+      hostname = "node-%02d" % (i - 2)
+      user_data = NODE_YAML
+    end
+		
+		# Transform yaml files
+		tmp_user_data = "/tmp/#{hostname}-vagrantfile-user-data"
+		replacements = {
+			'$ETCD_IP' => ETCD_IP_ADDRESS,
+			'$MASTER_IP' => MASTER_IP_ADDRESS,
+			'$KUBERNETES_VERSION' => 'v' + KUBERNETES_VERSION,
+			'$REBOOT_STRATEGY' => REBOOT_STRATEGY,
+			'$CLOUD_PROVIDER' => CLOUD_PROVIDER,
+			'$DNS_DOMAIN' => DNS_DOMAIN,
+			'$SERVICE_PUBLIC_IP' => NODE_01_PRIVATE_IP,
+			'$RUN_EXAMPLES' => MASK_EXAMPLES
+		}
+		
+		regexp = Regexp.new replacements.keys.map {|k| Regexp.quote(k) }.join('|')
+		tmp_file = Tempfile.new("tmp_vagrantfile")
+		
+		begin
+		  File.foreach(user_data, "r") do |line|
+	    	tmp_file.write line.gsub regexp, replacements
+		  end
+		  tmp_file.close
+		  FileUtils.mv(tmp_file.path, tmp_user_data)
+		ensure
+			tmp_file.close
+			tmp_file.unlink
+		end
+    
+    config.vm.define vmName = hostname do |config2|
+
+			config2.vm.provider :aws do |aws, override|
+
+		    aws.access_key_id = AWS_ACCESS_KEY
+		    aws.secret_access_key = AWS_SECRET_ACCESS
+		    #aws.session_token = AWS_SESSION_TOKEN
+		    aws.keypair_name = AWS_KEYPAIR
+		    aws.ami = AWS_AMI
+		    aws.instance_type = AWS_INSTANCE
+		    aws.region = AWS_REGION
+		    aws.security_groups = AWS_SECURITY_GROUPS
+		    aws.subnet_id = AWS_SUBNET
+		    aws.private_ip_address = BASE_IP_ADDRESS + "#{i+100}"
+		    aws.associate_public_ip = AWS_ASSOCIATE_PUBLIC_IP
+		    
+		    case hostname
+		    when 'master'
+		    	aws.elastic_ip = MASTER_PUB_IP
+		    when 'node-01'
+		    	aws.elastic_ip = NODE_PUB_IP
+		    end
+
+		    aws.user_data = File.read(tmp_user_data)
+
+		    aws.tags = {
+		    	'Name' => "kube-" + hostname,
+		    	'owner' => USER_MACHINE
+		    }
+
+		    override.ssh.username = "core"
+		    override.ssh.private_key_path = AWS_KEYPAIR_PATH
+		  end
+		end
+  end
+end

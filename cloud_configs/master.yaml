@@ -21,14 +21,39 @@ write_files:
   owner: root
   content: |
     #! /usr/bin/bash
-    /usr/bin/wget https://github.com/l337ch/provision_kubeskydns/archive/v0.0.1.tar.gz \
+    /usr/bin/wget https://github.com/l337ch/deploy-kube-srv/archive/v0.0.7.tar.gz \
     -O - | tar -xz -C /opt/bin
-    /opt/bin/provision_kubeskydns-0.0.1/bin/linux/kubectl \
+    /opt/bin/deploy-kube-srv-0.0.7/bin/linux/kubectl \
     --server=http://$MASTER_IP:8080 \
-    create -f /opt/bin/provision_kubeskydns-0.0.1/skydns-rc.yaml
-    /opt/bin/provision_kubeskydns-0.0.1/bin/linux/kubectl \
+    create -f /opt/bin/deploy-kube-srv-0.0.7/skydns/skydns-rc.yaml
+    /opt/bin/deploy-kube-srv-0.0.7/bin/linux/kubectl \
     --server=http://$MASTER_IP:8080 \
-    create -f /opt/bin/provision_kubeskydns-0.0.1/skydns-svc.yaml
+    create -f /opt/bin/deploy-kube-srv-0.0.7/skydns/skydns-svc.yaml
+- path: /opt/bin/guestbook_example.sh
+  owner: root
+  content: |
+    #! /usr/bin/bash
+    sed -i -- 's,$SERVICE_IP,$SERVICE_PUBLIC_IP,g' /opt/bin/deploy-kube-srv-0.0.7/guestbook/frontend-service.json
+    /opt/bin/deploy-kube-srv-0.0.7/bin/linux/kubectl \
+    --server=http://$MASTER_IP:8080 \
+    create -f /opt/bin/deploy-kube-srv-0.0.7/guestbook/redis-master.json
+    /opt/bin/deploy-kube-srv-0.0.7/bin/linux/kubectl \
+    --server=http://$MASTER_IP:8080 \
+    create -f /opt/bin/deploy-kube-srv-0.0.7/guestbook/redis-master-service.json
+    sleep 30
+    /opt/bin/deploy-kube-srv-0.0.7/bin/linux/kubectl \
+    --server=http://$MASTER_IP:8080 \
+    create -f /opt/bin/deploy-kube-srv-0.0.7/guestbook/redis-slave-controller.json
+    /opt/bin/deploy-kube-srv-0.0.7/bin/linux/kubectl \
+    --server=http://$MASTER_IP:8080 \
+    create -f /opt/bin/deploy-kube-srv-0.0.7/guestbook/redis-slave-service.json
+    sleep 30
+    /opt/bin/deploy-kube-srv-0.0.7/bin/linux/kubectl \
+    --server=http://$MASTER_IP:8080 \
+    create -f /opt/bin/deploy-kube-srv-0.0.7/guestbook/frontend-controller.json
+    /opt/bin/deploy-kube-srv-0.0.7/bin/linux/kubectl \
+    --server=http://$MASTER_IP:8080 \
+    create -f /opt/bin/deploy-kube-srv-0.0.7/guestbook/frontend-service.json
 coreos:
   etcd2:
     proxy: on
@@ -204,7 +229,8 @@ coreos:
         After=kube-apiserver.service
 
         [Service]
-        ExecStartPre=/usr/bin/wget -O /opt/bin/kube-register https://github.com/kelseyhightower/kube-register/releases/download/v0.0.3/kube-register-0.0.3-linux-amd64
+        ExecStartPre=/usr/bin/wget -O /opt/bin/kube-register \
+          https://github.com/kelseyhightower/kube-register/releases/download/v0.0.3/kube-register-0.0.3-linux-amd64
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-register
         ExecStart=/opt/bin/kube-register \
         --metadata=role=node \
@@ -238,8 +264,8 @@ coreos:
         [Service]
         TimeoutStartSec=0
         SyslogIdentifier=writer_process
-        ExecStartPre=/usr/bin/docker kill config-collector
-        ExecStartPre=/usr/bin/docker rm config-collector
+        ExecStartPre=-/usr/bin/docker kill config-collector
+        ExecStartPre=-/usr/bin/docker rm config-collector
         ExecStartPre=/usr/bin/docker pull vasbala/config-collector
         ExecStart=/bin/bash -c "/usr/bin/docker run \
           --net=host \
@@ -260,9 +286,9 @@ coreos:
         [Service]
         TimeoutStartSec=0
         SyslogIdentifier=writer_process
-        ExecStartPre=/usr/bin/docker kill kubernetes-ui
-        ExecStartPre=/usr/bin/docker rm kubernetes-ui
-        ExecStartPre=/usr/bin/docker pull l337ch/docker-kubernetes-ui
+        ExecStartPre=-/usr/bin/docker kill kubernetes-ui
+        ExecStartPre=-/usr/bin/docker rm kubernetes-ui
+        ExecStartPre=/usr/bin/docker pull quay.io/l337ch/kubernetes-ui
         ExecStart=/bin/bash -c "/usr/bin/docker run \
           -p 8900:8900 \
           --name kubernetes-ui \
@@ -270,6 +296,20 @@ coreos:
         ExecStop=/usr/bin/docker kill kubernetes-ui
         Restart=always
         RestartSec=10
+    - name: guestbook-example.service
+      command: $RUN_EXAMPLES
+      content: |
+        [Unit]
+        Description=Kubernetes guestbook example
+        Requires=config-collector.service
+        After=config-collector.service
+
+        [Service]
+        TimeoutStartSec=0
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/guestbook_example.sh
+        ExecStart=/usr/bin/bash /opt/bin/guestbook_example.sh
+        RemainAfterExit=true
+        Type=oneshot
   update:
     group: alpha
     reboot-strategy: $REBOOT_STRATEGY
