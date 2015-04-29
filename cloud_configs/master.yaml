@@ -131,8 +131,8 @@ coreos:
       content: |
         [Unit]
         Description=write flannel network to etcd
-        Wants=etcd2.service
-        After=etcd2.service
+        Wants=wait4ectdproxy.service
+        After=wait4ectdproxy.service
 
         [Service]
         ExecStartPre=/usr/bin/chmod +x /opt/bin/flannelconfig.sh
@@ -254,7 +254,7 @@ coreos:
         RemainAfterExit=true
         Type=oneshot
     - name: config-collector.service
-      command: start
+      command: stop
       content: |
         [Unit]
         Description=Docker configuration config-collector
@@ -276,7 +276,7 @@ coreos:
         Restart=always
         RestartSec=10
     - name: kubernetes-ui.service
-      command: start
+      command: stop
       content: |
         [Unit]
         Description=Kubernetes UI Service
@@ -301,9 +301,9 @@ coreos:
       content: |
         [Unit]
         Description=Kubernetes guestbook example
-        Requires=config-collector.service
-        After=config-collector.service
-
+        Requires=kube-skydns.service
+        After=kube-skydns.service
+        
         [Service]
         TimeoutStartSec=0
         ExecStartPre=/usr/bin/chmod +x /opt/bin/guestbook_example.sh

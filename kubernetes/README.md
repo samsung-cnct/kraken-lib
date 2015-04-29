@@ -67,3 +67,4 @@ f3e10ae7...	172.16.1.101	role=etcd
 ```
 
 If you do not see similar IPs and roles, contact <leetchang@gmail.com> and he'll help you sort it out. Or even better, file an issue [here](https://github.com/Samsung-AG/kraken/issues)
+

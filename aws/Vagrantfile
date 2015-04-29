@@ -25,10 +25,10 @@ NODE_PUB_IP = ENV['NODE_PUBLIC_IP']
 USER_MACHINE = Socket.gethostname
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-NETWORK = '10.1.100.0/24'
+NETWORK = ENV['NETWORK_CIDR'] 
 RUN_GUESTBOOK=true
 CLOUD_PROVIDER = 'vagrant'
-NUM_NODES = 3
+NUM_NODES = 25
 DNS_DOMAIN='kubernetes.local'
 ETCD_YAML = File.join(File.dirname(__FILE__), "../cloud_configs/etcd.yaml")
 MASTER_YAML = File.join(File.dirname(__FILE__), "../cloud_configs/master.yaml")
@@ -75,6 +75,7 @@ Vagrant.configure(2) do |config|
  	config.vm.synced_folder ".", "/vagrant", disabled: true
 
   (1..(NUM_NODES.to_i + 2)).each do |i|
+  
     case i
     when 1
       hostname = "etcd"
@@ -114,7 +115,8 @@ Vagrant.configure(2) do |config|
 			tmp_file.unlink
 		end
     
-    config.vm.define vmName = hostname do |config2|
+    config.vm.boot_timeout = 2
+    config.vm.define hostname do |config2|
 
 			config2.vm.provider :aws do |aws, override|
 
