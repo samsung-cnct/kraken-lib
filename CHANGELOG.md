@@ -1,5 +1,17 @@
 #Changelog
 
+###74.1.0
+###Features
+* Add kubeconfig builder to Kubernetes clusters that are built locally
+
+###Bug fixes
+* Fixed bug where detecting AWS variables was not reliable
+
+##74.0.0
+###Features
+* Add kube_cluster for AWS cluster deployment
+* Add master 
+
 ##72.0.0
 ###Features
 * Add guestbook example to boot process

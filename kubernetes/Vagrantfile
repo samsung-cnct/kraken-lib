@@ -36,6 +36,7 @@ KUBERNETES_VERSION = '0.15.0'
 CHANNEL = 'alpha'
 COREOS_VERSION = 'latest'
 REBOOT_STRATEGY = 'off'
+KUBECONFIG_TMPL = File.join(File.dirname(__FILE__), "../templates/kubeconfig.tmpl")
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 # Find the lastest stable release of kubernetes
@@ -202,6 +203,21 @@ Vagrant.configure(2) do |config|
           mv /tmp/vagrantfile-user-data /var/lib/coreos-vagrant/
         EOF
       end
+
+      # Create .kubeconfig file
+      kubeconfig_file = File.new(".kubeconfig", "w")
+      kubeconfig_tmpl = KUBECONFIG_TMPL
+      replacements = {
+        '$MASTER_IP' => MASTER_IP_ADDRESS
+      }
+
+      regexp = Regexp.new replacements.keys.map {|k| Regexp.quote(k) }.join('|')
+
+      File.foreach(kubeconfig_tmpl, "r") do |line|
+        kubeconfig_file.write line.gsub regexp, replacements
+      end
+
+      kubeconfig_file.close
     end
   end
 end
