@@ -93,7 +93,7 @@ coreos:
             After=flanneld.service
 
             [Service]
-            Environment=DOCKER_OPTS='--registry-mirror=http://172.16.1.101:5000'
+            Environment=DOCKER_OPTS='--registry-mirror=http://$DOCKER_CACHE:5000'
     - name: wait4ectdproxy.service
       command: start
       content: |
@@ -156,6 +156,7 @@ coreos:
         --address=0.0.0.0 \
         --enable_server=true \
         --port=10250 \
+        --read_only_port=10255 \
         --hostname_override=$private_ipv4 \
         --api_servers=$MASTER_IP:8080 \
         --cluster_dns=10.100.0.10 \
@@ -163,6 +164,7 @@ coreos:
         --healthz_bind_address=0.0.0.0 \
         --healthz_port=10254 \
         --cadvisor_port=4194 \
+        --log_cadvisor_usage=true \
         --log_cadvisor_usage=true \
         --logtostderr=true
         Restart=always

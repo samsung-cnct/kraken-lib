@@ -12,6 +12,11 @@ write_files:
   content: |
     #! /usr/bin/bash
     until curl http://127.0.0.1:4001/v2/machines; do sleep 2; done
+- path: /opt/bin/wait4finalnode.sh
+  owner: root
+  content: |
+    #! /usr/bin/bash
+    until curl http://$LAST_NODE_IP:10255/stats/; do sleep 2; done
 - path: /opt/bin/flannelconfig.sh
   owner: root
   content: |
@@ -25,10 +30,7 @@ write_files:
     -O - | tar -xz -C /opt/bin
     /opt/bin/deploy-kube-srv-0.0.7/bin/linux/kubectl \
     --server=http://$MASTER_IP:8080 \
-    create -f /opt/bin/deploy-kube-srv-0.0.7/skydns/skydns-rc.yaml
-    /opt/bin/deploy-kube-srv-0.0.7/bin/linux/kubectl \
-    --server=http://$MASTER_IP:8080 \
-    create -f /opt/bin/deploy-kube-srv-0.0.7/skydns/skydns-svc.yaml
+    create -f /opt/bin/deploy-kube-srv-0.0.7/skydns/
 - path: /opt/bin/guestbook_example.sh
   owner: root
   content: |
@@ -36,24 +38,9 @@ write_files:
     sed -i -- 's,$SERVICE_IP,$SERVICE_PUBLIC_IP,g' /opt/bin/deploy-kube-srv-0.0.7/guestbook/frontend-service.json
     /opt/bin/deploy-kube-srv-0.0.7/bin/linux/kubectl \
     --server=http://$MASTER_IP:8080 \
-    create -f /opt/bin/deploy-kube-srv-0.0.7/guestbook/redis-master.json
+    create -f /opt/bin/deploy-kube-srv-0.0.7/guestbook/
     /opt/bin/deploy-kube-srv-0.0.7/bin/linux/kubectl \
     --server=http://$MASTER_IP:8080 \
-    create -f /opt/bin/deploy-kube-srv-0.0.7/guestbook/redis-master-service.json
-    sleep 30
-    /opt/bin/deploy-kube-srv-0.0.7/bin/linux/kubectl \
-    --server=http://$MASTER_IP:8080 \
-    create -f /opt/bin/deploy-kube-srv-0.0.7/guestbook/redis-slave-controller.json
-    /opt/bin/deploy-kube-srv-0.0.7/bin/linux/kubectl \
-    --server=http://$MASTER_IP:8080 \
-    create -f /opt/bin/deploy-kube-srv-0.0.7/guestbook/redis-slave-service.json
-    sleep 30
-    /opt/bin/deploy-kube-srv-0.0.7/bin/linux/kubectl \
-    --server=http://$MASTER_IP:8080 \
-    create -f /opt/bin/deploy-kube-srv-0.0.7/guestbook/frontend-controller.json
-    /opt/bin/deploy-kube-srv-0.0.7/bin/linux/kubectl \
-    --server=http://$MASTER_IP:8080 \
-    create -f /opt/bin/deploy-kube-srv-0.0.7/guestbook/frontend-service.json
 coreos:
   etcd2:
     proxy: on
@@ -175,7 +162,7 @@ coreos:
         ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/$KUBERNETES_VERSION/bin/linux/amd64/kube-apiserver
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-apiserver
         ExecStart=/opt/bin/kube-apiserver \
-        --insecure_bind_address=$private_ipv4 \
+        --insecure_bind_address=0.0.0.0 \
         --insecure_port=8080 \
         --portal_net=10.100.0.0/16 \
         --etcd_servers=http://127.0.0.1:4001 \
