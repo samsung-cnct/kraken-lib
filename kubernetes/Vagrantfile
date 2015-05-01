@@ -161,7 +161,8 @@ Vagrant.configure(2) do |config|
       '$CLOUD_PROVIDER' => CLOUD_PROVIDER,
       '$DNS_DOMAIN' => DNS_DOMAIN,
       '$SERVICE_PUBLIC_IP' => NODE_01_PRIVATE_IP,
-      '$RUN_EXAMPLES' => EXAMPLE_STATE
+      '$RUN_EXAMPLES' => EXAMPLE_STATE,
+      '$DOCKER_CACHE' => ETCD_IP_ADDRESS
     }
     
     regexp = Regexp.new replacements.keys.map {|k| Regexp.quote(k) }.join('|')
