@@ -70,7 +70,7 @@ required_plugins.each do |plugin|
 end
 
 # Find the lastest stable release of kubernetes
-if KUBERNETES_VERSION == "latest"
+if KUBERNETES_VERSION == "stable"
   txt = "https://storage.googleapis.com/kubernetes-release/release/stable.txt"
   Object.redefine_const(:KUBERNETES_VERSION,
     open(txt).read().gsub('v','').chomp)
