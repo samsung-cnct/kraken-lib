@@ -1,6 +1,22 @@
 #Changelog
 
-###74.1.0
+##80.0.0
+###Features
+* Added metrics collection and graphing
+* Reorganized and collapsed AWS and local code
+* Removed old kubernetes-ui code
+
+###Bug fixes
+* Guard against flanneld start up failures
+
+##76.0.0
+###Features
+* Add environment settings for AWS Keypair
+
+###Bug fixes
+* Fixed bug where docker cache was no longer used
+
+##74.1.0
 ###Features
 * Add kubeconfig builder to Kubernetes clusters that are built locally
 
@@ -41,7 +57,7 @@
 * Fixed docker cert generation
 
 ##0.3.1
-###Features
+###Features1
 * Flannel builds using etcd2.0 native
 
 ##0.3.0

@@ -1,0 +1,30 @@
+# SSH tunneling fun
+# Rename this file to ~/.ssh/config
+# Be sure and change the IdentityFile to the location of 
+# key you are using for each network
+
+# Some basic SSH global niceties
+ForwardAgent yes
+# Keep connection alive for 10 mins even if network blips
+TCPKeepAlive no
+ServerAliveInterval 60
+ServerAliveCountMax 10
+
+# This is the gateway
+Host kube-ssh-proxy
+  Hostname 52.5.55.15
+  IdentityFile ~/.ssh/keys/kubernete-demo.pem
+  StrictHostKeyCHecking no
+  UserKnownHostsFile /dev/null
+  User core
+  HashKnownHosts no
+
+# Kubernetes development cluster on AWS
+Host 10.1.1.*
+  ProxyCommand ssh kube-ssh-proxy -W %h:%p
+  StrictHostKeyCHecking no
+  IdentityFile ~/.ssh/keys/kubernete-demo.pem
+  StrictHostKeyCHecking no
+  UserKnownHostsFile /dev/null
+  User core
+  HashKnownHosts no
