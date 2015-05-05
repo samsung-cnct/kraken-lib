@@ -124,8 +124,8 @@ coreos:
         [Unit]
         Description=Wait for etcd proxy to come up
         requires=etcd2.service
-        After=wait4etcd.service
-        Before=fleet.service
+        After=etcd2.service
+        Before=flannelconfig.service
 
         [Service]
         ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4ectdproxy.sh
@@ -308,7 +308,7 @@ coreos:
         After=kube-skydns.service
 
         [Service]
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/influxdb-grafana-pause.service
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/influxdb-grafana-pause.sh
         ExecStart=/usr/bin/bash /opt/bin/influxdb-grafana-pause.sh
         RemainAfterExit=true
         Type=oneshot
