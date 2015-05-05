@@ -25,18 +25,18 @@ NODE_CPUS = 1
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 NETWORK = '172.16.1.0/24'
-RUN_GUESTBOOK=true
+RUN_GUESTBOOK=false
 CLOUD_PROVIDER = 'vagrant'
 NUM_NODES = 3
 DNS_DOMAIN='kubernetes.local'
-ETCD_YAML = File.join(File.dirname(__FILE__), "../cloud_configs/etcd.yaml")
-MASTER_YAML = File.join(File.dirname(__FILE__), "../cloud_configs/master.yaml")
-NODE_YAML = File.join(File.dirname(__FILE__), "../cloud_configs/node.yaml")
-KUBERNETES_VERSION = '0.15.0'
+ETCD_YAML = File.join(File.dirname(__FILE__), "../../cloud_configs/etcd.yaml")
+MASTER_YAML = File.join(File.dirname(__FILE__), "../../cloud_configs/master.yaml")
+NODE_YAML = File.join(File.dirname(__FILE__), "../../cloud_configs/node.yaml")
+KUBERNETES_VERSION = '0.16.2'
 CHANNEL = 'alpha'
 COREOS_VERSION = 'latest'
 REBOOT_STRATEGY = 'off'
-KUBECONFIG_TMPL = File.join(File.dirname(__FILE__), "../templates/kubeconfig.tmpl")
+KUBECONFIG_TMPL = File.join(File.dirname(__FILE__), "../../templates/kubeconfig.tmpl")
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 # Find the lastest stable release of kubernetes
@@ -53,12 +53,17 @@ BASE_IP_ADDRESS = IPAddr.new(NETWORK).to_s.chomp("0")
 ETCD_IP_ADDRESS=BASE_IP_ADDRESS + "#{1+100}"
 MASTER_IP_ADDRESS=BASE_IP_ADDRESS + "#{2+100}"
 NODE_01_PRIVATE_IP = BASE_IP_ADDRESS + "#{3+100}"
+NODE_PUBLIC_IP = ENV['NODE_PUBLIC_IP'] || NODE_01_PRIVATE_IP
 
+# Should we run the guestbook example
 if RUN_GUESTBOOK
   EXAMPLE_STATE = "start"
 else 
   EXAMPLE_STATE = "stop"
 end
+
+# Find the final node ip address
+FINAL_NODE_IP = BASE_IP_ADDRESS + "#{(NUM_NODES + 2 + 100)}"
 
 # Install all other plugins(gems)
 required_plugins = %w(vagrant-triggers)
@@ -162,7 +167,10 @@ Vagrant.configure(2) do |config|
       '$DNS_DOMAIN' => DNS_DOMAIN,
       '$SERVICE_PUBLIC_IP' => NODE_01_PRIVATE_IP,
       '$RUN_EXAMPLES' => EXAMPLE_STATE,
-      '$DOCKER_CACHE' => ETCD_IP_ADDRESS
+      '$DOCKER_CACHE' => ETCD_IP_ADDRESS,
+      '$NODE_01_PRIVATE_IP' => NODE_01_PRIVATE_IP,
+      '$NODE_01_PUBLIC_IP' => NODE_01_PUBLIC_IP,
+      '$FINAL_NODE' => FINAL_NODE_IP
     }
     
     regexp = Regexp.new replacements.keys.map {|k| Regexp.quote(k) }.join('|')

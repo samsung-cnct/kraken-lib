@@ -7,8 +7,8 @@ require 'tempfile'
 ENV_FILE = ENV['VAGRANT_ENV_FILE'] || File.join(File.dirname(__FILE__), "aws_exports")
 VAGRANT_FILE = File.join(File.dirname(__FILE__), "Vagrantfile")
 KUBECONFIG = File.join(File.dirname(__FILE__), ".kubeconfig")
-KUBECONFIG_TMPL = File.join(File.dirname(__FILE__), "../templates/kubeconfig.tmpl")
-MASTER_IPS = ENV['MASTER_PUBLIC_IP'] || '172.16.1.0/24'
+KUBECONFIG_TMPL = File.join(File.dirname(__FILE__), "../../templates/kubeconfig.tmpl")
+MASTER_IPS = ENV['MASTER_PUBLIC_IP']
 
 # Find the number of nodes to launch and build array of node names
 vms = [ 'etcd', 'master']

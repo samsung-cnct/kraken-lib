@@ -165,7 +165,6 @@ coreos:
         --healthz_port=10254 \
         --cadvisor_port=4194 \
         --log_cadvisor_usage=true \
-        --log_cadvisor_usage=true \
         --logtostderr=true
         Restart=always
         RestartSec=10
