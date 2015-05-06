@@ -69,7 +69,7 @@ while [ "$1" != "" ]; do
 done
 if [ -z "$TMP_LOC" ]; then
     echo ""
-    echo "ERROR Now Cluster Supplied"
+    echo "ERROR No Cluster Supplied"
     echo ""
     usage
     exit 1
