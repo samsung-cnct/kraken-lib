@@ -15,7 +15,11 @@ MASTER_YAML = File.join(File.dirname(__FILE__), "../../cloud_configs/master.yaml
 NODE_YAML = File.join(File.dirname(__FILE__), "../../cloud_configs/node.yaml")
 KUBECONFIG_TMPL = File.join(File.dirname(__FILE__), "../../templates/kubeconfig.tmpl")
 
-config = YAML.load_file(settings_yaml)if File.exist?(settings_yaml)
+if File.exist?(settings_yaml)
+  config = YAML.load_file(settings_yaml)
+else
+  abort("\n\e[1;31;40mERROR: settings.yaml was not found in the local path. Exiting\n\n")
+end
 
 vs = config["vmSettings"]
 ETCD_MEM = vs["etcd"]["memory"] || 512
@@ -93,6 +97,7 @@ coreos_url = "http://#{CHANNEL}.release.core-os.net/amd64-usr/#{COREOS_VERSION}"
 if COREOS_VERSION == "latest"
   coreos_url = "http://#{CHANNEL}.release.core-os.net/amd64-usr/current"
   version_url = "#{coreos_url}/version.txt"
+
   @coreos_version = open(version_url).read().scan(/COREOS_VERSION=.*/)[0].split('=')[1]
 else
   @coreos_version = COREOS_VERSION
