@@ -1,0 +1,29 @@
+---
+id: local                                                   #do not modify
+
+# Virtual machine settings
+vmSettings:                             
+  etcd:
+    memory: 512                                              #default = 512
+    cpus: 1                                                  #default = 1
+  master:
+    memory: 512                                              #default = 512
+    cpus: 1                                                  #default = 1
+  node:
+    memory: 1024                                             #default = 1024
+    cpus: 1                                                  #default = 1
+
+# Kubernetes sysetem settings
+cluster:                     
+  kubernetesVersion: stable                                  #default = stable
+  nodes: 2                                                   #default = 3
+  apiVersion: v1beta3                                        #default = v1beta3
+  network: 172.16.1.0/24                                     #default = 172.16.1.0/24
+  guestbook: 
+    run: false                                               #default = false
+
+# Coreos system settings
+coreos:
+  channel: alpha                                             #default = alpha
+  version: latest                                            #default = latest
+  rebootStrategy: off                                        #default = off
