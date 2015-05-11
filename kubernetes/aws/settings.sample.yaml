@@ -1,0 +1,33 @@
+---
+id: aws
+
+# AWS system settings
+aws:
+  accessKeyId:                                               #required
+  secretAccessKey:                                           #required
+  amiId: latest                                              #default = latest
+  instanceType: m3.medium                                    #default = m3.medium
+  regionId: us-east-1                                        #required
+  securityGroupIds:
+    -                                                        #required
+  subnetId:                                                  #required
+  associatePublicIps: true                                   #default = no
+  masterPublicIp:                                            #required
+  nodePublicIp:                                              #required
+  keyPair:                                                   #required
+  keyPairPath:                                               #required
+
+# Kubernetes sysetem settings
+cluster:                     
+  kubernetesVersion: stable                                  #default = stable
+  nodes: 3                                                   #default = 3
+  apiVersion: v1beta3                                        #default = v1beta3
+  network: 10.1.100.0/24                                     #required
+  guestbook: 
+    run: false                                               #default = false
+
+# Coreos system settings
+coreos:
+  channel: alpha                                             #default = alpha
+  version: latest                                            #default = latest
+  rebootStrategy: off                                        #default = off

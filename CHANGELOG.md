@@ -1,5 +1,15 @@
 #Changelog
 
+##83.0.0
+###Features
+* Added setting.sample.yaml for all configuration settings
+* AWS Coreos AMI is not automatically configured
+* Added kubernetes api version settings
+* Improved AWS flannelconfiguration timing
+
+###Bug
+* .kubconfig is now automatically generated again
+
 ##80.0.0
 ###Features
 * Added metrics collection and graphing
