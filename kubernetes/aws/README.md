@@ -1,22 +1,32 @@
-# Overivew
-* Create a Cloudformation template
-  * Use nested stacks
-    http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-stack.html
-  * Acknowledge IAM capabilities even though IAM’s resources are not used in this template
-    http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-iam-template.html
-  * Create an Amazon VPC network
-  * Create a public address
-  * Bind a DNS to the public address 
-  * Create the kubernetes security group
-  * Create the kubernetes master node stack
-  * Create the kubernetes minion node stack
-  * Bind the public address to the new kubernetes stack for demoing or troubleshooting
-* E2E test
-* Destroy stack if pass
+## Kubenetes cluster on AWS
+
+The default settings create 4 nodes:
+* 1 etcd node
+* 1 Kubernetes API servers and controller
+* 3 Kubernetes minions
+
+### Kubernetes UI
+The Kubernetes UI is available at http://52.24.103.52:8080/static/app (master public ip)
 
 
-vpc: vpc-c9369dac
+## Troubleshooting
 
-subnet_id: subnet-f8c14c9d
-subnet: 10.1.1.0/24
-ami: ami-fe724896
+On the slim chance that things go awry. Here are some troubleshooting tips to hopefully sort you out.
+
+Verify that `fleet` has set up the nodes correctly and can commincate with them (52.24.103.52 being your master node ip).
+```
+FLEETCTL_ENDPOINT=http://52.24.103.52:4001 fleetctl list-machines
+```
+
+Output should look something like this
+```
+MACHINE   IP    METADATA
+1fda4620... 52.24.103.52  role=master
+348c9b7d... 10.1.104.103  role=node
+7b5894d9... 10.1.104.101  role=etcd
+b3e12f9a... 10.1.104.104  role=node
+fb39062d... 10.1.104.105  role=node
+```
+
+If you do not see similar IPs and roles, contact <leetchang@gmail.com> and he'll help you sort it out. Or even better, file an issue [here](https://github.com/Samsung-AG/kraken/issues)
+

@@ -17,29 +17,64 @@ subcommand_option_handling :normal
 arguments :strict
 sort_help :manually
 
-Dir.entries(File.expand_path(File.dirname(__FILE__))).select do |f| 
-  if File.directory?(File.join(File.expand_path(File.dirname(__FILE__)), f)) and !f.start_with?('.')
-    
-    desc "Work with #{f} cluster"
-    arg 'vagrant_command', :multiple
-    long_desc "Send vagrant commands to #{f} cluster. For example:
+# 'v' command
+desc "Vagrant operations on a cluster"
+command :v do |vagrant_command|
+  Dir.entries(File.expand_path(File.dirname(__FILE__))).select do |f| 
+    if File.directory?(File.join(File.expand_path(File.dirname(__FILE__)), f)) and !f.start_with?('.')
+      vagrant_command.desc "Work with #{f} cluster"
+      vagrant_command.arg 'vagrant_args', :multiple
+      vagrant_command.long_desc "Send vagrant commands to #{f} cluster. For example:
 
-    ./kraken #{f} up
+      ./kraken v #{f} up
 
-    ./kraken #{f} destroy
+      ./kraken v #{f} destroy
 
-    ./kraken #{f} ssh master
-    "
-    command f.to_sym do |cluster_command|
-      cluster_command.action do |global_options,options,args|
-        exec "KRAKEN_CLUSTER='#{f}' VAGRANT_DOTFILE_PATH='#{File.join(File.expand_path(File.dirname(__FILE__)), f)}' vagrant #{args.join(' ')}"
+      ./kraken v #{f} ssh master
+      "
+      vagrant_command.command f.to_sym do |vagrant_cluster_command|
+        vagrant_cluster_command.action do |global_options,options,args|
+          cmd_str = "KRAKEN_CLUSTER='#{f}' VAGRANT_DOTFILE_PATH='#{File.join(File.expand_path(File.dirname(__FILE__)), f)}' vagrant #{args.join(' ')}"
+          puts "Running: #{cmd_str}"
+          exec cmd_str
+        end
       end
     end
-  end
+  end 
+end
+
+# 'k' command
+desc "kubectl operations on a cluster"
+command :k do |kube_command|
+  Dir.entries(File.expand_path(File.dirname(__FILE__))).select do |f| 
+    if File.directory?(File.join(File.expand_path(File.dirname(__FILE__)), f)) and !f.start_with?('.')
+      kube_command.desc "Work with #{f} cluster"
+      kube_command.arg 'kube_args', :multiple
+      kube_command.long_desc "Send vagrant commands to #{f} cluster. For example:
+
+      ./kraken k #{f} get minions
+
+      ./kraken k #{f} get services
+      "
+      kube_command.command f.to_sym do |kube_cluster_command|
+        kube_cluster_command.action do |global_options,options,args|
+          cmd_str = "kubectl --kubeconfig='#{File.join(File.expand_path(File.dirname(__FILE__)), f, '.kubeconfig')}' #{args.join(' ')}"
+          puts "Running: #{cmd_str}"
+          exec cmd_str
+        end
+      end
+    end
+  end 
 end
 
 pre do |global,command,options,args|
-  raise 'Please make sure Vagrant is installed' if find_executable('Vagrant').nil?
+  case command
+  when :k
+    raise 'Please make sure kubectl is installed' if find_executable('kubectl').nil?
+    raise 'No such cluster' unless find_executable('kubectl').nil?
+  else
+    raise 'Please make sure Vagrant is installed' if find_executable('Vagrant').nil?
+  end
   true
 end
 
