@@ -3,6 +3,7 @@
 Deploy a __Kubernetes cluster by running `./kraken` commands while in the __kubernetes__ directory.
 
 *  rename [aws settings.sample.yaml](aws/settings.sample.yaml) and [local settings.sample.yaml](local/settings.sample.yaml) to settings.yaml and edit as needed
+*  run 'bundle install'
 *  run ./kraken v <desired cluster type> up
 
 for example:
