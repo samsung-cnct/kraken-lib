@@ -111,18 +111,18 @@ def get_coreos_node_info(host_number)
   when 1
     node_info[:hostname] = 'etcd'
     node_info[:user_data] = File.join(File.dirname(__FILE__), '../cloud_configs/etcd.yaml')
-    node_info[:memory] = settings['vmSettings']['etcd']['memory'] || 512
-    node_info[:cpus] = settings['vmSettings']['etcd']['cpus'] || 1
+    node_info[:memory] = settings['vmSettings']['etcd']['memory'] || 512 unless settings['vmSettings'].nil?
+    node_info[:cpus] = settings['vmSettings']['etcd']['cpus'] || 1 unless settings['vmSettings'].nil?
   when 2
     node_info[:hostname] = 'master'
     node_info[:user_data] = File.join(File.dirname(__FILE__), '../cloud_configs/master.yaml')
-    node_info[:memory] = settings['vmSettings']['master']['memory'] || 512
-    node_info[:cpus] = settings['vmSettings']['master']['cpus'] || 1
+    node_info[:memory] = settings['vmSettings']['master']['memory'] || 512 unless settings['vmSettings'].nil?
+    node_info[:cpus] = settings['vmSettings']['master']['cpus'] || 1 unless settings['vmSettings'].nil?
   else      
     node_info[:hostname] = "node-%02d" % (host_number - 2)
     node_info[:user_data] = File.join(File.dirname(__FILE__), '../cloud_configs/master.yaml')
-    node_info[:memory] = settings['vmSettings']['node']['memory'] || 1024
-    node_info[:cpus] = settings['vmSettings']['node']['cpus'] || 1
+    node_info[:memory] = settings['vmSettings']['node']['memory'] || 1024 unless settings['vmSettings'].nil?
+    node_info[:cpus] = settings['vmSettings']['node']['cpus'] || 1 unless settings['vmSettings'].nil?
   end
 
   node_info
