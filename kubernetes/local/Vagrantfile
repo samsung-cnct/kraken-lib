@@ -1,3 +1,5 @@
+abort "Please run with kraken.sh from #{File.expand_path(File.join('..', 'kraken.sh'), __FILE__)}" unless defined? VAGRANTFILE_API_VERSION
+
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # plugin conflict
