@@ -9,13 +9,16 @@ require 'socket'
 require 'ipaddr'
 require 'yaml'
 
-settings_yaml = File.join(File.dirname(__FILE__), "settings.yaml")
 ETCD_YAML = File.join(File.dirname(__FILE__), "../../cloud_configs/etcd.yaml")
 MASTER_YAML = File.join(File.dirname(__FILE__), "../../cloud_configs/master.yaml")
 NODE_YAML = File.join(File.dirname(__FILE__), "../../cloud_configs/node.yaml")
 KUBECONFIG_TMPL = File.join(File.dirname(__FILE__), "../../templates/kubeconfig.tmpl")
 
-config = YAML.load_file(settings_yaml)
+if File.exist?(settings_yaml)
+  config = YAML.load_file(settings_yaml)
+else
+  abort("\n\e[1;31;40mERROR: settings.yaml was not found in the local path. Exiting\n\n")
+end
 
 aws = config["aws"]
 AWS_ACCESS_KEY = aws["accessKeyId"]

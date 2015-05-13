@@ -1,5 +1,10 @@
 #Changelog
 
+##86.0.0
+###Features
+* Checks for settings.yaml file
+* Docker now runs without TLS
+
 ##83.0.0
 ###Features
 * Added setting.sample.yaml for all configuration settings
