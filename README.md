@@ -19,7 +19,7 @@ Gather bits that you will to need deploy these systems on your machine.
 Download __kraken__ into your working directory 
 
 ```bash
-git clone https://github.com/onemorehill/kraken.git
+git clone git@github.com:Samsung-AG/kraken.git
 cd kraken
 ```
 ## Docker
@@ -28,6 +28,14 @@ For Mac people, use `brew` to install Docker. Get `brew` [here](http://brew.sh/)
 ```bash
 brew update
 brew install docker
+```
+
+## Gems for helper kraken tool
+
+Run bundler install from kraken folder
+
+```bash
+bundle install
 ```
 
 ### kubectl
