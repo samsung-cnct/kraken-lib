@@ -1,0 +1,53 @@
+#!/usr/bin/env ruby
+abort 'This tool requires ruby 2.x.x or above!' unless RUBY_VERSION.split('.')[0].to_i >= 2
+
+require 'gli'
+require 'mkmf'
+
+# Make the MakeMakefile logger write file output to null.
+# Probably requires ruby >= 1.9.3
+module MakeMakefile::Logging
+  @logfile = File::NULL
+end
+
+include GLI::App
+
+# GLI data setup
+program_desc 'Helper tool for interacting with kraken kubernetes cluster'
+version '1.0'
+subcommand_option_handling :normal
+arguments :strict
+sort_help :manually
+
+Dir.entries(File.expand_path(File.dirname(__FILE__))).select do |f| 
+  if File.directory?(File.join(File.expand_path(File.dirname(__FILE__)), f)) and !f.start_with?('.')
+    
+    desc "Work with #{f} cluster"
+    arg 'vagrant_command', :multiple
+    long_desc "Send vagrant commands to #{f} cluster. For example:
+
+    ./kraken #{f} up
+
+    ./kraken #{f} destroy
+
+    ./kraken #{f} ssh master
+    "
+    command f.to_sym do |cluster_command|
+      cluster_command.action do |global_options,options,args|
+        command_str = "KRAKEN_CLUSTER='#{f}' "\
+                      "VAGRANT_DOTFILE_PATH='#{File.join(File.expand_path(File.dirname(__FILE__)), f)}' "\
+                      "VAGRANT_CWD='#{File.join(File.expand_path(File.dirname(__FILE__)))}' "\
+                      "vagrant #{args.join(' ')}"
+        puts "Executing: #{command_str}"
+        exec command_str
+      end
+    end
+  end
+end
+
+pre do |global,command,options,args|
+  raise 'Please make sure Vagrant is installed' if find_executable('Vagrant').nil?
+  true
+end
+
+exit run(ARGV)

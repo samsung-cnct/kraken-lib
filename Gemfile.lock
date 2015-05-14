@@ -1,0 +1,10 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    gli (2.13.1)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  gli (>= 2.13.1)

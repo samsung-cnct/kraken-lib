@@ -1,95 +1,7 @@
-# -*- mode: ruby -*-
-# vi: set ft=ruby :
-
-require 'tempfile'
-require 'fileutils'
-require 'net/http'
-require 'open-uri'
-require 'socket'
-require 'ipaddr'
-require 'yaml'
-
-ETCD_YAML = File.join(File.dirname(__FILE__), "../../cloud_configs/etcd.yaml")
-MASTER_YAML = File.join(File.dirname(__FILE__), "../../cloud_configs/master.yaml")
-NODE_YAML = File.join(File.dirname(__FILE__), "../../cloud_configs/node.yaml")
-KUBECONFIG_TMPL = File.join(File.dirname(__FILE__), "../../templates/kubeconfig.tmpl")
-
-if File.exist?(settings_yaml)
-  config = YAML.load_file(settings_yaml)
-else
-  abort("\n\e[1;31;40mERROR: settings.yaml was not found in the local path. Exiting\n\n")
-end
-
-aws = config["aws"]
-AWS_ACCESS_KEY = aws["accessKeyId"]
-AWS_SECRET_ACCESS = aws["secretAccessKey"]
-AWS_AMI_ID = aws["amiId"]
-AWS_SESSION_TOKEN = ''
-AWS_INSTANCE = aws["instanceType"]
-AWS_REGION = aws["regionId"]
-AWS_SECURITY_GROUPS = aws["securityGroupIds"]
-AWS_SUBNET = aws["subnetId"]
-AWS_ASSOCIATE_PUBLIC_IP = aws["associatePublicIps"]
-AWS_KEYPAIR = aws["keyPair"]
-AWS_KEYPAIR_PATH = aws["keyPairPath"]
-
-cl = config["cluster"]
-NETWORK = cl["network"]
-RUN_GUESTBOOK= cl["guestbook"]["run"]
-CLOUD_PROVIDER = 'vagrant'
-NUM_NODES = cl["nodes"]
-DNS_DOMAIN='kubernetes.local'
-KUBERNETES_VERSION = cl["kubernetesVersion"]
-API_VERSION = cl["apiVersion"]
-
-co = config["coreos"]
-CHANNEL = co["channel"] || 'alpha' 
-COREOS_VERSION = co["version"] || 'latest'
-REBOOT_STRATEGY = co["rebootStrategy"] || 'off'
-
-BASE_IP_ADDRESS = IPAddr.new(NETWORK).to_s.chomp("0")
-ETCD_IP_ADDRESS=BASE_IP_ADDRESS + "#{1+100}"
-MASTER_IP_ADDRESS=BASE_IP_ADDRESS + "#{2+100}"
-NODE_01_PRIVATE_IP = BASE_IP_ADDRESS + "#{3+100}"
-NODE_01_PUBLIC_IP = aws["nodePublicIp"] || NODE_01_PRIVATE_IP
-MASTER_PUBLIC_IP = aws["masterPublicIp"] || MASTER_IP_ADDRESS
-
-# Should we run the guestbook example
-if RUN_GUESTBOOK
-  EXAMPLE_STATE = "start"
-else 
-  EXAMPLE_STATE = "stop"
-end
-
-# Find the final node ip address but don't test beyond 5 nodes
-if NUM_NODES >= 5
-	fixed_num_nodes = 5
-else
-	fixed_num_nodes = NUM_NODES
-end
-FINAL_NODE_IP = BASE_IP_ADDRESS + "#{(fixed_num_nodes + 2 + 100)}"
-
-# Check for needed gems
-required_plugins = %w(vagrant-aws)
-required_plugins.each do |plugin|
-  need_restart = false
-  unless Vagrant.has_plugin? plugin
-    system "vagrant plugin install #{plugin}"
-    need_restart = true
-  end
-  exec "vagrant #{ARGV.join(' ')}" if need_restart
-end
+abort "Please run with kraken.sh from #{File.expand_path(File.join('..', 'kraken.sh'), __FILE__)}" unless defined? VAGRANTFILE_API_VERSION
 
 # Find the latest Coreos based on region
-
-# Find the lastest stable release of kubernetes
-if KUBERNETES_VERSION == "stable"
-  release_url = "https://storage.googleapis.com/kubernetes-release/release/stable.txt"
-  kubernetes_release = open(release_url).read().gsub('v','').chomp
-  puts "\n" * 2 + ("+" * 61 + "\n") * 2 + "++++" + "\s" * 53 + "++++" + "\n"
-  puts "+" * 12 + ">>    Kubernetes Version #{KUBERNETES_VERSION}    <<" + "+" * 12 + "\n"
-  puts "++++" + "\s" * 53 + "++++" + "\n" + ("+" * 61 + "\n") * 2 + "\n" * 2
-end
+aws_ami = cluster_settings['aws']['amiId']
 
 coreos_ami = {
   "ap-northeest-1" => "coreos_production_ami_hvm_ap-northeast-1.txt",
@@ -104,123 +16,59 @@ coreos_ami = {
   "us-west-2" => "coreos_production_ami_hvm_us-west-2.txt" 
 }
 
-coreos_url = "http://#{CHANNEL}.release.core-os.net/amd64-usr/#{COREOS_VERSION}"
-if COREOS_VERSION == "latest"
-  coreos_url = "http://#{CHANNEL}.release.core-os.net/amd64-usr/current"
-  version_url = "#{coreos_url}/version.txt"
-  @coreos_version = open(version_url).read().scan(/COREOS_VERSION=.*/)[0].split('=')[1]
-else
-  @coreos_version = COREOS_VERSION
+if aws_ami == 'latest'
+  aws_ami_url = coreos_ami[cluster_settings['aws']['regionId']]
+  coreos_ami_url = "#{coreos_url}/#{aws_ami_url}"
+  aws_ami = open(coreos_ami_url).read().chomp
 end
 
-if AWS_AMI_ID == 'latest'
-  if config["id"] == 'aws'
-    aws_ami_url = coreos_ami[AWS_REGION]
-    coreos_ami_url = "#{coreos_url}/#{aws_ami_url}"
-    aws_ami = open(coreos_ami_url).read().chomp
-  end
-  AWS_AMI_ID = aws_ami
-end
-
-Vagrant.configure(2) do |config|
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "aws.box"
  	config.vm.synced_folder ".", "/vagrant", disabled: true
 
-  (1..(NUM_NODES.to_i + 2)).each do |i|
+  (1..(get_num_nodes.to_i + 2)).each do |i|
+
+    tmp_user_data = build_coreos_userdata(i)
+    node_info = get_coreos_node_info(i)
   
-    case i
-    when 1
-      hostname = "etcd"
-      user_data = ETCD_YAML
-    when 2
-      hostname = "master"
-      user_data = MASTER_YAML
-    else
-      hostname = "node-%02d" % (i - 2)
-      user_data = NODE_YAML
-    end
-		
-    # Transform yaml files
-    tmp_user_data = "/tmp/#{hostname}-vagrantfile-user-data"
-    replacements = {
-      '$ETCD_IP' => ETCD_IP_ADDRESS,
-      '$MASTER_IP' => MASTER_IP_ADDRESS,
-      '$KUBERNETES_VERSION' => 'v' + kubernetes_release,
-      '$REBOOT_STRATEGY' => REBOOT_STRATEGY,
-      '$CLOUD_PROVIDER' => CLOUD_PROVIDER,
-      '$DNS_DOMAIN' => DNS_DOMAIN,
-      '$SERVICE_PUBLIC_IP' => NODE_01_PRIVATE_IP,
-      '$RUN_EXAMPLES' => EXAMPLE_STATE,
-      '$DOCKER_CACHE' => ETCD_IP_ADDRESS,
-      '$NODE_01_PRIVATE_IP' => NODE_01_PRIVATE_IP,
-      '$NODE_01_PUBLIC_IP' => NODE_01_PUBLIC_IP,
-      '$FINAL_NODE' => FINAL_NODE_IP
-    }
-		
-		regexp = Regexp.new replacements.keys.map {|k| Regexp.quote(k) }.join('|')
-		tmp_file = Tempfile.new("tmp_vagrantfile")
-		
-		begin
-		  File.foreach(user_data, "r") do |line|
-	    	tmp_file.write line.gsub regexp, replacements
-		  end
-		  tmp_file.close
-		  FileUtils.mv(tmp_file.path, tmp_user_data)
-		ensure
-			tmp_file.close
-			tmp_file.unlink
-		end
-    
     config.vm.boot_timeout = 2
-    config.vm.define hostname do |config2|
+    config.vm.define node_info[:hostname] do |config2|
 
 			config2.vm.provider :aws do |aws, override|
 
-		    aws.access_key_id = AWS_ACCESS_KEY
-		    aws.secret_access_key = AWS_SECRET_ACCESS
-		    #aws.session_token = AWS_SESSION_TOKEN
-		    aws.keypair_name = AWS_KEYPAIR
-		    aws.ami = AWS_AMI_ID
-		    aws.instance_type = AWS_INSTANCE
-		    aws.region = AWS_REGION
-		    aws.security_groups = AWS_SECURITY_GROUPS
-		    aws.subnet_id = AWS_SUBNET
-		    aws.private_ip_address = BASE_IP_ADDRESS + "#{i+100}"
-		    aws.associate_public_ip = AWS_ASSOCIATE_PUBLIC_IP
+		    aws.access_key_id = cluster_settings['aws']['accessKeyId']
+		    aws.secret_access_key = cluster_settings['aws']['secretAccessKey']
+		    #aws.session_token = ''
+		    aws.keypair_name = cluster_settings['aws']['keyPair']
+		    aws.ami = aws_ami
+		    aws.instance_type = cluster_settings['aws']['instanceType']
+		    aws.region = cluster_settings['aws']['regionId']
+		    aws.security_groups = cluster_settings['aws']['securityGroupIds']
+		    aws.subnet_id = cluster_settings['aws']['subnetId']
+		    aws.private_ip_address = base_ip_address + "#{i+100}"
+		    aws.associate_public_ip = cluster_settings['aws']['associatePublicIps']
 		    
-		    case hostname
+		    case node_info[:hostname]
 		    when 'master'
-		    	aws.elastic_ip = MASTER_PUBLIC_IP
+		    	aws.elastic_ip = cluster_settings['aws']['masterPublicIp'] || base_ip_address + "#{2+100}"
 		    when 'node-01'
-		    	aws.elastic_ip = NODE_01_PUBLIC_IP
+		    	aws.elastic_ip = cluster_settings['aws']['nodePublicIp'] || base_ip_address + "#{3+100}"
 		    end
 
 		    aws.user_data = File.read(tmp_user_data)
 
 		    aws.tags = {
-		    	'Name' => "kube-" + hostname,
+		    	'Name' => "kube-" + node_info[:hostname],
 		    	'owner' => Socket.gethostname
 		    }
 
 		    override.ssh.username = "core"
-		    override.ssh.private_key_path = AWS_KEYPAIR_PATH
+		    override.ssh.private_key_path = cluster_settings['aws']['keyPairPath']
 		  end
   	end
 
     # Create .kubeconfig file
-    kubeconfig_file = File.new(".kubeconfig", "w")
-    kubeconfig_tmpl = KUBECONFIG_TMPL
-    replacements = {
-      '$MASTER_IP' => MASTER_PUBLIC_IP,
-      '$API_VERSION' => API_VERSION
-    }
-
-    regexp = Regexp.new replacements.keys.map {|k| Regexp.quote(k) }.join('|')
-
-    File.foreach(kubeconfig_tmpl, "r") do |line|
-      kubeconfig_file.write line.gsub regexp, replacements
-    end
-
-    kubeconfig_file.close
+    # .kubeconfig will be place in the current path
+    build_kubeconfig
   end
 end

@@ -1,0 +1,4 @@
+---
+plugins:
+  - name: vagrant-aws
+    version: 0.6.0
