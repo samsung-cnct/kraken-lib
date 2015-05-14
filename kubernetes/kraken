@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+abort 'This tool requires ruby 2.x.x or above!' unless RUBY_VERSION.split('.')[0].to_i >= 2
+
 require 'gli'
 require 'mkmf'
 
