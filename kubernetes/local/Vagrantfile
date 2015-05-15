@@ -60,6 +60,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       # Create .kubeconfig file
       # .kubeconfig will be place in the current path
       build_kubeconfig
+
+      run_tests(config2, node_info[:type])
     end
   end
 end

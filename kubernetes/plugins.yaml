@@ -1,0 +1,6 @@
+---
+plugins:
+  - name: vagrant-serversepec
+    version: 1.5.1
+  - name: vagrant-cucumber-host
+    version: 0.2.2
