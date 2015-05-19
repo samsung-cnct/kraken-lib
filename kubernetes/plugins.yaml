@@ -1,6 +1,8 @@
 ---
 plugins:
-  - name: vagrant-serversepec
-    version: 1.5.1
+  - name: vagrant-serverspec
+    version: 1.0.1
   - name: vagrant-cucumber-host
-    version: 0.2.2
+    version: 0.2.0
+  - name: rspec-wait
+    version: 0.0.5

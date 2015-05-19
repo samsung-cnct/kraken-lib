@@ -50,7 +50,7 @@ def install_plugins_from_file(plugins_yaml)
   required_plugins = YAML.load_file(plugins_yaml)
   required_plugins['plugins'].each do |plugin|
     need_restart = false
-    unless Vagrant.has_plugin? plugin
+    unless Vagrant.has_plugin? plugin['name'], plugin['version']
       system "vagrant plugin install #{plugin['name']} --plugin-version #{plugin['version']}"
       need_restart = true
     end
@@ -201,6 +201,8 @@ def run_tests(config, type)
     spec.pattern = "../spec/*_#{type}_#{ENV['KRAKEN_CLUSTER']}_spec.rb"
   end
 end
+
+install_plugins
 
 begin
   load "#{File.join(File.dirname(__FILE__), ENV['KRAKEN_CLUSTER'], 'Vagrantfile')}"

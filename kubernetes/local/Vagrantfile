@@ -61,7 +61,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       # .kubeconfig will be place in the current path
       build_kubeconfig
 
-      run_tests(config2, node_info[:type])
+      run_tests(config2, node_info[:type]) if ENV['KRAKEN_UNITTEST']
     end
   end
 end
