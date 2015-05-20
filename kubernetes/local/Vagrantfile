@@ -1,4 +1,4 @@
-abort "Please run with kraken.sh from #{File.expand_path(File.join('..', 'kraken.sh'), __FILE__)}" unless defined? VAGRANTFILE_API_VERSION
+abort "Please run with kraken script from #{File.expand_path(File.join(File.expand_path(File.dirname(__FILE__)), '..', 'kraken'))}" unless defined? VAGRANTFILE_API_VERSION
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
