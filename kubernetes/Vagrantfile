@@ -202,6 +202,13 @@ def run_tests(config, type)
   end
 end
 
+def run_integration_tests(config)
+  config.vm.provision :cucumber_host do |cucumber|
+    # TODO: fill in features array using ENV['KRAKEN_CLUSTER']
+    cucumber.features = []
+  end
+end
+
 install_plugins
 
 begin
