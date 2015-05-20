@@ -1,10 +1,44 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    diff-lcs (1.2.5)
     gli (2.13.1)
+    multi_json (1.11.0)
+    net-scp (1.2.1)
+      net-ssh (>= 2.6.5)
+    net-ssh (2.9.2)
+    rspec (3.2.0)
+      rspec-core (~> 3.2.0)
+      rspec-expectations (~> 3.2.0)
+      rspec-mocks (~> 3.2.0)
+    rspec-core (3.2.3)
+      rspec-support (~> 3.2.0)
+    rspec-expectations (3.2.1)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.2.0)
+    rspec-its (1.2.0)
+      rspec-core (>= 3.0.0)
+      rspec-expectations (>= 3.0.0)
+    rspec-mocks (3.2.1)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.2.0)
+    rspec-support (3.2.2)
+    rspec-wait (0.0.5)
+      rspec (>= 2.11, < 3.3)
+    serverspec (2.17.0)
+      multi_json
+      rspec (~> 3.0)
+      rspec-its
+      specinfra (~> 2.32)
+    specinfra (2.32.0)
+      net-scp
+      net-ssh
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   gli (>= 2.13.1)
+  rspec (>= 3.2.0)
+  rspec-wait (>= 0.0.5)
+  serverspec (>= 2.17.0)

@@ -33,13 +33,18 @@ Dir.entries(File.expand_path(File.dirname(__FILE__))).select do |f|
     ./kraken #{f} ssh master
     "
     command f.to_sym do |cluster_command|
+      cluster_command.switch :unittest, :default_value => false
       cluster_command.action do |global_options,options,args|
         command_str = "KRAKEN_CLUSTER='#{f}' "\
                       "VAGRANT_DOTFILE_PATH='#{File.join(File.expand_path(File.dirname(__FILE__)), f)}' "\
-                      "VAGRANT_CWD='#{File.join(File.expand_path(File.dirname(__FILE__)))}' "\
-                      "vagrant #{args.join(' ')}"
-        puts "Executing: #{command_str}"
-        exec command_str
+                      "VAGRANT_CWD='#{File.join(File.expand_path(File.dirname(__FILE__)))}' "
+
+        if options[:unittest]
+          command_str += "KRAKEN_UNITTEST=true"
+        end
+
+        puts "Executing: #{command_str} vagrant #{args.join(' ')}"
+        exec "#{command_str} vagrant #{args.join(' ')}"
       end
     end
   end
