@@ -3,6 +3,7 @@ abort 'This tool requires ruby 2.x.x or above!' unless RUBY_VERSION.split('.')[0
 
 require 'gli'
 require 'mkmf'
+require 'fileutils'
 
 # Make the MakeMakefile logger write file output to null.
 # Probably requires ruby >= 1.9.3
@@ -33,20 +34,42 @@ Dir.entries(File.expand_path(File.dirname(__FILE__))).select do |f|
     ./kraken #{f} ssh master
     "
     command f.to_sym do |cluster_command|
-      cluster_command.switch :unittest, :default_value => false
+      if f == 'local'
+        cluster_command.desc "run unit tests on each VM immediately after it boots up."
+        cluster_command.switch :unittest, :negatable => false, :default_value => false 
+      end
       cluster_command.action do |global_options,options,args|
         command_str = "KRAKEN_CLUSTER='#{f}' "\
                       "VAGRANT_DOTFILE_PATH='#{File.join(File.expand_path(File.dirname(__FILE__)), f)}' "\
-                      "VAGRANT_CWD='#{File.join(File.expand_path(File.dirname(__FILE__)))}' "
+                      "VAGRANT_CWD='#{File.join(File.expand_path(File.dirname(__FILE__)))}'"
 
         if options[:unittest]
-          command_str += "KRAKEN_UNITTEST=true"
+          command_str += " KRAKEN_UNITTEST=true"
         end
 
         puts "Executing: #{command_str} vagrant #{args.join(' ')}"
         exec "#{command_str} vagrant #{args.join(' ')}"
       end
     end
+  end
+end
+
+desc "run integration tests on a cluster"
+arg 'cluster'
+long_desc "Run cucumber tests on a cluster. For example:
+
+./kraken test local
+
+./kraken test aws
+"
+skips_pre
+command :test do |test_command|
+  test_command.action do |global_options,options,args|
+    # copy kube config to a known location#
+    source_config = File.expand_path(File.join(File.dirname(__FILE__), '.', args[0], '.kubeconfig'))
+    raise "#{source_config} not found. Did you create the cluster?" unless File.exist?(source_config)
+    FileUtils.cp(source_config, File.join('/', 'tmp'))
+    exec "cucumber #{File.expand_path(File.join(File.dirname(__FILE__), '..', 'features', "*_#{args[0]}.feature"))}"
   end
 end
 
