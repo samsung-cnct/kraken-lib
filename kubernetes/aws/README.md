@@ -3,7 +3,7 @@
 The default settings create 4 nodes:
 * 1 etcd node
 * 1 Kubernetes API servers and controller
-* 3 Kubernetes minions
+* 3 Kubernetes nodes
 
 ### Kubernetes UI
 The Kubernetes UI is available at http://52.24.103.52:8080/static/app (master public ip)

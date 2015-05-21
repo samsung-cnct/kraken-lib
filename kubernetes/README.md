@@ -24,10 +24,10 @@ kubernetes          component=apiserver,provider=kubernetes   <none>            
 kubernetes-ro       component=apiserver,provider=kubernetes   <none>              10.100.0.1          80
 ```
 
-Check on your minions by running
+Check on your nodes by running
 
 ```bash
-$ kubectl --kubeconfig=./local/.kubeconfig get minions
+$ kubectl --kubeconfig=./local/.kubeconfig get nodes
 NAME                LABELS              STATUS
 172.16.1.103        <none>              Ready
 172.16.1.104        <none>              Ready
