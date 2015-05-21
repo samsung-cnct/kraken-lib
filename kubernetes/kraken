@@ -34,7 +34,10 @@ Dir.entries(File.expand_path(File.dirname(__FILE__))).select do |f|
     ./kraken #{f} ssh master
     "
     command f.to_sym do |cluster_command|
-      cluster_command.switch :unittest, :default_value => false unless f == 'aws'
+      if f == 'local'
+        cluster_command.desc "run unit tests on each VM immediately after it boots up."
+        cluster_command.switch :unittest, :negatable => false, :default_value => false 
+      end
       cluster_command.action do |global_options,options,args|
         command_str = "KRAKEN_CLUSTER='#{f}' "\
                       "VAGRANT_DOTFILE_PATH='#{File.join(File.expand_path(File.dirname(__FILE__)), f)}' "\

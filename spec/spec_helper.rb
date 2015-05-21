@@ -1,4 +1,4 @@
 require "rspec/wait"
 RSpec.configure do |config|
-  config.wait_timeout = 300 # seconds
+  config.wait_timeout = 60 # seconds
 end
