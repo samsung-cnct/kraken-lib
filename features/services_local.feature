@@ -5,51 +5,16 @@ Feature: Make sure we have the correct kubernetes services
   I should be able to run this scenario and see the correct services output
  
   Scenario: Getting services
-    When I run `kubectl --kubeconfig=../../kubernetes/local/.kubeconfig get -o yaml services`
-    Then the output should match:
+    When I run `kubectl --kubeconfig=/tmp/.kubeconfig get services`
+    Then the exit status should be 0
+    And the output should eventually match:
       """
-      apiVersion: v1beta3
-      items:
-      - apiVersion: v1beta3
       .*
-        metadata:
-      .*
-          name: kube-dns
-      .*
-      - apiVersion: v1beta3
-      .*
-        metadata:
-      .*
-          name: kubernetes
-      .*
-      - apiVersion: v1beta3
-      .*
-        metadata:
-      .*
-          name: kubernetes-ro
-      .*
-      - apiVersion: v1beta3
-      .*
-        metadata:
-      .*
-          name: monitoring-grafana
-      .*
-      - apiVersion: v1beta3
-        .*
-        metadata:
-      .*
-          name: monitoring-heapster
-      .*
-      - apiVersion: v1beta3
-        .*
-        metadata:
-      .*
-          name: monitoring-influxdb
-      .*
-      - apiVersion: v1beta3
-        .*
-        metadata:
-      .*
-          name: monitoring-influxdb-ui
-      .*
+      kube-dns.*
+      kubernetes.*
+      kubernetes-ro.*
+      monitoring-grafana.*
+      monitoring-heapster.*
+      monitoring-influxdb.*
+      monitoring-influxdb-ui.* 
       """

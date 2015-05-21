@@ -11,6 +11,7 @@ require 'open-uri'
 require 'ipaddr'
 require 'yaml'
 require 'mkmf'
+require 'fileutils'
 
 VAGRANTFILE_API_VERSION = "2"
 Vagrant.require_version ">= 1.7.2"
@@ -198,14 +199,7 @@ end
 
 def run_tests(config, type)
   config.vm.provision :serverspec do |spec|
-    spec.pattern = "../spec/*_#{type}_#{ENV['KRAKEN_CLUSTER']}_spec.rb"
-  end
-end
-
-def run_integration_tests(config)
-  config.vm.provision :cucumber_host do |cucumber|
-    # TODO: fill in features array using ENV['KRAKEN_CLUSTER']
-    cucumber.features = []
+    spec.pattern = File.expand_path(File.join(File.dirname(__FILE__), '..', 'spec', "*_#{type}_#{ENV['KRAKEN_CLUSTER']}_spec.rb"))
   end
 end
 
