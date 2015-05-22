@@ -61,8 +61,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
   end
 
-  # Create .kubeconfig file
-  # .kubeconfig will be place in the current path
-  build_kubeconfig
+  # Output instructions on how to access the kubernetes cluster from a Mac
+  set_kubeconfig("local")
 
 end

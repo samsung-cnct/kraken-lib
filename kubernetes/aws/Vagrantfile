@@ -69,6 +69,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     # Create .kubeconfig file
     # .kubeconfig will be place in the current path
-    build_kubeconfig
+  set_kubeconfig("aws")
   end
 end
