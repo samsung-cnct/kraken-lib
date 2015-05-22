@@ -65,10 +65,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 		    override.ssh.username = "core"
 		    override.ssh.private_key_path = cluster_settings['aws']['keyPairPath']
 		  end
-  	end
 
-    # Create .kubeconfig file
-    # .kubeconfig will be place in the current path
-  set_kubeconfig("aws")
+      # Output instructions on how to access the kubernetes cluster from a Mac
+      if base_ip_address + "#{i+100}" == final_node_ip
+        config.trigger.after [:up] do
+          set_kubeconfig("aws")
+        end
+      end
+  	end
   end
 end

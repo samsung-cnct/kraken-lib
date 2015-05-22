@@ -27,10 +27,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     config.vm.define vm_name = node_info[:hostname] do |config2|
       config2.vm.hostname = vm_name
-      config2.vm.provider "virtualbox" do |vb|
-        vb.memory = node_info[:memory]
-        vb.cpus = node_info[:cpus]
-      end
 
       if ENV['SERIAL_LOGGING'].to_s.downcase == 'true'
         logdir = File.join(File.dirname(__FILE__), "log")
@@ -57,11 +53,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         EOF
       end
 
+      # Output instructions on how to access the kubernetes cluster from a Mac
+      if base_ip_address + "#{i+100}" == final_node_ip
+        config.trigger.after [:up] do
+          set_kubeconfig("local")
+        end
+      end
+
       run_tests(config2, node_info[:type]) if ENV['KRAKEN_UNITTEST']
     end
   end
-
-  # Output instructions on how to access the kubernetes cluster from a Mac
-  set_kubeconfig("local")
-
 end
