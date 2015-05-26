@@ -178,23 +178,19 @@ def build_coreos_userdata(host_number)
   tmp_user_data
 end
 
-def build_kubeconfig
+def set_kubeconfig(cluster)
+  # Output the kubectl config settings at the end of the vagrant run
+  # kubectl config set-cluster <cluster> --server=http://<master>:8080 --apiVersion=<api_version>
+  # Optional: include instructions on create an alias
+  #   Run the following command to create a shortcut on a Mac
+  #   alias kub<cluster>="kubectl --cluster=local" 
   settings = cluster_settings
-  kubeconfig_file = File.new(File.join(File.expand_path(File.dirname(__FILE__)), ENV['KRAKEN_CLUSTER'], '.kubeconfig'), "w")
-  kubeconfig_tmpl = File.join(File.expand_path(File.dirname(__FILE__)), '../templates/kubeconfig.tmpl')
-
-  replacements = {
-    '$MASTER_IP' => settings['id'] == 'aws' ? settings['aws']['masterPublicIp']: base_ip_address + "#{2+100}",
-    '$API_VERSION' => settings['cluster']['apiVersion'] || 'v1beta3'
-  }
-
-  regexp = Regexp.new replacements.keys.map {|k| Regexp.quote(k) }.join('|')
-
-  File.foreach(kubeconfig_tmpl, "r") do |line|
-    kubeconfig_file.write line.gsub regexp, replacements
-  end
-
-  kubeconfig_file.close 
+  master = settings['id'] == 'aws' ? settings['aws']['masterPublicIp']: base_ip_address + "#{2+100}"
+  api_version = settings['cluster']['apiVersion']
+  puts "\n\033[34mYou can now access the Kubernetes cluster by creating a new cluster in your kubeconfig by running:\033[0m"
+  puts "\033[34mkubectl config set-cluster #{cluster} --server=http://#{master}:8080 --apiVersion=#{api_version}\033[0m"
+  puts "\n\033[34mTalk to the kubernetes cluster by running:\033[0m"
+  puts "\033[34mkubectl --cluster=#{cluster} [commands]\033[0m\n\n"
 end
 
 def run_tests(config, type)
