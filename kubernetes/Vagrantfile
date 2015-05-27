@@ -188,7 +188,7 @@ def set_kubeconfig(cluster)
   master = settings['id'] == 'aws' ? settings['aws']['masterPublicIp']: base_ip_address + "#{2+100}"
   api_version = settings['cluster']['apiVersion']
   puts "\n\033[34mYou can now access the Kubernetes cluster by creating a new cluster in your kubeconfig by running:\033[0m"
-  puts "\033[34mkubectl config set-cluster #{cluster} --server=http://#{master}:8080 --apiVersion=#{api_version}\033[0m"
+  puts "\033[34mkubectl config set-cluster #{cluster} --server=http://#{master}:8080 --api-version=#{api_version}\033[0m"
   puts "\n\033[34mTalk to the kubernetes cluster by running:\033[0m"
   puts "\033[34mkubectl --cluster=#{cluster} [commands]\033[0m\n\n"
 end
