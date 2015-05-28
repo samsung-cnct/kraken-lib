@@ -1,7 +1,7 @@
 abort "Please run with kraken script from #{File.expand_path(File.join(File.expand_path(File.dirname(__FILE__)), '..', 'kraken'))}" unless defined? VAGRANTFILE_API_VERSION
 
 # Find the latest Coreos based on region
-aws_ami = cluster_settings['aws']['amiId']
+aws_settings = cluster_settings['aws']
 
 coreos_ami = {
   "ap-northeest-1" => "coreos_production_ami_hvm_ap-northeast-1.txt",
@@ -16,10 +16,10 @@ coreos_ami = {
   "us-west-2" => "coreos_production_ami_hvm_us-west-2.txt" 
 }
 
-if aws_ami == 'latest'
-  aws_ami_url = coreos_ami[cluster_settings['aws']['regionId']]
+if aws_settings['amiId'] == 'latest'
+  aws_ami_url = coreos_ami[aws_settings['regionId']]
   coreos_ami_url = "#{coreos_url}/#{aws_ami_url}"
-  aws_ami = open(coreos_ami_url).read().chomp
+  aws_settings['amiId'] = open(coreos_ami_url).read().chomp
 end
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
@@ -36,23 +36,33 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 			config2.vm.provider :aws do |aws, override|
 
-		    aws.access_key_id = cluster_settings['aws']['accessKeyId']
-		    aws.secret_access_key = cluster_settings['aws']['secretAccessKey']
+		    aws.access_key_id = aws_settings['accessKeyId']
+		    aws.secret_access_key = aws_settings['secretAccessKey']
 		    #aws.session_token = ''
-		    aws.keypair_name = cluster_settings['aws']['keyPair']
-		    aws.ami = aws_ami
-		    aws.instance_type = cluster_settings['aws']['instanceType']
-		    aws.region = cluster_settings['aws']['regionId']
-		    aws.security_groups = cluster_settings['aws']['securityGroupIds']
-		    aws.subnet_id = cluster_settings['aws']['subnetId']
+		    aws.keypair_name = aws_settings['keyPair']
+		    aws.ami = aws_settings['amiId']
+		    aws.instance_type = aws_settings['instanceType']
+		    aws.region = aws_settings['regionId']
+		    aws.security_groups = aws_settings['securityGroupIds']
+		    aws.subnet_id = aws_settings['subnetId']
 		    aws.private_ip_address = base_ip_address + "#{i+100}"
-		    aws.associate_public_ip = cluster_settings['aws']['associatePublicIps']
+		    aws.associate_public_ip = aws_settings['associatePublicIps']
 		    
 		    case node_info[:hostname]
 		    when 'master'
-		    	aws.elastic_ip = cluster_settings['aws']['masterPublicIp'] || base_ip_address + "#{2+100}"
+          if aws_settings['masterHostName']
+  		    	override.route53.hosted_zone_id = aws_settings['hostedZoneId'] 
+            override.route53.record_set = [dot_record_set(aws_settings['masterHostName']), "A"]
+          elsif aws_settings['masterPublicIp']
+            aws.elastic_ip = aws_settings['masterPublicIp']
+          end
 		    when 'node-01'
-		    	aws.elastic_ip = cluster_settings['aws']['nodePublicIp'] || base_ip_address + "#{3+100}"
+          if aws_settings['proxyHostName']
+            override.route53.hosted_zone_id = aws_settings['hostedZoneId']
+            override.route53.record_set = [dot_record_set(aws_settings['proxyHostName']), "A"]
+          elsif cluster_settings aws_settings['proxyPublicIp']
+  		    	aws.elastic_ip = aws_settings['nodePublicIp'] || base_ip_address + "#{3+100}"
+          end
 		    end
 
 		    aws.user_data = File.read(tmp_user_data)
@@ -63,7 +73,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 		    }
 
 		    override.ssh.username = "core"
-		    override.ssh.private_key_path = cluster_settings['aws']['keyPairPath']
+		    override.ssh.private_key_path = aws_settings['keyPairPath']
 		  end
 
       # Output instructions on how to access the kubernetes cluster from a Mac

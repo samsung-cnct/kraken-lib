@@ -7,13 +7,13 @@ aws:
   secretAccessKey:                                           #required
   amiId: latest                                              #default = latest
   instanceType: m3.medium                                    #default = m3.medium
-  regionId: us-east-1                                        #required
+  regionId: us-west-2                                        #required
   securityGroupIds:
     -                                                        #required
   subnetId:                                                  #required
   associatePublicIps: true                                   #default = no
-  masterPublicIp:                                            #required
-  nodePublicIp:                                              #required
+  masterHostName:                                            #required
+  proxyHostName:                                             #required
   keyPair:                                                   #required
   keyPairPath:                                               #required
 
