@@ -4,6 +4,8 @@ abort 'This tool requires ruby 2.x.x or above!' unless RUBY_VERSION.split('.')[0
 require 'gli'
 require 'mkmf'
 require 'fileutils'
+require 'yaml'
+require 'ipaddr'
 
 # Make the MakeMakefile logger write file output to null.
 # Probably requires ruby >= 1.9.3
@@ -65,11 +67,25 @@ long_desc "Run cucumber tests on a cluster. For example:
 skips_pre
 command :test do |test_command|
   test_command.action do |global_options,options,args|
-    # copy kube config to a known location#
-    source_config = File.expand_path(File.join(File.dirname(__FILE__), '.', args[0], '.kubeconfig'))
-    raise "#{source_config} not found. Did you create the cluster?" unless File.exist?(source_config)
-    FileUtils.cp(source_config, File.join('/', 'tmp'))
-    exec "cucumber #{File.expand_path(File.join(File.dirname(__FILE__), '..', 'features', "*_#{args[0]}.feature"))}"
+    raise 'Please make sure kubectl is installed' if find_executable('kubectl').nil?
+    settings_yaml = File.expand_path(File.join(File.dirname(__FILE__), '.', args[0], 'settings.yaml'))
+    raise "#{settings_yaml} not found. You need to create it!" unless File.exist?(settings_yaml)
+    
+    settings = YAML.load_file(settings_yaml)
+    
+    command_str = "kubectl config set-cluster #{args[0]} --server=http://"
+    if args[0] == 'aws'
+      command_str += "#{settings['aws']['masterPublicIp']}:8080 "
+    else
+      network = settings['cluster']['network'] || '172.16.1.0/24'
+      ip = IPAddr.new(network).to_s.chomp("0") + "#{2+100}"
+      command_str += "#{ip}:8080 "
+    end
+
+    command_str += "--api-version=#{settings['cluster']['apiVersion']}"
+    puts 'Creating kubeconfig file and running tests'
+    exec command_str + '; ' + "cucumber #{File.expand_path(File.join(File.dirname(__FILE__), '..', 'features', "*_#{args[0]}.feature"))}"
+
   end
 end
 
