@@ -74,7 +74,7 @@ command :test do |test_command|
 end
 
 pre do |global,command,options,args|
-  raise 'Please make sure Vagrant is installed' if find_executable('Vagrant').nil?
+  raise 'Please make sure Vagrant is installed' if find_executable('vagrant').nil?
   true
 end
 
