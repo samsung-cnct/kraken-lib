@@ -9,7 +9,7 @@ aws:
   instanceType: m3.medium                                    #default = m3.medium
   regionId: us-west-2                                        #required
   securityGroupIds:
-    -                                                        #required
+    -                                                        #required, include '-' to denote an array
   subnetId:                                                  #required
   associatePublicIps: true                                   #default = no
   masterHostName:                                            #required
