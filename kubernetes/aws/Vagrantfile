@@ -65,7 +65,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 		    override.ssh.username = 'core'
 		    override.ssh.private_key_path = cluster_settings['aws']['keyPairPath']
         override.ssh.insert_key = false
-        override.ssh.password = 'this_is_sparta!!!'
 		  end
 
       # Output instructions on how to access the kubernetes cluster from a Mac
