@@ -62,6 +62,7 @@ coreos:
   etcd2:
     proxy: on
     listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
+    advertise-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
     initial-cluster: etcd=http://$ETCD_IP:2380
   fleet:
     etcd-servers: http://$private_ipv4:4001
