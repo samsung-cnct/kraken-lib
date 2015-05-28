@@ -17,7 +17,7 @@ VAGRANTFILE_API_VERSION = "2"
 Vagrant.require_version ">= 1.7.2"
  
 # Make the MakeMakefile logger write file output to null.
-# Probably requires ruby >= 1.9.3
+# Probably requires ruby >= 2.0.0
 module MakeMakefile::Logging
   @logfile = File::NULL
 end
