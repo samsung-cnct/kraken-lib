@@ -8,8 +8,6 @@ write_files:
     #! /usr/bin/bash
     until curl http://127.0.0.1:4001/v2/machines; do sleep 2; done
 coreos:
-  ssh_authorized_keys:
-      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC+ORTPzSHSlzoGd7tJzNc5XdVAu6sv1lxe5830OqO+Y2FkUZQrzjov5azCTKHxVTC+UZsyYPRjk/qTHwMiFVdS2Na3pCTCfGJEJf+4A9khKRjWRFQ0vu8Qyk7baQ5UlZCbwkg0lSIl++NQudZoFFis/T6Lujg3p7+9SIoEJQXFi07WkRaDcHWmsufS6Rd/CCeIGPI8/JW8CtdKs/8kCxnW6ipzl3nK8RohbOYYAtzfEkTY/AxaHHAd9dcclp8ffQSMvLj0SxANMBB5vIIeM+XtFwnkUz7u6IfWv6SqgeSLIMO+iQ1pdf5Rl+cHc28fY2rXfw/AQHaSY5nvZrg11RnqAJj69mjVLty1wwotqnNkQEVsXlYh64YzPbcMk+NGagoICDbm+vzuDht8Xn9skTHjRece6dOf0/QGHoMGK9ttLh+bOZJTK+bXBFP8e4jjxzkQvgTCHKbJXXPt1WOeeKVGnHvFchvH6TIkqQwrTaNaPpmPhM6uqear6cKBJhxY/Laq5tQX6DB2ypQDvFS0z4PFOJTTPJ9dyvMRa2wNzjPk9EFC9+huex0rP9u2j/8a4DJOqH9pvI3Ciu0Cexk3kOJaess64kUft8ULzIPpunKyM1D4KhfbvxwwiPx4aMqxwNwLFX8CEG4Lsx1YMqkJAqb42+MNXnU0gb/xJRAZP6rrUQ== maratoid+samsungjenkins@gmail.com
   etcd2:
     name: etcd
     listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001

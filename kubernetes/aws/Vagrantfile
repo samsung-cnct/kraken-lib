@@ -62,7 +62,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 		    	'owner' => Socket.gethostname
 		    }
 
-		    override.ssh.username = 'core'
+		    override.ssh.username = "core"
 		    override.ssh.private_key_path = cluster_settings['aws']['keyPairPath']
         override.ssh.insert_key = false
 		  end
