@@ -60,7 +60,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           if aws_settings['proxyHostName']
             override.route53.hosted_zone_id = aws_settings['hostedZoneId']
             override.route53.record_set = [dot_record_set(aws_settings['proxyHostName']), "A"]
-          elsif cluster_settings aws_settings['proxyPublicIp']
+          elsif aws_settings['nodePublicIp']
   		    	aws.elastic_ip = aws_settings['nodePublicIp'] || base_ip_address + "#{3+100}"
           end
 		    end
