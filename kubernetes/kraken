@@ -72,10 +72,10 @@ command :test do |test_command|
     raise "#{settings_yaml} not found. You need to create it!" unless File.exist?(settings_yaml)
     
     settings = YAML.load_file(settings_yaml)
-    
     command_str = "kubectl config set-cluster #{args[0]} --server=http://"
     if args[0] == 'aws'
-      command_str += "#{settings['aws']['masterPublicIp']}:8080 "
+      aws_master = settings['aws']['masterHostName'] || settings['aws']['masterPublicIp']
+      command_str += "#{aws_master}:8080 "
     else
       network = settings['cluster']['network'] || '172.16.1.0/24'
       ip = IPAddr.new(network).to_s.chomp("0") + "#{2+100}"
