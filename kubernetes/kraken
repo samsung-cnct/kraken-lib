@@ -75,7 +75,7 @@ command :test do |test_command|
     
     command_str = "kubectl config set-cluster #{args[0]} --server=http://"
     if args[0] == 'aws'
-      command_str += "#{settings['aws']['masterHostName']}:8080 "
+      command_str += "#{aws_master}:8080 "
     else
       network = settings['cluster']['network'] || '172.16.1.0/24'
       ip = IPAddr.new(network).to_s.chomp("0") + "#{2+100}"

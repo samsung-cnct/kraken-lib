@@ -66,6 +66,11 @@ def base_ip_address
     IPAddr.new(network).to_s.chomp("0")
 end
 
+def aws_master
+  master = cluster_settings['aws']['masterHostName'] || cluster_settings['aws']['masterPublicIp']
+  master
+end
+
 def kubernetes_release
   settings = cluster_settings
   version = settings['cluster']['kubernetesVersion'] || 'stable'
@@ -196,7 +201,8 @@ def set_kubeconfig(cluster)
   #   Run the following command to create a shortcut on a Mac
   #   alias kub<cluster>="kubectl --cluster=local" 
   settings = cluster_settings
-  master = settings['id'] == 'aws' ? settings['aws']['masterHostName']: base_ip_address + "#{2+100}"
+
+  master = settings['id'] == 'aws' ? aws_master : base_ip_address + "#{2+100}"
   api_version = settings['cluster']['apiVersion']
   puts "\n\033[34mYou can now access the Kubernetes cluster by creating a new cluster in your kubeconfig by running:\033[0m"
   puts "\033[34mkubectl config set-cluster #{cluster} --server=http://#{master}:8080 --api-version=#{api_version}\033[0m"
