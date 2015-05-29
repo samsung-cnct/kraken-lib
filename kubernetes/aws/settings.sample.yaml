@@ -12,8 +12,8 @@ aws:
     -                                                        #required, include '-' to denote an array
   subnetId:                                                  #required
   associatePublicIps: true                                   #default = no
-  masterHostName:                                            #required
-  proxyHostName:                                             #required
+  masterHostName:                                            #optional example master.domain.com
+  proxyHostName:                                             #optional example proxy.domain.com
   keyPair:                                                   #required
   keyPairPath:                                               #required
 
