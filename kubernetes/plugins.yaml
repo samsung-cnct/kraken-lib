@@ -4,3 +4,5 @@ plugins:
     version: 1.0.1
   - name: rspec-wait
     version: 0.0.5
+  - name: highline
+    version: 1.7.2 
