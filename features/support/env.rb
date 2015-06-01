@@ -5,19 +5,34 @@ Before do
 end
 
 module AsyncSupport
-  def eventual_output
-    timeout = 300
-    polling_interval = 1
+  def timeout
+    300
+  end
+
+  def polling_interval
+    1
+  end
+
+  def eventual_success
     time_limit = Time.now + timeout
     begin 
       yield
     rescue Exception => error
-      puts "Retrying #{@commands[-1]} after #{polling_interval} seconds..."
       raise error if Time.now >= time_limit
-      sleep polling_interval 
-      run_simple(@commands[-1])
+      retry_last_command(time_limit)     
       retry
     end    
+  end
+
+  def retry_last_command(time_limit)
+    begin
+      puts "Retrying #{@commands[-1]} after #{polling_interval} seconds..."
+      sleep polling_interval
+      run_simple(@commands[-1])
+    rescue Exception => error
+      raise error if Time.now >= time_limit
+      retry
+    end
   end
 end
 World(AsyncSupport)

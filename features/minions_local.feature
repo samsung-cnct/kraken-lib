@@ -2,11 +2,11 @@
 Feature: Make sure we have the correct number of kubernetes nodes
   In order to verify that cluster came up correctly
   As kraken developer 
-  I should be able to run this scenario and see the correct nodes output
- 
+  I should be able to run these scenario and see the correct exit code and nodes output
+
   Scenario: Getting nodes
     When I run `kubectl --cluster=local get nodes`
-    Then the exit status should be 0
+    Then the exit status should eventually be 0
     And the output should eventually match:
       """
       .*
