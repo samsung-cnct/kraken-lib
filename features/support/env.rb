@@ -5,9 +5,15 @@ Before do
 end
 
 module AsyncSupport
-  def eventual_output
-    timeout = 300
-    polling_interval = 1
+  def timeout
+    300
+  end
+
+  def polling_interval
+    1
+  end
+
+  def eventual_success
     time_limit = Time.now + timeout
     begin 
       yield
