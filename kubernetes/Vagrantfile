@@ -15,39 +15,47 @@ require 'fileutils'
 
 VAGRANTFILE_API_VERSION = "2"
 Vagrant.require_version ">= 1.7.2"
- 
+
 # Make the MakeMakefile logger write file output to null.
 # Probably requires ruby >= 2.0.0
 module MakeMakefile::Logging
   @logfile = File::NULL
 end
 
-# do some checks on required ENV vars
-abort 'KRAKEN_CLUSTER must be defined!' unless ENV['KRAKEN_CLUSTER']
-abort "#{ENV['KRAKEN_CLUSTER']} - no such cluster" unless File.directory?(File.join(File.expand_path(File.dirname(__FILE__)), ENV['KRAKEN_CLUSTER']))
+CLOUDCONFIG_PATH = File.join(__dir__, '..', 'cloud_configs')
+SPEC_PATH = File.join(__dir__, '..', 'spec')
+CLUSTERS_PATH = ENV.fetch('KRAKEN_CLUSTERS_PATH', File.join(__dir__, 'clusters'))
+
+# fail fast on unspecified or invalid cluster
+abort 'KRAKEN_CLUSTER must be defined!' unless ENV.has_key?('KRAKEN_CLUSTER')
+CLUSTER_NAME = ENV['KRAKEN_CLUSTER']
+CLUSTER_PATH = File.join(CLUSTERS_PATH, CLUSTER_NAME)
+abort "#{CLUSTER_NAME} - no such cluster" unless File.directory?(CLUSTER_PATH)
+
+# fail fast if cluster vagrant commands aren't being run through kraken.sh
 abort 'VAGRANT_DOTFILE_PATH is not set to the right location.
-Make sure to run vagrant commands through kraken.sh' unless ENV['VAGRANT_DOTFILE_PATH'] == File.join(File.expand_path(File.dirname(__FILE__)), ENV['KRAKEN_CLUSTER'])
+Make sure to run vagrant commands through kraken.sh' unless ENV['VAGRANT_DOTFILE_PATH'] == CLUSTER_PATH
 
 # all of the externalized settings get loaded here
 def cluster_settings
-    settings_yaml = File.join(File.expand_path(File.dirname(__FILE__)), ENV['KRAKEN_CLUSTER'], 'settings.yaml')
-    abort "#{settings_yaml} is not present. Did you create it?" unless File.exist?(settings_yaml)
-    YAML.load_file(settings_yaml)
+  settings_yaml = File.join(CLUSTER_PATH, 'settings.yaml')
+  abort "#{settings_yaml} is not present. Did you create it?" unless File.exist?(settings_yaml)
+  YAML.load_file(settings_yaml)
 end
 
 def install_plugins
   # for this cluster
-  plugins_yaml = File.join(File.expand_path(File.dirname(__FILE__)), ENV['KRAKEN_CLUSTER'], 'plugins.yaml')
+  plugins_yaml = File.join(CLUSTER_PATH, 'plugins.yaml')
   install_plugins_from_file(plugins_yaml)
 
   # plugins required for all clusters
-  plugins_yaml = File.join(File.expand_path(File.dirname(__FILE__)), 'plugins.yaml')
-  install_plugins_from_file(plugins_yaml)  
+  plugins_yaml = File.join(__dir__, 'plugins.yaml')
+  install_plugins_from_file(plugins_yaml)
 end
 
 def install_plugins_from_file(plugins_yaml)
   abort "#{plugins_yaml} does not exist" unless File.exist?(plugins_yaml)
-  
+
   required_plugins = YAML.load_file(plugins_yaml)
   required_plugins['plugins'].each do |plugin|
     need_restart = false
@@ -75,7 +83,7 @@ def kubernetes_release
   settings = cluster_settings
   version = settings['cluster']['kubernetesVersion'] || 'stable'
   release_url = "https://storage.googleapis.com/kubernetes-release/release/stable.txt"
-  
+
   open(release_url).read().gsub('v','').chomp
 end
 
@@ -95,7 +103,7 @@ def coreos_release
   settings = cluster_settings
   version = settings['coreos']['version'] || 'latest'
   return version unless version == 'latest'
-  
+
   version_url = "#{coreos_url}/version.txt"
   open(version_url).read().scan(/COREOS_VERSION=.*/)[0].split('=')[1]
 end
@@ -107,7 +115,7 @@ def example_state
   run_examples ? 'start' : 'stop'
 end
 
-def final_node_ip 
+def final_node_ip
   settings = cluster_settings
   number_of_nodes = settings['cluster']['nodes'] || 2
   base_ip_address + "#{(number_of_nodes + 2 + 100)}"
@@ -126,19 +134,19 @@ def get_coreos_node_info(host_number)
   when 1
     node_info[:hostname] = 'etcd'
     node_info[:type] = 'etcd'
-    node_info[:user_data] = File.join(File.expand_path(File.dirname(__FILE__)), '../cloud_configs/etcd.yaml')
+    node_info[:user_data] = File.join(CLOUDCONFIG_PATH, 'etcd.yaml')
     node_info[:memory] = settings['vmSettings']['etcd']['memory'] || 512 unless settings['vmSettings'].nil?
     node_info[:cpus] = settings['vmSettings']['etcd']['cpus'] || 1 unless settings['vmSettings'].nil?
   when 2
     node_info[:hostname] = 'master'
     node_info[:type] = 'master'
-    node_info[:user_data] = File.join(File.expand_path(File.dirname(__FILE__)), '../cloud_configs/master.yaml')
+    node_info[:user_data] = File.join(CLOUDCONFIG_PATH, 'master.yaml')
     node_info[:memory] = settings['vmSettings']['master']['memory'] || 512 unless settings['vmSettings'].nil?
     node_info[:cpus] = settings['vmSettings']['master']['cpus'] || 1 unless settings['vmSettings'].nil?
-  else      
+  else
     node_info[:hostname] = "node-%02d" % (host_number - 2)
     node_info[:type] = 'node'
-    node_info[:user_data] = File.join(File.expand_path(File.dirname(__FILE__)), '../cloud_configs/node.yaml')
+    node_info[:user_data] = File.join(CLOUDCONFIG_PATH, 'node.yaml')
     node_info[:memory] = settings['vmSettings']['node']['memory'] || 1024 unless settings['vmSettings'].nil?
     node_info[:cpus] = settings['vmSettings']['node']['cpus'] || 1 unless settings['vmSettings'].nil?
   end
@@ -199,7 +207,7 @@ def set_kubeconfig(cluster)
   # kubectl config set-cluster <cluster> --server=http://<master>:8080 --apiVersion=<api_version>
   # Optional: include instructions on create an alias
   #   Run the following command to create a shortcut on a Mac
-  #   alias kub<cluster>="kubectl --cluster=local" 
+  #   alias kub<cluster>="kubectl --cluster=local"
   settings = cluster_settings
 
   master = settings['id'] == 'aws' ? aws_master : base_ip_address + "#{2+100}"
@@ -212,14 +220,15 @@ end
 
 def run_tests(config, type)
   config.vm.provision :serverspec do |spec|
-    spec.pattern = File.expand_path(File.join(File.dirname(__FILE__), '..', 'spec', "*_#{type}_#{ENV['KRAKEN_CLUSTER']}_spec.rb"))
+    spec.pattern = File.join(SPEC_PATH, "*_#{type}_#{CLUSTER_NAME}_spec.rb")
   end
 end
 
 install_plugins
 
 begin
-  load "#{File.join(File.expand_path(File.dirname(__FILE__)), ENV['KRAKEN_CLUSTER'], 'Vagrantfile')}"
+  cluster_vagrantfile = File.join(CLUSTER_PATH, 'Vagrantfile')
+  load cluster_vagrantfile
 rescue LoadError
-  abort "Could not load #{File.join(File.expand_path(File.dirname(__FILE__)), ENV['KRAKEN_CLUSTER'], 'Vagrantfile')}"
+  abort "Could not load #{cluster_vagrantfile}"
 end
