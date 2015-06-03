@@ -3,26 +3,27 @@ id: aws
 
 # AWS system settings
 aws:
-  accessKeyId:                                               #required
-  secretAccessKey:                                           #required
+  accessKeyId:                                               #required, eq: same as AWS_ACCESS_KEY_ID
+  secretAccessKey:                                           #required, eq: same as AWS_SECRET_ACCESS_KEY
   amiId: latest                                              #default = latest
   instanceType: m3.medium                                    #default = m3.medium
   regionId: us-west-2                                        #required
   securityGroupIds:
-    -                                                        #required, include '-' to denote an array
-  subnetId:                                                  #required
+    -                                                        #required, eg: - sg-1234
+  subnetId:                                                  #required, eg: subnet-1234
   associatePublicIps: true                                   #default = no
-  masterHostName:                                            #optional example master.domain.com
-  proxyHostName:                                             #optional example proxy.domain.com
-  keyPair:                                                   #required
-  keyPairPath:                                               #required
+  hostedZoneId:                                              #optional (required if using *HostName fields), eg: Z1234
+  masterHostName:                                            #optional, eg: name-master.kubeme.io
+  proxyHostName:                                             #optional, eg: name-proxy.kubeme.io
+  keyPair:                                                   #required, eg: 'key'
+  keyPairPath:                                               #required, eg: ~/.ssh/keys/key.pem
 
 # Kubernetes sysetem settings
 cluster:                     
   kubernetesVersion: stable                                  #default = stable
   nodes: 3                                                   #default = 3
   apiVersion: v1beta3                                        #default = v1beta3
-  network: 10.1.100.0/24                                     #required
+  network:                                                   #required, CIDR of aws.subnetId
   guestbook: 
     run: false                                               #default = false
 
