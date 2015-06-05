@@ -87,7 +87,7 @@ command :test do |test_command|
 
     command_str += "--api-version=#{settings['cluster']['apiVersion']}"
     puts 'Creating kubeconfig file and running tests'
-    exec command_str + '; ' + "cucumber #{File.expand_path(File.join(File.dirname(__FILE__), '..', 'features', "*_#{args[0]}.feature"))}"
+    exec command_str + '; ' + "cucumber #{File.join(__dir__, '..', 'features', "*_#{args[0]}.feature")}"
 
   end
 end
