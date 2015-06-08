@@ -53,7 +53,7 @@ CLUSTERS.each do |cluster, cluster_path|
         command_str += " KRAKEN_UNITTEST=true"
       end
 
-      puts "Executing: #{command_str} vagrant #{args.join(' ')}"
+      puts "# executing: #{command_str} vagrant #{args.join(' ')}"
       exec "#{command_str} vagrant #{args.join(' ')}"
     end
   end
@@ -70,7 +70,6 @@ long_desc "Run cucumber tests on a cluster. For example:
 skips_pre
 command :test do |test_command|
   test_command.action do |global_options,options,args|
-    raise 'Please make sure kubectl is installed' if find_executable('kubectl').nil?
     settings_yaml = File.join(CLUSTERS_PATH, args[0], 'settings.yaml')
     raise "#{settings_yaml} not found. You need to create it!" unless File.exist?(settings_yaml)
 
@@ -93,7 +92,9 @@ command :test do |test_command|
 end
 
 pre do |global,command,options,args|
-  raise 'Please make sure Vagrant is installed' if find_executable('vagrant').nil?
+  %w(vagrant kubectl).each do |tool|
+    raise "ERROR: required tool '#{tool}' not found or not executable" unless system("test -x \"$(which #{tool})\"")
+  end
   true
 end
 
