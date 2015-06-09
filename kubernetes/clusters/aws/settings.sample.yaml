@@ -13,6 +13,7 @@ aws:
   subnetId:                                                  #required, eg: subnet-1234
   associatePublicIps: true                                   #default = no
   hostedZoneId:                                              #optional (required if using *HostName fields), eg: Z1234
+  #instanceNamePrefix:                                       #default = kube, will set ec2 Name tag to eg: prefix-master
   masterHostName:                                            #optional, eg: name-master.kubeme.io
   proxyHostName:                                             #optional, eg: name-proxy.kubeme.io
   keyPair:                                                   #required, eg: 'key'
