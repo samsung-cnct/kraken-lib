@@ -65,6 +65,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           end
 		    end
 
+        # join to ELB if, specified
+        if node_info[:hostname].start_with?('node-')
+          aws.elb = aws_settings['elb'] unless aws_settings['elb'].nil?
+        end
+
 		    aws.user_data = File.read(tmp_user_data)
 
 		    aws.tags = {

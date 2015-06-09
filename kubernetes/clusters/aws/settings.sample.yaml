@@ -17,6 +17,7 @@ aws:
   proxyHostName:                                             #optional, eg: name-proxy.kubeme.io
   keyPair:                                                   #required, eg: 'key'
   keyPairPath:                                               #required, eg: ~/.ssh/keys/key.pem
+  elb:                                                       #optional, eg: 'elastic load balancer name'. Joins nodes 01 through X to a sepcified ELB
 
 # Kubernetes sysetem settings
 cluster:                     
