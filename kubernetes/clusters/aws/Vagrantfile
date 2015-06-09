@@ -70,8 +70,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
         aws.user_data = File.read(tmp_user_data)
 
+        instance_name_prefix = aws_settings.fetch('instanceNamePrefix', 'kube')
         aws.tags = {
-          'Name' => "kube-" + node_info[:hostname],
+          'Name' => "#{instance_name_prefix}-" + node_info[:hostname],
           'owner' => Socket.gethostname
         }
 
