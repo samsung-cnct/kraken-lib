@@ -158,19 +158,28 @@ def build_coreos_userdata(host_number)
   node_info = get_coreos_node_info(host_number)
   settings = cluster_settings
 
+  etcd_cluster_ip = base_ip_address + "#{1+100}"
+  master_cluster_ip = base_ip_address + "#{2+100}"
+  proxy_cluster_ip = base_ip_address + "#{3+100}"
+  proxy_public_ip = ENV.fetch('NODE_PUBLIC_IP', proxy_cluster_ip)
+  if settings.has_key?('aws')
+    proxy_public_ip = settings['aws'].fetch('nodePublicIp', settings['aws'].fetch('proxyHostName', proxy_public_ip))
+  end
+
+
   tmp_user_data = "/tmp/#{node_info[:hostname]}-vagrantfile-user-data"
   replacements = {
-    '$ETCD_IP' => base_ip_address + "#{1+100}",
-    '$MASTER_IP' => base_ip_address + "#{2+100}",
+    '$ETCD_IP' => etcd_cluster_ip,
+    '$MASTER_IP' => master_cluster_ip,
     '$KUBERNETES_VERSION' => 'v' + kubernetes_release,
     '$REBOOT_STRATEGY' => settings['coreos']['rebootStrategy'] || 'off',
     '$CLOUD_PROVIDER' => 'vagrant',
     '$DNS_DOMAIN' => 'kubernetes.local',
-    '$SERVICE_PUBLIC_IP' => base_ip_address + "#{3+100}",
+    '$SERVICE_PUBLIC_IP' => proxy_cluster_ip,
     '$RUN_EXAMPLES' => example_state,
-    '$DOCKER_CACHE' => base_ip_address + "#{1+100}",
-    '$NODE_01_PRIVATE_IP' => base_ip_address + "#{3+100}",
-    '$NODE_01_PUBLIC_IP' => ENV['NODE_PUBLIC_IP'] || base_ip_address + "#{3+100}",
+    '$DOCKER_CACHE' => etcd_cluster_ip,
+    '$NODE_01_PRIVATE_IP' => proxy_cluster_ip,
+    '$NODE_01_PUBLIC_IP' => proxy_public_ip,
     '$FINAL_NODE' => final_node_ip
   }
 

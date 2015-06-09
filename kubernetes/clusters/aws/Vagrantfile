@@ -6,14 +6,14 @@ aws_settings = cluster_settings['aws']
 coreos_ami = {
   "ap-northeest-1" => "coreos_production_ami_hvm_ap-northeast-1.txt",
   "ap-southeast-1" => "coreos_production_ami_hvm_ap-southeast-1.txt",
-  "ap-southeast-2" => "coreos_production_ami_hvm_ap-southeast-2.txt", 
-  "eu-central-1" => "coreos_production_ami_hvm_eu-central-1.txt", 
-  "eu-west-1" => "coreos_production_ami_hvm_eu-west-1.txt", 
-  "sa-east-1" => "coreos_production_ami_hvm_sa-east-1.txt", 
-  "us-east-1" => "coreos_production_ami_hvm_us-east-1.txt", 
-  "us-gov-west-1" => "coreos_production_ami_hvm_us-gov-west-1.txt", 
-  "us-west-1" => "coreos_production_ami_hvm_us-west-1.txt", 
-  "us-west-2" => "coreos_production_ami_hvm_us-west-2.txt" 
+  "ap-southeast-2" => "coreos_production_ami_hvm_ap-southeast-2.txt",
+  "eu-central-1" => "coreos_production_ami_hvm_eu-central-1.txt",
+  "eu-west-1" => "coreos_production_ami_hvm_eu-west-1.txt",
+  "sa-east-1" => "coreos_production_ami_hvm_sa-east-1.txt",
+  "us-east-1" => "coreos_production_ami_hvm_us-east-1.txt",
+  "us-gov-west-1" => "coreos_production_ami_hvm_us-gov-west-1.txt",
+  "us-west-1" => "coreos_production_ami_hvm_us-west-1.txt",
+  "us-west-2" => "coreos_production_ami_hvm_us-west-2.txt"
 }
 
 if aws_settings['amiId'] == 'latest'
@@ -30,56 +30,55 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     tmp_user_data = build_coreos_userdata(i)
     node_info = get_coreos_node_info(i)
-  
+
     config.vm.boot_timeout = 2
     config.vm.define node_info[:hostname] do |config2|
 
-			config2.vm.provider :aws do |aws, override|
+      config2.vm.provider :aws do |aws, override|
 
-		    aws.access_key_id = aws_settings['accessKeyId']
-		    aws.secret_access_key = aws_settings['secretAccessKey']
-		    #aws.session_token = ''
-		    aws.keypair_name = aws_settings['keyPair']
-		    aws.ami = aws_settings['amiId']
-		    aws.instance_type = aws_settings['instanceType']
-		    aws.region = aws_settings['regionId']
-		    aws.security_groups = aws_settings['securityGroupIds']
-		    aws.subnet_id = aws_settings['subnetId']
-		    aws.private_ip_address = base_ip_address + "#{i+100}"
-		    aws.associate_public_ip = aws_settings['associatePublicIps']
-		    
-		    case node_info[:hostname]
-		    when 'master'
+        aws.access_key_id = aws_settings['accessKeyId']
+        aws.secret_access_key = aws_settings['secretAccessKey']
+        #aws.session_token = ''
+        aws.keypair_name = aws_settings['keyPair']
+        aws.ami = aws_settings['amiId']
+        aws.instance_type = aws_settings['instanceType']
+        aws.region = aws_settings['regionId']
+        aws.security_groups = aws_settings['securityGroupIds']
+        aws.subnet_id = aws_settings['subnetId']
+        aws.private_ip_address = base_ip_address + "#{i+100}"
+        aws.associate_public_ip = aws_settings['associatePublicIps']
+
+        case node_info[:hostname]
+        when 'master'
+          aws.elastic_ip = aws_settings['masterPublicIp'] if aws_settings['masterPublicIp']
           if aws_settings['masterHostName']
-  		    	override.route53.hosted_zone_id = aws_settings['hostedZoneId'] 
+            override.route53.hosted_zone_id = aws_settings['hostedZoneId']
             override.route53.record_set = [dot_record_set(aws_settings['masterHostName']), "A"]
-          elsif aws_settings['masterPublicIp']
-            aws.elastic_ip = aws_settings['masterPublicIp']
           end
-		    when 'node-01'
+        when 'node-01'
+          aws.elastic_ip = aws_settings['nodePublicIp'] if aws_settings['nodePublicIp']
           if aws_settings['proxyHostName']
             override.route53.hosted_zone_id = aws_settings['hostedZoneId']
             override.route53.record_set = [dot_record_set(aws_settings['proxyHostName']), "A"]
-          elsif aws_settings['nodePublicIp']
-  		    	aws.elastic_ip = aws_settings['nodePublicIp'] || base_ip_address + "#{3+100}"
           end
-		    end
+        end
 
         # join to ELB if, specified
         if node_info[:hostname].start_with?('node-')
           aws.elb = aws_settings['elb'] unless aws_settings['elb'].nil?
         end
 
-		    aws.user_data = File.read(tmp_user_data)
+        aws.user_data = File.read(tmp_user_data)
 
-		    aws.tags = {
-		    	'Name' => "kube-" + node_info[:hostname],
-		    	'owner' => Socket.gethostname
-		    }
+        instance_name_prefix = aws_settings.fetch('instanceNamePrefix', 'kube')
+        aws.tags = {
+          'Name' => "#{instance_name_prefix}-" + node_info[:hostname],
+          'owner' => Socket.gethostname
+        }
 
-		    override.ssh.username = "core"
-		    override.ssh.private_key_path = aws_settings['keyPairPath']
-		  end
+        override.ssh.username = "core"
+        override.ssh.private_key_path = aws_settings['keyPairPath']
+      end
 
       # Output instructions on how to access the kubernetes cluster from a Mac
       if base_ip_address + "#{i+100}" == final_node_ip
@@ -87,6 +86,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           set_kubeconfig("aws")
         end
       end
-  	end
+    end
   end
 end

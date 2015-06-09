@@ -12,7 +12,7 @@ write_files:
   content: |
     #! /usr/bin/bash
     until curl http://$ETCD_IP:4001/v2/machines; do sleep 2; done
-- path: /opt/bin/wait4ectdproxy.sh
+- path: /opt/bin/wait4etcdproxy.sh
   owner: root
   content: |
     #! /usr/bin/bash
@@ -119,18 +119,18 @@ coreos:
         ExecStart=/opt/bin/setup-network-environment
         RemainAfterExit=yes
         Type=oneshot
-    - name: wait4ectdproxy.service
+    - name: wait4etcdproxy.service
       command: start
       content: |
         [Unit]
         Description=Wait for etcd proxy to come up
-        requires=etcd2.service
+        Requires=etcd2.service
         After=etcd2.service
         Before=flannelconfig.service
 
         [Service]
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4ectdproxy.sh
-        ExecStart=/usr/bin/bash /opt/bin/wait4ectdproxy.sh
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4etcdproxy.sh
+        ExecStart=/usr/bin/bash /opt/bin/wait4etcdproxy.sh
         RemainAfterExit=true
         Type=oneshot
     - name: flannelconfig.service
@@ -138,7 +138,7 @@ coreos:
       content: |
         [Unit]
         Description=write flannel network to etcd
-        After=wait4ectdproxy.service
+        After=wait4etcdproxy.service
 
         [Service]
         ExecStartPre=/usr/bin/chmod +x /opt/bin/flannelconfig.sh
@@ -172,7 +172,7 @@ coreos:
         [Unit]
         Description=Kubernetes API Server
         Documentation=https://github.com/GoogleCloudPlatform/kubernetes
-        After=wait4ectdproxy.service
+        After=wait4etcdproxy.service
 
         [Service]
         ExecStartPre=-/usr/bin/mkdir -p /opt/bin
