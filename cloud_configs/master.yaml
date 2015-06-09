@@ -2,11 +2,13 @@
 
 ---
 write_files:
-- path: /opt/bin/download-deploy-kube-srv.sh
+- path: /opt/bin/download-kraken-services.sh
   owner: root
   content: |
     #! /usr/bin/bash
-    /usr/bin/wget https://github.com/l337ch/deploy-kube-srv/archive/v0.1.0.tar.gz -O - | tar -xz -C /opt/bin
+    mkdir -p /opt/bin/kraken-services && cd /opt/bin/kraken-services
+    /usr/bin/wget https://github.com/samsung-ag/kraken-services/archive/v$KRAKEN_SERVICES_VERSION.tar.gz -O - |\
+      tar -xz -C . --strip-components 1
 - path: /opt/bin/wait4etcd.sh
   owner: root
   content: |
@@ -36,23 +38,26 @@ write_files:
   owner: root
   content: |
     #! /usr/bin/bash
-    /opt/bin/kubectl create -f /opt/bin/deploy-kube-srv-0.1.0/skydns/
+    cd /opt/bin/kraken-services
+    /opt/bin/kubectl create -f ./skydns/
 - path: /opt/bin/guestbook_example.sh
   owner: root
   content: |
     #! /usr/bin/bash
-    sed -i -- 's,$SERVICE_IP,$SERVICE_PUBLIC_IP,g' /opt/bin/deploy-kube-srv-0.1.0/guestbook/frontend-service.json
-    /opt/bin/kubectl create -f /opt/bin/deploy-kube-srv-0.1.0/guestbook/
+    cd /opt/bin/kraken-services
+    sed -i -- 's,$SERVICE_IP,$SERVICE_PUBLIC_IP,g' ./guestbook/frontend-service.json
+    /opt/bin/kubectl create -f ./guestbook/
 - path: /opt/bin/influxdb_grafana.sh
   owner: root
   content: |
     #! /usr/bin/bash
-    sed -i -- 's,$NODE_01_IP,$NODE_01_PRIVATE_IP,g' /opt/bin/deploy-kube-srv-0.1.0/influxdb-grafana/grafana-service.json
-    sed -i -- 's,$NODE_01_IP,$NODE_01_PRIVATE_IP,g' /opt/bin/deploy-kube-srv-0.1.0/influxdb-grafana/heapster-service.json
-    sed -i -- 's,$NODE_01_IP,$NODE_01_PRIVATE_IP,g' /opt/bin/deploy-kube-srv-0.1.0/influxdb-grafana/influxdb-service.json
-    sed -i -- 's,$NODE_01_IP,$NODE_01_PRIVATE_IP,g' /opt/bin/deploy-kube-srv-0.1.0/influxdb-grafana/influxdb-ui-service.json
-    sed -i -- 's,$NODE_01_IP,$NODE_01_PUBLIC_IP,g' /opt/bin/deploy-kube-srv-0.1.0/influxdb-grafana/influxdb-grafana-controller.json
-    /opt/bin/kubectl --server=http://$MASTER_IP:8080 create -f /opt/bin/deploy-kube-srv-0.1.0/influxdb-grafana/
+    cd /opt/bin/kraken-services
+    sed -i -- 's,$NODE_01_IP,$NODE_01_PRIVATE_IP,g' ./influxdb-grafana/grafana-service.json
+    sed -i -- 's,$NODE_01_IP,$NODE_01_PRIVATE_IP,g' ./influxdb-grafana/heapster-service.json
+    sed -i -- 's,$NODE_01_IP,$NODE_01_PRIVATE_IP,g' ./influxdb-grafana/influxdb-service.json
+    sed -i -- 's,$NODE_01_IP,$NODE_01_PRIVATE_IP,g' ./influxdb-grafana/influxdb-ui-service.json
+    sed -i -- 's,$NODE_01_IP,$NODE_01_PUBLIC_IP,g'  ./influxdb-grafana/influxdb-grafana-controller.json
+    /opt/bin/kubectl --server=http://$MASTER_IP:8080 create -f ./influxdb-grafana/
 - path: /opt/bin/influxdb-grafana-pause.sh
   owner: root
   content: |
@@ -257,18 +262,18 @@ coreos:
         ExecStart=/usr/bin/bash /opt/bin/wait4finalnode.sh
         RemainAfterExit=true
         Type=oneshot
-    - name: download-deploy-kube-srv.service
+    - name: download-kraken-services.service
       command: start
       content: |
         [Unit]
-        Description=Download deploy-kube-srv
+        Description=Download samsung-ag/kraken-services
         Requires=wait4finalnode.service
         After=wait4finalnode.service
 
         [Service]
         TimeoutStartSec=0
-        ExecStartPre=-/usr/bin/bash /opt/bin/download-deploy-kube-srv.sh
-        ExecStartPre=/usr/bin/cp /opt/bin/deploy-kube-srv-0.1.0/bin/linux/kubectl /opt/bin/
+        ExecStartPre=-/usr/bin/bash /opt/bin/download-kraken-services.sh
+        ExecStartPre=/usr/bin/cp /opt/bin/kraken-services/bin/linux/kubectl /opt/bin/
         ExecStart=/usr/bin/chmod +x /opt/bin/kubectl
         RemainAfterExit=true
         Type=oneshot
@@ -277,8 +282,8 @@ coreos:
       content: |
         [Unit]
         Description=Kubernetes local DNS service
-        Requires=download-deploy-kube-srv.service
-        After=download-deploy-kube-srv.service
+        Requires=download-kraken-services.service
+        After=download-kraken-services.service
 
         [Service]
         TimeoutStartSec=0
