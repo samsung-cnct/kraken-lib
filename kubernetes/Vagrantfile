@@ -176,6 +176,7 @@ def build_coreos_userdata(host_number)
     '$CLOUD_PROVIDER' => 'vagrant',
     '$DNS_DOMAIN' => 'kubernetes.local',
     '$SERVICE_PUBLIC_IP' => proxy_cluster_ip,
+    '$KRAKEN_SERVICES_VERSION' => '0.1.0',
     '$RUN_EXAMPLES' => example_state,
     '$DOCKER_CACHE' => etcd_cluster_ip,
     '$NODE_01_PRIVATE_IP' => proxy_cluster_ip,
