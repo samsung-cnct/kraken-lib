@@ -8,9 +8,13 @@ require 'yaml'
 require 'ipaddr'
 
 # Make the MakeMakefile logger write file output to null.
-# Probably requires ruby >= 1.9.3
+# Supress output from find_executable
+# Requires ruby >= 2.0.0
 module MakeMakefile::Logging
   @logfile = File::NULL
+end
+module MakeMakefile
+  def message(*s) end
 end
 
 include GLI::App
@@ -93,7 +97,7 @@ end
 
 pre do |global,command,options,args|
   %w(vagrant kubectl).each do |tool|
-    raise "ERROR: required tool '#{tool}' not found or not executable" unless system("test -x \"$(which #{tool})\"")
+    raise "ERROR: required tool '#{tool}' not found or not executable" if find_executable(tool).nil?
   end
   true
 end
