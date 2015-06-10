@@ -93,7 +93,7 @@ end
 
 pre do |global,command,options,args|
   %w(vagrant kubectl).each do |tool|
-    raise "ERROR: required tool '#{tool}' not found or not executable" unless system("test -x \"$(which #{tool})\"")
+    raise "ERROR: required tool '#{tool}' not found or not executable" if find_executable(tool).nil?
   end
   true
 end
