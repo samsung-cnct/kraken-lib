@@ -16,5 +16,4 @@ Feature: Make sure we have the correct kubernetes services
       monitoring-grafana.*
       monitoring-heapster.*
       monitoring-influxdb.*
-      monitoring-influxdb-ui.*
       """
