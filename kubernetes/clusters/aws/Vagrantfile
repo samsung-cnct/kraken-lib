@@ -1,5 +1,7 @@
 abort "Please run with kraken script from #{File.expand_path(File.join(File.expand_path(File.dirname(__FILE__)), '..', 'kraken'))}" unless defined? VAGRANTFILE_API_VERSION
 
+require "excon/middleware/aws/exponential_backoff/include"
+
 # Find the latest Coreos based on region
 aws_settings = cluster_settings['aws']
 
