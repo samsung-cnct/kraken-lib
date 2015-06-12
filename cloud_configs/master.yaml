@@ -188,7 +188,7 @@ coreos:
         --insecure_bind_address=0.0.0.0 \
         --insecure_port=8080 \
         --portal_net=10.100.0.0/16 \
-        --etcd_servers=http://10.1.104.101:2379 \
+        --etcd_servers=http://127.0.0.1:4001 \
         --public_address_override=$private_ipv4 \
         --logtostderr=true \
         --cors_allowed_origins=.* \
