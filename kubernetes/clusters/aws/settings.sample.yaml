@@ -6,7 +6,10 @@ aws:
   accessKeyId:                                               #required, eq: same as AWS_ACCESS_KEY_ID
   secretAccessKey:                                           #required, eq: same as AWS_SECRET_ACCESS_KEY
   amiId: latest                                              #default = latest
-  instanceType: m3.medium                                    #default = m3.medium
+  instanceType: m3.medium                                    #default = m3.medium required
+  instanceTypeMaster: m3.large                               #default = m3.large
+  instanceTypeEtcd: m3.medium                                #default = m3.medium
+  instandeTypeNode: m3.medium                                #default = m3.medium 
   regionId: us-west-2                                        #required
   securityGroupIds:
     -                                                        #required, eg: - sg-1234

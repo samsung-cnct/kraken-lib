@@ -6,3 +6,5 @@ plugins:
     version: 0.3.2
   - name: vagrant-triggers
     version: 0.5.0
+  - name: excon-middleware-aws-exponential_backoff
+    version: 0.0.2
