@@ -52,11 +52,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
         case node_info[:hostname]
         when 'master'
+          aws.instance_type = aws_settings['instanceTypeMaster'] unless aws_settings['instanceTypeMaster'].nil?
           aws.elastic_ip = aws_settings['masterPublicIp'] if aws_settings['masterPublicIp']
           if aws_settings['masterHostName']
             override.route53.hosted_zone_id = aws_settings['hostedZoneId']
             override.route53.record_set = [dot_record_set(aws_settings['masterHostName']), "A"]
           end
+        when 'etcd'
+          aws.instance_type = aws_settings['instanceTypeEtcd'] unless aws_settings['instanceTypeEtcd'].nil?
         when 'node-01'
           aws.elastic_ip = aws_settings['nodePublicIp'] if aws_settings['nodePublicIp']
           if aws_settings['proxyHostName']
@@ -67,6 +70,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
         # join to ELB if, specified
         if node_info[:hostname].start_with?('node-')
+          aws.instance_type = aws_settings['instanceTypeNode'] unless aws_settings['instanceTypeNode'].nil?
           aws.elb = aws_settings['elb'] unless aws_settings['elb'].nil?
         end
 
