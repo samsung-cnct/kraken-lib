@@ -9,7 +9,7 @@ aws:
   instanceType: m3.medium                                    #default = m3.medium required
   instanceTypeMaster: m3.large                               #default = m3.large
   instanceTypeEtcd: m3.medium                                #default = m3.medium
-  instandeTypeNode: m3.small                                 #default = m3.small 
+  instandeTypeNode: m3.medium                                #default = m3.medium 
   regionId: us-west-2                                        #required
   securityGroupIds:
     -                                                        #required, eg: - sg-1234
