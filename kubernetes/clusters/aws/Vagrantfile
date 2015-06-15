@@ -1,6 +1,78 @@
 abort "Please run with kraken script from #{File.expand_path(File.join(File.expand_path(File.dirname(__FILE__)), '..', 'kraken'))}" unless defined? VAGRANTFILE_API_VERSION
 
+require 'fog'
 require "excon/middleware/aws/exponential_backoff/include"
+
+# checks for a named ELV
+def check_elb(aws_settings)
+  connection = Fog::AWS::ELB.new(
+    :aws_access_key_id => aws_settings['accessKeyId'], 
+    :aws_secret_access_key => aws_settings['secretAccessKey'], 
+    :region => aws_settings['regionId'])
+
+  result = connection.describe_load_balancers
+  raise "ELB check failed!" unless result.status == 200
+
+  descriptions = result.body['DescribeLoadBalancersResult']['LoadBalancerDescriptions']
+
+  return true if descriptions.select{ |balancer| balancer['LoadBalancerName'] == aws_settings['elb']['name'] }.length > 0
+  return false
+end
+
+# creates a named ELB
+def create_elb(aws_settings)
+  return if check_elb(aws_settings)
+
+  connection = Fog::AWS::ELB.new(
+    :aws_access_key_id => aws_settings['accessKeyId'], 
+    :aws_secret_access_key => aws_settings['secretAccessKey'], 
+    :region => aws_settings['regionId'])
+
+  # Build the Load Balancer
+  listeners = [ 
+    { 
+      "Protocol" => "HTTP", 
+      "LoadBalancerPort" => aws_settings['elb']['balancer_port'], 
+      "InstancePort" => aws_settings['elb']['instance_port'], 
+      "InstanceProtocol" => "HTTP", 
+    } 
+  ]
+
+  result = connection.create_load_balancer(
+    nil, 
+    aws_settings['elb']['name'], 
+    listeners, 
+    {
+      :subnet_ids => [ aws_settings['subnetId'] ],
+      :security_groupd => aws_settings['securityGroupIds']
+    }
+  )
+  raise "ELB creation failed!" unless result.status == 200
+
+  # Let's configure a health check
+  health_check_config = { 
+    "HealthyThreshold" => aws_settings['elb']['healthy_threshold'], 
+    "Interval" => aws_settings['elb']['interval'], 
+    "Target" => "TCP:#{aws_settings['elb']['target_port']}", 
+    "Timeout" => aws_settings['elb']['timeout'], 
+    "UnhealthyThreshold" => aws_settings['elb']['unhealthy_threshold']
+  }
+  health_check_result = connection.configure_health_check(aws_settings['elb']['name'], health_check_config)
+  raise "Failed ELB health check configuration request" unless health_check_result.status == 200
+end
+
+# destroys a named ELB
+def delete_elb(aws_settings)
+  return unless check_elb(aws_settings)
+
+  connection = Fog::AWS::ELB.new(
+    :aws_access_key_id => aws_settings['accessKeyId'], 
+    :aws_secret_access_key => aws_settings['secretAccessKey'], 
+    :region => aws_settings['regionId'])
+
+  result = connection.delete_load_balancer(aws_settings['elb']['name'])
+  raise "ELB creation failed!" unless result.status == 200
+end
 
 # Find the latest Coreos based on region
 aws_settings = cluster_settings['aws']
@@ -27,6 +99,20 @@ end
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = File.join(File.expand_path(File.dirname(__FILE__)), 'aws.box')
   config.vm.synced_folder ".", "/vagrant", disabled: true
+
+  # create elb if specified. Allow for multiple launches of this
+  # since we have no control of when each one of the VM's will be provisioned
+  # if we are running in parallel mode
+  config.trigger.before [:up], :vm => ['master'] do
+    info "Creating ELB #{aws_settings['elb']['name']}" unless aws_settings['elb'].nil?
+    create_elb(aws_settings) unless aws_settings['elb'].nil?
+  end
+
+  # destroy elb if specified, tie to node 1 to avoid doing this multiple times
+  config.trigger.after [:destroy], :vm => ['node-01'] do
+    info "Deleting ELB #{aws_settings['elb']['name']}" unless aws_settings['elb'].nil?
+    delete_elb(aws_settings) unless aws_settings['elb'].nil?
+  end
 
   (1..(get_num_nodes.to_i + 2)).each do |i|
 
@@ -71,7 +157,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         # join to ELB if, specified
         if node_info[:hostname].start_with?('node-')
           aws.instance_type = aws_settings['instanceTypeNode'] unless aws_settings['instanceTypeNode'].nil?
-          aws.elb = aws_settings['elb'] unless aws_settings['elb'].nil?
+          aws.elb = aws_settings['elb']['name'] unless aws_settings['elb'].nil?
         end
 
         aws.user_data = File.read(tmp_user_data)
