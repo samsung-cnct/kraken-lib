@@ -44,7 +44,7 @@ def create_elb(aws_settings)
     listeners, 
     {
       :subnet_ids => [ aws_settings['subnetId'] ],
-      :security_groupd => aws_settings['securityGroupIds']
+      :security_groups => aws_settings['securityGroupIds']
     }
   )
   raise "ELB creation failed!" unless result.status == 200
