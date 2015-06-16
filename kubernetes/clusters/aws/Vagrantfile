@@ -3,12 +3,17 @@ abort "Please run with kraken script from #{File.expand_path(File.join(File.expa
 require 'fog'
 require "excon/middleware/aws/exponential_backoff/include"
 
+def create_elb_connection(aws_settings)
+  Fog::AWS::ELB.new({
+    aws_access_key_id: aws_settings['accessKeyId'],
+    aws_secret_access_key: aws_settings['secretAccessKey'],
+    region: aws_settings['regionId']
+  })
+end
+
 # checks for a named ELV
 def check_elb(aws_settings)
-  connection = Fog::AWS::ELB.new(
-    :aws_access_key_id => aws_settings['accessKeyId'], 
-    :aws_secret_access_key => aws_settings['secretAccessKey'], 
-    :region => aws_settings['regionId'])
+  connection = create_elb_connection(aws_settings)
 
   result = connection.describe_load_balancers
   raise "ELB check failed!" unless result.status == 200
@@ -22,26 +27,22 @@ end
 # creates a named ELB
 def create_elb(aws_settings)
   return if check_elb(aws_settings)
-
-  connection = Fog::AWS::ELB.new(
-    :aws_access_key_id => aws_settings['accessKeyId'], 
-    :aws_secret_access_key => aws_settings['secretAccessKey'], 
-    :region => aws_settings['regionId'])
+  connection = create_elb_connection(aws_settings)
 
   # Build the Load Balancer
-  listeners = [ 
-    { 
-      "Protocol" => "HTTP", 
-      "LoadBalancerPort" => aws_settings['elb']['balancer_port'], 
-      "InstancePort" => aws_settings['elb']['instance_port'], 
-      "InstanceProtocol" => "HTTP", 
-    } 
+  listeners = [
+    {
+      "Protocol" => "HTTP",
+      "LoadBalancerPort" => aws_settings['elb']['balancer_port'],
+      "InstancePort" => aws_settings['elb']['instance_port'],
+      "InstanceProtocol" => "HTTP",
+    }
   ]
 
   result = connection.create_load_balancer(
-    nil, 
-    aws_settings['elb']['name'], 
-    listeners, 
+    nil,
+    aws_settings['elb']['name'],
+    listeners,
     {
       :subnet_ids => [ aws_settings['subnetId'] ],
       :security_groups => aws_settings['securityGroupIds']
@@ -50,11 +51,11 @@ def create_elb(aws_settings)
   raise "ELB creation failed!" unless result.status == 200
 
   # Let's configure a health check
-  health_check_config = { 
-    "HealthyThreshold" => aws_settings['elb']['healthy_threshold'], 
-    "Interval" => aws_settings['elb']['interval'], 
-    "Target" => "TCP:#{aws_settings['elb']['target_port']}", 
-    "Timeout" => aws_settings['elb']['timeout'], 
+  health_check_config = {
+    "HealthyThreshold" => aws_settings['elb']['healthy_threshold'],
+    "Interval" => aws_settings['elb']['interval'],
+    "Target" => "TCP:#{aws_settings['elb']['target_port']}",
+    "Timeout" => aws_settings['elb']['timeout'],
     "UnhealthyThreshold" => aws_settings['elb']['unhealthy_threshold']
   }
   health_check_result = connection.configure_health_check(aws_settings['elb']['name'], health_check_config)
@@ -64,11 +65,7 @@ end
 # destroys a named ELB
 def delete_elb(aws_settings)
   return unless check_elb(aws_settings)
-
-  connection = Fog::AWS::ELB.new(
-    :aws_access_key_id => aws_settings['accessKeyId'], 
-    :aws_secret_access_key => aws_settings['secretAccessKey'], 
-    :region => aws_settings['regionId'])
+  connection = create_elb_connection(aws_settings)
 
   result = connection.delete_load_balancer(aws_settings['elb']['name'])
   raise "ELB creation failed!" unless result.status == 200
