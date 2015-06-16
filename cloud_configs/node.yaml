@@ -133,11 +133,13 @@ coreos:
         After=wait4apiserver.service
 
         [Service]
+        LimitNOFILE=infinity
         ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/$KUBERNETES_VERSION/bin/linux/amd64/kube-proxy
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-proxy
         ExecStart=/opt/bin/kube-proxy \
         --master=$MASTER_IP:8080 \
-        --logtostderr=true
+        --logtostderr=true \
+        --v=$KUBERNETES_VERBOSITY
         Restart=always
         RestartSec=10
     - name: kube-kubelet.service
@@ -166,7 +168,8 @@ coreos:
         --healthz_port=10254 \
         --cadvisor_port=4194 \
         --log_cadvisor_usage=true \
-        --logtostderr=true
+        --logtostderr=true \
+        --v=$KUBERNETES_VERBOSITY
         Restart=always
         RestartSec=10
   update:

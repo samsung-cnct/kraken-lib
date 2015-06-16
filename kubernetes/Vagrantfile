@@ -82,9 +82,12 @@ end
 def kubernetes_release
   settings = cluster_settings
   version = settings['cluster']['kubernetesVersion'] || 'stable'
-  release_url = "https://storage.googleapis.com/kubernetes-release/release/stable.txt"
-
-  open(release_url).read().gsub('v','').chomp
+  if version == 'stable'
+    release_url = "https://storage.googleapis.com/kubernetes-release/release/stable.txt"
+    open(release_url).read().gsub('v','').chomp
+  else
+    version
+  end
 end
 
 def coreos_channel
@@ -173,6 +176,7 @@ def build_coreos_userdata(host_number)
     '$MASTER_IP' => master_cluster_ip,
     '$KUBERNETES_VERSION' => 'v' + kubernetes_release,
     '$KUBERNETES_API_VERSION' => settings['cluster']['apiVersion'],
+    '$KUBERNETES_VERBOSITY' => '2',
     '$REBOOT_STRATEGY' => settings['coreos']['rebootStrategy'] || 'off',
     '$CLOUD_PROVIDER' => 'vagrant',
     '$DNS_DOMAIN' => 'kubernetes.local',
