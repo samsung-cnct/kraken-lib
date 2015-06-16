@@ -217,7 +217,7 @@ coreos:
         --pod_eviction_timeout=1m \
         --resource_quota_sync_period=20s \
         --logtostderr=true \
-        --v=$KUBERNETES_VERBOSITY \
+        --v=$KUBERNETES_VERBOSITY
         Restart=always
         RestartSec=10
     - name: kube-scheduler.service
@@ -235,7 +235,7 @@ coreos:
         ExecStart=/opt/bin/kube-scheduler \
         --master=$private_ipv4:8080 \
         --logtostderr=true \
-        --v=$KUBERNETES_VERBOSITY \
+        --v=$KUBERNETES_VERBOSITY
         Restart=always
         RestartSec=10
     - name: kube-register.service
