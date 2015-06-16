@@ -21,15 +21,15 @@ aws:
   proxyHostName:                                             #optional, eg: name-proxy.kubeme.io
   keyPair:                                                   #required, eg: 'key'
   keyPairPath:                                               #required, eg: ~/.ssh/keys/key.pem
-  elb:                                                       #optional, Joins nodes 01 through X to a sepcified ELB
-    name:                                                    #required. 'elastic load balancer name'. 
-    balancer_port: 80                                        #required. ELB world-facing port 
-    instance_port: 30061                                     #required. ELP port to forward to on an instance. 
-    healthy_threshold: 2                                     #required. How many successful pings before "healthy"  
-    unhealthy_threshold: 3                                   #required. How many unsuccessful pings before "not healthy"  
-    timeout: 5                                               #required. ping timeout 
-    interval: 30                                             #required. ping check interval
-    target_port: 30061                                       #required. ping port (TCP)
+  #elb:                                                      #optional, Joins nodes 01 through X to a sepcified ELB
+  #  name:                                                   #required. 'elastic load balancer name'. 
+  #  balancer_port: 80                                       #required. ELB world-facing port 
+  #  instance_port: 30061                                    #required. ELP port to forward to on an instance. 
+  #  healthy_threshold: 2                                    #required. How many successful pings before "healthy"  
+  #  unhealthy_threshold: 3                                  #required. How many unsuccessful pings before "not healthy"  
+  #  timeout: 5                                              #required. ping timeout 
+  #  interval: 30                                            #required. ping check interval
+  #  target_port: 30061                                      #required. ping port (TCP)
 
 
 # Kubernetes sysetem settings
