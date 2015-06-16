@@ -195,6 +195,7 @@ coreos:
         --etcd_servers=http://127.0.0.1:4001 \
         --public_address_override=$private_ipv4 \
         --logtostderr=true \
+        --v=$KUBERNETES_VERBOSITY \
         --cors_allowed_origins=.* \
         --runtime_config=api/$KUBERNETES_API_VERSION
         Restart=always
@@ -215,7 +216,8 @@ coreos:
         --master=$private_ipv4:8080 \
         --pod_eviction_timeout=1m \
         --resource_quota_sync_period=20s \
-        --logtostderr=true
+        --logtostderr=true \
+        --v=$KUBERNETES_VERBOSITY \
         Restart=always
         RestartSec=10
     - name: kube-scheduler.service
@@ -230,7 +232,10 @@ coreos:
         [Service]
         ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/$KUBERNETES_VERSION/bin/linux/amd64/kube-scheduler
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-scheduler
-        ExecStart=/opt/bin/kube-scheduler --master=$private_ipv4:8080
+        ExecStart=/opt/bin/kube-scheduler \
+        --master=$private_ipv4:8080 \
+        --logtostderr=true \
+        --v=$KUBERNETES_VERBOSITY \
         Restart=always
         RestartSec=10
     - name: kube-register.service

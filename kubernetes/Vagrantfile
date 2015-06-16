@@ -173,6 +173,7 @@ def build_coreos_userdata(host_number)
     '$MASTER_IP' => master_cluster_ip,
     '$KUBERNETES_VERSION' => 'v' + kubernetes_release,
     '$KUBERNETES_API_VERSION' => settings['cluster']['apiVersion'],
+    '$KUBERNETES_VERBOSITY' => '0',
     '$REBOOT_STRATEGY' => settings['coreos']['rebootStrategy'] || 'off',
     '$CLOUD_PROVIDER' => 'vagrant',
     '$DNS_DOMAIN' => 'kubernetes.local',
