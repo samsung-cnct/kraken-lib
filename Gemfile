@@ -1,0 +1,8 @@
+ruby '2.2.1'
+source 'https://rubygems.org'
+gem 'gli', '>= 2.13.1'
+gem 'serverspec', '>= 2.17.0'
+gem 'rspec', '>= 3.2.0'
+gem 'cucumber', '>= 2.0.0'
+gem 'aruba', '>= 0.6.2'
+gem 'fog', '>= 1.31.0'

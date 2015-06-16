@@ -2,17 +2,20 @@
 
 ---
 write_files:
-- path: /opt/bin/download-deploy-kube-srv.sh
+- path: /opt/bin/download-kraken-services.sh
   owner: root
   content: |
     #! /usr/bin/bash
-    /usr/bin/wget https://github.com/l337ch/deploy-kube-srv/archive/v0.1.0.tar.gz -O - | tar -xz -C /opt/bin
+    mkdir -p /opt/bin/kraken-services && cd /opt/bin/kraken-services
+    git clone $KRAKEN_SERVICES_REPO .
+    # use explicit form incase branch name matches filename in repo and avoids shortcut
+    git checkout -b $KRAKEN_SERVICES_BRANCH origin/$KRAKEN_SERVICES_BRANCH
 - path: /opt/bin/wait4etcd.sh
   owner: root
   content: |
     #! /usr/bin/bash
     until curl http://$ETCD_IP:4001/v2/machines; do sleep 2; done
-- path: /opt/bin/wait4ectdproxy.sh
+- path: /opt/bin/wait4etcdproxy.sh
   owner: root
   content: |
     #! /usr/bin/bash
@@ -32,36 +35,43 @@ write_files:
   content: |
     #! /usr/bin/bash
     /usr/bin/etcdctl set /coreos.com/network/config '{"Network":"10.244.0.0/16", "Backend": {"Type": "vxlan"}}' 
-- path: /opt/bin/kube2sky.sh
+- path: /opt/bin/kraken-create-skydns.sh
   owner: root
   content: |
     #! /usr/bin/bash
-    /opt/bin/kubectl create -f /opt/bin/deploy-kube-srv-0.1.0/skydns/
-- path: /opt/bin/guestbook_example.sh
+    cd /opt/bin/kraken-services
+    sed -e 's,$KUBE_MASTER_URL,http://$MASTER_IP:8080,g' \
+        -i -- ./skydns/*.{json,yaml}
+    /opt/bin/kubectl --server=http://$MASTER_IP:8080 create -f ./skydns/
+- path: /opt/bin/kraken-create-guestbook.sh
   owner: root
   content: |
     #! /usr/bin/bash
-    sed -i -- 's,$SERVICE_IP,$SERVICE_PUBLIC_IP,g' /opt/bin/deploy-kube-srv-0.1.0/guestbook/frontend-service.json
-    /opt/bin/kubectl create -f /opt/bin/deploy-kube-srv-0.1.0/guestbook/
-- path: /opt/bin/influxdb_grafana.sh
+    cd /opt/bin/kraken-services
+    sed -e 's,$SERVICE_IP,$SERVICE_PUBLIC_IP,g' \
+        -i -- ./guestbook/frontend-service.json
+    /opt/bin/kubectl --server=http://$MASTER_IP:8080 create -f ./guestbook/
+- path: /opt/bin/kraken-create-influxdb-grafana.sh
   owner: root
   content: |
     #! /usr/bin/bash
-    sed -i -- 's,$NODE_01_IP,$NODE_01_PRIVATE_IP,g' /opt/bin/deploy-kube-srv-0.1.0/influxdb-grafana/grafana-service.json
-    sed -i -- 's,$NODE_01_IP,$NODE_01_PRIVATE_IP,g' /opt/bin/deploy-kube-srv-0.1.0/influxdb-grafana/heapster-service.json
-    sed -i -- 's,$NODE_01_IP,$NODE_01_PRIVATE_IP,g' /opt/bin/deploy-kube-srv-0.1.0/influxdb-grafana/influxdb-service.json
-    sed -i -- 's,$NODE_01_IP,$NODE_01_PRIVATE_IP,g' /opt/bin/deploy-kube-srv-0.1.0/influxdb-grafana/influxdb-ui-service.json
-    sed -i -- 's,$NODE_01_IP,$NODE_01_PUBLIC_IP,g' /opt/bin/deploy-kube-srv-0.1.0/influxdb-grafana/influxdb-grafana-controller.json
-    /opt/bin/kubectl --server=http://$MASTER_IP:8080 create -f /opt/bin/deploy-kube-srv-0.1.0/influxdb-grafana/
-- path: /opt/bin/influxdb-grafana-pause.sh
+    cd /opt/bin/kraken-services
+    sed -e 's,$INFLUXDB_EXTERNAL_HOST,$NODE_01_PUBLIC_IP,g' \
+        -e 's,$INFLUXDB_PUBLIC_IP,$NODE_01_PRIVATE_IP,g' \
+        -e 's,$GRAFANA_PUBLIC_IP,$NODE_01_PRIVATE_IP,g' \
+        -e 's,$HEAPSTER_PUBLIC_IP,$NODE_01_PRIVATE_IP,g' \
+        -i -- ./influxdb-grafana/*.{json,yaml}
+    /opt/bin/kubectl --server=http://$MASTER_IP:8080 create -f ./influxdb-grafana/
+- path: /opt/bin/wait4skydns.sh
   owner: root
   content: |
     #! /usr/bin/bash
-    sleep 180
+    sleep 60
 coreos:
   etcd2:
     proxy: on
     listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
+    advertise-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
     initial-cluster: etcd=http://$ETCD_IP:2380
   fleet:
     etcd-servers: http://$private_ipv4:4001
@@ -113,23 +123,23 @@ coreos:
 
         [Service]
         ExecStartPre=-/usr/bin/mkdir -p /opt/bin
-        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/k8s/setup-network-environment 
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://github.com/kelseyhightower/setup-network-environment/releases/download/v1.0.0/setup-network-environment
         ExecStartPre=/usr/bin/chmod +x /opt/bin/setup-network-environment
         ExecStart=/opt/bin/setup-network-environment
         RemainAfterExit=yes
         Type=oneshot
-    - name: wait4ectdproxy.service
+    - name: wait4etcdproxy.service
       command: start
       content: |
         [Unit]
         Description=Wait for etcd proxy to come up
-        requires=etcd2.service
+        Requires=etcd2.service
         After=etcd2.service
         Before=flannelconfig.service
 
         [Service]
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4ectdproxy.sh
-        ExecStart=/usr/bin/bash /opt/bin/wait4ectdproxy.sh
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4etcdproxy.sh
+        ExecStart=/usr/bin/bash /opt/bin/wait4etcdproxy.sh
         RemainAfterExit=true
         Type=oneshot
     - name: flannelconfig.service
@@ -137,7 +147,7 @@ coreos:
       content: |
         [Unit]
         Description=write flannel network to etcd
-        After=wait4ectdproxy.service
+        After=wait4etcdproxy.service
 
         [Service]
         ExecStartPre=/usr/bin/chmod +x /opt/bin/flannelconfig.sh
@@ -171,9 +181,10 @@ coreos:
         [Unit]
         Description=Kubernetes API Server
         Documentation=https://github.com/GoogleCloudPlatform/kubernetes
-        After=wait4ectdproxy.service
+        After=wait4etcdproxy.service
 
         [Service]
+        LimitNOFILE=infinity
         ExecStartPre=-/usr/bin/mkdir -p /opt/bin
         ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/$KUBERNETES_VERSION/bin/linux/amd64/kube-apiserver
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-apiserver
@@ -185,7 +196,7 @@ coreos:
         --public_address_override=$private_ipv4 \
         --logtostderr=true \
         --cors_allowed_origins=.* \
-        --runtime_config=api/v1beta3
+        --runtime_config=api/$KUBERNETES_API_VERSION
         Restart=always
         RestartSec=10
     - name: kube-controller-manager.service
@@ -249,81 +260,81 @@ coreos:
         Description=Wait for final node to come up
         Wants=kube-register.service
         After=kube-register.service
-        Before=kube-skydns.service
+        Before=kraken-create-skydns.service
 
         [Service]
         ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4finalnode.sh
         ExecStart=/usr/bin/bash /opt/bin/wait4finalnode.sh
         RemainAfterExit=true
         Type=oneshot
-    - name: download-deploy-kube-srv.service
+    - name: download-kraken-services.service
       command: start
       content: |
         [Unit]
-        Description=Download deploy-kube-srv
+        Description=Download samsung-ag/kraken-services
         Requires=wait4finalnode.service
         After=wait4finalnode.service
 
         [Service]
         TimeoutStartSec=0
-        ExecStartPre=-/usr/bin/bash /opt/bin/download-deploy-kube-srv.sh
-        ExecStartPre=/usr/bin/cp /opt/bin/deploy-kube-srv-0.1.0/bin/linux/kubectl /opt/bin/
+        ExecStartPre=-/usr/bin/bash /opt/bin/download-kraken-services.sh
+        ExecStartPre=/usr/bin/cp /opt/bin/kraken-services/bin/linux/kubectl /opt/bin/
         ExecStart=/usr/bin/chmod +x /opt/bin/kubectl
         RemainAfterExit=true
         Type=oneshot
-    - name: kube-skydns.service
+    - name: kraken-create-skydns.service
       command: start
       content: |
         [Unit]
-        Description=Kubernetes local DNS service
-        Requires=download-deploy-kube-srv.service
-        After=download-deploy-kube-srv.service
+        Description=Kubernetes cluster DNS service
+        Requires=download-kraken-services.service
+        After=download-kraken-services.service
 
         [Service]
         TimeoutStartSec=0
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/kube2sky.sh
-        ExecStart=/usr/bin/bash /opt/bin/kube2sky.sh
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/kraken-create-skydns.sh
+        ExecStart=/usr/bin/bash /opt/bin/kraken-create-skydns.sh
         RemainAfterExit=true
         Type=oneshot
-    - name: guestbook-example.service
+    - name: kraken-create-guestbook.service
       command: $RUN_EXAMPLES
       content: |
         [Unit]
         Description=Kubernetes guestbook example
-        Requires=kube-skydns.service
-        After=kube-skydns.service
+        Requires=kraken-create-skydns.service
+        After=kraken-create-skydns.service
         
         [Service]
         TimeoutStartSec=0
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/guestbook_example.sh
-        ExecStart=/usr/bin/bash /opt/bin/guestbook_example.sh
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/kraken-create-guestbook.sh
+        ExecStart=/usr/bin/bash /opt/bin/kraken-create-guestbook.sh
         RemainAfterExit=true
         Type=oneshot
-    - name: influxdb-grafana-pause.service
+    - name: wait4skydns.service
       command: start
       content: |
         [Unit]
-        Description=Wait for kube-skydns service
-        Requires=kube-skydns.service
-        After=kube-skydns.service
+        Description=Wait for skydns service
+        Requires=kraken-create-skydns.service
+        After=kraken-create-skydns.service
 
         [Service]
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/influxdb-grafana-pause.sh
-        ExecStart=/usr/bin/bash /opt/bin/influxdb-grafana-pause.sh
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4skydns.sh
+        ExecStart=/usr/bin/bash /opt/bin/wait4skydns.sh
         RemainAfterExit=true
         Type=oneshot
-    - name: influxdb-grafana.service
+    - name: kraken-create-influxdb-grafana.service
       command: start
       content: |
         [Unit]
         Description=Kubernetes influxdb-grafana service
-        Requires=influxdb-grafana-pause.service
-        After=influxdb-grafana-pause.service
+        Requires=wait4skydns.service
+        After=wait4skydns.service
         
         [Service]
         TimeoutStartSec=0
-        ExecStartPre=-/usr/bin/chmod +x /opt/bin/influxdb_grafana.sh
-        ExecStart=/usr/bin/bash /opt/bin/influxdb_grafana.sh
+        ExecStartPre=-/usr/bin/chmod +x /opt/bin/kraken-create-influxdb-grafana.sh
+        ExecStart=/usr/bin/bash /opt/bin/kraken-create-influxdb-grafana.sh
         RemainAfterExit=true
         Type=oneshot
   update:
