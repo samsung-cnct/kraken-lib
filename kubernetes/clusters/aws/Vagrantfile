@@ -71,6 +71,56 @@ def delete_elb(aws_settings)
   raise "ELB creation failed!" unless result.status == 200
 end
 
+def create_elb_dns(aws_settings)
+  connection = Fog::DNS.new(
+    { 
+      :provider => "aws", 
+      :aws_access_key_id => aws_settings['accessKeyId'], 
+      :aws_secret_access_key => aws_settings['secretAccessKey']
+    }
+  )
+  
+  zone = connection.zones.get(aws_settings['hostedZoneId'])
+  
+  # check if record is present, destroy it if so:
+  record = zone.records.get(aws_settings['elb']['dns_name'])
+  unless record.nil?
+    record.destroy
+  end
+
+  # create new record
+  record = zone.records.create(
+    { 
+      :name => aws_settings['elb']['dns_name'], 
+      :alias_target => get_elb_dns_info(aws_settings), 
+      :type => "A"
+    }
+  )
+
+  while record.reload.status != "INSYNC"
+    sleep 2
+  end
+end
+
+def get_elb_dns_info(aws_settings)
+  alias_target = {}
+  connection = create_elb_connection(aws_settings)
+
+  result = connection.describe_load_balancers
+  raise "ELB check failed!" unless result.status == 200
+
+  descriptions = result.body['DescribeLoadBalancersResult']['LoadBalancerDescriptions']
+  raise "ELB not found" unless descriptions.select{ |balancer| balancer['LoadBalancerName'] == aws_settings['elb']['name'] }.length > 0
+
+  lb_desc = descriptions.select{ |balancer| balancer['LoadBalancerName'] == aws_settings['elb']['name'] }[0]
+  
+  alias_target['dns_name'] = lb_desc['DNSName']
+  alias_target['hosted_zone_id'] = lb_desc['CanonicalHostedZoneNameID']
+  alias_target['evaluate_target_health'] = false
+
+  return alias_target
+end
+
 # Find the latest Coreos based on region
 aws_settings = cluster_settings['aws']
 
@@ -97,12 +147,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = File.join(File.expand_path(File.dirname(__FILE__)), 'aws.box')
   config.vm.synced_folder ".", "/vagrant", disabled: true
 
-  # create elb if specified. Allow for multiple launches of this
-  # since we have no control of when each one of the VM's will be provisioned
-  # if we are running in parallel mode
+  # create elb if specified.
   config.trigger.before [:up], :vm => ['master'] do
     info "Creating ELB #{aws_settings['elb']['name']}" unless aws_settings['elb'].nil?
     create_elb(aws_settings) unless aws_settings['elb'].nil?
+    create_elb_dns(aws_settings) unless aws_settings['elb'].nil? || aws_settings['elb']['dns_name'].nil? 
   end
 
   # destroy elb if specified, tie to node 1 to avoid doing this multiple times
@@ -156,6 +205,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           aws.instance_type = aws_settings['instanceTypeNode'] unless aws_settings['instanceTypeNode'].nil?
           aws.elb = aws_settings['elb']['name'] unless aws_settings['elb'].nil?
         end
+
+        # add ELB alias, is hosted zone
 
         aws.user_data = File.read(tmp_user_data)
 

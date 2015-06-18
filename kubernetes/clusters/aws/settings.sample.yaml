@@ -15,7 +15,7 @@ aws:
     -                                                        #required, eg: - sg-1234
   subnetId:                                                  #required, eg: subnet-1234
   associatePublicIps: true                                   #default = no
-  hostedZoneId:                                              #optional (required if using *HostName fields), eg: Z1234
+  hostedZoneId:                                              #optional (required if using *HostName fields or elb dns_name), eg: Z1234
   #instanceNamePrefix:                                       #default = kube, will set ec2 Name tag to eg: prefix-master
   masterHostName:                                            #optional, eg: name-master.kubeme.io
   proxyHostName:                                             #optional, eg: name-proxy.kubeme.io
@@ -23,6 +23,7 @@ aws:
   keyPairPath:                                               #required, eg: ~/.ssh/keys/key.pem
   #elb:                                                      #optional, Joins nodes 01 through X to a sepcified ELB
   #  name:                                                   #required. 'elastic load balancer name'. 
+  #  dns_name:                                               #optional. E.g. your-elb.kubeme.io
   #  balancer_port: 80                                       #required. ELB world-facing port 
   #  instance_port: 30061                                    #required. ELP port to forward to on an instance. 
   #  healthy_threshold: 2                                    #required. How many successful pings before "healthy"  
