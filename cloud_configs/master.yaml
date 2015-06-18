@@ -6,6 +6,7 @@ write_files:
   owner: root
   content: |
     #! /usr/bin/bash
+    set -x
     mkdir -p /opt/bin/kraken-services && cd /opt/bin/kraken-services
     git clone $KRAKEN_SERVICES_REPO .
     # use explicit form incase branch name matches filename in repo and avoids shortcut
@@ -39,6 +40,7 @@ write_files:
   owner: root
   content: |
     #! /usr/bin/bash
+    set -x
     cd /opt/bin/kraken-services
     sed -e 's,$KUBE_MASTER_URL,http://$MASTER_IP:8080,g' \
         -i -- ./skydns/*.{json,yaml}
@@ -47,6 +49,7 @@ write_files:
   owner: root
   content: |
     #! /usr/bin/bash
+    set -x
     cd /opt/bin/kraken-services
     sed -e 's,$SERVICE_IP,$SERVICE_PUBLIC_IP,g' \
         -i -- ./guestbook/frontend-service.json
@@ -55,6 +58,7 @@ write_files:
   owner: root
   content: |
     #! /usr/bin/bash
+    set -x
     cd /opt/bin/kraken-services
     sed -e 's,$INFLUXDB_EXTERNAL_HOST,$NODE_01_PUBLIC_IP,g' \
         -e 's,$INFLUXDB_PUBLIC_IP,$NODE_01_PRIVATE_IP,g' \
