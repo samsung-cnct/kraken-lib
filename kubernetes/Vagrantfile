@@ -129,6 +129,13 @@ def get_num_nodes
   settings['cluster']['nodes'] || 2
 end
 
+def cluster_services
+  services = cluster_settings['cluster'].fetch('services', {})
+  services['repo'] ||= 'git://github.com/samsung-ag/kraken-services'
+  services['branch'] ||= 'master'
+  services
+end
+
 def get_coreos_node_info(host_number)
   node_info = Hash.new
   settings = cluster_settings
@@ -181,8 +188,8 @@ def build_coreos_userdata(host_number)
     '$CLOUD_PROVIDER' => 'vagrant',
     '$DNS_DOMAIN' => 'kubernetes.local',
     '$SERVICE_PUBLIC_IP' => proxy_cluster_ip,
-    '$KRAKEN_SERVICES_BRANCH' => 'master',
-    '$KRAKEN_SERVICES_REPO' => 'git://github.com/samsung-ag/kraken-services',
+    '$KRAKEN_SERVICES_BRANCH' => cluster_services['branch'],
+    '$KRAKEN_SERVICES_REPO' => cluster_services['repo'],
     '$RUN_EXAMPLES' => example_state,
     '$DOCKER_CACHE' => etcd_cluster_ip,
     '$NODE_01_PRIVATE_IP' => proxy_cluster_ip,
