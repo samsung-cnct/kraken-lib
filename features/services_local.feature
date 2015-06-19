@@ -13,7 +13,7 @@ Feature: Make sure we have the correct kubernetes services
       kube-dns.*
       kubernetes.*
       kubernetes-ro.*
-      monitoring-grafana.*
-      monitoring-heapster.*
-      monitoring-influxdb.*
+      grafana.*
+      heapster.*
+      influxdb.*
       """
