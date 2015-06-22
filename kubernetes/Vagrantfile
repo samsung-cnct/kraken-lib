@@ -190,6 +190,9 @@ def build_coreos_userdata(host_number)
     '$SERVICE_PUBLIC_IP' => proxy_cluster_ip,
     '$KRAKEN_SERVICES_BRANCH' => cluster_services['branch'],
     '$KRAKEN_SERVICES_REPO' => cluster_services['repo'],
+    # TODO: parse out from cluster.services
+    '$KRAKEN_SERVICES_INFLUXDB_GRAFANA_ENABLED' => 'true',
+    '$KRAKEN_SERVICES_HEAPSTER_ENABLED' => 'false',
     '$RUN_EXAMPLES' => example_state,
     '$DOCKER_CACHE' => etcd_cluster_ip,
     '$NODE_01_PRIVATE_IP' => proxy_cluster_ip,

@@ -54,6 +54,15 @@ write_files:
     sed -e 's,$SERVICE_IP,$SERVICE_PUBLIC_IP,g' \
         -i -- ./guestbook/frontend-service.json
     /opt/bin/kubectl --server=http://$MASTER_IP:8080 create -f ./guestbook/
+- path: /opt/bin/kraken-create-heapster.sh
+  owner: root
+  content: |
+    #! /usr/bin/bash
+    set -x
+    cd /opt/bin/kraken-services
+    sed -e 's,$HEAPSTER_PUBLIC_IP,$NODE_01_PRIVATE_IP,g' \
+        -i -- ./heapster/*.{json,yaml}
+    /opt/bin/kubectl --server=http://$MASTER_IP:8080 create -f ./heapster/
 - path: /opt/bin/kraken-create-influxdb-grafana.sh
   owner: root
   content: |
@@ -63,7 +72,6 @@ write_files:
     sed -e 's,$INFLUXDB_EXTERNAL_HOST,$NODE_01_PUBLIC_IP,g' \
         -e 's,$INFLUXDB_PUBLIC_IP,$NODE_01_PRIVATE_IP,g' \
         -e 's,$GRAFANA_PUBLIC_IP,$NODE_01_PRIVATE_IP,g' \
-        -e 's,$HEAPSTER_PUBLIC_IP,$NODE_01_PRIVATE_IP,g' \
         -i -- ./influxdb-grafana/*.{json,yaml}
     /opt/bin/kubectl --server=http://$MASTER_IP:8080 create -f ./influxdb-grafana/
 - path: /opt/bin/wait4skydns.sh
@@ -312,7 +320,7 @@ coreos:
         Description=Kubernetes guestbook example
         Requires=kraken-create-skydns.service
         After=kraken-create-skydns.service
-        
+
         [Service]
         TimeoutStartSec=0
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kraken-create-guestbook.sh
@@ -339,11 +347,27 @@ coreos:
         Description=Kubernetes influxdb-grafana service
         Requires=wait4skydns.service
         After=wait4skydns.service
-        
+        ConditionNull=$KRAKEN_SERVICES_INFLUXDB_GRAFANA_ENABLED
+
         [Service]
         TimeoutStartSec=0
         ExecStartPre=-/usr/bin/chmod +x /opt/bin/kraken-create-influxdb-grafana.sh
         ExecStart=/usr/bin/bash /opt/bin/kraken-create-influxdb-grafana.sh
+        RemainAfterExit=true
+        Type=oneshot
+    - name: kraken-create-heapster.service
+      command: start
+      content: |
+        [Unit]
+        Description=Kubernetes heapster service
+        Requires=wait4skydns.service
+        After=wait4skydns.service
+        ConditionNull=$KRAKEN_SERVICES_HEAPSTER_ENABLED
+
+        [Service]
+        TimeoutStartSec=0
+        ExecStartPre=-/usr/bin/chmod +x /opt/bin/kraken-create-heapster.sh
+        ExecStart=/usr/bin/bash /opt/bin/kraken-create-heapster.sh
         RemainAfterExit=true
         Type=oneshot
   update:
