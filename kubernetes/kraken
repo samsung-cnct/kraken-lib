@@ -101,8 +101,8 @@ command :test do |test_command|
     unless $?.success?
       system("ERROR: tests failed, displaying journalctl output from master")
       blacklist_regexes = %w(handlers.go motd OpenSSH sshd)
-      blacklist_grep_cmd = blacklist_regexes.map { |x| "grep -v #{x}" }.join(" \\| ")
-      system("kraken #{cluster} ssh master -c \\' journalctl --no-pager \\| #{blacklist_grep_cmd} \\'")
+      blacklist_grep_cmd = blacklist_regexes.map { |x| "grep -v #{x}" }.join(" \| ")
+      run("#{cluster} ssh master -c \' journalctl --no-pager \| #{blacklist_grep_cmd} \'".split(' '))
     end
   end
 end
