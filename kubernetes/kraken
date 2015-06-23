@@ -75,11 +75,12 @@ long_desc "Run cucumber tests on a cluster. For example:
 "
 command :test do |test_command|
   test_command.action do |global_options,options,args|
-    settings_yaml = File.join(CLUSTERS_PATH, args[0], 'settings.yaml')
+    cluster = args[0]
+    settings_yaml = File.join(CLUSTERS_PATH, cluster, 'settings.yaml')
     raise "#{settings_yaml} not found. You need to create it!" unless File.exist?(settings_yaml)
 
     settings = YAML.load_file(settings_yaml)
-    kube_master = case args[0]
+    kube_master = case cluster
                   when 'aws'
                     settings['aws']['masterHostName'] || settings['aws']['masterPublicIp']
                   else
@@ -87,16 +88,22 @@ command :test do |test_command|
                     IPAddr.new(network).to_s.chomp("0") + "#{2+100}"
                   end
 
-    kube_set_cluster_cmd = "kubectl config set-cluster #{args[0]}"\
+    kube_set_cluster_cmd = "kubectl config set-cluster #{cluster}"\
       " --server=http://#{kube_master}:8080"\
       " --api-version=#{settings['cluster']['apiVersion']}"
 
-    cucumber_cmd = "cucumber #{File.join(__dir__, '..', 'features', "*_#{args[0]}.feature")}"
+    cucumber_cmd = "cucumber #{File.join(__dir__, '..', 'features', "*_#{cluster}.feature")}"
 
     command_str = "#{kube_set_cluster_cmd}; #{cucumber_cmd}"
 
     puts "# executing: #{command_str}"
     system(command_str)
+    unless $?.success?
+      system("ERROR: tests failed, displaying journalctl output from master")
+      blacklist_regexes = %w(handlers.go motd OpenSSH sshd)
+      blacklist_grep_cmd = blacklist_regexes.map { |x| "grep -v #{x}" }.join(" \\| ")
+      system("kraken #{cluster} ssh master -c \\' journalctl --no-pager \\| #{blacklist_grep_cmd} \\'")
+    end
   end
 end
 
