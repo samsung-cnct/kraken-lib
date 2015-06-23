@@ -10,10 +10,9 @@ Feature: Make sure we have the correct kubernetes services
     And the output should eventually match:
       """
       .*
+      grafana.*
+      influxdb.*
       kube-dns.*
       kubernetes.*
       kubernetes-ro.*
-      grafana.*
-      heapster.*
-      influxdb.*
       """
