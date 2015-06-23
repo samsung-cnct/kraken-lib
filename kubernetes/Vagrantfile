@@ -132,7 +132,7 @@ end
 def cluster_services
   services = cluster_settings['cluster'].fetch('services', {})
   services['repo'] ||= 'git://github.com/samsung-ag/kraken-services'
-  services['branch'] ||= 'master'
+  services['branch'] ||= 'stable'
   services
 end
 
