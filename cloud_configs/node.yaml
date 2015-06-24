@@ -123,6 +123,19 @@ coreos:
         ExecStart=/usr/bin/bash /opt/bin/wait4apiserver.sh
         RemainAfterExit=true
         Type=oneshot
+    - name: install-kubectl.service
+      command: start
+      content: |
+        [Unit]
+        Description=Install kubectl client tool
+        Requires=network-online.target
+        After=network-online.target
+
+        [Service]
+        ExecStart=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/$KUBERNETES_VERSION/bin/linux/amd64/kubectl
+        ExecStart=/usr/bin/chmod +x /opt/bin/kubectl
+        Type=oneshot
+        RemainAfterExit=true
     - name: kube-proxy.service
       command: start
       content: |
