@@ -139,7 +139,7 @@ coreos_ami = {
 
 if aws_settings['amiId'] == 'latest'
   aws_ami_url = coreos_ami[aws_settings['regionId']]
-  coreos_ami_url = "#{coreos_url}/current/#{aws_ami_url}"
+  coreos_ami_url = "#{coreos_url}/#{coreos_release}/#{aws_ami_url}"
   aws_settings['amiId'] = open(coreos_ami_url).read().chomp
 end
 
