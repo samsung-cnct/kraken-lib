@@ -187,6 +187,19 @@ coreos:
             Environment=DOCKER_OPTS='--registry-mirror=http://$DOCKER_CACHE:5000'
     - name: fleet.service
       command: start
+    - name: install-kubectl.service
+      command: start
+      content: |
+        [Unit]
+        Description=Install kubectl client tool
+        Requires=network-online.target
+        After=network-online.target
+
+        [Service]
+        ExecStart=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/$KUBERNETES_VERSION/bin/linux/amd64/kubectl
+        ExecStart=/usr/bin/chmod +x /opt/bin/kubectl
+        Type=oneshot
+        RemainAfterExit=true
     - name: kube-apiserver.service
       command: start
       content: |
@@ -294,9 +307,7 @@ coreos:
 
         [Service]
         TimeoutStartSec=0
-        ExecStartPre=-/usr/bin/bash /opt/bin/download-kraken-services.sh
-        ExecStartPre=/usr/bin/cp /opt/bin/kraken-services/bin/linux/kubectl /opt/bin/
-        ExecStart=/usr/bin/chmod +x /opt/bin/kubectl
+        ExecStart=/usr/bin/bash /opt/bin/download-kraken-services.sh
         RemainAfterExit=true
         Type=oneshot
     - name: kraken-create-skydns.service
