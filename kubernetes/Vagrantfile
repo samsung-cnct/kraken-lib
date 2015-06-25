@@ -187,6 +187,7 @@ def build_coreos_userdata(host_number)
     '$REBOOT_STRATEGY' => settings['coreos']['rebootStrategy'] || 'off',
     '$CLOUD_PROVIDER' => 'vagrant',
     '$DNS_DOMAIN' => 'kubernetes.local',
+    '$HOSTNAME' => node_info[:hostname],
     '$SERVICE_PUBLIC_IP' => proxy_cluster_ip,
     '$KRAKEN_SERVICES_BRANCH' => cluster_services['branch'],
     '$KRAKEN_SERVICES_REPO' => cluster_services['repo'],

@@ -17,6 +17,11 @@ write_files:
   content: |
     #! /usr/bin/bash
     until curl http://$MASTER_IP:8080; do sleep 2; done
+- path: /opt/bin/wait4node.sh
+  owner: root
+  content: |
+    #! /usr/bin/bash
+    until /opt/bin/kubectl --server=$MASTER_IP:8080 get nodes | grep -q $private_ipv4; do sleep 2; done
 coreos:
   etcd2:
     proxy: on
@@ -185,6 +190,32 @@ coreos:
         --v=$KUBERNETES_VERBOSITY
         Restart=always
         RestartSec=10
+    - name: wait4node.service
+      command: start
+      content: |
+        [Unit]
+        Description=Wait for node to register with kube-apiserver
+        Requires=kube-kubelet.service
+        After=kube-kubelet.service
+
+        [Service]
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4node.sh
+        ExecStart=/usr/bin/bash /opt/bin/wait4node.sh
+        RemainAfterExit=true
+        Type=oneshot
+    - name: run-kubectl-label-node.service
+      command: start
+      content: |
+        [Unit]
+        Description=Try labeling ourselves
+        Requires=wait4node.service
+        After=wait4node.service
+
+        [Service]
+        ExecStart=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/$KUBERNETES_VERSION/bin/linux/amd64/kubectl
+        ExecStart=/opt/bin/kubectl --server=$MASTER_IP:8080 label nodes $private_ipv4 kraken-node=$HOSTNAME
+        Type=oneshot
+        RemainAfterExit=true
   update:
     group: alpha
     reboot-strategy: $REBOOT_STRATEGY
