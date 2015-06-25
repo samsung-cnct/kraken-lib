@@ -13,7 +13,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.box = coreos_boxname
   config.vm.box_version = "= #{coreos_release}"
-  config.vm.box_url = "#{coreos_url}/coreos_production_vagrant.json"
+  config.vm.box_url = "#{coreos_url}/#{coreos_release}/coreos_production_vagrant.json"
 
   config.trigger.after [:up, :resume] do
     info "making sure ssh agent has the default vagrant key..."

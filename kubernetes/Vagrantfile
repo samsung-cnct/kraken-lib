@@ -99,7 +99,7 @@ def coreos_boxname
 end
 
 def coreos_url
-  "http://#{coreos_channel}.release.core-os.net/amd64-usr/current"
+  "http://#{coreos_channel}.release.core-os.net/amd64-usr"
 end
 
 def coreos_release
@@ -107,7 +107,7 @@ def coreos_release
   version = settings['coreos']['version'] || 'latest'
   return version unless version == 'latest'
 
-  version_url = "#{coreos_url}/version.txt"
+  version_url = "#{coreos_url}/current/version.txt"
   open(version_url).read().scan(/COREOS_VERSION=.*/)[0].split('=')[1]
 end
 
