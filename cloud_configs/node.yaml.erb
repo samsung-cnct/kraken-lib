@@ -6,7 +6,7 @@ write_files:
   owner: root
   content: |
     #! /usr/bin/bash
-    until curl http://$ETCD_IP:4001/v2/machines; do sleep 2; done
+    until curl http://<%= etcd_cluster_ip %>:4001/v2/machines; do sleep 2; done
 - path: /opt/bin/wait4etcdproxy.sh
   owner: root
   content: |
@@ -16,26 +16,50 @@ write_files:
   owner: root
   content: |
     #! /usr/bin/bash
-    until curl http://$MASTER_IP:8080; do sleep 2; done
+    until curl http://<%= master_cluster_ip %>:8080; do sleep 2; done
 - path: /opt/bin/wait4node.sh
   owner: root
   content: |
     #! /usr/bin/bash
-    until /opt/bin/kubectl --server=$MASTER_IP:8080 get nodes | grep -q $private_ipv4; do sleep 2; done
+    until /opt/bin/kubectl --server=<%= master_cluster_ip %>:8080 get nodes | grep -q $private_ipv4; do sleep 2; done
 coreos:
   etcd2:
     proxy: on
     listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
     advertise-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
-    initial-cluster: etcd=http://$ETCD_IP:2380
+    initial-cluster: etcd=http://<%= etcd_cluster_ip %>:2380
   fleet:
     etcd-servers: http://$private_ipv4:4001
     public-ip: $private_ipv4
     metadata: "role=node"
   flannel:
-    etcd-endpoints: http://$ETCD_IP:4001
+    etcd-endpoints: http://<%= etcd_cluster_ip %>:4001
     interface: $private_ipv4
   units:
+    - name: format-ephemeral.service
+      command: start
+      content: |
+        [Unit]
+        Description=Formats the ephemeral drive
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/sbin/wipefs -f /dev/xvdb
+        ExecStart=/usr/sbin/mkfs.ext4 -F /dev/xvdb
+        ConditionNull=<%= use_ephemeral_drive %>
+    - name: var-lib-docker.mount
+      command: start
+      content: |
+        [Unit]
+        Description=Mount ephemeral to /var/lib/docker
+        Requires=format-ephemeral.service
+        After=format-ephemeral.service
+        Before=docker.service
+        [Mount]
+        What=/dev/xvdb
+        Where=/var/lib/docker
+        Type=ext4
+        ConditionNull=<%= use_ephemeral_drive %>
     - name: docker-tcp.socket
       command: start
       enable: true
@@ -99,7 +123,7 @@ coreos:
             After=flanneld.service
 
             [Service]
-            Environment=DOCKER_OPTS='--registry-mirror=http://$DOCKER_CACHE:5000'
+            Environment=DOCKER_OPTS='--registry-mirror=http://<%= docker_cache %>:5000'
     - name: wait4etcdproxy.service
       command: start
       content: |
@@ -137,7 +161,7 @@ coreos:
         After=network-online.target
 
         [Service]
-        ExecStart=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/$KUBERNETES_VERSION/bin/linux/amd64/kubectl
+        ExecStart=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kubectl
         ExecStart=/usr/bin/chmod +x /opt/bin/kubectl
         Type=oneshot
         RemainAfterExit=true
@@ -152,12 +176,12 @@ coreos:
 
         [Service]
         LimitNOFILE=infinity
-        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/$KUBERNETES_VERSION/bin/linux/amd64/kube-proxy
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kube-proxy
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-proxy
         ExecStart=/opt/bin/kube-proxy \
-        --master=$MASTER_IP:8080 \
+        --master=<%= master_cluster_ip %>:8080 \
         --logtostderr=true \
-        --v=$KUBERNETES_VERBOSITY
+        --v=<%= kubernetes_verbocity %>
         Restart=always
         RestartSec=10
     - name: kube-kubelet.service
@@ -171,7 +195,7 @@ coreos:
 
         [Service]
         EnvironmentFile=/etc/network-environment
-        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/$KUBERNETES_VERSION/bin/linux/amd64/kubelet
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kubelet
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kubelet
         ExecStart=/opt/bin/kubelet \
         --address=0.0.0.0 \
@@ -179,15 +203,15 @@ coreos:
         --port=10250 \
         --read_only_port=10255 \
         --hostname_override=$private_ipv4 \
-        --api_servers=$MASTER_IP:8080 \
+        --api_servers=<%= master_cluster_ip %>:8080 \
         --cluster_dns=10.100.0.10 \
-        --cluster_domain=$DNS_DOMAIN \
+        --cluster_domain=<%= dns_domain %> \
         --healthz_bind_address=0.0.0.0 \
         --healthz_port=10254 \
         --cadvisor_port=4194 \
         --log_cadvisor_usage=true \
         --logtostderr=true \
-        --v=$KUBERNETES_VERBOSITY
+        --v=<%= kubernetes_verbocity %>
         Restart=always
         RestartSec=10
     - name: wait4node.service
@@ -212,10 +236,10 @@ coreos:
         After=wait4node.service
 
         [Service]
-        ExecStart=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/$KUBERNETES_VERSION/bin/linux/amd64/kubectl
-        ExecStart=/opt/bin/kubectl --server=$MASTER_IP:8080 label nodes $private_ipv4 kraken-node=$HOSTNAME
+        ExecStart=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kubectl
+        ExecStart=/opt/bin/kubectl --server=<%= master_cluster_ip %>:8080 label nodes $private_ipv4 kraken-node=<%= hostname %>
         Type=oneshot
         RemainAfterExit=true
   update:
     group: alpha
-    reboot-strategy: $REBOOT_STRATEGY
+    reboot-strategy: <%= reboot_strategy %>

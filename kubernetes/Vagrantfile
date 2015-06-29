@@ -12,6 +12,8 @@ require 'ipaddr'
 require 'yaml'
 require 'mkmf'
 require 'fileutils'
+require 'erb'
+require 'ostruct'
 
 VAGRANTFILE_API_VERSION = "2"
 Vagrant.require_version ">= 1.7.2"
@@ -144,19 +146,19 @@ def get_coreos_node_info(host_number)
   when 1
     node_info[:hostname] = 'etcd'
     node_info[:type] = 'etcd'
-    node_info[:user_data] = File.join(CLOUDCONFIG_PATH, 'etcd.yaml')
+    node_info[:user_data] = File.join(CLOUDCONFIG_PATH, 'etcd.yaml.erb')
     node_info[:memory] = settings['vmSettings']['etcd']['memory'] || 512 unless settings['vmSettings'].nil?
     node_info[:cpus] = settings['vmSettings']['etcd']['cpus'] || 1 unless settings['vmSettings'].nil?
   when 2
     node_info[:hostname] = 'master'
     node_info[:type] = 'master'
-    node_info[:user_data] = File.join(CLOUDCONFIG_PATH, 'master.yaml')
+    node_info[:user_data] = File.join(CLOUDCONFIG_PATH, 'master.yaml.erb')
     node_info[:memory] = settings['vmSettings']['master']['memory'] || 512 unless settings['vmSettings'].nil?
     node_info[:cpus] = settings['vmSettings']['master']['cpus'] || 1 unless settings['vmSettings'].nil?
   else
     node_info[:hostname] = "node-%02d" % (host_number - 2)
     node_info[:type] = 'node'
-    node_info[:user_data] = File.join(CLOUDCONFIG_PATH, 'node.yaml')
+    node_info[:user_data] = File.join(CLOUDCONFIG_PATH, 'node.yaml.erb')
     node_info[:memory] = settings['vmSettings']['node']['memory'] || 1024 unless settings['vmSettings'].nil?
     node_info[:cpus] = settings['vmSettings']['node']['cpus'] || 1 unless settings['vmSettings'].nil?
   end
@@ -176,44 +178,34 @@ def build_coreos_userdata(host_number)
     proxy_public_ip = settings['aws'].fetch('nodePublicIp', settings['aws'].fetch('proxyHostName', proxy_public_ip))
   end
 
-
   tmp_user_data = "/tmp/#{node_info[:hostname]}-vagrantfile-user-data"
-  replacements = {
-    '$ETCD_IP' => etcd_cluster_ip,
-    '$MASTER_IP' => master_cluster_ip,
-    '$KUBERNETES_VERSION' => 'v' + kubernetes_release,
-    '$KUBERNETES_API_VERSION' => settings['cluster']['apiVersion'],
-    '$KUBERNETES_VERBOSITY' => '2',
-    '$REBOOT_STRATEGY' => settings['coreos']['rebootStrategy'] || 'off',
-    '$CLOUD_PROVIDER' => 'vagrant',
-    '$DNS_DOMAIN' => 'kubernetes.local',
-    '$HOSTNAME' => node_info[:hostname],
-    '$SERVICE_PUBLIC_IP' => proxy_cluster_ip,
-    '$KRAKEN_SERVICES_BRANCH' => cluster_services['branch'],
-    '$KRAKEN_SERVICES_REPO' => cluster_services['repo'],
-    # TODO: parse out from cluster.services
-    '$KRAKEN_SERVICES_INFLUXDB_GRAFANA_ENABLED' => 'true',
-    '$KRAKEN_SERVICES_HEAPSTER_ENABLED' => 'false',
-    '$RUN_EXAMPLES' => example_state,
-    '$DOCKER_CACHE' => etcd_cluster_ip,
-    '$NODE_01_PRIVATE_IP' => proxy_cluster_ip,
-    '$NODE_01_PUBLIC_IP' => proxy_public_ip,
-    '$FINAL_NODE' => final_node_ip
-  }
-
-  regexp = Regexp.new replacements.keys.map {|k| Regexp.quote(k) }.join('|')
-  tmp_file = Tempfile.new("tmp_vagrantfile")
-
-  begin
-    File.foreach(node_info[:user_data], "r") do |line|
-      tmp_file.write line.gsub regexp, replacements
-    end
-    tmp_file.close
-    FileUtils.mv(tmp_file.path, tmp_user_data)
-  ensure
-    tmp_file.close
-    tmp_file.unlink
-  end
+  render(
+    node_info[:user_data], 
+    tmp_user_data,
+    { 
+      :etcd_cluster_ip => etcd_cluster_ip, 
+      :master_cluster_ip => master_cluster_ip,
+      :kubernetes_release => 'v' + kubernetes_release,
+      :api_version => settings['cluster']['apiVersion'],
+      :kubernetes_verbocity => '2',
+      :reboot_strategy => settings['coreos']['rebootStrategy'] || 'off',
+      :cloud_provider => 'vagrant',
+      :dns_domain => 'kubernetes.local',
+      :hostname => node_info[:hostname],
+      :service_public_ip => proxy_cluster_ip,
+      :kraken_services_branch => cluster_services['branch'],
+      :kraken_services_repo => cluster_services['repo'],
+      # TODO: parse out from cluster.services
+      :kraken_services_grafana_enabled => 'true',
+      :kraken_services_heapster_enabled => 'false',
+      :run_examples => example_state,
+      :docker_cache => etcd_cluster_ip,
+      :node_01_private_ip => proxy_cluster_ip,
+      :node_01_public_ip => proxy_public_ip,
+      :finale_node_ip => final_node_ip,
+      :use_ephemeral_drive => CLUSTER_NAME == 'aws' ? 'true' : 'false'
+    } 
+  )
 
   tmp_user_data
 end
@@ -248,6 +240,16 @@ end
 def run_tests(config, type)
   config.vm.provision :serverspec do |spec|
     spec.pattern = File.join(SPEC_PATH, "*_#{type}_#{CLUSTER_NAME}_spec.rb")
+  end
+end
+
+def render(templatepath, destinationpath, variables)
+  if File.file?(templatepath)
+    template = File.open(templatepath, "rb").read
+    content = ERB.new(template).result(OpenStruct.new(variables).instance_eval { binding })
+    outputpath = destinationpath.end_with?('/') ? "#{destinationpath}/#{File.basename(templatepath, '.erb')}" : destinationpath
+    FileUtils.mkdir_p(File.dirname(outputpath))
+    File.open(outputpath, "wb") { |f| f.write(content) }
   end
 end
 

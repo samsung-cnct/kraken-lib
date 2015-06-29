@@ -181,6 +181,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         aws.subnet_id = aws_settings['subnetId']
         aws.private_ip_address = base_ip_address + "#{i+100}"
         aws.associate_public_ip = aws_settings['associatePublicIps']
+        aws.block_device_mapping = [{ 'DeviceName' => '/dev/sdb', 'VirtualName' => 'ephemeral0' }]
 
         case node_info[:hostname]
         when 'master'
