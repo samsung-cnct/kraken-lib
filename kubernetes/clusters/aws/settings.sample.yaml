@@ -7,13 +7,20 @@ aws:
   secretAccessKey:                                           #required, eq: same as AWS_SECRET_ACCESS_KEY
   amiId: latest                                              #default = latest
   instanceType: m3.medium                                    #default = m3.medium required
-  instanceTypeMaster: m3.large                               #default = m3.large
-  instanceTypeEtcd: m3.medium                                #default = m3.medium
-  instandeTypeNode: m3.medium                                #default = m3.medium 
-  instanceEBSSize: 300                                       #default = 300 GiB, size of EBS volume attachment
+  instanceTypeMaster: m3.large                               #optional
+  instanceTypeEtcd: m3.medium                                #optional
+  instanceTypeNode: m3.medium                                #optional 
+  instanceType_node_01:                                      #optional. Use with any node name i.e instanceType_node01, instanceType_node02
+  instanceStorageType:                                       #default: ebs. ebs or ephemeral
+  instanceStorageTypeMaster:                                 #optional
+  instanceStorageTypeEtcd:                                   #optional
+  instanceStorageTypeNode:                                   #optional 
+  instanceStorageType_node_01:                               #optional. Use with any node name i.e instanceStorageType_node_01, instanceStorageType_node_01
+  instanceEBSSize: 300                                       #default = 300 GiB, size of EBS volume attachment. only applies if instance stroage type is ebs
   masterEBSSize:                                             #optional
   etcdEBSSize:                                               #optional
   nodeEBSSize:                                               #optional
+  nodeEBSSize_node01:                                        #optional Use with any node name. i.e nodeEBSSize_node01, nodeEBSSize_node02 etc
   regionId: us-west-2                                        #required
   securityGroupIds:
     -                                                        #required, eg: - sg-1234

@@ -93,6 +93,7 @@ coreos:
     etcd-endpoints: http://<%= etcd_cluster_ip %>:4001
     interface: $private_ipv4
   units:
+    <% if drive_type == 'ebs' %>
     - name: format-ebs.service
       command: start
       content: |
@@ -103,7 +104,6 @@ coreos:
         RemainAfterExit=yes
         ExecStart=/usr/sbin/wipefs -f /dev/xvdf
         ExecStart=/usr/sbin/mkfs.ext4 -F /dev/xvdf
-        ConditionNull=<%= use_ebs_drive %>
     - name: var-lib-docker.mount
       command: start
       content: |
@@ -116,7 +116,31 @@ coreos:
         What=/dev/xvdf
         Where=/var/lib/docker
         Type=ext4
-        ConditionNull=<%= use_ebs_drive %>
+<% end %>
+<% if drive_type == 'ephemeral' %>
+    - name: format-ephemeral.service
+      command: start
+      content: |
+        [Unit]
+        Description=Formats the ephemeral drive
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/sbin/wipefs -f /dev/xvdb
+        ExecStart=/usr/sbin/mkfs.ext4 -F /dev/xvdb
+    - name: var-lib-docker.mount
+      command: start
+      content: |
+        [Unit]
+        Description=Mount ephemeral to /var/lib/docker
+        Requires=format-ephemeral.service
+        After=format-ephemeral.service
+        Before=docker.service
+        [Mount]
+        What=/dev/xvdb
+        Where=/var/lib/docker
+        Type=ext4
+<% end %>
     - name: docker-tcp.socket
       command: start
       enable: true
@@ -244,7 +268,7 @@ coreos:
         --etcd_servers=http://127.0.0.1:4001 \
         --public_address_override=$private_ipv4 \
         --logtostderr=true \
-        --v=<%= kubernetes_verbocity %> \
+        --v=<%= kubernetes_verbosity %> \
         --cors_allowed_origins=.* \
         --runtime_config=api/<%= api_version %>
         Restart=always
@@ -266,7 +290,7 @@ coreos:
         --pod_eviction_timeout=1m \
         --resource_quota_sync_period=20s \
         --logtostderr=true \
-        --v=<%= kubernetes_verbocity %>
+        --v=<%= kubernetes_verbosity %>
         Restart=always
         RestartSec=10
     - name: kube-scheduler.service
@@ -284,7 +308,7 @@ coreos:
         ExecStart=/opt/bin/kube-scheduler \
         --master=$private_ipv4:8080 \
         --logtostderr=true \
-        --v=<%= kubernetes_verbocity %>
+        --v=<%= kubernetes_verbosity %>
         Restart=always
         RestartSec=10
     - name: kube-register.service
@@ -382,7 +406,7 @@ coreos:
         Description=Kubernetes influxdb-grafana service
         Requires=wait4skydns.service
         After=wait4skydns.service
-        ConditionNull=<%= kraken_services_grafana_enabled %>
+        ConditionNull=<%= kraken_services_influxdb_grafana_enabled %>
 
         [Service]
         TimeoutStartSec=0

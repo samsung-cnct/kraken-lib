@@ -21,6 +21,7 @@ coreos:
     public-ip: $private_ipv4
     metadata: "role=etcd"
   units:
+<% if drive_type == 'ebs' %>
     - name: format-ebs.service
       command: start
       content: |
@@ -31,7 +32,6 @@ coreos:
         RemainAfterExit=yes
         ExecStart=/usr/sbin/wipefs -f /dev/xvdf
         ExecStart=/usr/sbin/mkfs.ext4 -F /dev/xvdf
-        ConditionNull=<%= use_ebs_drive %>
     - name: var-lib-docker.mount
       command: start
       content: |
@@ -44,7 +44,31 @@ coreos:
         What=/dev/xvdf
         Where=/var/lib/docker
         Type=ext4
-        ConditionNull=<%= use_ebs_drive %>
+<% end %>
+<% if drive_type == 'ephemeral' %>
+    - name: format-ephemeral.service
+      command: start
+      content: |
+        [Unit]
+        Description=Formats the ephemeral drive
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/sbin/wipefs -f /dev/xvdb
+        ExecStart=/usr/sbin/mkfs.ext4 -F /dev/xvdb
+    - name: var-lib-docker.mount
+      command: start
+      content: |
+        [Unit]
+        Description=Mount ephemeral to /var/lib/docker
+        Requires=format-ephemeral.service
+        After=format-ephemeral.service
+        Before=docker.service
+        [Mount]
+        What=/dev/xvdb
+        Where=/var/lib/docker
+        Type=ext4
+<% end %>
     - name: wait4etcdproxy.service
       command: start
       content: |

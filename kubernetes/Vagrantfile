@@ -178,33 +178,54 @@ def build_coreos_userdata(host_number)
     proxy_public_ip = settings['aws'].fetch('nodePublicIp', settings['aws'].fetch('proxyHostName', proxy_public_ip))
   end
 
+  storage_type = nil
+  if CLUSTER_NAME == 'aws'
+    aws_settings = settings['aws']
+    storage_type = aws_settings['instanceStorageType'] || 'ebs'
+
+    case node_info[:type]
+    when 'master'
+      storage_type = aws_settings['instanceStorageTypeMaster'] unless aws_settings['instanceStorageTypeMaster'].nil?
+    when 'etcd'
+      storage_type = aws_settings['instanceStorageTypeEtcd'] unless aws_settings['instanceStorageTypeEtcd'].nil?
+    when 'node'
+      storage_type = aws_settings['instanceStorageTypeNode'] unless aws_settings['instanceStorageTypeNode'].nil?
+
+      storage_setting = "instanceStorageType_#{node_info[:hostname].gsub('-','_')}"
+      storage_type = aws_settings[storage_setting] unless aws_settings[storage_setting].nil?
+    end
+
+  end
+
+  render_vars = { 
+    :etcd_cluster_ip => etcd_cluster_ip, 
+    :master_cluster_ip => master_cluster_ip,
+    :kubernetes_release => 'v' + kubernetes_release,
+    :api_version => settings['cluster']['apiVersion'],
+    :kubernetes_verbosity => '2',
+    :reboot_strategy => settings['coreos']['rebootStrategy'] || 'off',
+    :cloud_provider => 'vagrant',
+    :dns_domain => 'kubernetes.local',
+    :hostname => node_info[:hostname],
+    :service_public_ip => proxy_cluster_ip,
+    :kraken_services_branch => cluster_services['branch'],
+    :kraken_services_repo => cluster_services['repo'],
+    # TODO: parse out from cluster.services
+    :kraken_services_influxdb_grafana_enabled => 'true',
+    :kraken_services_heapster_enabled => 'false',
+    :run_examples => example_state,
+    :docker_cache => etcd_cluster_ip,
+    :node_01_private_ip => proxy_cluster_ip,
+    :node_01_public_ip => proxy_public_ip,
+    :finale_node_ip => final_node_ip,
+    :drive_type => storage_type
+  } 
+
   tmp_user_data = "/tmp/#{node_info[:hostname]}-vagrantfile-user-data"
   render(
     node_info[:user_data], 
     tmp_user_data,
-    { 
-      :etcd_cluster_ip => etcd_cluster_ip, 
-      :master_cluster_ip => master_cluster_ip,
-      :kubernetes_release => 'v' + kubernetes_release,
-      :api_version => settings['cluster']['apiVersion'],
-      :kubernetes_verbocity => '2',
-      :reboot_strategy => settings['coreos']['rebootStrategy'] || 'off',
-      :cloud_provider => 'vagrant',
-      :dns_domain => 'kubernetes.local',
-      :hostname => node_info[:hostname],
-      :service_public_ip => proxy_cluster_ip,
-      :kraken_services_branch => cluster_services['branch'],
-      :kraken_services_repo => cluster_services['repo'],
-      # TODO: parse out from cluster.services
-      :kraken_services_grafana_enabled => 'true',
-      :kraken_services_heapster_enabled => 'false',
-      :run_examples => example_state,
-      :docker_cache => etcd_cluster_ip,
-      :node_01_private_ip => proxy_cluster_ip,
-      :node_01_public_ip => proxy_public_ip,
-      :finale_node_ip => final_node_ip,
-      :use_ebs_drive => CLUSTER_NAME == 'aws' ? 'true' : 'false'
-    } 
+    render_vars
   )
 
   tmp_user_data
