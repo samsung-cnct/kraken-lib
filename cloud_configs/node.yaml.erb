@@ -36,30 +36,30 @@ coreos:
     etcd-endpoints: http://<%= etcd_cluster_ip %>:4001
     interface: $private_ipv4
   units:
-    - name: format-ephemeral.service
+    - name: format-ebs.service
       command: start
       content: |
         [Unit]
-        Description=Formats the ephemeral drive
+        Description=Formats the EBS drive
         [Service]
         Type=oneshot
         RemainAfterExit=yes
-        ExecStart=/usr/sbin/wipefs -f /dev/xvdb
-        ExecStart=/usr/sbin/mkfs.ext4 -F /dev/xvdb
-        ConditionNull=<%= use_ephemeral_drive %>
+        ExecStart=/usr/sbin/wipefs -f /dev/xvdf
+        ExecStart=/usr/sbin/mkfs.ext4 -F /dev/xvdf
+        ConditionNull=<%= use_ebs_drive %>
     - name: var-lib-docker.mount
       command: start
       content: |
         [Unit]
-        Description=Mount ephemeral to /var/lib/docker
-        Requires=format-ephemeral.service
-        After=format-ephemeral.service
+        Description=Mount EBS to /var/lib/docker
+        Requires=format-ebs.service
+        After=format-ebs.service
         Before=docker.service
         [Mount]
-        What=/dev/xvdb
+        What=/dev/xvdf
         Where=/var/lib/docker
         Type=ext4
-        ConditionNull=<%= use_ephemeral_drive %>
+        ConditionNull=<%= use_ebs_drive %>
     - name: docker-tcp.socket
       command: start
       enable: true

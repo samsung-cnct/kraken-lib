@@ -203,7 +203,7 @@ def build_coreos_userdata(host_number)
       :node_01_private_ip => proxy_cluster_ip,
       :node_01_public_ip => proxy_public_ip,
       :finale_node_ip => final_node_ip,
-      :use_ephemeral_drive => CLUSTER_NAME == 'aws' ? 'true' : 'false'
+      :use_ebs_drive => CLUSTER_NAME == 'aws' ? 'true' : 'false'
     } 
   )
 

@@ -10,6 +10,10 @@ aws:
   instanceTypeMaster: m3.large                               #default = m3.large
   instanceTypeEtcd: m3.medium                                #default = m3.medium
   instandeTypeNode: m3.medium                                #default = m3.medium 
+  instanceEBSSize: 300                                       #default = 300 GiB, size of EBS volume attachment
+  masterEBSSize:                                             #optional
+  etcdEBSSize:                                               #optional
+  nodeEBSSize:                                               #optional
   regionId: us-west-2                                        #required
   securityGroupIds:
     -                                                        #required, eg: - sg-1234

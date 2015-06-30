@@ -121,6 +121,34 @@ def get_elb_dns_info(aws_settings)
   return alias_target
 end
 
+def get_ami_type(node_info, aws_settings)
+  aws_instance_type = aws_settings['instanceType']
+  case node_info[:type]
+  when 'master'
+    aws_instance_type = aws_settings['instanceTypeMaster'] unless aws_settings['instanceTypeMaster'].nil?
+  when 'etcd'
+    aws_instance_type = aws_settings['instanceTypeEtcd'] unless aws_settings['instanceTypeEtcd'].nil?
+  when 'node'
+    aws_instance_type = aws_settings['instandeTypeNode'] unless aws_settings['instandeTypeNode'].nil?
+  end
+
+  aws_instance_type
+end
+
+def get_ebs_size(node_info, aws_settings)
+  ebs_size = aws_settings['instanceEBSSize'] || 300
+  case node_info[:type]
+  when 'master'
+    ebs_size = aws_settings['masterEBSSize'] unless aws_settings['masterEBSSize'].nil?
+  when 'etcd'
+    ebs_size = aws_settings['etcdEBSSize'] unless aws_settings['etcdEBSSize'].nil?
+  when 'node'
+    ebs_size = aws_settings['nodeEBSSize'] unless aws_settings['nodeEBSSize'].nil?
+  end
+
+  ebs_size
+end
+
 # Find the latest Coreos based on region
 aws_settings = cluster_settings['aws']
 
@@ -181,36 +209,30 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         aws.subnet_id = aws_settings['subnetId']
         aws.private_ip_address = base_ip_address + "#{i+100}"
         aws.associate_public_ip = aws_settings['associatePublicIps']
-        aws.block_device_mapping = [{ 'DeviceName' => '/dev/sdb', 'VirtualName' => 'ephemeral0' }]
+        aws.instance_type = get_ami_type(node_info, aws_settings)
+        aws.block_device_mapping = [
+          { 'DeviceName' => '/dev/sdf', 'Ebs.VolumeSize' => get_ebs_size(node_info, aws_settings) }
+        ]
 
-        case node_info[:hostname]
+        case node_info[:type]
         when 'master'
-          aws.instance_type = aws_settings['instanceTypeMaster'] unless aws_settings['instanceTypeMaster'].nil?
           aws.elastic_ip = aws_settings['masterPublicIp'] if aws_settings['masterPublicIp']
           if aws_settings['masterHostName']
             override.route53.hosted_zone_id = aws_settings['hostedZoneId']
             override.route53.record_set = [dot_record_set(aws_settings['masterHostName']), "A"]
           end
-        when 'etcd'
-          aws.instance_type = aws_settings['instanceTypeEtcd'] unless aws_settings['instanceTypeEtcd'].nil?
-        when 'node-01'
-          aws.instance_type = aws_settings['instanceTypeNode01'] unless aws_settings['instanceTypeNode01'].nil?
-          aws.elastic_ip = aws_settings['nodePublicIp'] if aws_settings['nodePublicIp']
-          if aws_settings['proxyHostName']
-            override.route53.hosted_zone_id = aws_settings['hostedZoneId']
-            override.route53.record_set = [dot_record_set(aws_settings['proxyHostName']), "A"]
+        when 'node'
+          if node_info[:hostname] == 'node-01'
+            aws.elastic_ip = aws_settings['nodePublicIp'] if aws_settings['nodePublicIp']
+            if aws_settings['proxyHostName']
+              override.route53.hosted_zone_id = aws_settings['hostedZoneId']
+              override.route53.record_set = [dot_record_set(aws_settings['proxyHostName']), "A"]
+            end
           end
-        end
 
-        # join to ELB if, specified
-        if node_info[:hostname].start_with?('node-')
-          unless node_info[:hostname] == 'node-01'
-            aws.instance_type = aws_settings['instanceTypeNode'] unless aws_settings['instanceTypeNode'].nil?
-          end
+          # join to ELB if, specified
           aws.elb = aws_settings['elb']['name'] unless aws_settings['elb'].nil?
         end
-
-        # add ELB alias, is hosted zone
 
         aws.user_data = File.read(tmp_user_data)
 
