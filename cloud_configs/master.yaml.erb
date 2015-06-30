@@ -8,14 +8,14 @@ write_files:
     #! /usr/bin/bash
     set -x
     mkdir -p /opt/bin/kraken-services && cd /opt/bin/kraken-services
-    git clone $KRAKEN_SERVICES_REPO .
+    git clone <%= kraken_services_repo %> .
     # use explicit form incase branch name matches filename in repo and avoids shortcut
-    git checkout -b $KRAKEN_SERVICES_BRANCH origin/$KRAKEN_SERVICES_BRANCH
+    git checkout -b <%= kraken_services_branch %> origin/<%= kraken_services_branch %>
 - path: /opt/bin/wait4etcd.sh
   owner: root
   content: |
     #! /usr/bin/bash
-    until curl http://$ETCD_IP:4001/v2/machines; do sleep 2; done
+    until curl http://<%= etcd_cluster_ip %>:4001/v2/machines; do sleep 2; done
 - path: /opt/bin/wait4etcdproxy.sh
   owner: root
   content: |
@@ -25,7 +25,7 @@ write_files:
   owner: root
   content: |
     #! /usr/bin/bash
-    until curl http://$FINAL_NODE:10255/stats/; do sleep 2; done
+    until curl http://<%= finale_node_ip %>:10255/stats/; do sleep 2; done
 - path: /opt/bin/wait4dns.sh
   owner: root
   content: |
@@ -42,38 +42,38 @@ write_files:
     #! /usr/bin/bash
     set -x
     cd /opt/bin/kraken-services
-    sed -e 's,$KUBE_MASTER_URL,http://$MASTER_IP:8080,g' \
+    sed -e 's,$KUBE_MASTER_URL,http://<%= master_cluster_ip %>:8080,g' \
         -i -- ./skydns/*.{json,yaml}
-    /opt/bin/kubectl --server=http://$MASTER_IP:8080 create -f ./skydns/
+    /opt/bin/kubectl --server=http://<%= master_cluster_ip %>:8080 create -f ./skydns/
 - path: /opt/bin/kraken-create-guestbook.sh
   owner: root
   content: |
     #! /usr/bin/bash
     set -x
     cd /opt/bin/kraken-services
-    sed -e 's,$SERVICE_IP,$SERVICE_PUBLIC_IP,g' \
+    sed -e 's,$SERVICE_IP,<%= service_public_ip %>,g' \
         -i -- ./guestbook/frontend-service.json
-    /opt/bin/kubectl --server=http://$MASTER_IP:8080 create -f ./guestbook/
+    /opt/bin/kubectl --server=http://<%= master_cluster_ip %>:8080 create -f ./guestbook/
 - path: /opt/bin/kraken-create-heapster.sh
   owner: root
   content: |
     #! /usr/bin/bash
     set -x
     cd /opt/bin/kraken-services
-    sed -e 's,$HEAPSTER_PUBLIC_IP,$NODE_01_PRIVATE_IP,g' \
+    sed -e 's,$HEAPSTER_PUBLIC_IP,<%= node_01_private_ip %>,g' \
         -i -- ./heapster/*.{json,yaml}
-    /opt/bin/kubectl --server=http://$MASTER_IP:8080 create -f ./heapster/
+    /opt/bin/kubectl --server=http://<%= master_cluster_ip %>:8080 create -f ./heapster/
 - path: /opt/bin/kraken-create-influxdb-grafana.sh
   owner: root
   content: |
     #! /usr/bin/bash
     set -x
     cd /opt/bin/kraken-services
-    sed -e 's,$INFLUXDB_EXTERNAL_HOST,$NODE_01_PUBLIC_IP,g' \
-        -e 's,$INFLUXDB_PUBLIC_IP,$NODE_01_PRIVATE_IP,g' \
-        -e 's,$GRAFANA_PUBLIC_IP,$NODE_01_PRIVATE_IP,g' \
+    sed -e 's,$INFLUXDB_EXTERNAL_HOST,<%= node_01_public_ip %>,g' \
+        -e 's,$INFLUXDB_PUBLIC_IP,<%= node_01_private_ip %>,g' \
+        -e 's,$GRAFANA_PUBLIC_IP,<%= node_01_private_ip %>,g' \
         -i -- ./influxdb-grafana/*.{json,yaml}
-    /opt/bin/kubectl --server=http://$MASTER_IP:8080 create -f ./influxdb-grafana/
+    /opt/bin/kubectl --server=http://<%= master_cluster_ip %>:8080 create -f ./influxdb-grafana/
 - path: /opt/bin/wait4skydns.sh
   owner: root
   content: |
@@ -84,15 +84,63 @@ coreos:
     proxy: on
     listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
     advertise-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
-    initial-cluster: etcd=http://$ETCD_IP:2380
+    initial-cluster: etcd=http://<%= etcd_cluster_ip %>:2380
   fleet:
     etcd-servers: http://$private_ipv4:4001
     public-ip: $public_ipv4
     metadata: "role=master"
   flannel:
-    etcd-endpoints: http://$ETCD_IP:4001
+    etcd-endpoints: http://<%= etcd_cluster_ip %>:4001
     interface: $private_ipv4
   units:
+    <% if drive_type == 'ebs' %>
+    - name: format-ebs.service
+      command: start
+      content: |
+        [Unit]
+        Description=Formats the EBS drive
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/sbin/wipefs -f /dev/xvdf
+        ExecStart=/usr/sbin/mkfs.ext4 -F /dev/xvdf
+    - name: var-lib-docker.mount
+      command: start
+      content: |
+        [Unit]
+        Description=Mount EBS to /var/lib/docker
+        Requires=format-ebs.service
+        After=format-ebs.service
+        Before=docker.service
+        [Mount]
+        What=/dev/xvdf
+        Where=/var/lib/docker
+        Type=ext4
+<% end %>
+<% if drive_type == 'ephemeral' %>
+    - name: format-ephemeral.service
+      command: start
+      content: |
+        [Unit]
+        Description=Formats the ephemeral drive
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/sbin/wipefs -f /dev/xvdb
+        ExecStart=/usr/sbin/mkfs.ext4 -F /dev/xvdb
+    - name: var-lib-docker.mount
+      command: start
+      content: |
+        [Unit]
+        Description=Mount ephemeral to /var/lib/docker
+        Requires=format-ephemeral.service
+        After=format-ephemeral.service
+        Before=docker.service
+        [Mount]
+        What=/dev/xvdb
+        Where=/var/lib/docker
+        Type=ext4
+<% end %>
     - name: docker-tcp.socket
       command: start
       enable: true
@@ -184,7 +232,7 @@ coreos:
             After=flanneld.service
 
             [Service]
-            Environment=DOCKER_OPTS='--registry-mirror=http://$DOCKER_CACHE:5000'
+            Environment=DOCKER_OPTS='--registry-mirror=http://<%= docker_cache %>:5000'
     - name: fleet.service
       command: start
     - name: install-kubectl.service
@@ -196,7 +244,7 @@ coreos:
         After=network-online.target
 
         [Service]
-        ExecStart=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/$KUBERNETES_VERSION/bin/linux/amd64/kubectl
+        ExecStart=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kubectl
         ExecStart=/usr/bin/chmod +x /opt/bin/kubectl
         Type=oneshot
         RemainAfterExit=true
@@ -211,7 +259,7 @@ coreos:
         [Service]
         LimitNOFILE=infinity
         ExecStartPre=-/usr/bin/mkdir -p /opt/bin
-        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/$KUBERNETES_VERSION/bin/linux/amd64/kube-apiserver
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kube-apiserver
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-apiserver
         ExecStart=/opt/bin/kube-apiserver \
         --insecure_bind_address=0.0.0.0 \
@@ -220,9 +268,9 @@ coreos:
         --etcd_servers=http://127.0.0.1:4001 \
         --public_address_override=$private_ipv4 \
         --logtostderr=true \
-        --v=$KUBERNETES_VERBOSITY \
+        --v=<%= kubernetes_verbosity %> \
         --cors_allowed_origins=.* \
-        --runtime_config=api/$KUBERNETES_API_VERSION
+        --runtime_config=api/<%= api_version %>
         Restart=always
         RestartSec=10
     - name: kube-controller-manager.service
@@ -235,14 +283,14 @@ coreos:
         After=kube-apiserver.service
 
         [Service]
-        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/$KUBERNETES_VERSION/bin/linux/amd64/kube-controller-manager
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kube-controller-manager
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-controller-manager
         ExecStart=/opt/bin/kube-controller-manager \
         --master=$private_ipv4:8080 \
         --pod_eviction_timeout=1m \
         --resource_quota_sync_period=20s \
         --logtostderr=true \
-        --v=$KUBERNETES_VERBOSITY
+        --v=<%= kubernetes_verbosity %>
         Restart=always
         RestartSec=10
     - name: kube-scheduler.service
@@ -255,12 +303,12 @@ coreos:
         After=kube-apiserver.service
 
         [Service]
-        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/$KUBERNETES_VERSION/bin/linux/amd64/kube-scheduler
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kube-scheduler
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-scheduler
         ExecStart=/opt/bin/kube-scheduler \
         --master=$private_ipv4:8080 \
         --logtostderr=true \
-        --v=$KUBERNETES_VERBOSITY
+        --v=<%= kubernetes_verbosity %>
         Restart=always
         RestartSec=10
     - name: kube-register.service
@@ -325,7 +373,7 @@ coreos:
         RemainAfterExit=true
         Type=oneshot
     - name: kraken-create-guestbook.service
-      command: $RUN_EXAMPLES
+      command: <%= run_examples %>
       content: |
         [Unit]
         Description=Kubernetes guestbook example
@@ -358,7 +406,7 @@ coreos:
         Description=Kubernetes influxdb-grafana service
         Requires=wait4skydns.service
         After=wait4skydns.service
-        ConditionNull=$KRAKEN_SERVICES_INFLUXDB_GRAFANA_ENABLED
+        ConditionNull=<%= kraken_services_influxdb_grafana_enabled %>
 
         [Service]
         TimeoutStartSec=0
@@ -373,7 +421,7 @@ coreos:
         Description=Kubernetes heapster service
         Requires=wait4skydns.service
         After=wait4skydns.service
-        ConditionNull=$KRAKEN_SERVICES_HEAPSTER_ENABLED
+        ConditionNull=<%= kraken_services_heapster_enabled %>
 
         [Service]
         TimeoutStartSec=0
@@ -383,4 +431,4 @@ coreos:
         Type=oneshot
   update:
     group: alpha
-    reboot-strategy: $REBOOT_STRATEGY
+    reboot-strategy: <%= reboot_strategy %>
