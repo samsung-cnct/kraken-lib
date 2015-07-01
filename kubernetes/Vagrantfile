@@ -212,7 +212,7 @@ def build_coreos_userdata(host_number)
     :kraken_services_repo => cluster_services['repo'],
     # TODO: parse out from cluster.services
     :kraken_services_influxdb_grafana_enabled => 'true',
-    :kraken_services_heapster_enabled => 'false',
+    :kraken_services_heapster_enabled => 'true',
     :run_examples => example_state,
     :docker_cache => etcd_cluster_ip,
     :node_01_private_ip => proxy_cluster_ip,
