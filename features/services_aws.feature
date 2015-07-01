@@ -11,6 +11,7 @@ Feature: Make sure we have the correct kubernetes services
       """
       .*
       grafana.*
+      heapster.*
       influxdb.*
       kube-dns.*
       kubernetes.*
