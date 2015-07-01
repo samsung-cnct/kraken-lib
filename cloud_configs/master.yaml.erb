@@ -10,7 +10,7 @@ write_files:
     mkdir -p /opt/bin/kraken-services && cd /opt/bin/kraken-services
     git clone <%= kraken_services_repo %> .
     # use explicit form incase branch name matches filename in repo and avoids shortcut
-    git checkout -b <%= kraken_services_branch %> origin/<%= kraken_services_branch %>
+    git checkout -B <%= kraken_services_branch %> origin/<%= kraken_services_branch %>
 - path: /opt/bin/wait4etcd.sh
   owner: root
   content: |
