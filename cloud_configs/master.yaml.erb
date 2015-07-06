@@ -43,6 +43,7 @@ write_files:
     set -x
     cd /opt/bin/kraken-services
     sed -e 's,$KUBE_MASTER_URL,http://<%= master_cluster_ip %>:8080,g' \
+        -e 's,$CLUSTER_DOMAIN,<%= dns_domain %>,g' \
         -i -- ./skydns/*.{json,yaml}
     /opt/bin/kubectl --server=http://<%= master_cluster_ip %>:8080 create -f ./skydns/
 - path: /opt/bin/kraken-create-guestbook.sh
