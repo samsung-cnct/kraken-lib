@@ -48,7 +48,7 @@ aws:
 cluster:                     
   kubernetesVersion: stable                                  #default = stable
   nodes: 3                                                   #default = 3
-  apiVersion: v1beta3                                        #default = v1beta3
+  apiVersion: v1                                             #default = v1
   network:                                                   #required, CIDR of aws.subnetId
   guestbook: 
     run: false                                               #default = false
