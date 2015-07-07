@@ -75,6 +75,15 @@ write_files:
         -e 's,$GRAFANA_PUBLIC_IP,<%= node_01_private_ip %>,g' \
         -i -- ./influxdb-grafana/*.{json,yaml}
     /opt/bin/kubectl --server=http://<%= master_cluster_ip %>:8080 create -f ./influxdb-grafana/
+- path: /opt/bin/kraken-create-kube-ui.sh
+  owner: root
+  content: |
+    #! /usr/bin/bash
+    set -x
+    cd /opt/bin/kraken-services
+    sed -e 's,$KUBE_UI_PUBLIC_IP,<%= node_01_private_ip %>,g' \
+        -i -- ./kube-ui/*.{json,yaml}
+    /opt/bin/kubectl --server=http://<%= master_cluster_ip %>:8080 create -f ./kube-ui/
 - path: /opt/bin/wait4skydns.sh
   owner: root
   content: |
@@ -428,6 +437,21 @@ coreos:
         TimeoutStartSec=0
         ExecStartPre=-/usr/bin/chmod +x /opt/bin/kraken-create-heapster.sh
         ExecStart=/usr/bin/bash /opt/bin/kraken-create-heapster.sh
+        RemainAfterExit=true
+        Type=oneshot
+    - name: kraken-create-kube-ui.service
+      command: start
+      content: |
+        [Unit]
+        Description=Kubernetes UI service
+        Requires=wait4skydns.service
+        After=wait4skydns.service
+        ConditionNull=<%= kraken_services_kube_ui_enabled %>
+
+        [Service]
+        TimeoutStartSec=0
+        ExecStartPre=-/usr/bin/chmod +x /opt/bin/kraken-create-kube-ui.sh
+        ExecStart=/usr/bin/bash /opt/bin/kraken-create-kube-ui.sh
         RemainAfterExit=true
         Type=oneshot
   update:
