@@ -27,3 +27,8 @@ coreos:
   channel: alpha                                             #default = alpha
   version: latest                                            #default = latest
   rebootStrategy: off                                        #default = off
+
+logentries:
+  enabled: false                                             #default = false
+  url: api.logentries.com:20000                              #required
+  token:                                                     #required
