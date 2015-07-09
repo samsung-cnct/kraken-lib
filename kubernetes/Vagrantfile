@@ -194,8 +194,12 @@ def build_coreos_userdata(host_number)
       storage_setting = "instanceStorageType_#{node_info[:hostname].gsub('-','_')}"
       storage_type = aws_settings[storage_setting] unless aws_settings[storage_setting].nil?
     end
-
   end
+
+  # logentries values
+  enable_logentries = settings['logentries'] != nil and settings['logentries']['enabled']
+  logentries_token = enable_logentries ? settings['logentries']['token'] : nil
+  logentries_url = enable_logentries ? settings['logentries']['url'] : nil
 
   render_vars = { 
     :etcd_cluster_ip => etcd_cluster_ip, 
@@ -219,7 +223,10 @@ def build_coreos_userdata(host_number)
     :node_01_private_ip => proxy_cluster_ip,
     :node_01_public_ip => proxy_public_ip,
     :finale_node_ip => final_node_ip,
-    :drive_type => storage_type
+    :drive_type => storage_type,
+    :enable_logentries => enable_logentries,
+    :logentries_token => logentries_token,
+    :logentries_url => logentries_url
   } 
 
   tmp_user_data = "/tmp/#{node_info[:hostname]}-vagrantfile-user-data"
