@@ -50,6 +50,8 @@ curl -L https://github.com/GoogleCloudPlatform/kubernetes/releases/download/v0.1
 
 ### Using LogEntries.com
 
+**NOTE: current releases of systemd have [a bug introduced in systemd v220 that breaks journald HTTP gateway]( https://github.com/systemd/systemd/issues/506). This bug is now fixed, but at this time the latest systemd release (v222) does not have the fix merged yet. Last stable CoreOS release with systemd v219 is 681.2.0**
+
 1. First, create an account on logentries.com.
 2. Create a new log in your Logentries account by clicking + Add New Log.
 
