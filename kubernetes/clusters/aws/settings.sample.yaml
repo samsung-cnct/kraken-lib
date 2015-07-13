@@ -32,17 +32,21 @@ aws:
   proxyHostName:                                             #optional, eg: name-proxy.kubeme.io
   keyPair:                                                   #required, eg: 'key'
   keyPairPath:                                               #required, eg: ~/.ssh/keys/key.pem
-  #elb:                                                      #optional, Joins nodes 01 through X to a sepcified ELB
+  #elb:                                                      #optional, Joins nodes 01 through X to a specified ELB. healthcheck port is the first listener instance port. TCP
   #  name:                                                   #required. 'elastic load balancer name'. 
   #  dns_name:                                               #optional. E.g. your-elb.kubeme.io
-  #  balancer_port: 80                                       #required. ELB world-facing port 
-  #  instance_port: 30061                                    #required. ELP port to forward to on an instance. 
+  #  listeners:                                              #optional. array of listeners. Eg. port 80 forwarding to port 3061 on HTTP protocol
+  #   - elb_port: 80                                         # if not specified, a single listener on 80 forwarding to 30061 with HTTP will be setup
+  #     forwarding_to: 30061
+  #     protocol: HTTP
+  #   - elb_port: 8080
+  #     forwarding_to: 30977
+  #     protocol: HTTP
   #  healthy_threshold: 2                                    #required. How many successful pings before "healthy"  
   #  unhealthy_threshold: 3                                  #required. How many unsuccessful pings before "not healthy"  
   #  timeout: 5                                              #required. ping timeout 
   #  interval: 30                                            #required. ping check interval
-  #  target_port: 30061                                      #required. ping port (TCP)
-
+  #  heathcheck_port: 30977                                  #optional. port to use for healthcheck. if not sepcified, port of first listener is used
 
 # Kubernetes sysetem settings
 cluster:                     
