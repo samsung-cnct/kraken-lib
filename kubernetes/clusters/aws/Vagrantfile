@@ -11,7 +11,7 @@ def create_elb_connection(aws_settings)
   })
 end
 
-# checks for a named ELV
+# checks for a named ELB
 def check_elb(aws_settings)
   connection = create_elb_connection(aws_settings)
 
@@ -30,14 +30,20 @@ def create_elb(aws_settings)
   connection = create_elb_connection(aws_settings)
 
   # Build the Load Balancer
-  listeners = [
+  listener_array = aws_settings['elb']['listeners']
+  listener_array = [{'elb_port' => 80, 'forwarding_to' => 30061, 'protocol' => 'HTTP'}] if listener_array.nil?
+
+  listeners = listener_array.map do |listener|
     {
-      "Protocol" => "HTTP",
-      "LoadBalancerPort" => aws_settings['elb']['balancer_port'],
-      "InstancePort" => aws_settings['elb']['instance_port'],
-      "InstanceProtocol" => "HTTP",
+      'Protocol' => listener['protocol'],
+      'LoadBalancerPort' => listener['elb_port'],
+      'InstancePort' => listener['forwarding_to'],
+      'InstanceProtocol' => listener['protocol']
     }
-  ]
+  end
+
+  # use first of the forwarded to ports as the healthcheck ping port
+  target_port = aws_settings['elb']['heathcheck_port'].nil? ? listeners[0]['InstancePort'] : aws_settings['elb']['heathcheck_port']
 
   result = connection.create_load_balancer(
     nil,
@@ -54,7 +60,7 @@ def create_elb(aws_settings)
   health_check_config = {
     "HealthyThreshold" => aws_settings['elb']['healthy_threshold'],
     "Interval" => aws_settings['elb']['interval'],
-    "Target" => "TCP:#{aws_settings['elb']['target_port']}",
+    "Target" => "TCP:#{target_port}",
     "Timeout" => aws_settings['elb']['timeout'],
     "UnhealthyThreshold" => aws_settings['elb']['unhealthy_threshold']
   }
