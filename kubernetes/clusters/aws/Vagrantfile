@@ -32,19 +32,15 @@ def create_elb(aws_settings)
   # Build the Load Balancer
   listener_array = aws_settings['elb']['listeners']
   listener_array = [{'elb_port' => 80, 'forwarding_to' => 30061, 'protocol' => 'HTTP'}] if listener_array.nil?
-  
-  listeners = []
 
-  listener_array.each { |listener|
-    listeners.push(
-      {
-        'Protocol' => listener['protocol'],
-        'LoadBalancerPort' => listener['elb_port'],
-        'InstancePort' => listener['forwarding_to'],
-        'InstanceProtocol' => listener['protocol']
-      }
-    )
-  }
+  listeners = listener_array.map do |listener|
+    {
+      'Protocol' => listener['protocol'],
+      'LoadBalancerPort' => listener['elb_port'],
+      'InstancePort' => listener['forwarding_to'],
+      'InstanceProtocol' => listener['protocol']
+    }
+  end
 
   # use first of the forwarded to ports as the healthcheck ping port
   target_port = aws_settings['elb']['heathcheck_port'].nil? ? listeners[0]['InstancePort'] : aws_settings['elb']['heathcheck_port']
