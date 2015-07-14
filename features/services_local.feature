@@ -14,6 +14,7 @@ Feature: Make sure we have the correct kubernetes services
       heapster.*
       influxdb.*
       kube-dns.*
+      kube-ui.*
       kubernetes.*
-      kubernetes-ro.*
+      prometheus.*
       """

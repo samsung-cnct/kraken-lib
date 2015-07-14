@@ -113,13 +113,6 @@ def coreos_release
   open(version_url).read().scan(/COREOS_VERSION=.*/)[0].split('=')[1]
 end
 
-def example_state
-  settings = cluster_settings
-  run_examples = settings['cluster']['guestbook']['run'] || false
-
-  run_examples ? 'start' : 'stop'
-end
-
 def final_node_ip
   settings = cluster_settings
   number_of_nodes = settings['cluster']['nodes'] || 2
@@ -135,6 +128,7 @@ def cluster_services
   services = cluster_settings['cluster'].fetch('services', {})
   services['repo'] ||= 'git://github.com/samsung-ag/kraken-services'
   services['branch'] ||= 'stable'
+  services['dirs'] ||= %w(heapster influxdb-grafana kube-ui loadtest skydns)
   services
 end
 
@@ -214,20 +208,19 @@ def build_coreos_userdata(host_number)
     :service_public_ip => proxy_cluster_ip,
     :kraken_services_branch => cluster_services['branch'],
     :kraken_services_repo => cluster_services['repo'],
-    # TODO: parse out from cluster.services
-    :kraken_services_influxdb_grafana_enabled => 'true',
-    :kraken_services_heapster_enabled => 'true',
-    :kraken_services_kube_ui_enabled => 'true',
-    :run_examples => example_state,
+    :kraken_services_guestbook_enabled => 'false',
     :docker_cache => etcd_cluster_ip,
     :node_01_private_ip => proxy_cluster_ip,
     :node_01_public_ip => proxy_public_ip,
-    :finale_node_ip => final_node_ip,
+    :final_node_ip => final_node_ip,
     :drive_type => storage_type,
     :enable_logentries => enable_logentries,
     :logentries_token => logentries_token,
     :logentries_url => logentries_url
   } 
+  service_vars = Hash[cluster_services['dirs'].map {|s| ["kraken_services_#{s}_enabled".to_sym,'true'] }]
+
+  render_vars.merge!(service_vars)
 
   tmp_user_data = "/tmp/#{node_info[:hostname]}-vagrantfile-user-data"
   render(
