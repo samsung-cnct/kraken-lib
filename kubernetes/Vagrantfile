@@ -128,7 +128,7 @@ def cluster_services
   services = cluster_settings['cluster'].fetch('services', {})
   services['repo'] ||= 'git://github.com/samsung-ag/kraken-services'
   services['branch'] ||= 'stable'
-  services['dirs'] ||= %w(heapster influxdb-grafana kube-ui loadtest skydns)
+  services['dirs'] ||= %w(heapster influxdb-grafana kube-ui loadtest prometheus skydns)
   services
 end
 
