@@ -25,7 +25,7 @@ write_files:
   owner: root
   content: |
     #! /usr/bin/bash
-    until curl http://<%= finale_node_ip %>:10255/stats/; do sleep 2; done
+    until curl http://<%= final_node_ip %>:10255/stats/; do sleep 2; done
 - path: /opt/bin/wait4dns.sh
   owner: root
   content: |
@@ -44,7 +44,7 @@ write_files:
     cd /opt/bin/kraken-services
     sed -e 's,$KUBE_MASTER_URL,http://<%= master_cluster_ip %>:8080,g' \
         -e 's,$CLUSTER_DOMAIN,<%= dns_domain %>,g' \
-        -i -- ./skydns/*.{json,yaml}
+        -i -- ./skydns/*.yaml
     /opt/bin/kubectl --server=http://<%= master_cluster_ip %>:8080 create -f ./skydns/
 - path: /opt/bin/kraken-create-guestbook.sh
   owner: root
@@ -62,7 +62,7 @@ write_files:
     set -x
     cd /opt/bin/kraken-services
     sed -e 's,$HEAPSTER_PUBLIC_IP,<%= node_01_private_ip %>,g' \
-        -i -- ./heapster/*.{json,yaml}
+        -i -- ./heapster/*.yaml
     /opt/bin/kubectl --server=http://<%= master_cluster_ip %>:8080 create -f ./heapster/
 - path: /opt/bin/kraken-create-influxdb-grafana.sh
   owner: root
@@ -73,7 +73,7 @@ write_files:
     sed -e 's,$INFLUXDB_EXTERNAL_HOST,<%= node_01_public_ip %>,g' \
         -e 's,$INFLUXDB_PUBLIC_IP,<%= node_01_private_ip %>,g' \
         -e 's,$GRAFANA_PUBLIC_IP,<%= node_01_private_ip %>,g' \
-        -i -- ./influxdb-grafana/*.{json,yaml}
+        -i -- ./influxdb-grafana/*.yaml
     /opt/bin/kubectl --server=http://<%= master_cluster_ip %>:8080 create -f ./influxdb-grafana/
 - path: /opt/bin/kraken-create-kube-ui.sh
   owner: root
@@ -82,8 +82,17 @@ write_files:
     set -x
     cd /opt/bin/kraken-services
     sed -e 's,$KUBE_UI_PUBLIC_IP,<%= node_01_private_ip %>,g' \
-        -i -- ./kube-ui/*.{json,yaml}
+        -i -- ./kube-ui/*.yaml
     /opt/bin/kubectl --server=http://<%= master_cluster_ip %>:8080 create -f ./kube-ui/
+- path: /opt/bin/kraken-create-prometheus.sh
+  owner: root
+  content: |
+    #! /usr/bin/bash
+    set -x
+    cd /opt/bin/kraken-services
+    sed -e 's,$PROMETHEUS_PUBLIC_IP,<%= node_01_private_ip %>,g' \
+        -i -- ./prometheus/*.yaml
+    /opt/bin/kubectl --server=http://<%= master_cluster_ip %>:8080 create -f ./prometheus/
 - path: /opt/bin/wait4skydns.sh
   owner: root
   content: |
@@ -296,6 +305,8 @@ coreos:
         ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kube-controller-manager
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-controller-manager
         ExecStart=/opt/bin/kube-controller-manager \
+        --address=127.0.0.1 \
+        --port=10252 \
         --master=$private_ipv4:8080 \
         --pod_eviction_timeout=1m \
         --resource_quota_sync_period=20s \
@@ -316,6 +327,8 @@ coreos:
         ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kube-scheduler
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-scheduler
         ExecStart=/opt/bin/kube-scheduler \
+        --address=127.0.0.1 \
+        --port=10251 \
         --master=$private_ipv4:8080 \
         --logtostderr=true \
         --v=<%= kubernetes_verbosity %>
@@ -383,12 +396,13 @@ coreos:
         RemainAfterExit=true
         Type=oneshot
     - name: kraken-create-guestbook.service
-      command: <%= run_examples %>
+      command: start
       content: |
         [Unit]
         Description=Kubernetes guestbook example
         Requires=kraken-create-skydns.service
         After=kraken-create-skydns.service
+        ConditionNull=<%= kraken_services_guestbook_enabled %>
 
         [Service]
         TimeoutStartSec=0
@@ -452,6 +466,21 @@ coreos:
         TimeoutStartSec=0
         ExecStartPre=-/usr/bin/chmod +x /opt/bin/kraken-create-kube-ui.sh
         ExecStart=/usr/bin/bash /opt/bin/kraken-create-kube-ui.sh
+        RemainAfterExit=true
+        Type=oneshot
+    - name: kraken-create-prometheus.service
+      command: start
+      content: |
+        [Unit]
+        Description=Prometheus service
+        Requires=wait4skydns.service
+        After=wait4skydns.service
+        ConditionNull=<%= kraken_services_prometheus_enabled %>
+
+        [Service]
+        TimeoutStartSec=0
+        ExecStartPre=-/usr/bin/chmod +x /opt/bin/kraken-create-prometheus.sh
+        ExecStart=/usr/bin/bash /opt/bin/kraken-create-prometheus.sh
         RemainAfterExit=true
         Type=oneshot
     - name: systemd-journal-gatewayd.socket
