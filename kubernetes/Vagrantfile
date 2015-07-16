@@ -10,6 +10,8 @@ require 'net/http'
 require 'open-uri'
 require 'ipaddr'
 require 'yaml'
+require 'json'
+require 'base64'
 require 'mkmf'
 require 'fileutils'
 require 'erb'
@@ -190,13 +192,8 @@ def build_coreos_userdata(host_number)
     end
   end
 
-  # logentries values
-  enable_logentries = settings['logentries'] != nil and settings['logentries']['enabled']
-  logentries_token = enable_logentries ? settings['logentries']['token'] : nil
-  logentries_url = enable_logentries ? settings['logentries']['url'] : nil
-
-  render_vars = { 
-    :etcd_cluster_ip => etcd_cluster_ip, 
+  render_vars = {
+    :etcd_cluster_ip => etcd_cluster_ip,
     :master_cluster_ip => master_cluster_ip,
     :kubernetes_release => 'v' + kubernetes_release,
     :api_version => settings['cluster']['apiVersion'],
@@ -206,25 +203,37 @@ def build_coreos_userdata(host_number)
     :dns_domain => 'kubernetes.local',
     :hostname => node_info[:hostname],
     :service_public_ip => proxy_cluster_ip,
-    :kraken_services_branch => cluster_services['branch'],
-    :kraken_services_repo => cluster_services['repo'],
-    :kraken_services_guestbook_enabled => 'false',
     :docker_cache => etcd_cluster_ip,
     :node_01_private_ip => proxy_cluster_ip,
     :node_01_public_ip => proxy_public_ip,
     :final_node_ip => final_node_ip,
-    :drive_type => storage_type,
-    :enable_logentries => enable_logentries,
-    :logentries_token => logentries_token,
-    :logentries_url => logentries_url
-  } 
-  service_vars = Hash[cluster_services['dirs'].map {|s| ["kraken_services_#{s}_enabled".to_sym,'true'] }]
+    :drive_type => storage_type
+  }
 
-  render_vars.merge!(service_vars)
+  render_vars[:dockercfg_base64] =
+    settings['cluster'].fetch('dockercfg_base64',
+      settings['cluster'].has_key?('dockercfg') ?
+        Base64.strict_encode64(settings['cluster']['dockercfg'].to_json) : '' )
+
+  # logentries values
+  enable_logentries = settings['logentries'] != nil and settings['logentries']['enabled']
+  logentries_vars = {
+    :enable_logentries => enable_logentries,
+    :logentries_token => enable_logentries ? settings['logentries']['url'] : nil,
+    :logentries_url => enable_logentries ? settings['logentries']['url'] : nil
+  }
+
+  kraken_services_vars = {
+    :kraken_services_branch => cluster_services['branch'],
+    :kraken_services_repo => cluster_services['repo'],
+    :kraken_services_dirs => cluster_services['dirs'].join(' ')
+  }
+
+  [logentries_vars, kraken_services_vars].each { |vars| render_vars.merge!(vars) }
 
   tmp_user_data = "/tmp/#{node_info[:hostname]}-vagrantfile-user-data"
   render(
-    node_info[:user_data], 
+    node_info[:user_data],
     tmp_user_data,
     render_vars
   )
