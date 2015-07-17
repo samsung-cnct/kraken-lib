@@ -267,7 +267,7 @@ coreos:
         ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kube-controller-manager
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-controller-manager
         ExecStart=/opt/bin/kube-controller-manager \
-        --address=127.0.0.1 \
+        --address=$private_ipv4 \
         --port=10252 \
         --master=$private_ipv4:8080 \
         --pod_eviction_timeout=1m \
@@ -288,7 +288,7 @@ coreos:
         ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kube-scheduler
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-scheduler
         ExecStart=/opt/bin/kube-scheduler \
-        --address=127.0.0.1 \
+        --address=$private_ipv4
         --port=10251 \
         --master=$private_ipv4:8080 \
         --logtostderr=true \
