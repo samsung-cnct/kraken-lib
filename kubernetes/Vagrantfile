@@ -219,7 +219,7 @@ def build_coreos_userdata(host_number)
   enable_logentries = settings['logentries'] != nil and settings['logentries']['enabled']
   logentries_vars = {
     :enable_logentries => enable_logentries,
-    :logentries_token => enable_logentries ? settings['logentries']['url'] : nil,
+    :logentries_token => enable_logentries ? settings['logentries']['token'] : nil,
     :logentries_url => enable_logentries ? settings['logentries']['url'] : nil
   }
 
