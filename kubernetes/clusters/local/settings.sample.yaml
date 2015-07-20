@@ -17,7 +17,7 @@ vmSettings:
 cluster:                     
   kubernetesVersion: stable                                  #default = stable
   nodes: 2                                                   #default = 3
-  apiVersion: v1beta3                                        #default = v1beta3
+  apiVersion: v1                                             #default = v1
   network: 172.16.1.0/24                                     #default = 172.16.1.0/24
   guestbook: 
     run: false                                               #default = false
@@ -27,3 +27,8 @@ coreos:
   channel: alpha                                             #default = alpha
   version: latest                                            #default = latest
   rebootStrategy: off                                        #default = off
+
+logentries:
+  enabled: false                                             #default = false
+  url: api.logentries.com:20000                              #required
+  token:                                                     #required

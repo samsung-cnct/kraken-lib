@@ -10,8 +10,12 @@ require 'net/http'
 require 'open-uri'
 require 'ipaddr'
 require 'yaml'
+require 'json'
+require 'base64'
 require 'mkmf'
 require 'fileutils'
+require 'erb'
+require 'ostruct'
 
 VAGRANTFILE_API_VERSION = "2"
 Vagrant.require_version ">= 1.7.2"
@@ -82,9 +86,12 @@ end
 def kubernetes_release
   settings = cluster_settings
   version = settings['cluster']['kubernetesVersion'] || 'stable'
-  release_url = "https://storage.googleapis.com/kubernetes-release/release/stable.txt"
-
-  open(release_url).read().gsub('v','').chomp
+  if version == 'stable'
+    release_url = "https://storage.googleapis.com/kubernetes-release/release/stable.txt"
+    open(release_url).read().gsub('v','').chomp
+  else
+    version
+  end
 end
 
 def coreos_channel
@@ -96,7 +103,7 @@ def coreos_boxname
 end
 
 def coreos_url
-  "http://#{coreos_channel}.release.core-os.net/amd64-usr/current"
+  "http://#{coreos_channel}.release.core-os.net/amd64-usr"
 end
 
 def coreos_release
@@ -104,15 +111,8 @@ def coreos_release
   version = settings['coreos']['version'] || 'latest'
   return version unless version == 'latest'
 
-  version_url = "#{coreos_url}/version.txt"
+  version_url = "#{coreos_url}/current/version.txt"
   open(version_url).read().scan(/COREOS_VERSION=.*/)[0].split('=')[1]
-end
-
-def example_state
-  settings = cluster_settings
-  run_examples = settings['cluster']['guestbook']['run'] || false
-
-  run_examples ? 'start' : 'stop'
 end
 
 def final_node_ip
@@ -126,6 +126,14 @@ def get_num_nodes
   settings['cluster']['nodes'] || 2
 end
 
+def cluster_services
+  services = cluster_settings['cluster'].fetch('services', {})
+  services['repo'] ||= 'git://github.com/samsung-ag/kraken-services'
+  services['branch'] ||= 'stable'
+  services['dirs'] ||= %w(heapster influxdb-grafana kube-ui loadtest prometheus skydns)
+  services
+end
+
 def get_coreos_node_info(host_number)
   node_info = Hash.new
   settings = cluster_settings
@@ -134,19 +142,19 @@ def get_coreos_node_info(host_number)
   when 1
     node_info[:hostname] = 'etcd'
     node_info[:type] = 'etcd'
-    node_info[:user_data] = File.join(CLOUDCONFIG_PATH, 'etcd.yaml')
+    node_info[:user_data] = File.join(CLOUDCONFIG_PATH, 'etcd.yaml.erb')
     node_info[:memory] = settings['vmSettings']['etcd']['memory'] || 512 unless settings['vmSettings'].nil?
     node_info[:cpus] = settings['vmSettings']['etcd']['cpus'] || 1 unless settings['vmSettings'].nil?
   when 2
     node_info[:hostname] = 'master'
     node_info[:type] = 'master'
-    node_info[:user_data] = File.join(CLOUDCONFIG_PATH, 'master.yaml')
+    node_info[:user_data] = File.join(CLOUDCONFIG_PATH, 'master.yaml.erb')
     node_info[:memory] = settings['vmSettings']['master']['memory'] || 512 unless settings['vmSettings'].nil?
     node_info[:cpus] = settings['vmSettings']['master']['cpus'] || 1 unless settings['vmSettings'].nil?
   else
     node_info[:hostname] = "node-%02d" % (host_number - 2)
     node_info[:type] = 'node'
-    node_info[:user_data] = File.join(CLOUDCONFIG_PATH, 'node.yaml')
+    node_info[:user_data] = File.join(CLOUDCONFIG_PATH, 'node.yaml.erb')
     node_info[:memory] = settings['vmSettings']['node']['memory'] || 1024 unless settings['vmSettings'].nil?
     node_info[:cpus] = settings['vmSettings']['node']['cpus'] || 1 unless settings['vmSettings'].nil?
   end
@@ -166,39 +174,69 @@ def build_coreos_userdata(host_number)
     proxy_public_ip = settings['aws'].fetch('nodePublicIp', settings['aws'].fetch('proxyHostName', proxy_public_ip))
   end
 
+  storage_type = nil
+  if CLUSTER_NAME == 'aws'
+    aws_settings = settings['aws']
+    storage_type = aws_settings['instanceStorageType'] || 'ebs'
 
-  tmp_user_data = "/tmp/#{node_info[:hostname]}-vagrantfile-user-data"
-  replacements = {
-    '$ETCD_IP' => etcd_cluster_ip,
-    '$MASTER_IP' => master_cluster_ip,
-    '$KUBERNETES_VERSION' => 'v' + kubernetes_release,
-    '$KUBERNETES_API_VERSION' => settings['cluster']['apiVersion'],
-    '$REBOOT_STRATEGY' => settings['coreos']['rebootStrategy'] || 'off',
-    '$CLOUD_PROVIDER' => 'vagrant',
-    '$DNS_DOMAIN' => 'kubernetes.local',
-    '$SERVICE_PUBLIC_IP' => proxy_cluster_ip,
-    '$KRAKEN_SERVICES_BRANCH' => 'master',
-    '$KRAKEN_SERVICES_REPO' => 'git://github.com/samsung-ag/kraken-services',
-    '$RUN_EXAMPLES' => example_state,
-    '$DOCKER_CACHE' => etcd_cluster_ip,
-    '$NODE_01_PRIVATE_IP' => proxy_cluster_ip,
-    '$NODE_01_PUBLIC_IP' => proxy_public_ip,
-    '$FINAL_NODE' => final_node_ip
+    case node_info[:type]
+    when 'master'
+      storage_type = aws_settings['instanceStorageTypeMaster'] unless aws_settings['instanceStorageTypeMaster'].nil?
+    when 'etcd'
+      storage_type = aws_settings['instanceStorageTypeEtcd'] unless aws_settings['instanceStorageTypeEtcd'].nil?
+    when 'node'
+      storage_type = aws_settings['instanceStorageTypeNode'] unless aws_settings['instanceStorageTypeNode'].nil?
+
+      storage_setting = "instanceStorageType_#{node_info[:hostname].gsub('-','_')}"
+      storage_type = aws_settings[storage_setting] unless aws_settings[storage_setting].nil?
+    end
+  end
+
+  render_vars = {
+    :etcd_cluster_ip => etcd_cluster_ip,
+    :master_cluster_ip => master_cluster_ip,
+    :kubernetes_release => 'v' + kubernetes_release,
+    :api_version => settings['cluster']['apiVersion'],
+    :kubernetes_verbosity => '2',
+    :reboot_strategy => settings['coreos']['rebootStrategy'] || 'off',
+    :cloud_provider => 'vagrant',
+    :dns_domain => 'kubernetes.local',
+    :hostname => node_info[:hostname],
+    :service_public_ip => proxy_cluster_ip,
+    :docker_cache => etcd_cluster_ip,
+    :node_01_private_ip => proxy_cluster_ip,
+    :node_01_public_ip => proxy_public_ip,
+    :final_node_ip => final_node_ip,
+    :drive_type => storage_type
   }
 
-  regexp = Regexp.new replacements.keys.map {|k| Regexp.quote(k) }.join('|')
-  tmp_file = Tempfile.new("tmp_vagrantfile")
+  render_vars[:dockercfg_base64] =
+    settings['cluster'].fetch('dockercfg_base64',
+      settings['cluster'].has_key?('dockercfg') ?
+        Base64.strict_encode64(settings['cluster']['dockercfg'].to_json) : '' )
 
-  begin
-    File.foreach(node_info[:user_data], "r") do |line|
-      tmp_file.write line.gsub regexp, replacements
-    end
-    tmp_file.close
-    FileUtils.mv(tmp_file.path, tmp_user_data)
-  ensure
-    tmp_file.close
-    tmp_file.unlink
-  end
+  # logentries values
+  enable_logentries = settings['logentries'] != nil and settings['logentries']['enabled']
+  logentries_vars = {
+    :enable_logentries => enable_logentries,
+    :logentries_token => enable_logentries ? settings['logentries']['token'] : nil,
+    :logentries_url => enable_logentries ? settings['logentries']['url'] : nil
+  }
+
+  kraken_services_vars = {
+    :kraken_services_branch => cluster_services['branch'],
+    :kraken_services_repo => cluster_services['repo'],
+    :kraken_services_dirs => cluster_services['dirs'].join(' ')
+  }
+
+  [logentries_vars, kraken_services_vars].each { |vars| render_vars.merge!(vars) }
+
+  tmp_user_data = "/tmp/#{node_info[:hostname]}-vagrantfile-user-data"
+  render(
+    node_info[:user_data],
+    tmp_user_data,
+    render_vars
+  )
 
   tmp_user_data
 end
@@ -233,6 +271,16 @@ end
 def run_tests(config, type)
   config.vm.provision :serverspec do |spec|
     spec.pattern = File.join(SPEC_PATH, "*_#{type}_#{CLUSTER_NAME}_spec.rb")
+  end
+end
+
+def render(templatepath, destinationpath, variables)
+  if File.file?(templatepath)
+    template = File.open(templatepath, "rb").read
+    content = ERB.new(template).result(OpenStruct.new(variables).instance_eval { binding })
+    outputpath = destinationpath.end_with?('/') ? "#{destinationpath}/#{File.basename(templatepath, '.erb')}" : destinationpath
+    FileUtils.mkdir_p(File.dirname(outputpath))
+    File.open(outputpath, "wb") { |f| f.write(content) }
   end
 end
 

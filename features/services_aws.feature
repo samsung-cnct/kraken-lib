@@ -10,10 +10,11 @@ Feature: Make sure we have the correct kubernetes services
     And the output should eventually match:
       """
       .*
+      grafana.*
+      heapster.*
+      influxdb.*
       kube-dns.*
+      kube-ui.*
       kubernetes.*
-      kubernetes-ro.*
-      monitoring-grafana.*
-      monitoring-heapster.*
-      monitoring-influxdb.*
+      prometheus.*
       """

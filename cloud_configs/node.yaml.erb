@@ -1,0 +1,300 @@
+#cloud-config
+
+---
+write_files:
+- path: /opt/bin/wait4etcd.sh
+  owner: root
+  content: |
+    #! /usr/bin/bash
+    until curl http://<%= etcd_cluster_ip %>:4001/v2/machines; do sleep 2; done
+- path: /opt/bin/wait4etcdproxy.sh
+  owner: root
+  content: |
+    #! /usr/bin/bash
+    until curl http://127.0.0.1:4001/v2/machines; do sleep 2; done
+- path: /opt/bin/wait4apiserver.sh
+  owner: root
+  content: |
+    #! /usr/bin/bash
+    until curl http://<%= master_cluster_ip %>:8080; do sleep 2; done
+- path: /opt/bin/wait4node.sh
+  owner: root
+  content: |
+    #! /usr/bin/bash
+    until /opt/bin/kubectl --server=<%= master_cluster_ip %>:8080 get nodes | grep -q $private_ipv4; do sleep 2; done
+coreos:
+  etcd2:
+    proxy: on
+    listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
+    advertise-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
+    initial-cluster: etcd=http://<%= etcd_cluster_ip %>:2380
+  fleet:
+    etcd-servers: http://$private_ipv4:4001
+    public-ip: $private_ipv4
+    metadata: "role=node"
+  flannel:
+    etcd-endpoints: http://<%= etcd_cluster_ip %>:4001
+    interface: $private_ipv4
+  units:
+    <% if drive_type == 'ebs' %>
+    - name: format-ebs.service
+      command: start
+      content: |
+        [Unit]
+        Description=Formats the EBS drive
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/sbin/wipefs -f /dev/xvdf
+        ExecStart=/usr/sbin/mkfs.ext4 -F /dev/xvdf
+    - name: var-lib-docker.mount
+      command: start
+      content: |
+        [Unit]
+        Description=Mount EBS to /var/lib/docker
+        Requires=format-ebs.service
+        After=format-ebs.service
+        Before=docker.service
+        [Mount]
+        What=/dev/xvdf
+        Where=/var/lib/docker
+        Type=ext4
+<% end %>
+<% if drive_type == 'ephemeral' %>
+    - name: format-ephemeral.service
+      command: start
+      content: |
+        [Unit]
+        Description=Formats the ephemeral drive
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/sbin/wipefs -f /dev/xvdb
+        ExecStart=/usr/sbin/mkfs.ext4 -F /dev/xvdb
+    - name: var-lib-docker.mount
+      command: start
+      content: |
+        [Unit]
+        Description=Mount ephemeral to /var/lib/docker
+        Requires=format-ephemeral.service
+        After=format-ephemeral.service
+        Before=docker.service
+        [Mount]
+        What=/dev/xvdb
+        Where=/var/lib/docker
+        Type=ext4
+<% end %>
+    - name: docker-tcp.socket
+      command: start
+      enable: true
+      content: |
+        [Unit]
+        Description=Docker Socket for the API
+
+        [Socket]
+        ListenStream=0.0.0.0:4243
+        BindIPv6Only=both
+        Service=docker.service
+
+        [Install]
+        WantedBy=sockets.target
+    - name: wait4etcd.service
+      command: start
+      content: |
+        [Unit]
+        Description=Wait for etcd to come up
+        Wants=network-online.target
+        After=network-online.target
+        Before=flannel.service
+        [Service]
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4etcd.sh
+        ExecStart=/usr/bin/bash /opt/bin/wait4etcd.sh
+        RemainAfterExit=true
+        Type=oneshot
+    - name: setup-network-environment.service
+      command: start
+      content: |
+        [Unit]
+        Description=Setup Network Environment
+        Documentation=https://github.com/kelseyhightower/setup-network-environment
+        Requires=network-online.target
+        After=network-online.target
+        Before=flanneld.service
+
+        [Service]
+        ExecStartPre=-/usr/bin/mkdir -p /opt/bin
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://github.com/kelseyhightower/setup-network-environment/releases/download/v1.0.0/setup-network-environment
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/setup-network-environment
+        ExecStart=/opt/bin/setup-network-environment
+        RemainAfterExit=yes
+        Type=oneshot
+    - name: flanneld.service
+      command: start
+      drop-ins:
+        - name: 50-network-config.conf
+          content: |
+            [Unit]
+            Requires=wait4etcd.service
+            After=wait4etcd.service
+            Before=docker.service
+    - name: docker.service
+      drop-ins:
+        - name: 51-docker-flannel.conf
+          content: |
+            [Unit]
+            # startup, otherwise containers won't land in flannel's network...
+            Requires=flanneld.service
+            After=flanneld.service
+
+            [Service]
+            Environment=DOCKER_OPTS='--registry-mirror=http://<%= docker_cache %>:5000'
+    - name: wait4etcdproxy.service
+      command: start
+      content: |
+        [Unit]
+        Description=Wait for etcd proxy to come up
+        Wants=etcd2.service
+        After=etcd2.service
+
+        [Service]
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4etcdproxy.sh
+        ExecStart=/usr/bin/bash /opt/bin/wait4etcdproxy.sh
+        RemainAfterExit=true
+        Type=oneshot
+    - name: fleet.service
+      command: start
+    - name: wait4apiserver.service
+      command: start
+      content: |
+        [Unit]
+        Description=Wait for etcd proxy to come up
+        Wants=network-online.target
+        After=network-online.target
+
+        [Service]
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4apiserver.sh
+        ExecStart=/usr/bin/bash /opt/bin/wait4apiserver.sh
+        RemainAfterExit=true
+        Type=oneshot
+    - name: install-kubectl.service
+      command: start
+      content: |
+        [Unit]
+        Description=Install kubectl client tool
+        Requires=network-online.target
+        After=network-online.target
+
+        [Service]
+        ExecStart=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kubectl
+        ExecStart=/usr/bin/chmod +x /opt/bin/kubectl
+        Type=oneshot
+        RemainAfterExit=true
+    - name: kube-proxy.service
+      command: start
+      content: |
+        [Unit]
+        Description=Kubernetes Proxy
+        Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+        Requires=wait4apiserver.service
+        After=wait4apiserver.service
+
+        [Service]
+        LimitNOFILE=infinity
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kube-proxy
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-proxy
+        ExecStart=/opt/bin/kube-proxy \
+        --master=<%= master_cluster_ip %>:8080 \
+        --logtostderr=true \
+        --v=<%= kubernetes_verbosity %>
+        Restart=always
+        RestartSec=10
+    - name: kube-kubelet.service
+      command: start
+      content: |
+        [Unit]
+        Description=Kubernetes Kubelet
+        Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+        Requires=wait4apiserver.service
+        After=wait4apiserver.service
+
+        [Service]
+        EnvironmentFile=/etc/network-environment
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kubelet
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/kubelet
+        ExecStart=/opt/bin/kubelet \
+        --address=0.0.0.0 \
+        --enable_server=true \
+        --port=10250 \
+        --read_only_port=10255 \
+        --hostname_override=$private_ipv4 \
+        --api_servers=<%= master_cluster_ip %>:8080 \
+        --cluster_dns=10.100.0.10 \
+        --cluster_domain=<%= dns_domain %> \
+        --healthz_bind_address=0.0.0.0 \
+        --healthz_port=10254 \
+        --cadvisor_port=4194 \
+        --log_cadvisor_usage=true \
+        --logtostderr=true \
+        --v=<%= kubernetes_verbosity %>
+        Restart=always
+        RestartSec=10
+    - name: wait4node.service
+      command: start
+      content: |
+        [Unit]
+        Description=Wait for node to register with kube-apiserver
+        Requires=kube-kubelet.service
+        After=kube-kubelet.service
+
+        [Service]
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4node.sh
+        ExecStart=/usr/bin/bash /opt/bin/wait4node.sh
+        RemainAfterExit=true
+        Type=oneshot
+    - name: run-kubectl-label-node.service
+      command: start
+      content: |
+        [Unit]
+        Description=Try labeling ourselves
+        Requires=wait4node.service
+        After=wait4node.service
+
+        [Service]
+        ExecStart=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kubectl
+        ExecStart=/opt/bin/kubectl --server=<%= master_cluster_ip %>:8080 label nodes $private_ipv4 kraken-node=<%= hostname %>
+        Type=oneshot
+        RemainAfterExit=true
+    - name: systemd-journal-gatewayd.socket
+      command: start
+      enable: yes
+      content: |
+        [Unit] 
+        Description=Journal Gateway Service Socket
+        [Socket] 
+        ListenStream=/var/run/journald.sock
+        Service=systemd-journal-gatewayd.service
+        [Install] 
+        WantedBy=sockets.target
+<% if enable_logentries %>
+    - name: journal-2-logentries.service
+      command: start
+      content: |
+        [Unit]
+        Description=Forward Systemd Journal to logentries.com
+        After=docker.service
+        Requires=docker.service
+        [Service]
+        TimeoutStartSec=0
+        ExecStartPre=-/usr/bin/docker kill journal-2-logentries
+        ExecStartPre=-/usr/bin/docker rm journal-2-logentries
+        ExecStartPre=/usr/bin/docker pull quay.io/kelseyhightower/journal-2-logentries
+        ExecStart=/usr/bin/bash -c \
+        "/usr/bin/docker run --name journal-2-logentries \
+        -v /run/journald.sock:/run/journald.sock \
+        -e LOGENTRIES_TOKEN=`etcdctl get /logentries.com/token` \
+        -e LOGENTRIES_URL=`etcdctl get /logentries.com/url` \
+        quay.io/kelseyhightower/journal-2-logentries"
+<% end %>
+  update:
+    group: alpha
+    reboot-strategy: <%= reboot_strategy %>
