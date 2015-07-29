@@ -72,7 +72,7 @@ curl -L https://github.com/GoogleCloudPlatform/kubernetes/releases/download/v0.1
 6. Run kraken [cluster name] up as usual. All journald logs will now be sent to logentries.com 
 
 ## Hacking
-Deploy details and README's for each system are located within their respective folders.
+Deploy details and READMEs for each system are located within their respective folders.
 
 ### Helpful Links
 * kubectl user documentation can be found [here](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/kubectl.md)
