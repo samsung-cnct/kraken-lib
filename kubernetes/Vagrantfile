@@ -72,10 +72,8 @@ def install_plugins_from_file(plugins_yaml)
 end
 
 def base_ip_address
-    settings = cluster_settings
-    network = settings['cluster']['network'] || '172.16.1.0/24'
-
-    IPAddr.new(network).to_s.chomp("0")
+    cidr = cluster_settings['cluster']['network'] || '172.16.1.0/24'
+    IPAddr.new(cidr)
 end
 
 def aws_master
@@ -115,15 +113,21 @@ def coreos_release
   open(version_url).read().scan(/COREOS_VERSION=.*/)[0].split('=')[1]
 end
 
-def final_node_ip
-  settings = cluster_settings
-  number_of_nodes = settings['cluster']['nodes'] || 2
-  base_ip_address + "#{(number_of_nodes + 2 + 100)}"
+def get_num_nodes
+  cluster_settings['cluster']['nodes'].to_i || 2
 end
 
-def get_num_nodes
-  settings = cluster_settings
-  settings['cluster']['nodes'] || 2
+def get_num_vms
+  get_num_nodes + 2 # nodes + (etcd + master)
+end
+
+def get_vm_ip(i)
+  i += 3 # XXX: AWS VPC reserves the first 4 address in a subnet; we'll just assume we don't run into the reserved last address
+  i.times.inject(base_ip_address) { |ip,_| ip.succ }.to_s
+end
+
+def final_node_ip
+  get_vm_ip(get_num_vms)
 end
 
 def cluster_services
@@ -166,9 +170,9 @@ def build_coreos_userdata(host_number)
   node_info = get_coreos_node_info(host_number)
   settings = cluster_settings
 
-  etcd_cluster_ip = base_ip_address + "#{1+100}"
-  master_cluster_ip = base_ip_address + "#{2+100}"
-  proxy_cluster_ip = base_ip_address + "#{3+100}"
+  etcd_cluster_ip = get_vm_ip(1)
+  master_cluster_ip = get_vm_ip(2)
+  proxy_cluster_ip = get_vm_ip(3)
   proxy_public_ip = ENV.fetch('NODE_PUBLIC_IP', proxy_cluster_ip)
   if settings.has_key?('aws')
     proxy_public_ip = settings['aws'].fetch('nodePublicIp', settings['aws'].fetch('proxyHostName', proxy_public_ip))
@@ -260,7 +264,7 @@ def set_kubeconfig(cluster)
   #   alias kub<cluster>="kubectl --cluster=local"
   settings = cluster_settings
 
-  master = settings['id'] == 'aws' ? aws_master : base_ip_address + "#{2+100}"
+  master = settings['id'] == 'aws' ? aws_master : get_vm_ip(2)
   api_version = settings['cluster']['apiVersion']
   puts "\n\033[34mYou can now access the Kubernetes cluster by creating a new cluster in your kubeconfig by running:\033[0m"
   puts "\033[34mkubectl config set-cluster #{cluster} --server=http://#{master}:8080 --api-version=#{api_version}\033[0m"
