@@ -201,7 +201,7 @@ def build_coreos_userdata(host_number)
     :master_cluster_ip => master_cluster_ip,
     :kubernetes_release => 'v' + kubernetes_release,
     :api_version => settings['cluster']['apiVersion'],
-    :kubernetes_verbosity => '2',
+    :kubernetes_verbosity => '1',
     :reboot_strategy => settings['coreos']['rebootStrategy'] || 'off',
     :cloud_provider => 'vagrant',
     :dns_domain => 'kubernetes.local',
