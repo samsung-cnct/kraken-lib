@@ -30,12 +30,7 @@ write_files:
   owner: root
   content: |
     #! /usr/bin/bash
-    until 
-- path: /opt/bin/flannelconfig.sh
-  owner: root
-  content: |
-    #! /usr/bin/bash
-    /usr/bin/etcdctl set /coreos.com/network/config '{"Network":"10.244.0.0/16", "Backend": {"Type": "vxlan"}}' 
+    until q
 - path: /opt/bin/kraken-render.sh
   owner: root
   content: |
@@ -185,18 +180,6 @@ coreos:
         ExecStart=/usr/bin/bash /opt/bin/wait4etcdproxy.sh
         RemainAfterExit=true
         Type=oneshot
-    - name: flannelconfig.service
-      command: start
-      content: |
-        [Unit]
-        Description=write flannel network to etcd
-        After=wait4etcdproxy.service
-
-        [Service]
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/flannelconfig.sh
-        ExecStart=/usr/bin/bash /opt/bin/flannelconfig.sh
-        RemainAfterExit=true
-        Type=oneshot
     - name: flanneld.service
       command: start
       drop-ins:
@@ -205,6 +188,9 @@ coreos:
             [Unit]
             After=flannelconfig.service
             Before=docker.service
+
+            [Service]
+            ExecStartPre=-/usr/bin/etcdctl set /coreos.com/network/config '{"Network":"10.244.0.0/14", "Backend": {"Type": "vxlan"}}' 
     - name: docker.service
       drop-ins:
         - name: 51-docker-flannel.conf
