@@ -1,0 +1,1 @@
+variable "github_org_token" {}
