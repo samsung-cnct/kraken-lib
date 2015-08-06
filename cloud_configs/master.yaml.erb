@@ -15,7 +15,7 @@ write_files:
   owner: root
   content: |
     #! /usr/bin/bash
-    until curl http://<%= etcd_cluster_ip %>:4001/v2/machines; do sleep 2; done
+    until curl http://<%= kube_etcd_ip %>:4001/v2/machines; do sleep 2; done
 - path: /opt/bin/wait4etcdproxy.sh
   owner: root
   content: |
@@ -43,6 +43,8 @@ write_files:
         -e 's,$KUBE_CONTROLLER_IP,<%= master_cluster_ip %>,g' \
         -e 's,$KUBE_SCHEDULER_IP,<%= master_cluster_ip %>,g' \
         -e 's,$DOCKERCFG_BASE64,<%= dockercfg_base64 %>,g' \
+        -e 's,$COREOS_ETCD_IP,<%= coreos_etcd_ip %>,g' \
+        -e 's,$KUBE_ETCD_IP,<%= kube_etcd_ip %>,g' \
         -i -- ./*/*.{json,yaml}
 - path: /opt/bin/kraken-create.sh
   owner: root
@@ -63,13 +65,13 @@ coreos:
     proxy: on
     listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
     advertise-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
-    initial-cluster: etcd=http://<%= etcd_cluster_ip %>:2380
+    initial-cluster: etcd=http://<%= kube_etcd_ip %>:2380
   fleet:
     etcd-servers: http://$private_ipv4:4001
     public-ip: $public_ipv4
     metadata: "role=master"
   flannel:
-    etcd-endpoints: http://<%= etcd_cluster_ip %>:4001
+    etcd-endpoints: http://<%= kube_etcd_ip %>:4001
     interface: $private_ipv4
   units:
     <% if drive_type == 'ebs' %>
@@ -233,7 +235,7 @@ coreos:
         --insecure_bind_address=0.0.0.0 \
         --insecure_port=8080 \
         --portal_net=10.100.0.0/16 \
-        --etcd_servers=http://127.0.0.1:4001 \
+        --etcd_servers=http://<%= kube_etcd_ip %>:4001 \
         --public_address_override=$private_ipv4 \
         --logtostderr=true \
         --v=<%= kubernetes_verbosity %> \

@@ -6,7 +6,7 @@ write_files:
   owner: root
   content: |
     #! /usr/bin/bash
-    until curl http://<%= etcd_cluster_ip %>:4001/v2/machines; do sleep 2; done
+    until curl http://<%= kube_etcd_ip %>:4001/v2/machines; do sleep 2; done
 - path: /opt/bin/wait4etcdproxy.sh
   owner: root
   content: |
@@ -27,13 +27,13 @@ coreos:
     proxy: on
     listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
     advertise-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
-    initial-cluster: etcd=http://<%= etcd_cluster_ip %>:2380
+    initial-cluster: etcd=http://<%= kube_etcd_ip %>:2380
   fleet:
     etcd-servers: http://$private_ipv4:4001
     public-ip: $private_ipv4
     metadata: "role=node"
   flannel:
-    etcd-endpoints: http://<%= etcd_cluster_ip %>:4001
+    etcd-endpoints: http://<%= kube_etcd_ip %>:4001
     interface: $private_ipv4
   units:
     <% if drive_type == 'ebs' %>
@@ -235,7 +235,9 @@ coreos:
         --cadvisor_port=4194 \
         --log_cadvisor_usage=true \
         --logtostderr=true \
-        --v=<%= kubernetes_verbosity %>
+        --v=<%= kubernetes_verbosity %> \
+        --node-status-update-frequency=10s \
+        --max-pods=40
         Restart=always
         RestartSec=10
     - name: wait4node.service

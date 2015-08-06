@@ -170,7 +170,7 @@ def build_coreos_userdata(host_number)
   node_info = get_coreos_node_info(host_number)
   settings = cluster_settings
 
-  etcd_cluster_ip = get_vm_ip(1)
+  kube_etcd_ip = get_vm_ip(1)
   master_cluster_ip = get_vm_ip(2)
   proxy_cluster_ip = get_vm_ip(3)
   proxy_public_ip = ENV.fetch('NODE_PUBLIC_IP', proxy_cluster_ip)
@@ -197,7 +197,8 @@ def build_coreos_userdata(host_number)
   end
 
   render_vars = {
-    :etcd_cluster_ip => etcd_cluster_ip,
+    :coreos_etcd_ip => master_cluster_ip, # XXX: there appears to be a coreos etcd on every node, is it even used?  looking at just master for now
+    :kube_etcd_ip => kube_etcd_ip,
     :master_cluster_ip => master_cluster_ip,
     :kubernetes_release => 'v' + kubernetes_release,
     :api_version => settings['cluster']['apiVersion'],
@@ -207,7 +208,7 @@ def build_coreos_userdata(host_number)
     :dns_domain => 'kubernetes.local',
     :hostname => node_info[:hostname],
     :service_public_ip => proxy_cluster_ip,
-    :docker_cache => etcd_cluster_ip,
+    :docker_cache => kube_etcd_ip,
     :node_01_private_ip => proxy_cluster_ip,
     :node_01_public_ip => proxy_public_ip,
     :final_node_ip => final_node_ip,
