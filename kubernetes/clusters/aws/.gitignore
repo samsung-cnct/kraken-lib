@@ -1,3 +1,5 @@
 .kubeconfig
 settings.yaml
 machines/
+terraform.tfstate
+terraform.tfstate.backup
