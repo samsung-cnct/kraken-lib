@@ -150,6 +150,25 @@ coreos:
         Service=systemd-journal-gatewayd.service
         [Install] 
         WantedBy=sockets.target
+    - name: cadvisor.service
+      command: start
+      content: |
+        [Unit]
+        Description=Download and run cadvisor
+        [Service]
+        ExecStartPre=-/usr/bin/docker kill cadvisor
+        ExecStartPre=-/usr/bin/docker rm cadvisor
+        ExecStart=/usr/bin/bash -c \
+          "/usr/bin/docker run \
+          --volume=/:/rootfs:ro \
+          --volume=/var/run:/var/run:rw \
+          --volume=/sys:/sys:ro \
+          --volume=/var/lib/docker/:/var/lib/docker:ro \
+          --publish=4194:4194 \
+          --publish=8094:8080 \
+          --detach=true \
+          --name=cadvisor \
+          google/cadvisor:latest"
 <% if enable_logentries %>
     - name: logentries-token.service
       command: start

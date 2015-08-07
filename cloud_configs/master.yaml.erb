@@ -11,12 +11,12 @@ write_files:
     git clone <%= kraken_services_repo %> .
     # use explicit form incase branch name matches filename in repo and avoids shortcut
     git checkout -B <%= kraken_services_branch %> origin/<%= kraken_services_branch %>
-- path: /opt/bin/wait4etcd.sh
+- path: /opt/bin/wait4-kube-etcd.sh
   owner: root
   content: |
     #! /usr/bin/bash
     until curl http://<%= kube_etcd_ip %>:4001/v2/machines; do sleep 2; done
-- path: /opt/bin/wait4etcdproxy.sh
+- path: /opt/bin/wait4-local-etcd.sh
   owner: root
   content: |
     #! /usr/bin/bash
@@ -26,11 +26,6 @@ write_files:
   content: |
     #! /usr/bin/bash
     until curl http://<%= final_node_ip %>:10255/stats/; do sleep 2; done
-- path: /opt/bin/wait4dns.sh
-  owner: root
-  content: |
-    #! /usr/bin/bash
-    until q
 - path: /opt/bin/kraken-render.sh
   owner: root
   content: |
@@ -136,7 +131,7 @@ coreos:
 
         [Install]
         WantedBy=sockets.target
-    - name: wait4etcd.service
+    - name: wait4-kube-etcd.service
       command: start
       content: |
         [Unit]
@@ -146,8 +141,8 @@ coreos:
         Before=flannel.service
 
         [Service]
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4etcd.sh
-        ExecStart=/usr/bin/bash /opt/bin/wait4etcd.sh
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4-kube-etcd.sh
+        ExecStart=/usr/bin/bash /opt/bin/wait4-kube-etcd.sh
         RemainAfterExit=true
         Type=oneshot
     - name: etcd2.service
@@ -168,7 +163,7 @@ coreos:
         ExecStart=/opt/bin/setup-network-environment
         RemainAfterExit=yes
         Type=oneshot
-    - name: wait4etcdproxy.service
+    - name: wait4-local-etcd.service
       command: start
       content: |
         [Unit]
@@ -178,8 +173,8 @@ coreos:
         Before=flannelconfig.service
 
         [Service]
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4etcdproxy.sh
-        ExecStart=/usr/bin/bash /opt/bin/wait4etcdproxy.sh
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4-local-etcd.sh
+        ExecStart=/usr/bin/bash /opt/bin/wait4-local-etcd.sh
         RemainAfterExit=true
         Type=oneshot
     - name: flanneld.service
@@ -224,7 +219,7 @@ coreos:
       content: |
         [Unit]
         Description=Kubernetes API Server
-        After=wait4etcdproxy.service
+        After=wait4-local-etcd.service
 
         [Service]
         LimitNOFILE=infinity
@@ -302,6 +297,28 @@ coreos:
         --healthz-port=10254
         Restart=always
         RestartSec=10
+    - name: cadvisor.service
+      command: start
+      content: |
+        [Unit]
+        Description=Download and run cadvisor
+        Requires=early-docker.service
+
+        [Service]
+        Description=Download and run cadvisor
+        ExecStartPre=-/usr/bin/docker kill cadvisor
+        ExecStartPre=-/usr/bin/docker rm cadvisor
+        ExecStart=/usr/bin/bash -c \
+          "/usr/bin/docker run \
+          --volume=/:/rootfs:ro \
+          --volume=/var/run:/var/run:rw \
+          --volume=/sys:/sys:ro \
+          --volume=/var/lib/docker/:/var/lib/docker:ro \
+          --publish=4194:4194 \
+          --publish=8094:8080 \
+          --detach=true \
+          --name=cadvisor \
+          google/cadvisor:latest"
     - name: wait4finalnode.service
       command: start
       content: |
