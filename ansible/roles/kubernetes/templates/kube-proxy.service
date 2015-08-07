@@ -1,0 +1,12 @@
+[Unit]
+Description=Kubernetes proxy server
+
+[Service]
+ExecStart=/opt/bin/kube-proxy \
+--etcd_servers=http://{{ master_private_ip }}:4001 \
+--logtostderr=true
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

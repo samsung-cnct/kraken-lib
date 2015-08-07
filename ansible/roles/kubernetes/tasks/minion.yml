@@ -1,0 +1,36 @@
+---
+- name: Configure fleet.service
+  template: src=fleet.service.minion
+            dest=/etc/systemd/system/fleet.service 
+            owner=root 
+            group=root 
+            mode=0644
+  sudo: yes
+  notify: start fleet
+
+- name: Configure flannel.service
+  template: src=flannel.service.minion
+            dest=/etc/systemd/system/flannel.service
+            owner=root
+            group=root
+            mode=0644
+  sudo: yes
+  notify: restart flannel
+
+- name: Configure kube-proxy.service
+  template: src=kube-proxy.service 
+            dest=/etc/systemd/system/kube-proxy.service 
+            owner=root 
+            group=root 
+            mode=0644
+  sudo: yes
+  notify: restart kube-proxy
+
+- name: Configure kubelet.service
+  template: src=kubelet.service 
+            dest=/etc/systemd/system/kubelet.service 
+            owner=root 
+            group=root 
+            mode=0644
+  sudo: yes
+  notify: restart kubelet

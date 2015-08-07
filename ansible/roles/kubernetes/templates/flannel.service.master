@@ -1,0 +1,15 @@
+[Unit]
+Description=Flannel network fabric for CoreOS
+Requires=etcd.service
+After=etcd.service
+
+[Service]
+EnvironmentFile=/etc/environment
+ExecStartPre=-/bin/bash -c "until /usr/bin/etcdctl set /coreos.com/network/config '{\"Network\": \"10.100.0.0/16\"}'; do echo \"waiting for etcd to become available...\"; sleep 5; done"
+ExecStart=/opt/bin/flanneld -iface=${COREOS_PRIVATE_IPV4}
+ExecStartPost=-/bin/bash -c "until [ -e /run/flannel/subnet.env ]; do echo \"waiting for write.\"; sleep 3; done"
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

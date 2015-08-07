@@ -1,0 +1,56 @@
+---
+id: aws
+
+# AWS system settings
+aws:
+  accessKeyId: AKIAJCQCE3FIGFJIB7RA
+  secretAccessKey: 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
+  amiId: latest
+  instanceType: m3.large
+  instanceStorageType: ephemeral
+  regionId: us-west-2
+  securityGroupIds:
+    - sg-be9082db
+  subnetId: subnet-26158e43
+  associatePublicIps: true
+  hostedZoneId: ZX7O08V47RE60
+  instanceNamePrefix: marat
+  masterHostName: marat-master.kubeme.io
+  proxyHostName: marat-proxy.kubeme.io
+  keyPair: kubernetes-marat
+  keyPairPath: /Users/marat/.ssh/keys/kubernetes-marat.pem
+  elb:
+    name: marat-elb
+    dns_name: marat.kubeme.io
+    listeners:
+     - elb_port: 80
+       forwarding_to: 30061
+       protocol: HTTP
+     - elb_port: 8080
+       forwarding_to: 30977
+       protocol: HTTP
+    healthy_threshold: 2 
+    unhealthy_threshold: 3
+    timeout: 5
+    interval: 30
+    heathcheck_port: 30977
+
+# Kubernetes sysetem settings
+cluster:                     
+  kubernetesVersion: stable 
+  nodes: 3
+  apiVersion: v1
+  network: 10.1.104.0/24
+  guestbook: 
+    run: false
+
+# Coreos system settings
+coreos:
+  channel: alpha
+  version: latest
+  rebootStrategy: off
+
+logentries:
+  enabled: false
+  url: api.logentries.com:20000
+  token:

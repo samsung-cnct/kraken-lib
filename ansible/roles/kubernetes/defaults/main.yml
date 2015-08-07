@@ -1,0 +1,2 @@
+flannel_repository_path: /opt/flannel
+kubernetes_coreos_repository_path: /opt/kubernetes-coreos

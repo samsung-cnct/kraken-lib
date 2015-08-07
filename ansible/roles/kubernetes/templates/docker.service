@@ -1,0 +1,15 @@
+[Unit]
+Description=Docker container engine configured to run with flannel
+Requires=flannel.service
+After=flannel.service
+
+[Service]
+EnvironmentFile=/run/flannel/subnet.env
+ExecStartPre=-/usr/bin/ip link set dev docker0 down
+ExecStartPre=-/usr/sbin/brctl delbr docker0
+ExecStart=/usr/bin/docker -d -s=btrfs -H fd:// --bip=${FLANNEL_SUBNET} --mtu=${FLANNEL_MTU}
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

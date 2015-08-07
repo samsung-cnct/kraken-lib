@@ -251,3 +251,17 @@ resource "aws_route53_record" "proxy_record" {
   ttl = "30"
   records = ["${aws_instance.kubernetes_node.0.public_ip}"]
 }
+
+resource "template_file" "ansible_inventory" {
+  filename = "${path.module}/ansible.inventory.tpl"
+  vars {
+    master_public_ip = "${aws_instance.kubernetes_master.public_ip}"
+    etcd_public_ip = "${aws_instance.kubernetes_etcd.public_ip}"
+    node_public_ips = "${join("\n", aws_instance.kubernetes_node.*.public_ip)}"
+    master_private_ip = "${aws_instance.kubernetes_master.private_ip}"
+  }
+}
+
+output "template" {
+  value = "${template_file.ansible_inventory.rendered}"
+}

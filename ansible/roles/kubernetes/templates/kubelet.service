@@ -1,0 +1,16 @@
+[Unit]
+Description=Kubernetes Kubelet
+
+[Service]
+EnvironmentFile=/etc/environment
+ExecStart=/opt/bin/kubelet \
+-address=0.0.0.0 \
+-port=10250 \
+-hostname_override=${COREOS_PRIVATE_IPV4} \
+-etcd_servers=http://{{ master_private_ip }}:4001 \
+-logtostderr=true
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

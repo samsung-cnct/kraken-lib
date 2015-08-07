@@ -1,0 +1,11 @@
+[Unit]
+Description=Flannel network fabric for CoreOS
+
+[Service]
+Type=notify
+ExecStart=/opt/bin/flanneld -etcd-endpoints http://{{ master_private_ip }}:4001
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

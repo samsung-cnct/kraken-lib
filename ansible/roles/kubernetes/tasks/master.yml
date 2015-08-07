@@ -1,0 +1,63 @@
+---
+- name: Configure etcd.service
+  template: src=etcd.service
+            dest=/etc/systemd/system/etcd.service 
+            owner=root 
+            group=root 
+            mode=0644
+  sudo: yes
+  notify: start etcd
+
+- name: Configure fleet.service
+  template: src=fleet.service.master
+            dest=/etc/systemd/system/fleet.service 
+            owner=root 
+            group=root 
+            mode=0644
+  sudo: yes
+  notify: start fleet
+
+- name: Configure flannel.service
+  template: src=flannel.service.master
+            dest=/etc/systemd/system/flannel.service 
+            owner=root 
+            group=root 
+            mode=0644
+  sudo: yes
+  notify: restart flannel
+
+- name: Configure kube-apiserver.service
+  template: src=kube-apiserver.service 
+            dest=/etc/systemd/system/kube-apiserver.service 
+            owner=root 
+            group=root 
+            mode=0644
+  sudo: yes
+  notify: restart kube-apiserver
+
+- name: Configure kube-controller-manager.service
+  template: src=kube-controller-manager.service 
+            dest=/etc/systemd/system/kube-controller-manager.service 
+            owner=root 
+            group=root 
+            mode=0644
+  sudo: yes
+  notify: restart kube-controller-manager
+
+- name: Configure kube-scheduler.service
+  template: src=kube-scheduler.service 
+            dest=/etc/systemd/system/kube-scheduler.service 
+            owner=root 
+            group=root 
+            mode=0644
+  sudo: yes
+  notify: restart kube-scheduler
+
+- name: Configure kube-register.service
+  template: src=kube-register.service 
+            dest=/etc/systemd/system/kube-register.service 
+            owner=root 
+            group=root 
+            mode=0644
+  sudo: yes
+  notify: restart kube-register
