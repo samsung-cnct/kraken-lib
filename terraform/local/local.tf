@@ -1,0 +1,3 @@
+variable dummy {
+  default = "dummy"
+}
