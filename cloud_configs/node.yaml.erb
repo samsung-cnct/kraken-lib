@@ -205,7 +205,7 @@ coreos:
         ExecStart=/opt/bin/kube-proxy \
         --master=<%= master_cluster_ip %>:8080 \
         --logtostderr=true \
-        --v=<%= kubernetes_verbosity %>
+        --v=<%= kube_proxy_v %>
         Restart=always
         RestartSec=10
     - name: kube-kubelet.service
@@ -223,21 +223,24 @@ coreos:
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kubelet
         ExecStart=/opt/bin/kubelet \
         --address=0.0.0.0 \
-        --enable_server=true \
-        --port=10250 \
-        --read_only_port=10255 \
-        --hostname_override=$private_ipv4 \
         --api_servers=<%= master_cluster_ip %>:8080 \
+        --cadvisor_port=4194 \
         --cluster_dns=10.100.0.10 \
         --cluster_domain=<%= dns_domain %> \
+        --enable_server=true \
+        --file-check-frequency=<%= kubelet_file_check_frequency %> \
         --healthz_bind_address=0.0.0.0 \
         --healthz_port=10254 \
-        --cadvisor_port=4194 \
+        --hostname_override=$private_ipv4 \
+        --http-check-frequency=<%= kubelet_http_check_frequency %> \
         --log_cadvisor_usage=true \
         --logtostderr=true \
-        --v=<%= kubernetes_verbosity %> \
-        --node-status-update-frequency=10s \
-        --max-pods=40
+        --max-pods=<%= kubelet_max_pods %> \
+        --node-status-update-frequency=<%= kubelet_node_status_update_frequency %> \
+        --port=10250 \
+        --read_only_port=10255 \
+        --sync-frequency=<%= kubelet_sync_frequency %> \
+        --v=<%= kubelet_v %>
         Restart=always
         RestartSec=10
     - name: wait4node.service
@@ -270,12 +273,12 @@ coreos:
       command: start
       enable: yes
       content: |
-        [Unit] 
+        [Unit]
         Description=Journal Gateway Service Socket
-        [Socket] 
+        [Socket]
         ListenStream=/var/run/journald.sock
         Service=systemd-journal-gatewayd.service
-        [Install] 
+        [Install]
         WantedBy=sockets.target
 <% if enable_logentries %>
     - name: journal-2-logentries.service

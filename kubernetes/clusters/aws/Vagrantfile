@@ -223,8 +223,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     node_info = get_coreos_node_info(i)
     vm_ip = get_vm_ip(i)
 
-    puts "vm_ip: #{vm_ip}"
-
     config.vm.boot_timeout = 2
     config.vm.define node_info[:hostname] do |config2|
 

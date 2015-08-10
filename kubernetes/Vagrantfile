@@ -197,22 +197,40 @@ def build_coreos_userdata(host_number)
   end
 
   render_vars = {
-    :coreos_etcd_ip => master_cluster_ip, # XXX: there appears to be a coreos etcd on every node, is it even used?  looking at just master for now
     :kube_etcd_ip => kube_etcd_ip,
     :master_cluster_ip => master_cluster_ip,
+    :service_public_ip => proxy_cluster_ip,
+    :node_01_private_ip => proxy_cluster_ip,
+    :node_01_public_ip => proxy_public_ip,
+    :final_node_ip => final_node_ip,
+    :docker_cache => kube_etcd_ip,
     :kubernetes_release => 'v' + kubernetes_release,
     :api_version => settings['cluster']['apiVersion'],
-    :kubernetes_verbosity => '1',
+    :kube_apiserver_v => '1',
+    :kube_controller_manager_v => '4',
+    :kube_scheduler_v => '4',
+    :kubelet_v => '1',
+    :kube_proxy_v => '1',
     :reboot_strategy => settings['coreos']['rebootStrategy'] || 'off',
     :cloud_provider => 'vagrant',
     :dns_domain => 'kubernetes.local',
     :hostname => node_info[:hostname],
-    :service_public_ip => proxy_cluster_ip,
-    :docker_cache => kube_etcd_ip,
-    :node_01_private_ip => proxy_cluster_ip,
-    :node_01_public_ip => proxy_public_ip,
-    :final_node_ip => final_node_ip,
-    :drive_type => storage_type
+    :drive_type => storage_type,
+    :kube_apiserver_event_ttl => 0, # "Default 1 hour", what shold this be?
+    :kube_apiserver_kubelet_timeout => 0, # what should this be? what are the units?
+    :kube_apiserver_max_requests_inflight => 1600, # 4X default
+    :kube_controller_manager_concurrent_rc_syncs => '5', # default
+    :kube_controller_manager_concurrent_endpoint_syncs => '5', # default
+    :kube_controller_manager_node_monitor_grace_period => '40s', # default
+    :kube_controller_manager_node_monitor_period => '5s', # default
+    :kube_controller_manager_pod_eviction_timeout => '1m', # ???
+    :kube_controller_manager_resource_quota_sync_period => '20s', # ???
+    :kubelet_max_pods => 40, # default
+    :kubelet_file_check_frequency => '20s', # default
+    :kubelet_http_check_frequency => '20s', # default
+    :kubelet_node_status_update_frequency => '10s', # default
+    :kubelet_sync_frequency => '10s' # default
+
   }
 
   render_vars[:dockercfg_base64] =
