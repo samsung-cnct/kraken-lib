@@ -1,0 +1,16 @@
+---
+- name: Create /opt/bin for custom binaries
+  sudo: yes
+  file: >
+    path=/opt/bin
+    state=directory
+    owner=core
+    group=core
+
+- name: Create /var/lib/coreos-install/user_data for cloud config data
+  sudo: yes
+  file: >
+    path=/var/lib/coreos-install/user_data
+    state=directory
+    owner=core
+    group=core

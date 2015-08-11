@@ -25,6 +25,14 @@ variable "coreos_ami" {
     "us-west-2" = "ami-85ada4b5"
   }
 }
+variable "coreos_update_group" {
+  description = "CoreOS update group"
+  default = "alpha"
+}
+variable "coreos_reboot_strategy" {
+  description = "CoreOS reboot strategy"
+  default = "off"
+}
 variable "aws_cluster_prefix" {
   default = "kubernetes"
   description = "AWS cluster prefix - all resources with names will be identified as <aws_user_prefix>_<aws_cluster_prefix>_<name>"
@@ -73,7 +81,6 @@ variable "aws_cluster_domain" {
   default = "kubeme.io"
   description = "Location of public key material to import into the <aws_user_prefix>_<aws_cluster_prefix>_keypair"
 }
-
 
 
 

@@ -1,0 +1,8 @@
+---
+- name: Create cloud - init file
+  template: src=etcd.yaml.template
+            dest=/var/lib/coreos-install/user_data/etcd.yaml
+  sudo: yes
+
+- name: run the coreos-cloudinit
+  shell: coreos-cloudinit -from-file=/var/lib/coreos-install/user_data/etcd.yaml

@@ -211,7 +211,7 @@ resource "aws_instance" "kubernetes_etcd" {
     volume_size = "${var.aws_volume_size}"
   }
   tags {
-    Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_master"
+    Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_etcd"
   }
 }
 
@@ -259,6 +259,7 @@ resource "template_file" "ansible_inventory" {
     etcd_public_ip = "${aws_instance.kubernetes_etcd.public_ip}"
     node_public_ips = "${join("\n", aws_instance.kubernetes_node.*.public_ip)}"
     master_private_ip = "${aws_instance.kubernetes_master.private_ip}"
+    etcd_private_ip = "${aws_instance.kubernetes_etcd.private_ip}"
   }
 }
 

@@ -1,0 +1,8 @@
+---
+- name: Create cloud - init file
+  template: src=master.yaml.template
+            dest=/var/lib/coreos-install/user_data/master.yaml
+  sudo: yes
+
+- name: run the coreos-cloudinit
+  shell: coreos-cloudinit -from-file=/var/lib/coreos-install/user_data/master.yaml

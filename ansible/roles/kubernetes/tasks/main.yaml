@@ -1,0 +1,15 @@
+---
+# Common tasks for every node
+- include: common.yml
+
+# Kubernetes master specific tasks
+- include: master.yml
+  when: "'master' in group_names"
+
+# Etcd specific tasks
+- include: etcd.yml
+  when: "'etcd' in group_names"
+
+# Kubernetes node specific tasks
+- include: node.yml
+  when: "'nodes' in group_names"

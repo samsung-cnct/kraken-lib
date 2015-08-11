@@ -1,0 +1,297 @@
+#cloud-config
+
+---
+write_files:
+- path: /opt/bin/download-kraken-services.sh
+  owner: root
+  content: |
+    #! /usr/bin/bash
+    set -x
+    mkdir -p /opt/bin/kraken-services && cd /opt/bin/kraken-services
+    git clone {{kraken_services_repo}} .
+    # use explicit form incase branch name matches filename in repo and avoids shortcut
+    git checkout -B {{kraken_services_branch}} origin/{{kraken_services_branch}}
+- path: /opt/bin/kraken-render.sh
+  owner: root
+  content: |
+    #! /usr/bin/bash
+    set -x
+    cd /opt/bin/kraken-services
+    sed -e 's,$KUBE_MASTER_URL,http://{{master_private_ip}}:8080,g' \
+        -e 's,$CLUSTER_DOMAIN,{{dns_domain}},g' \
+        -e 's,$INFLUXDB_EXTERNAL_HOST,{{node_01_public_ip}},g' \
+        -e 's,$KUBE_CONTROLLER_IP,{{master_private_ip}},g' \
+        -e 's,$KUBE_SCHEDULER_IP,{{master_private_ip}},g' \
+        -e 's,$DOCKERCFG_BASE64,{{dockercfg_base64}},g' \
+        -i -- ./*/*.{json,yaml}
+- path: /opt/bin/kraken-create.sh
+  owner: root
+  content: |
+    #! /usr/bin/bash
+    set -x
+    cd /opt/bin/kraken-services
+    for dir in $*; do
+      /opt/bin/kubectl --server=http://{{master_private_ip}}:8080 create -f ./$dir/
+    done
+coreos:
+  etcd2:
+    proxy: on
+    listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
+    advertise-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
+    initial-cluster: etcd=http://{{etcd_private_ip}}:2380
+  fleet:
+    etcd-servers: http://{{master_private_ip}}:4001
+    public-ip: {{master_public_ip}}
+    metadata: "role=master"
+  flannel:
+    etcd-endpoints: http://{{etcd_private_ip}}:4001
+    interface: {{master_private_ip}}
+  units:
+{% if format_docker_storage_mnt %}
+    - name: format-ebs.service
+      command: start
+      content: |
+        [Unit]
+        Description=Formats the EBS drive
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/sbin/wipefs -f {{format_docker_storage_mnt}}
+        ExecStart=/usr/sbin/mkfs.ext4 -F {{format_docker_storage_mnt}}
+    - name: var-lib-docker.mount
+      command: start
+      content: |
+        [Unit]
+        Description=Mount EBS to /var/lib/docker
+        Requires=format-ebs.service
+        After=format-ebs.service
+        Before=docker.service
+        [Mount]
+        What=/dev/xvdf
+        Where=/var/lib/docker
+        Type=ext4
+{% endif %}
+    - name: docker-tcp.socket
+      command: start
+      enable: true
+      content: |
+        [Unit]
+        Description=Docker TCP Socket for the API
+
+        [Socket]
+        ListenStream=0.0.0.0:4243
+        BindIPv6Only=both
+        Service=docker.service
+
+        [Install]
+        WantedBy=sockets.target
+    - name: etcd2.service
+      command: start
+    - name: setup-network-environment.service
+      command: start
+      content: |
+        [Unit]
+        Description=Setup Network Environment
+        Requires=network-online.target
+        After=network-online.target
+        Before=flanneld.service
+
+        [Service]
+        ExecStartPre=-/usr/bin/mkdir -p /opt/bin
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://github.com/kelseyhightower/setup-network-environment/releases/download/v1.0.0/setup-network-environment
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/setup-network-environment
+        ExecStart=/opt/bin/setup-network-environment
+        RemainAfterExit=yes
+        Type=oneshot
+    - name: flanneld.service
+      command: start
+      drop-ins:
+        - name: 50-network-config.conf
+          content: |
+            [Unit]
+            After=flannelconfig.service
+            Before=docker.service
+
+            [Service]
+            ExecStartPre=-/usr/bin/etcdctl set /coreos.com/network/config '{"Network":"10.244.0.0/14", "Backend": {"Type": "vxlan"}}' 
+    - name: fleet.service
+      command: start
+    - name: install-kubectl.service
+      command: start
+      content: |
+        [Unit]
+        Description=Install kubectl client tool
+        Requires=network-online.target
+        After=network-online.target
+
+        [Service]
+        ExecStart=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/{{kubernetes_version}}/bin/linux/amd64/kubectl
+        ExecStart=/usr/bin/chmod +x /opt/bin/kubectl
+        Type=oneshot
+        RemainAfterExit=true
+    - name: kube-apiserver.service
+      command: start
+      content: |
+        [Unit]
+        Description=Kubernetes API Server
+
+        [Service]
+        LimitNOFILE=infinity
+        ExecStartPre=-/usr/bin/mkdir -p /opt/bin
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/{{kubernetes_version}}/bin/linux/amd64/kube-apiserver
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-apiserver
+        ExecStart=/opt/bin/kube-apiserver \
+        --insecure_bind_address=0.0.0.0 \
+        --insecure_port=8080 \
+        --portal_net=10.100.0.0/16 \
+        --etcd_servers=http://127.0.0.1:4001 \
+        --public_address_override={{master_private_ip}} \
+        --logtostderr=true \
+        --v={{kubernetes_verbosity}} \
+        --cors_allowed_origins=.* \
+        --runtime_config=api/{{kubernetes_api_version}}
+        Restart=always
+        RestartSec=10
+    - name: kube-controller-manager.service
+      command: start
+      content: |
+        [Unit]
+        Description=Kubernetes Controller Manager
+        Requires=kube-apiserver.service
+        After=kube-apiserver.service
+
+        [Service]
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/{{kubernetes_version}}/bin/linux/amd64/kube-controller-manager
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-controller-manager
+        ExecStart=/opt/bin/kube-controller-manager \
+        --address={{master_private_ip}} \
+        --port=10252 \
+        --master=$private_ipv4:8080 \
+        --pod_eviction_timeout=1m \
+        --resource_quota_sync_period=20s \
+        --logtostderr=true \
+        --v={{kubernetes_verbosity}}
+        Restart=always
+        RestartSec=10
+    - name: kube-scheduler.service
+      command: start
+      content: |
+        [Unit]
+        Description=Kubernetes Scheduler
+        Requires=kube-apiserver.service
+        After=kube-apiserver.service
+
+        [Service]
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/{{kubernetes_version}}/bin/linux/amd64/kube-scheduler
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-scheduler
+        ExecStart=/opt/bin/kube-scheduler \
+        --address={{master_private_ip}}
+        --port=10251 \
+        --master=$private_ipv4:8080 \
+        --logtostderr=true \
+        --v={{kubernetes_verbosity}}
+        Restart=always
+        RestartSec=10
+    - name: kube-register.service
+      command: start
+      content: |
+        [Unit]
+        Description=Kubernetes Registration Service
+        Requires=kube-apiserver.service
+        After=kube-apiserver.service
+
+        [Service]
+        ExecStartPre=/usr/bin/wget -O /opt/bin/kube-register \
+          https://github.com/kelseyhightower/kube-register/releases/download/v0.0.3/kube-register-0.0.3-linux-amd64
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-register
+        ExecStart=/opt/bin/kube-register \
+        --metadata=role=node \
+        --fleet-endpoint=unix:///var/run/fleet.sock \
+        --api-endpoint=http://{{master_private_ip}}:8080 \
+        --healthz-port=10254
+        Restart=always
+        RestartSec=10
+    
+    - name: download-kraken-services.service
+      command: start
+      content: |
+        [Unit]
+        Description=Download samsung-ag/kraken-services
+
+        [Service]
+        TimeoutStartSec=0
+        ExecStart=/usr/bin/bash /opt/bin/download-kraken-services.sh
+        RemainAfterExit=true
+        Type=oneshot
+    - name: kraken-render.service
+      command: start
+      content: |
+        [Unit]
+        Requires=download-kraken-services.service
+        After=download-kraken-services.service
+
+        [Service]
+        TimeoutStartSec=0
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/kraken-render.sh
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/kraken-create.sh
+        ExecStart=/usr/bin/bash /opt/bin/kraken-render.sh
+        RemainAfterExit=true
+        Type=oneshot
+    - name: kraken-create-skydns.service
+      command: start
+      content: |
+        [Unit]
+        Description=Kubernetes cluster DNS service
+        Requires=kraken-render.service
+        After=kraken-render.service
+
+        [Service]
+        TimeoutStartSec=0
+        ExecStart=/usr/bin/bash /opt/bin/kraken-create.sh skydns
+        RemainAfterExit=true
+        Type=oneshot
+    - name: kraken-create-services.service
+      command: start
+      content: |
+        [Unit]
+        Description=Launch kraken services (excluding skydns)
+
+        [Service]
+        TimeoutStartSec=0
+        ExecStart=/usr/bin/bash /opt/bin/kraken-create.sh {{kraken_services_dirs}}
+        RemainAfterExit=true
+        Type=oneshot
+    - name: systemd-journal-gatewayd.socket
+      command: start
+      enable: yes
+      content: |
+        [Unit] 
+        Description=Journal Gateway Service Socket
+        [Socket] 
+        ListenStream=/var/run/journald.sock
+        Service=systemd-journal-gatewayd.service
+        [Install] 
+        WantedBy=sockets.target
+{% if logentries_token %}
+    - name: journal-2-logentries.service
+      command: start
+      content: |
+        [Unit]
+        Description=Forward Systemd Journal to logentries.com
+        After=docker.service
+        Requires=docker.service
+        [Service]
+        TimeoutStartSec=0
+        ExecStartPre=-/usr/bin/docker kill journal-2-logentries
+        ExecStartPre=-/usr/bin/docker rm journal-2-logentries
+        ExecStartPre=/usr/bin/docker pull quay.io/kelseyhightower/journal-2-logentries
+        ExecStart=/usr/bin/bash -c \
+        "/usr/bin/docker run --name journal-2-logentries \
+        -v /run/journald.sock:/run/journald.sock \
+        -e LOGENTRIES_TOKEN=`etcdctl get /logentries.com/token` \
+        -e LOGENTRIES_URL=`etcdctl get /logentries.com/url` \
+        quay.io/kelseyhightower/journal-2-logentries"
+{% endif %}
+  update:
+    group: {{update_group}}
+    reboot-strategy: {{reboot_strategy}}

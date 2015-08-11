@@ -1,0 +1,177 @@
+#cloud-config
+
+---
+coreos:
+  etcd2:
+    proxy: on
+    listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
+    advertise-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
+    initial-cluster: etcd=http://{{etcd_private_ip}}:2380
+  fleet:
+    etcd-servers: http://$private_ipv4:4001
+    public-ip: $private_ipv4
+    metadata: "role=node"
+  flannel:
+    etcd-endpoints: http://{{etcd_private_ip}}:4001
+    interface: $private_ipv4
+  units:
+{% if format_docker_storage_mnt %}
+    - name: format-ebs.service
+      command: start
+      content: |
+        [Unit]
+        Description=Formats the EBS drive
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/sbin/wipefs -f {{format_docker_storage_mnt}}
+        ExecStart=/usr/sbin/mkfs.ext4 -F {{format_docker_storage_mnt}}
+    - name: var-lib-docker.mount
+      command: start
+      content: |
+        [Unit]
+        Description=Mount EBS to /var/lib/docker
+        Requires=format-ebs.service
+        After=format-ebs.service
+        Before=docker.service
+        [Mount]
+        What=/dev/xvdf
+        Where=/var/lib/docker
+        Type=ext4
+{% endif %}
+    - name: docker-tcp.socket
+      command: start
+      enable: true
+      content: |
+        [Unit]
+        Description=Docker Socket for the API
+
+        [Socket]
+        ListenStream=0.0.0.0:4243
+        BindIPv6Only=both
+        Service=docker.service
+
+        [Install]
+        WantedBy=sockets.target
+    - name: setup-network-environment.service
+      command: start
+      content: |
+        [Unit]
+        Description=Setup Network Environment
+        Documentation=https://github.com/kelseyhightower/setup-network-environment
+        Requires=network-online.target
+        After=network-online.target
+        Before=flanneld.service
+
+        [Service]
+        ExecStartPre=-/usr/bin/mkdir -p /opt/bin
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://github.com/kelseyhightower/setup-network-environment/releases/download/v1.0.0/setup-network-environment
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/setup-network-environment
+        ExecStart=/opt/bin/setup-network-environment
+        RemainAfterExit=yes
+        Type=oneshot
+    - name: fleet.service
+      command: start
+    - name: install-kubectl.service
+      command: start
+      content: |
+        [Unit]
+        Description=Install kubectl client tool
+        Requires=network-online.target
+        After=network-online.target
+
+        [Service]
+        ExecStart=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/{{kubernetes_version}}/bin/linux/amd64/kubectl
+        ExecStart=/usr/bin/chmod +x /opt/bin/kubectl
+        Type=oneshot
+        RemainAfterExit=true
+    - name: kube-proxy.service
+      command: start
+      content: |
+        [Unit]
+        Description=Kubernetes Proxy
+        Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+        [Service]
+        LimitNOFILE=infinity
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/{{kubernetes_version}}/bin/linux/amd64/kube-proxy
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-proxy
+        ExecStart=/opt/bin/kube-proxy \
+        --master={{master_private_ip}}:8080 \
+        --logtostderr=true \
+        --v={{kubernetes_verbosity}}
+        Restart=always
+        RestartSec=10
+    - name: kube-kubelet.service
+      command: start
+      content: |
+        [Unit]
+        Description=Kubernetes Kubelet
+        Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+        [Service]
+        EnvironmentFile=/etc/network-environment
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/{{kubernetes_version}}/bin/linux/amd64/kubelet
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/kubelet
+        ExecStart=/opt/bin/kubelet \
+        --address=0.0.0.0 \
+        --enable_server=true \
+        --port=10250 \
+        --read_only_port=10255 \
+        --hostname_override=$private_ipv4 \
+        --api_servers={{master_private_ip}}:8080 \
+        --cluster_dns=10.100.0.10 \
+        --cluster_domain={{dns_domain}} \
+        --healthz_bind_address=0.0.0.0 \
+        --healthz_port=10254 \
+        --cadvisor_port=4194 \
+        --log_cadvisor_usage=true \
+        --logtostderr=true \
+        --v={{kubernetes_verbosity}}
+        Restart=always
+        RestartSec=10
+    - name: run-kubectl-label-node.service
+      command: start
+      content: |
+        [Unit]
+        Description=Try labeling ourselves
+
+        [Service]
+        ExecStart=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/{{kubernetes_version}}/bin/linux/amd64/kubectl
+        ExecStart=/opt/bin/kubectl --server={{master_private_ip}}:8080 label nodes $private_ipv4 kraken-node={{ ansible_hostname }}
+        Type=oneshot
+        RemainAfterExit=true
+    - name: systemd-journal-gatewayd.socket
+      command: start
+      enable: yes
+      content: |
+        [Unit] 
+        Description=Journal Gateway Service Socket
+        [Socket] 
+        ListenStream=/var/run/journald.sock
+        Service=systemd-journal-gatewayd.service
+        [Install] 
+        WantedBy=sockets.target
+{% if logentries_token %}
+    - name: journal-2-logentries.service
+      command: start
+      content: |
+        [Unit]
+        Description=Forward Systemd Journal to logentries.com
+        After=docker.service
+        Requires=docker.service
+        [Service]
+        TimeoutStartSec=0
+        ExecStartPre=-/usr/bin/docker kill journal-2-logentries
+        ExecStartPre=-/usr/bin/docker rm journal-2-logentries
+        ExecStartPre=/usr/bin/docker pull quay.io/kelseyhightower/journal-2-logentries
+        ExecStart=/usr/bin/bash -c \
+        "/usr/bin/docker run --name journal-2-logentries \
+        -v /run/journald.sock:/run/journald.sock \
+        -e LOGENTRIES_TOKEN=`etcdctl get /logentries.com/token` \
+        -e LOGENTRIES_URL=`etcdctl get /logentries.com/url` \
+        quay.io/kelseyhightower/journal-2-logentries"
+{% endif %}
+  update:
+    group: {{update_group}}
+    reboot-strategy: {{reboot_strategy}}
