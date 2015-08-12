@@ -182,22 +182,14 @@ resource "aws_security_group" "vpc_secgroup" {
   }
 }
 
-resource "aws_instance" "kubernetes_master" {
-  ami = "${lookup(var.coreos_ami, var.aws_region)}"
-  instance_type = "${var.aws_master_type}"
-  key_name = "${aws_key_pair.keypair.key_name}"
-  vpc_security_group_ids = [ "${aws_security_group.vpc_secgroup.id}" ]
-  subnet_id = "${aws_subnet.vpc_subnet.id}"
-  associate_public_ip_address = true
-  ebs_block_device {
-    device_name = "/dev/sdf"
-    volume_size = "${var.aws_volume_size}"
-  }
-  tags {
-    Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_master"
+resource "template_file" "etcd_cloudinit" {
+  filename = "${path.module}/../../templates/etcd.yaml.tpl"
+  vars {
+    format_docker_storage_mnt = "${var.format_docker_storage_mnt}"
+    coreos_update_channel = "${var.coreos_update_channel}"
+    coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
   }
 }
-
 resource "aws_instance" "kubernetes_etcd" {
   depends_on = ["aws_instance.kubernetes_master"]
   ami = "${lookup(var.coreos_ami, var.aws_region)}"
@@ -210,11 +202,47 @@ resource "aws_instance" "kubernetes_etcd" {
     device_name = "/dev/sdf"
     volume_size = "${var.aws_volume_size}"
   }
+  user_data = "${template_file.etcd_cloudinit.rendered}"
   tags {
     Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_etcd"
   }
 }
 
+resource "template_file" "master_cloudinit" {
+  filename = "${path.module}/../../templates/master.yaml.tpl"
+  vars {
+    etcd_private_ip = "${aws_instance.kubernetes_etcd.private_ip}"
+    format_docker_storage_mnt = "${var.format_docker_storage_mnt}"
+    coreos_update_channel = "${var.coreos_update_channel}"
+    coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
+  }
+}
+resource "aws_instance" "kubernetes_master" {
+  ami = "${lookup(var.coreos_ami, var.aws_region)}"
+  instance_type = "${var.aws_master_type}"
+  key_name = "${aws_key_pair.keypair.key_name}"
+  vpc_security_group_ids = [ "${aws_security_group.vpc_secgroup.id}" ]
+  subnet_id = "${aws_subnet.vpc_subnet.id}"
+  associate_public_ip_address = true
+  ebs_block_device {
+    device_name = "/dev/sdf"
+    volume_size = "${var.aws_volume_size}"
+  }
+  user_data = "${template_file.master_cloudinit.rendered}"
+  tags {
+    Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_master"
+  }
+}
+
+resource "template_file" "node_cloudinit" {
+  filename = "${path.module}/../../templates/node.yaml.tpl"
+  vars {
+    etcd_private_ip = "${aws_instance.kubernetes_etcd.private_ip}"
+    format_docker_storage_mnt = "${var.format_docker_storage_mnt}"
+    coreos_update_channel = "${var.coreos_update_channel}"
+    coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
+  }
+}
 resource "aws_instance" "kubernetes_node" {
   depends_on = ["aws_instance.kubernetes_etcd"]
   count = "${var.node_count}"
@@ -228,7 +256,7 @@ resource "aws_instance" "kubernetes_node" {
     device_name = "/dev/sdf"
     volume_size = "${var.aws_volume_size}"
   }
-  # user_data = ""
+  user_data = "${template_file.node_cloudinit.rendered}"
   tags {
     Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_node-${count.index+1}"
   }
@@ -253,7 +281,7 @@ resource "aws_route53_record" "proxy_record" {
 }
 
 resource "template_file" "ansible_inventory" {
-  filename = "${path.module}/ansible.inventory.tpl"
+  filename = "${path.module}/../../templates/ansible.inventory.tpl"
   vars {
     master_public_ip = "${aws_instance.kubernetes_master.public_ip}"
     etcd_public_ip = "${aws_instance.kubernetes_etcd.public_ip}"

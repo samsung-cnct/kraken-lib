@@ -1,36 +1,43 @@
 ---
-- name: Configure fleet.service
-  template: src=fleet.service.minion
-            dest=/etc/systemd/system/fleet.service 
-            owner=root 
-            group=root 
-            mode=0644
-  sudo: yes
-  notify: start fleet
+- name: Wait for kubernetes master
+  wait_for: host={{master_private_ip}} port=8080 timeout=300
 
-- name: Configure flannel.service
-  template: src=flannel.service.minion
-            dest=/etc/systemd/system/flannel.service
-            owner=root
-            group=root
-            mode=0644
+- name: Create wait4node script
+  template: src=wait4node.sh.ansible
+            dest=/opt/bin/wait4node.sh
   sudo: yes
-  notify: restart flannel
 
-- name: Configure kube-proxy.service
-  template: src=kube-proxy.service 
-            dest=/etc/systemd/system/kube-proxy.service 
-            owner=root 
-            group=root 
-            mode=0644
+- name: Create hyperkube node
+  template: src=hyperkube-node.service.ansible
+            dest=/etc/systemd/system/hyperkube-node.service
   sudo: yes
-  notify: restart kube-proxy
 
-- name: Configure kubelet.service
-  template: src=kubelet.service 
-            dest=/etc/systemd/system/kubelet.service 
-            owner=root 
-            group=root 
-            mode=0644
+- name: Create wait4node
+  template: src=wait4node.service.ansible
+            dest=/etc/systemd/system/wait4node.service
   sudo: yes
-  notify: restart kubelet
+
+- name: Create hyperkube node proxy
+  template: src=hyperkube-proxy-node.service.ansible
+            dest=/etc/systemd/system/hyperkube-proxy-node.service
+  sudo: yes
+
+- name: Create labeler service
+  template: src=kubernetes-label.service.ansible
+            dest=/etc/systemd/system/kubernetes-label.service
+  sudo: yes
+
+- name: notify systemd of config changes
+  command: systemctl daemon-reload
+
+- name: start hyperkube-node and set to start on startup
+  service: name=hyperkube-node state=restarted enabled=yes
+
+- name: start wait4node and set to start on startup
+  service: name=wait4node state=restarted enabled=yes
+
+- name: start kubernetes-label and set to start on startup
+  service: name=kubernetes-label state=restarted enabled=yes
+
+- name: start hyperkube-proxy-node and set to start on startup
+  service: name=hyperkube-proxy-node state=restarted enabled=yes

@@ -1,0 +1,8 @@
+[Unit]
+Description=Launch hyperkube node proxy
+Requires=hyperkube-node.service
+After=hyperkube-node.service
+
+[Service]
+Restart=always
+ExecStart=docker run -d --net=host --privileged gcr.io/google_containers/hyperkube:{{kubernetes_version}} /hyperkube proxy --master=http://{{master_private_ip}}:8080 --v={{kubernetes_verbosity}}

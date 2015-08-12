@@ -1,0 +1,10 @@
+[Unit]
+Description=Launch kraken services (excluding skydns)
+Requires=kraken-create-skydns.service
+After=kraken-create-skydns.service
+
+[Service]
+TimeoutStartSec=0
+ExecStart=/usr/bin/bash /opt/bin/kraken-create.sh {{kraken_services_dirs}}
+RemainAfterExit=true
+Type=oneshot

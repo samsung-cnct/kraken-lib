@@ -1,0 +1,2 @@
+#! /usr/bin/bash
+  until /opt/bin/kubectl --server={{master_private_ip}}:8080 get nodes | grep -q {{ansible_default_ipv4.address}}; do sleep 2; done

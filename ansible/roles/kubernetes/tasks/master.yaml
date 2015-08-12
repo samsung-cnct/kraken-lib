@@ -1,8 +1,72 @@
 ---
-- name: Create cloud - init file
-  template: src=master.yaml.template
-            dest=/var/lib/coreos-install/user_data/master.yaml
+- name: Create /opt/bin/kraken-services for custom binaries
+  sudo: yes
+  file: >
+    path=/opt/bin/kraken-services
+    state=directory
+    owner=core
+    group=core
+
+- name: Create /opt/bin/manifests for configs
+  sudo: yes
+  file: >
+    path=/opt/bin/manifests
+    state=directory
+    owner=core
+    group=core
+
+- name: copy master manifest config
+  template: src=hyperkube_config_master.json.ansible
+            dest=/opt/bin/manifests/master.json
   sudo: yes
 
-- name: run the coreos-cloudinit
-  shell: coreos-cloudinit -from-file=/var/lib/coreos-install/user_data/master.yaml
+- name: Download services
+  git: repo={{kraken_services_repo}}
+       dest=/opt/bin/kraken-services
+       version={{kraken_services_branch}}
+  sudo: yes
+
+- name: Create hyperkube master
+  template: src=hyperkube-master.service.ansible
+            dest=/etc/systemd/system/hyperkube-master.service
+  sudo: yes
+
+- name: Create hyperkube proxy
+  template: src=hyperkube-proxy.service.ansible
+            dest=/etc/systemd/system/hyperkube-proxy.service
+  sudo: yes
+
+- name: Create render services script
+  template: src=kraken-render.sh.ansible
+            dest=/opt/bin/kraken-render.sh
+  sudo: yes
+
+- name: Create render services service
+  template: src=kraken-render.service.ansible
+            dest=/etc/systemd/system/kraken-render.service
+  sudo: yes
+
+- name: Create skydns service
+  template: src=kraken-create-skydns.service.ansible
+            dest=/etc/systemd/system/kraken-create-skydns.service
+  sudo: yes
+
+- name: Create kraken-create-services service
+  template: src=kraken-create-services.service.ansible
+            dest=/etc/systemd/system/kraken-create-services.service
+  sudo: yes
+
+- name: notify systemd of config changes
+  command: systemctl daemon-reload
+
+- name: start kraken-render and set to start on startup
+  service: name=kraken-render state=restarted enabled=yes
+
+- name: start kraken-create-skydns and set to start on startup
+  service: name=kraken-create-skydns state=restarted enabled=yes
+
+- name: wait for skydns to start up
+  wait_for: timeout=60
+
+- name: start kraken-create-services and set to start on startup
+  service: name=kraken-create-services state=restarted enabled=yes

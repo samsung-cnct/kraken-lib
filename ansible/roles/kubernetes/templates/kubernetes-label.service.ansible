@@ -1,0 +1,9 @@
+[Unit]
+Description=Try labeling ourselves
+Requires=wait4node.service
+After=wait4node.service
+
+[Service]
+ExecStart=/opt/bin/kubectl --server={{master_private_ip}}:8080 label nodes {{ ansible_default_ipv4.address }} kraken-node={{ansible_hostname}}
+Type=oneshot
+RemainAfterExit=true

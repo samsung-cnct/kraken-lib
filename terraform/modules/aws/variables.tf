@@ -81,7 +81,18 @@ variable "aws_cluster_domain" {
   default = "kubeme.io"
   description = "Location of public key material to import into the <aws_user_prefix>_<aws_cluster_prefix>_keypair"
 }
-
+variable "format_docker_storage_mnt" {
+  default = "/dev/xvdf"
+  description = "Mount point for EBS drive to move /var/docker to"
+}
+variable "coreos_update_channel" {
+  default = "alpha"
+  description = "Core OS update channel. Alpha, beta, stable or some custom value"
+}
+variable "coreos_reboot_strategy" {
+  default = "off"
+  description = Core OS reboot strategy"
+}
 
 
 

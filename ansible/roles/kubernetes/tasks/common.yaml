@@ -1,16 +1,21 @@
 ---
-- name: Create /opt/bin for custom binaries
-  sudo: yes
-  file: >
-    path=/opt/bin
-    state=directory
-    owner=core
-    group=core
+- name: create logentries-url.service
+  template: src=logentries-url.service.ansible dest=/etc/systemd/system/logentries-url.service
 
-- name: Create /var/lib/coreos-install/user_data for cloud config data
-  sudo: yes
-  file: >
-    path=/var/lib/coreos-install/user_data
-    state=directory
-    owner=core
-    group=core
+- name: create kubectl.service
+  template: src=kubectl.service.ansible dest=/etc/systemd/system/kubectl.service
+
+- name: create journal-2-logentries.service
+  template: src=journal-2-logentries.service.ansible dest=/etc/systemd/system/journal-2-logentries.service
+
+- name: notify systemd of config changes
+  command: systemctl daemon-reload
+
+- name: start logentries-url.service and set to start on startup
+  service: name=logentries-url state=restarted enabled=yes
+
+- name: start journal-2-logentries.service and set to start on startup
+  service: name=journal-2-logentries state=restarted enabled=yes
+
+- name: start kubectl.service and set to start on startup
+  service: name=kubectl state=restarted enabled=yes
