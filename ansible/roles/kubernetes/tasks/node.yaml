@@ -29,15 +29,20 @@
 
 - name: notify systemd of config changes
   command: systemctl daemon-reload
+  sudo: yes
 
 - name: start hyperkube-node and set to start on startup
   service: name=hyperkube-node state=restarted enabled=yes
+  sudo: yes
 
 - name: start wait4node and set to start on startup
   service: name=wait4node state=restarted enabled=yes
+  sudo: yes
 
 - name: start kubernetes-label and set to start on startup
   service: name=kubernetes-label state=restarted enabled=yes
+  sudo: yes
 
 - name: start hyperkube-proxy-node and set to start on startup
   service: name=hyperkube-proxy-node state=restarted enabled=yes
+  sudo: yes

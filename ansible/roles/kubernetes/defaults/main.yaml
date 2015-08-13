@@ -6,6 +6,6 @@ dockercfg_base64:
 kubernetes_version: 1.0.1
 kubernetes_api_version: v1
 kubernetes_verbosity: 2
-kraken_services_dirs: "heapster influxdb-grafana kube-ui loadtest prometheus podpincher"
+kraken_services_dirs: "heapster influxdb-grafana kube-ui loadtest prometheus podpincher/other"
 logentries_token:
 logentries_url: api.logentries.com:20000

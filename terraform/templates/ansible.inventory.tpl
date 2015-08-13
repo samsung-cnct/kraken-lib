@@ -21,3 +21,5 @@ etcd_private_ip=${etcd_private_ip}
 etcd_public_ip=${etcd_public_ip}
 node_01_public_ip=${node_01_public_ip}
 node_01_private_ip=${node_01_private_ip}
+cluster_name=${cluster_name}
+cluster_master_record=${cluster_master_record}

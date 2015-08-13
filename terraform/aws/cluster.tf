@@ -32,5 +32,17 @@ resource "template_file" "ansible_inventory" {
   provisioner "local-exec" {
     command = "cat << 'EOF' > ${path.module}/../../ansible/inventory/ansible.inventory\n${module.aws.template}\nEOF"
   }
+
+  provisioner "local-exec" {
+    command = "ansible-galaxy install defunctzombie.coreos-bootstrap --ignore-errors"
+  }
+
+  provisioner "local-exec" {
+    command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ${path.module}/../../ansible/inventory/ansible.inventory ${path.module}/../../ansible/setup-python.yaml"
+  }
+
+  provisioner "local-exec" {
+    command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ${path.module}/../../ansible/inventory/ansible.inventory ${path.module}/../../ansible/setup-kubernetes.yaml"
+  }
 }
 

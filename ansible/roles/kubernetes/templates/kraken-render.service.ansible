@@ -5,7 +5,6 @@ After=hyperkube-proxy.service
 [Service]
 TimeoutStartSec=0
 ExecStartPre=/usr/bin/chmod +x /opt/bin/kraken-render.sh
-ExecStartPre=/usr/bin/chmod +x /opt/bin/kraken-create.sh
 ExecStart=/usr/bin/bash /opt/bin/kraken-render.sh
 RemainAfterExit=true
 Type=oneshot

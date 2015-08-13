@@ -1,3 +1,0 @@
-[submodule "ansible/roles/ansible-coreos-bootstrap"]
-	path = ansible/roles/ansible-coreos-bootstrap
-	url = git@github.com:defunctzombie/ansible-coreos-bootstrap.git

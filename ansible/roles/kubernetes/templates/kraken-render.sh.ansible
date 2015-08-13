@@ -1,7 +1,7 @@
 #! /usr/bin/bash
 set -x
 cd /opt/bin/kraken-services
-sed -e 's,$KUBE_MASTER_URL,http://{{master_cluster_ip}}:8080,g' \
+sed -e 's,$KUBE_MASTER_URL,http://{{master_private_ip}}:8080,g' \
     -e 's,$CLUSTER_DOMAIN,{{dns_domain}},g' \
     -e 's,$INFLUXDB_EXTERNAL_HOST,{{node_01_public_ip}},g' \
     -e 's,$KUBE_CONTROLLER_IP,{{master_private_ip}},g' \

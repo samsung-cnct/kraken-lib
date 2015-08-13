@@ -91,7 +91,7 @@ variable "coreos_update_channel" {
 }
 variable "coreos_reboot_strategy" {
   default = "off"
-  description = Core OS reboot strategy"
+  description = "Core OS reboot strategy"
 }
 
 

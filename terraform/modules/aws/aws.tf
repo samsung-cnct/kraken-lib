@@ -191,7 +191,6 @@ resource "template_file" "etcd_cloudinit" {
   }
 }
 resource "aws_instance" "kubernetes_etcd" {
-  depends_on = ["aws_instance.kubernetes_master"]
   ami = "${lookup(var.coreos_ami, var.aws_region)}"
   instance_type = "${var.aws_etcd_type}"
   key_name = "${aws_key_pair.keypair.key_name}"
@@ -288,6 +287,10 @@ resource "template_file" "ansible_inventory" {
     node_public_ips = "${join("\n", aws_instance.kubernetes_node.*.public_ip)}"
     master_private_ip = "${aws_instance.kubernetes_master.private_ip}"
     etcd_private_ip = "${aws_instance.kubernetes_etcd.private_ip}"
+    node_01_private_ip = "${aws_instance.kubernetes_node.0.private_ip}"
+    node_01_public_ip = "${aws_instance.kubernetes_node.0.public_ip}"
+    cluster_name = "aws"
+    cluster_master_record = "http://${var.aws_user_prefix}-master.${var.aws_cluster_domain}:8080"
   }
 }
 

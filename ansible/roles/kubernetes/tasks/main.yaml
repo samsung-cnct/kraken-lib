@@ -1,11 +1,13 @@
 ---
 # Common tasks for every node
-- include: common.yml
+- include: common.yaml
 
 # Kubernetes master specific tasks
-- include: master.yml
+- include: master.yaml
+  when: "'master' in group_names"
+- include: kraken.yaml
   when: "'master' in group_names"
 
 # Kubernetes node specific tasks
-- include: node.yml
+- include: node.yaml
   when: "'nodes' in group_names"

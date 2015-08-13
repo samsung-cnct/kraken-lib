@@ -1,21 +1,32 @@
 ---
 - name: create logentries-url.service
   template: src=logentries-url.service.ansible dest=/etc/systemd/system/logentries-url.service
+  sudo: yes
+  when: logentries_token
 
 - name: create kubectl.service
   template: src=kubectl.service.ansible dest=/etc/systemd/system/kubectl.service
+  sudo: yes
 
 - name: create journal-2-logentries.service
   template: src=journal-2-logentries.service.ansible dest=/etc/systemd/system/journal-2-logentries.service
+  sudo: yes
+  when: logentries_token
 
 - name: notify systemd of config changes
   command: systemctl daemon-reload
+  sudo: yes
 
 - name: start logentries-url.service and set to start on startup
   service: name=logentries-url state=restarted enabled=yes
+  sudo: yes
+  when: logentries_token
 
 - name: start journal-2-logentries.service and set to start on startup
   service: name=journal-2-logentries state=restarted enabled=yes
+  sudo: yes
+  when: logentries_token
 
 - name: start kubectl.service and set to start on startup
   service: name=kubectl state=restarted enabled=yes
+  sudo: yes

@@ -4,7 +4,7 @@ Requires=network-online.target
 After=network-online.target
 
 [Service]
-ExecStart=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/{{kubernetes_version}}/bin/linux/amd64/kubectl
+ExecStart=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/v{{kubernetes_version}}/bin/linux/amd64/kubectl
 ExecStart=/usr/bin/chmod +x /opt/bin/kubectl
 Type=oneshot
 RemainAfterExit=true
