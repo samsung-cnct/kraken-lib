@@ -183,7 +183,7 @@ resource "aws_security_group" "vpc_secgroup" {
 }
 
 resource "template_file" "etcd_cloudinit" {
-  filename = "${path.module}/../../templates/etcd.yaml.tpl"
+  filename = "${path.module}/templates/etcd.yaml.tpl"
   vars {
     format_docker_storage_mnt = "${var.format_docker_storage_mnt}"
     coreos_update_channel = "${var.coreos_update_channel}"
@@ -208,7 +208,7 @@ resource "aws_instance" "kubernetes_etcd" {
 }
 
 resource "template_file" "master_cloudinit" {
-  filename = "${path.module}/../../templates/master.yaml.tpl"
+  filename = "${path.module}/templates/master.yaml.tpl"
   vars {
     etcd_private_ip = "${aws_instance.kubernetes_etcd.private_ip}"
     format_docker_storage_mnt = "${var.format_docker_storage_mnt}"
@@ -234,7 +234,7 @@ resource "aws_instance" "kubernetes_master" {
 }
 
 resource "template_file" "node_cloudinit" {
-  filename = "${path.module}/../../templates/node.yaml.tpl"
+  filename = "${path.module}/templates/node.yaml.tpl"
   vars {
     etcd_private_ip = "${aws_instance.kubernetes_etcd.private_ip}"
     format_docker_storage_mnt = "${var.format_docker_storage_mnt}"
@@ -280,7 +280,7 @@ resource "aws_route53_record" "proxy_record" {
 }
 
 resource "template_file" "ansible_inventory" {
-  filename = "${path.module}/../../templates/ansible.inventory.tpl"
+  filename = "${path.module}/templates/ansible.inventory.tpl"
   vars {
     master_public_ip = "${aws_instance.kubernetes_master.public_ip}"
     etcd_public_ip = "${aws_instance.kubernetes_etcd.public_ip}"

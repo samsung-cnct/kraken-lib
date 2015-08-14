@@ -1,6 +1,10 @@
 ---
 - hosts: cluster
-  sudo: true
+  gather_facts: False
   roles:
     - defunctzombie.coreos-bootstrap
+
+- hosts: cluster
+  gather_facts: True
+  roles:
     - kubernetes

@@ -1,3 +1,2 @@
-.kubeconfig
-settings.yaml
 machines/
+provisioners/

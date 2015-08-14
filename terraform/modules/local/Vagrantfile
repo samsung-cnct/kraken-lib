@@ -1,4 +1,6 @@
-abort "Please run with kraken script from #{File.expand_path(File.join(File.expand_path(File.dirname(__FILE__)), '..', 'kraken'))}" unless defined? VAGRANTFILE_API_VERSION
+require File.join(File.dirname(__FILE__), 'kraken_helpers.rb')
+
+install_plugins
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
@@ -10,57 +12,71 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # always use Vagrants' insecure key
   config.ssh.insert_key = false
   config.ssh.forward_agent = true
+  config.ssh.username = 'core'
 
   config.vm.box = coreos_boxname
   config.vm.box_version = "= #{coreos_release}"
   config.vm.box_url = "#{coreos_url}/#{coreos_release}/coreos_production_vagrant.json"
 
-  config.trigger.after [:up, :resume] do
-    info "making sure ssh agent has the default vagrant key..."
-    system "ssh-add ~/.vagrant.d/insecure_private_key"
+  config.trigger.before :up, :vm => 'etcd'  do
+    info "getting ansible roles"
+    run "ansible-galaxy install defunctzombie.coreos-bootstrap --force"
   end
+
+  # array of non master or etcd nodes for ansible inventory
+  node_names = []
 
   (1..(get_num_nodes.to_i + 2)).each do |i| # number of 'node' nodes + master and etcd nodes
 
-    tmp_user_data = build_coreos_userdata(i)
-    node_info = get_coreos_node_info(i)
+    user_data = build_coreos_userdata(i)
 
-    config.vm.define vm_name = node_info[:hostname] do |config2|
+    # add node name to node name array
+    node_names.push(user_data[:name]) if i > 2
+
+    config.vm.define vm_name = user_data[:name] do |config2|
       config2.vm.hostname = vm_name
 
-      if ENV['SERIAL_LOGGING'].to_s.downcase == 'true'
-        logdir = File.join(File.dirname(__FILE__), "log")
-        FileUtils.mkdir_p(logdir)
-
-        serialFile = File.join(logdir, "#{vm_name}-serial.txt")
-        FileUtils.touch(serialFile)
-
-        config2.vm.provider :virtualbox do |vb, override|
-          vb.memory = node_info[:memory]
-          vb.cpus = node_info[:cpus]
-          vb.customize ["modifyvm", :id, "--uart1", "0x3F8", "4"]
-          vb.customize ["modifyvm", :id, "--uartmode1", serialFile]
-        end
+      config2.vm.provider :virtualbox do |vb, override|
+        vb.memory = user_data[:mem]
+        vb.cpus = user_data[:cpus]
       end
 
       config2.vm.network :private_network, ip: base_ip_address + "#{i+100}"
 
-      if File.exist?(tmp_user_data)
-        config2.vm.provision :file, :source => "#{tmp_user_data}", :destination => "/tmp/vagrantfile-user-data"
+      if File.exist?(user_data[:data])
+        config2.vm.provision :file, :source => "#{user_data[:data]}", :destination => "/tmp/vagrantfile-user-data"
         config2.vm.provision :shell, :privileged => true, 
         inline: <<-EOF
           mv /tmp/vagrantfile-user-data /var/lib/coreos-vagrant/
         EOF
       end
 
-      # Output instructions on how to access the kubernetes cluster from a Mac
+      # run ansible
+      master_private_ip = base_ip_address + "#{2+100}"
       if base_ip_address + "#{i+100}" == final_node_ip
-        config.trigger.after [:up] do
-          set_kubeconfig("local")
+        config2.vm.provision 'ansible' do |ansible|
+          ansible.limit = 'all'
+          
+          ansible.extra_vars = { 
+            ansible_ssh_user: 'core',
+            ansible_python_interpreter: '"PATH=/home/core/bin:$PATH python"',
+            master_private_ip: master_private_ip,
+            etcd_private_ip: base_ip_address + "#{1+100}",
+            node_01_public_ip: base_ip_address + "#{3+100}",
+            node_01_private_ip: base_ip_address + "#{3+100}",
+            cluster_name: 'local',
+            cluster_master_record: "http://#{master_private_ip}:8080"
+          }
+
+          ansible.groups = {
+            'master' => ['master'],
+            'etcd' => ['etcd'],
+            'nodes' => node_names,
+            "cluster:children" => ['master', 'etcd', node_names].flatten
+          }
+          ansible.playbook = "../../../ansible/vagrant_provision.yaml"
         end
       end
-
-      run_tests(config2, node_info[:type]) if ENV['KRAKEN_UNITTEST']
     end
   end
 end
