@@ -39,12 +39,12 @@
   service: name=kraken-render state=restarted enabled=yes
   sudo: yes
 
+- name: Wait for kubernetes master
+  wait_for: host={{master_private_ip}} port=8080 timeout=300
+
 - name: start kraken-create-skydns and set to start on startup
   service: name=kraken-create-skydns state=restarted enabled=yes
   sudo: yes
-
-- name: wait for skydns to start up
-  wait_for: timeout=60
 
 - name: start kraken-create-services and set to start on startup
   service: name=kraken-create-services state=restarted enabled=yes

@@ -21,27 +21,42 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.trigger.before :up, :vm => 'etcd'  do
     info "getting ansible roles"
     run "ansible-galaxy install defunctzombie.coreos-bootstrap --force"
+    run "touch #{ENV['VAGRANT_CWD']}/rendered/ansible.inventory"
   end
 
   # array of non master or etcd nodes for ansible inventory
-  node_names = []
+  node_ips = ""
 
   (1..(get_num_nodes.to_i + 2)).each do |i| # number of 'node' nodes + master and etcd nodes
 
     user_data = build_coreos_userdata(i)
 
-    # add node name to node name array
-    node_names.push(user_data[:name]) if i > 2
-
     config.vm.define vm_name = user_data[:name] do |config2|
       config2.vm.hostname = vm_name
+
+      if enable_serial_logging
+        logdir = File.join(File.dirname(__FILE__), 'log')
+        FileUtils.mkdir_p(logdir)
+
+        serialFile = File.join(logdir, "%s-serial.txt" % vm_name)
+        FileUtils.touch(serialFile)
+
+        config2.vm.provider :virtualbox do |vb, override|
+          vb.customize ["modifyvm", :id, "--uart1", "0x3F8", "4"]
+          vb.customize ["modifyvm", :id, "--uartmode1", serialFile]
+        end
+      end
 
       config2.vm.provider :virtualbox do |vb, override|
         vb.memory = user_data[:mem]
         vb.cpus = user_data[:cpus]
       end
 
-      config2.vm.network :private_network, ip: base_ip_address + "#{i+100}"
+      ip_address = base_ip_address + "#{i+100}"
+      config2.vm.network :private_network, ip: ip_address
+
+      # add non-etcd or master ip to the list
+      node_ips += "#{ip_address}\n" if i > 2
 
       if File.exist?(user_data[:data])
         config2.vm.provision :file, :source => "#{user_data[:data]}", :destination => "/tmp/vagrantfile-user-data"
@@ -53,27 +68,20 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
       # run ansible
       master_private_ip = base_ip_address + "#{2+100}"
-      if base_ip_address + "#{i+100}" == final_node_ip
-        config2.vm.provision 'ansible' do |ansible|
-          ansible.limit = 'all'
-          
-          ansible.extra_vars = { 
-            ansible_ssh_user: 'core',
-            ansible_python_interpreter: '"PATH=/home/core/bin:$PATH python"',
-            master_private_ip: master_private_ip,
-            etcd_private_ip: base_ip_address + "#{1+100}",
-            node_01_public_ip: base_ip_address + "#{3+100}",
-            node_01_private_ip: base_ip_address + "#{3+100}",
-            cluster_name: 'local',
-            cluster_master_record: "http://#{master_private_ip}:8080"
-          }
 
-          ansible.groups = {
-            'master' => ['master'],
-            'etcd' => ['etcd'],
-            'nodes' => node_names,
-            "cluster:children" => ['master', 'etcd', node_names].flatten
-          }
+      if base_ip_address + "#{i+100}" == final_node_ip
+        render_vars = {
+          :master_ip => master_private_ip,
+          :etcd_ip => base_ip_address + "#{1+100}",
+          :node_public_ips => node_ips,
+          :node_01_ip => base_ip_address + "#{3+100}"
+        }
+
+        render("#{ENV['VAGRANT_CWD']}/templates/ansible.inventory.erb", "#{ENV['VAGRANT_CWD']}/rendered/ansible.inventory", render_vars)
+        
+        config2.vm.provision 'ansible' do |ansible|
+          ansible.limit = 'cluster'
+          ansible.inventory_path = "#{ENV['VAGRANT_CWD']}/rendered/ansible.inventory"
           ansible.playbook = "../../../ansible/vagrant_provision.yaml"
         end
       end

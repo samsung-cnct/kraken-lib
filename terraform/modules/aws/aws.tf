@@ -292,8 +292,12 @@ resource "template_file" "ansible_inventory" {
     cluster_name = "aws"
     cluster_master_record = "http://${var.aws_user_prefix}-master.${var.aws_cluster_domain}:8080"
   }
+
+  provisioner "local-exec" {
+    command = "cat << 'EOF' > ${path.module}/rendered/ansible.inventory\n${self.rendered}\nEOF"
+  }
 }
 
-output "template" {
-  value = "${template_file.ansible_inventory.rendered}"
+output "inventory" {
+  value = "${path.module}/rendered/ansible.inventory"
 }

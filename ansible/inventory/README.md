@@ -1,1 +1,0 @@
-terraform generates an inventory file here. 

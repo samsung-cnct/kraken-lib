@@ -3,6 +3,8 @@
 
 require 'fileutils'
 require 'ipaddr'
+require 'erb'
+require 'ostruct'
 
 VAGRANTFILE_API_VERSION = "2"
 Vagrant.require_version ">= 1.7.2"
@@ -42,6 +44,10 @@ def get_num_nodes
   ENV['KRAKEN_NUMBER_NODES']
 end
 
+def enable_serial_logging
+  ENV['KRAKEN_SERIAL_LOGGING'] || false
+end
+
 def base_ip_address
     network = "#{ENV['KRAKEN_IP_BASE']}.0/24"
     IPAddr.new(network).to_s.chomp("0")
@@ -64,4 +70,17 @@ end
 def final_node_ip
   number_of_nodes = get_num_nodes.to_i
   base_ip_address + "#{(number_of_nodes + 2 + 100)}"
+end
+
+def render(templatepath, destinationpath, variables)
+  puts templatepath
+  if File.file?(templatepath)
+    template = File.open(templatepath, "rb").read
+    content = ERB.new(template).result(OpenStruct.new(variables).instance_eval { binding })
+    outputpath = destinationpath.end_with?('/') ? "#{destinationpath}/#{File.basename(templatepath, '.erb')}" : destinationpath
+    FileUtils.mkdir_p(File.dirname(outputpath))
+    File.open(outputpath, "wb") { |f| f.write(content) }
+  else
+    puts "WWWWAAAAAAAAAa"
+  end
 end
