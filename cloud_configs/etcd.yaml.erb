@@ -85,7 +85,6 @@ coreos:
       content: |
         [Unit]
         Before=etcd2.service
-        Requires=var-lib-etcd2.mount
         [Service]
         ExecStart=/usr/bin/chown -R etcd:etcd /var/lib/etcd2
     - name: etcd2.service
