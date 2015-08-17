@@ -85,7 +85,7 @@ command :test do |test_command|
                     settings['aws']['masterHostName'] || settings['aws']['masterPublicIp']
                   else
                     network = settings['cluster']['network'] || '172.16.1.0/24'
-                    IPAddr.new(network).to_s.chomp("0") + "#{2+100}"
+                    (2+3).times.inject(IPAddr.new(network)) { |ip,_| ip.succ }.to_s
                   end
 
     kube_set_cluster_cmd = "kubectl config set-cluster #{cluster}"\
