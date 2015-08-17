@@ -210,8 +210,21 @@ coreos:
         After=network-online.target
 
         [Service]
-        ExecStart=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kubectl
+        ExecStart=/usr/bin/wget -N -P /opt/bin <%= kubernetes_download_uri %>/kubectl
         ExecStart=/usr/bin/chmod +x /opt/bin/kubectl
+        Type=oneshot
+        RemainAfterExit=true
+    - name: install-hyperkube.service
+      command: start
+      content: |
+        [Unit]
+        Description=Install hyperkube
+        Requires=network-online.target
+        After=network-online.target
+
+        [Service]
+        ExecStart=/usr/bin/wget -N -P /opt/bin <%= kubernetes_download_uri %>/hyperkube
+        ExecStart=/usr/bin/chmod +x /opt/bin/hyperkube
         Type=oneshot
         RemainAfterExit=true
     - name: kube-apiserver.service
@@ -219,14 +232,12 @@ coreos:
       content: |
         [Unit]
         Description=Kubernetes API Server
+        Requires=install-hyperkube.service
         After=wait4-local-etcd.service
 
         [Service]
         LimitNOFILE=infinity
-        ExecStartPre=-/usr/bin/mkdir -p /opt/bin
-        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kube-apiserver
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-apiserver
-        ExecStart=/opt/bin/kube-apiserver \
+        ExecStart=/opt/bin/hyperkube apiserver \
         --cors_allowed_origins=.* \
         --etcd_servers=http://<%= kube_etcd_ip %>:4001 \
         --event-ttl=<%= kube_apiserver_event_ttl %> \
@@ -250,9 +261,7 @@ coreos:
         After=kube-apiserver.service
 
         [Service]
-        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kube-controller-manager
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-controller-manager
-        ExecStart=/opt/bin/kube-controller-manager \
+        ExecStart=/opt/bin/hyperkube controller-manager \
         --address=$private_ipv4 \
         --port=10252 \
         --logtostderr=true \
@@ -275,9 +284,7 @@ coreos:
         After=kube-apiserver.service
 
         [Service]
-        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kube-scheduler
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-scheduler
-        ExecStart=/opt/bin/kube-scheduler \
+        ExecStart=/opt/bin/hyperkube scheduler\
         --address=$private_ipv4 \
         --port=10251 \
         --master=$private_ipv4:8080 \

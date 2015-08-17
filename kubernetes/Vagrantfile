@@ -204,7 +204,7 @@ def build_coreos_userdata(host_number)
     :node_01_public_ip => proxy_public_ip,
     :final_node_ip => final_node_ip,
     :docker_cache => kube_etcd_ip,
-    :kubernetes_release => 'v' + kubernetes_release,
+    :kubernetes_download_uri => "https://storage.googleapis.com/kubernetes-release/release/v#{kubernetes_release}/bin/linux/amd64",
     :api_version => settings['cluster']['apiVersion'],
     :kube_apiserver_v => '1',
     :kube_controller_manager_v => '4',
