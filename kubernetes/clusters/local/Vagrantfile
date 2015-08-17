@@ -20,7 +20,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     system "ssh-add ~/.vagrant.d/insecure_private_key"
   end
 
-  (1..(get_num_nodes.to_i + 2)).each do |i| # number of 'node' nodes + master and etcd nodes
+  (1..get_total_instances).each do |i| # number of 'node' nodes + master and etcd nodes
 
     tmp_user_data = build_coreos_userdata(i)
     node_info = get_coreos_node_info(i)
