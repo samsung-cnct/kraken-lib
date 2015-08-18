@@ -135,11 +135,6 @@ def get_num_apiservers
   settings['cluster']['apiservers'] || 1
 end
 
-def get_total_instances
-  # Add 2 for etcd and master servers
-  get_num_nodes.to_i + get_num_apiservers.to_i + 2
-end
-
 def apiserver_pool
   pool = []
   tot_wout_apiservers = get_num_nodes + 3
@@ -165,7 +160,7 @@ def get_coreos_node_info(host_number)
   # SubTotal of instances excluding apiservers
   subtotal = get_num_nodes + 2
   # Total number of instances including apiservers
-  total = subtotal + get_num_apiservers
+  total = get_num_vms
 
 
   case host_number
