@@ -1,4 +1,5 @@
+tap 'Samsung-AG/terraform-provider-execute'
 brew 'ansible'
 brew 'terraform'
 brew 'jq'
-brew 'https://raw.github.com/adammck/terraform-inventory/master/homebrew/terraform-inventory.rb'
+brew 'terraform-provider-execute'
