@@ -51,7 +51,7 @@ aws:
 # Kubernetes sysetem settings
 cluster:                     
   kubernetesVersion: stable                                  #default = stable
-  apiservers: 2                                              #default 2
+  apiservers: 1                                              #default 1
   nodes: 3                                                   #default = 3
   apiVersion: v1                                             #default = v1
   network:                                                   #required, CIDR of aws.subnetId
