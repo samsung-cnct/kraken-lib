@@ -112,11 +112,26 @@ coreos:
             Environment=DOCKER_OPTS='--registry-mirror=http://<%= docker_cache %>:5000'
     - name: fleet.service
       command: start
+    - name: install-hyperkube.service
+      command: start
+      content: |
+        [Unit]
+        Description=Install hyperkube
+        Requires=network-online.target
+        After=network-online.target
+
+        [Service]
+        ExecStart=/usr/bin/wget -N -P /opt/bin <%= kubernetes_download_uri %>/hyperkube
+        ExecStart=/usr/bin/chmod +x /opt/bin/hyperkube
+        Type=oneshot
+        RemainAfterExit=true
     - name: kube-apiserver.service
       command: start
       content: |
         [Unit]
         Description=Kubernetes API Server
+        Requires=install-hyperkube.service
+        After=install-hyperkube.service
 
         [Service]
         LimitNOFILE=infinity

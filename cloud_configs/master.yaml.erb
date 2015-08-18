@@ -252,7 +252,7 @@ coreos:
         After=network-online.target
 
         [Service]
-        ExecStart=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kubectl
+        ExecStart=/usr/bin/wget -N -P /opt/bin <%= kubernetes_download_uri %>/kubectl
         ExecStart=/usr/bin/chmod +x /opt/bin/kubectl
         Type=oneshot
         RemainAfterExit=true
@@ -268,8 +268,19 @@ coreos:
         ExecStartPre=-/usr/bin/docker kill nginx
         ExecStartPre=-/usr/bin/docker rm nginx
         ExecStart=/usr/bin/docker run --net host --name nginx -v /opt/nginx/nginx.conf:/etc/nginx/nginx.conf nginx
-        Restart=always
-        RestartSec=10
+    - name: install-hyperkube.service
+      command: start
+      content: |
+        [Unit]
+        Description=Install hyperkube
+        Requires=network-online.target
+        After=network-online.target
+
+        [Service]
+        ExecStart=/usr/bin/wget -N -P /opt/bin <%= kubernetes_download_uri %>/hyperkube
+        ExecStart=/usr/bin/chmod +x /opt/bin/hyperkube
+        Type=oneshot
+        RemainAfterExit=true
     - name: kube-controller-manager.service
       command: start
       content: |
@@ -279,9 +290,7 @@ coreos:
         #After=kube-apiserver.service
 
         [Service]
-        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kube-controller-manager
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-controller-manager
-        ExecStart=/opt/bin/kube-controller-manager \
+        ExecStart=/opt/bin/hyperkube controller-manager \
         --address=$private_ipv4 \
         --port=10252 \
         --logtostderr=true \
@@ -304,9 +313,7 @@ coreos:
         #After=kube-apiserver.service
 
         [Service]
-        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kube-scheduler
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-scheduler
-        ExecStart=/opt/bin/kube-scheduler \
+        ExecStart=/opt/bin/hyperkube scheduler\
         --address=$private_ipv4 \
         --port=10251 \
         --master=$private_ipv4:8080 \
