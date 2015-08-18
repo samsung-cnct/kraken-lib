@@ -3,6 +3,11 @@
 ---
 
 coreos:
+  etcd2:
+    proxy: on
+    listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
+    advertise-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
+    initial-cluster: etcd=http://<%= kube_etcd_ip %>:2380
   fleet:
     etcd-servers: http://$private_ipv4:4001
     public-ip: $public_ipv4
@@ -135,10 +140,7 @@ coreos:
 
         [Service]
         LimitNOFILE=infinity
-        ExecStartPre=-/usr/bin/mkdir -p /opt/bin
-        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kube-apiserver
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-apiserver
-        ExecStart=/opt/bin/kube-apiserver \
+        ExecStart=/opt/bin/hyperkube apiserver \
         --cors_allowed_origins=.* \
         --etcd_servers=http://<%= kube_etcd_ip %>:4001 \
         --event-ttl=<%= kube_apiserver_event_ttl %> \
