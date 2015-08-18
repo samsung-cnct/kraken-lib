@@ -217,10 +217,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     delete_elb(aws_settings) unless aws_settings['elb'].nil?
   end
 
-  (1..get_total_instances).each do |i|
-
+  (1..get_num_vms).each do |i|
     tmp_user_data = build_coreos_userdata(i)
     node_info = get_coreos_node_info(i)
+    vm_ip = get_vm_ip(i)
 
     config.vm.boot_timeout = 2
     config.vm.define node_info[:hostname] do |config2|
@@ -236,7 +236,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         aws.region = aws_settings['regionId']
         aws.security_groups = aws_settings['securityGroupIds']
         aws.subnet_id = aws_settings['subnetId']
-        aws.private_ip_address = base_ip_address + "#{i+100}"
+        aws.private_ip_address = vm_ip
         aws.associate_public_ip = aws_settings['associatePublicIps']
         aws.instance_type = get_instance_type(node_info, aws_settings)
 
@@ -285,7 +285,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       end
 
       # Output instructions on how to access the kubernetes cluster from a Mac
-      if base_ip_address + "#{i+100}" == final_node_ip
+      if vm_ip == final_node_ip
         config.trigger.after [:up] do
           set_kubeconfig("aws")
         end

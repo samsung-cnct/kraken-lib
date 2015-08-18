@@ -2,6 +2,34 @@
 
 ---
 write_files:
+- path: /opt/bin/nginx-render.sh
+  owner: root
+  content: |
+    #! /usr/bin/bash
+    set -e
+    mkdir -p /opt/nginx && cd /opt/nginx
+    touch nginx.conf
+    cat > nginx.conf <<EOF
+    worker_processes  1;
+    error_log /var/log/error.log debug;
+    events {
+        worker_connections 1024;
+    }
+    http {
+        upstream apiservers {
+            <%= apiserver_pool %>;
+        }
+
+        server {
+            listen 8080;
+
+            location / {
+                proxy_pass http://apiservers;
+            }
+        }
+    }
+    EOF
+
 - path: /opt/bin/download-kraken-services.sh
   owner: root
   content: |
@@ -11,12 +39,12 @@ write_files:
     git clone <%= kraken_services_repo %> .
     # use explicit form incase branch name matches filename in repo and avoids shortcut
     git checkout -B <%= kraken_services_branch %> origin/<%= kraken_services_branch %>
-- path: /opt/bin/wait4etcd.sh
+- path: /opt/bin/wait4-kube-etcd.sh
   owner: root
   content: |
     #! /usr/bin/bash
-    until curl http://<%= etcd_cluster_ip %>:4001/v2/machines; do sleep 2; done
-- path: /opt/bin/wait4etcdproxy.sh
+    until curl http://<%= kube_etcd_ip %>:4001/v2/machines; do sleep 2; done
+- path: /opt/bin/wait4-local-etcd.sh
   owner: root
   content: |
     #! /usr/bin/bash
@@ -25,28 +53,21 @@ write_files:
   owner: root
   content: |
     #! /usr/bin/bash
-    until curl http://<%= final_node_ip %>:10255/stats/; do sleep 2; done
-- path: /opt/bin/wait4dns.sh
-  owner: root
-  content: |
-    #! /usr/bin/bash
-    until 
-- path: /opt/bin/flannelconfig.sh
-  owner: root
-  content: |
-    #! /usr/bin/bash
-    /usr/bin/etcdctl set /coreos.com/network/config '{"Network":"10.244.0.0/16", "Backend": {"Type": "vxlan"}}' 
+    # It's now waiting for the apiserver pool
+    until curl http://localhost:8080/; do sleep 2; done
 - path: /opt/bin/kraken-render.sh
   owner: root
   content: |
     #! /usr/bin/bash
     set -x
     cd /opt/bin/kraken-services
-    sed -e 's,$KUBE_MASTER_URL,http://<%= master_cluster_ip %>:8080,g' \
-        -e 's,$CLUSTER_DOMAIN,<%= dns_domain %>,g' \
-        -e 's,$INFLUXDB_EXTERNAL_HOST,<%= node_01_public_ip %>,g' \
+    sed -e 's,$KUBE_APISERVER_IP,<%= master_cluster_ip %>,g' \
         -e 's,$KUBE_CONTROLLER_IP,<%= master_cluster_ip %>,g' \
         -e 's,$KUBE_SCHEDULER_IP,<%= master_cluster_ip %>,g' \
+        -e 's,$KUBE_ETCD_IP,<%= kube_etcd_ip %>,g' \
+        -e 's,$KUBE_MASTER_URL,http://<%= master_cluster_ip %>:8080,g' \
+        -e 's,$CLUSTER_DOMAIN,<%= dns_domain %>,g' \
+        -e 's,$INFLUXDB_EXTERNAL_HOST,<%= node_01_public_ip %>,g' \
         -e 's,$DOCKERCFG_BASE64,<%= dockercfg_base64 %>,g' \
         -i -- ./*/*.{json,yaml}
 - path: /opt/bin/kraken-create.sh
@@ -68,13 +89,13 @@ coreos:
     proxy: on
     listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
     advertise-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
-    initial-cluster: etcd=http://<%= etcd_cluster_ip %>:2380
+    initial-cluster: etcd=http://<%= kube_etcd_ip %>:2380
   fleet:
     etcd-servers: http://$private_ipv4:4001
     public-ip: $public_ipv4
     metadata: "role=master"
   flannel:
-    etcd-endpoints: http://<%= etcd_cluster_ip %>:4001
+    etcd-endpoints: http://<%= kube_etcd_ip %>:4001
     interface: $private_ipv4
   units:
     <% if drive_type == 'ebs' %>
@@ -139,7 +160,7 @@ coreos:
 
         [Install]
         WantedBy=sockets.target
-    - name: wait4etcd.service
+    - name: wait4-kube-etcd.service
       command: start
       content: |
         [Unit]
@@ -149,8 +170,8 @@ coreos:
         Before=flannel.service
 
         [Service]
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4etcd.sh
-        ExecStart=/usr/bin/bash /opt/bin/wait4etcd.sh
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4-kube-etcd.sh
+        ExecStart=/usr/bin/bash /opt/bin/wait4-kube-etcd.sh
         RemainAfterExit=true
         Type=oneshot
     - name: etcd2.service
@@ -171,7 +192,20 @@ coreos:
         ExecStart=/opt/bin/setup-network-environment
         RemainAfterExit=yes
         Type=oneshot
-    - name: wait4etcdproxy.service
+    - name: nginx-render.service
+      command: start
+      content: |
+        [Unit]
+        Description=Render nginx configuration file
+        Requires=etcd2.service
+        After=etcd2.service
+
+        [Service]
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/nginx-render.sh
+        ExecStart=/usr/bin/bash /opt/bin/nginx-render.sh
+        RemainAfterExit=true
+        Type=oneshot
+    - name: wait4-local-etcd.service
       command: start
       content: |
         [Unit]
@@ -181,20 +215,8 @@ coreos:
         Before=flannelconfig.service
 
         [Service]
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4etcdproxy.sh
-        ExecStart=/usr/bin/bash /opt/bin/wait4etcdproxy.sh
-        RemainAfterExit=true
-        Type=oneshot
-    - name: flannelconfig.service
-      command: start
-      content: |
-        [Unit]
-        Description=write flannel network to etcd
-        After=wait4etcdproxy.service
-
-        [Service]
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/flannelconfig.sh
-        ExecStart=/usr/bin/bash /opt/bin/flannelconfig.sh
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4-local-etcd.sh
+        ExecStart=/usr/bin/bash /opt/bin/wait4-local-etcd.sh
         RemainAfterExit=true
         Type=oneshot
     - name: flanneld.service
@@ -205,6 +227,9 @@ coreos:
             [Unit]
             After=flannelconfig.service
             Before=docker.service
+
+            [Service]
+            ExecStartPre=-/usr/bin/etcdctl set /coreos.com/network/config '{"Network":"10.244.0.0/14", "Backend": {"Type": "vxlan"}}'
     - name: docker.service
       drop-ins:
         - name: 51-docker-flannel.conf
@@ -231,31 +256,20 @@ coreos:
         ExecStart=/usr/bin/chmod +x /opt/bin/kubectl
         Type=oneshot
         RemainAfterExit=true
+    - name: nginx-proxy.service
+      command: start
+      content: |
+        [Unit]
+        Description=Nginx proxy load-balancer
+        Requires=nginx-render.service
+        After=nginx-render.service
 
-    #- name: kube-apiserver.service
-    #  command: start
-    #  content: |
-    #    [Unit]
-    #    Description=Kubernetes API Server
-    #    After=wait4etcdproxy.service
-    #
-    #    [Service]
-    #    LimitNOFILE=infinity
-    #    ExecStartPre=-/usr/bin/mkdir -p /opt/bin
-    #    ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kube-apiserver
-    #    ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-apiserver
-    #    ExecStart=/opt/bin/kube-apiserver \
-    #    --insecure_bind_address=0.0.0.0 \
-    #    --insecure_port=8080 \
-    #    --portal_net=10.100.0.0/16 \
-    #    --etcd_servers=http://127.0.0.1:4001 \
-    #    --public_address_override=$private_ipv4 \
-    #    --logtostderr=true \
-    #    --v=<%= kubernetes_verbosity %> \
-    #    --cors_allowed_origins=.* \
-    #    --runtime_config=api/<%= api_version %>
-    #    Restart=always
-    #    RestartSec=10
+        [Service]
+        ExecStartPre=-/usr/bin/docker kill nginx
+        ExecStartPre=-/usr/bin/docker rm nginx
+        ExecStart=/usr/bin/docker run --net host --name nginx -v /opt/nginx/nginx.conf:/etc/nginx/nginx.conf nginx
+        Restart=always
+        RestartSec=10
     - name: kube-controller-manager.service
       command: start
       content: |
@@ -270,11 +284,15 @@ coreos:
         ExecStart=/opt/bin/kube-controller-manager \
         --address=$private_ipv4 \
         --port=10252 \
-        --master=$private_ipv4:8080 \
-        --pod_eviction_timeout=1m \
-        --resource_quota_sync_period=20s \
         --logtostderr=true \
-        --v=<%= kubernetes_verbosity %>
+        --master=$private_ipv4:8080 \
+        --concurrent-endpoint-syncs=<%= kube_controller_manager_concurrent_endpoint_syncs %> \
+        --concurrent-rc-syncs=<%= kube_controller_manager_concurrent_rc_syncs %> \
+        --node-monitor-grace-period=<%= kube_controller_manager_node_monitor_grace_period %> \
+        --node-monitor-period=<%= kube_controller_manager_node_monitor_period %> \
+        --pod_eviction_timeout=<%= kube_controller_manager_pod_eviction_timeout %> \
+        --resource_quota_sync_period=<%= kube_controller_manager_resource_quota_sync_period %> \
+        --v=<%= kube_controller_manager_v %>
         Restart=always
         RestartSec=10
     - name: kube-scheduler.service
@@ -289,11 +307,11 @@ coreos:
         ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kube-scheduler
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-scheduler
         ExecStart=/opt/bin/kube-scheduler \
-        --address=$private_ipv4
+        --address=$private_ipv4 \
         --port=10251 \
         --master=$private_ipv4:8080 \
         --logtostderr=true \
-        --v=<%= kubernetes_verbosity %>
+        --v=<%= kube_scheduler_v %>
         Restart=always
         RestartSec=10
     - name: kube-register.service
@@ -315,6 +333,28 @@ coreos:
         --healthz-port=10254
         Restart=always
         RestartSec=10
+    - name: cadvisor.service
+      command: start
+      content: |
+        [Unit]
+        Description=Download and run cadvisor
+        Requires=early-docker.service
+
+        [Service]
+        Description=Download and run cadvisor
+        ExecStartPre=-/usr/bin/docker kill cadvisor
+        ExecStartPre=-/usr/bin/docker rm cadvisor
+        ExecStart=/usr/bin/bash -c \
+          "/usr/bin/docker run \
+          --volume=/:/rootfs:ro \
+          --volume=/var/run:/var/run:rw \
+          --volume=/sys:/sys:ro \
+          --volume=/var/lib/docker/:/var/lib/docker:ro \
+          --publish=4194:4194 \
+          --publish=8094:8080 \
+          --detach=true \
+          --name=cadvisor \
+          google/cadvisor:latest"
     - name: wait4finalnode.service
       command: start
       content: |
@@ -322,7 +362,7 @@ coreos:
         Description=Wait for final node to come up
         Wants=kube-register.service
         After=kube-register.service
-        Before=kraken-create-skydns.service
+        Before=download-kraken-services.service
 
         [Service]
         ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4finalnode.sh
@@ -339,6 +379,7 @@ coreos:
 
         [Service]
         TimeoutStartSec=0
+        ExecStartPre=-/usr/bin/chmod +x /opt/bin/download-kraken-services.sh
         ExecStart=/usr/bin/bash /opt/bin/download-kraken-services.sh
         RemainAfterExit=true
         Type=oneshot
@@ -367,8 +408,8 @@ coreos:
         [Service]
         TimeoutStartSec=0
         ExecStart=/usr/bin/bash /opt/bin/kraken-create.sh skydns
-        RemainAfterExit=true
-        Type=oneshot
+        Restart=always
+        RestartSec=10
     - name: wait4skydns.service
       command: start
       content: |
@@ -393,18 +434,18 @@ coreos:
         [Service]
         TimeoutStartSec=0
         ExecStart=/usr/bin/bash /opt/bin/kraken-create.sh <%= kraken_services_dirs %>
-        RemainAfterExit=true
-        Type=oneshot
+        Restart=always
+        RestartSec=10
     - name: systemd-journal-gatewayd.socket
       command: start
       enable: yes
       content: |
-        [Unit] 
+        [Unit]
         Description=Journal Gateway Service Socket
-        [Socket] 
+        [Socket]
         ListenStream=/var/run/journald.sock
         Service=systemd-journal-gatewayd.service
-        [Install] 
+        [Install]
         WantedBy=sockets.target
 <% if enable_logentries %>
     - name: journal-2-logentries.service

@@ -20,10 +20,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     system "ssh-add ~/.vagrant.d/insecure_private_key"
   end
 
-  (1..get_total_instances).each do |i| # number of 'node' nodes + master and etcd nodes
-
+  (1..get_num_vms).each do |i| 
     tmp_user_data = build_coreos_userdata(i)
     node_info = get_coreos_node_info(i)
+    vm_ip = get_vm_ip(i)
 
     config.vm.define vm_name = node_info[:hostname] do |config2|
       config2.vm.hostname = vm_name
@@ -43,7 +43,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         end
       end
 
-      config2.vm.network :private_network, ip: base_ip_address + "#{i+100}"
+      config2.vm.network :private_network, ip: vm_ip 
 
       if File.exist?(tmp_user_data)
         config2.vm.provision :file, :source => "#{tmp_user_data}", :destination => "/tmp/vagrantfile-user-data"
@@ -54,7 +54,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       end
 
       # Output instructions on how to access the kubernetes cluster from a Mac
-      if base_ip_address + "#{i+100}" == final_node_ip
+      if vm_ip == final_node_ip
         config.trigger.after [:up] do
           set_kubeconfig("local")
         end

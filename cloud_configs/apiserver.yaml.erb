@@ -124,15 +124,18 @@ coreos:
         ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kube-apiserver
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-apiserver
         ExecStart=/opt/bin/kube-apiserver \
+        --cors_allowed_origins=.* \
+        --etcd_servers=http://<%= kube_etcd_ip %>:4001 \
+        --event-ttl=<%= kube_apiserver_event_ttl %> \
         --insecure_bind_address=0.0.0.0 \
         --insecure_port=8080 \
-        --service-cluster-ip-range=10.100.0.0/16 \
-        --etcd_servers=http://127.0.0.1:4001 \
-        --public_address_override=$private_ipv4 \
+        --kubelet_timeout=<%= kube_apiserver_kubelet_timeout %> \
         --logtostderr=true \
-        --v=<%= kubernetes_verbosity %> \
-        --cors_allowed_origins=.* \
-        --runtime_config=api/<%= api_version %>
+        --max-requests-inflight=<%= kube_apiserver_max_requests_inflight %> \
+        --public_address_override=$private_ipv4 \
+        --runtime_config=api/<%= api_version %> \
+        --service-cluster-ip-range=10.100.0.0/16 \
+        --v=<%= kube_apiserver_v %>
         Restart=always
         RestartSec=10
     - name: systemd-journal-gatewayd.socket

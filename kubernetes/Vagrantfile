@@ -72,10 +72,8 @@ def install_plugins_from_file(plugins_yaml)
 end
 
 def base_ip_address
-    settings = cluster_settings
-    network = settings['cluster']['network'] || '172.16.1.0/24'
-
-    IPAddr.new(network).to_s.chomp("0")
+    cidr = cluster_settings['cluster']['network'] || '172.16.1.0/24'
+    IPAddr.new(cidr)
 end
 
 def aws_master
@@ -115,16 +113,21 @@ def coreos_release
   open(version_url).read().scan(/COREOS_VERSION=.*/)[0].split('=')[1]
 end
 
-def final_node_ip
-  settings = cluster_settings
-  number_of_nodes = settings['cluster']['nodes'] || 2
-  base_ip_address + "#{(number_of_nodes + 2 + 100)}"
+def get_num_nodes
+  cluster_settings['cluster']['nodes'].to_i || 2
 end
 
-def get_num_nodes
-  settings = cluster_settings
-  # Now with apiservers added :)
-  settings['cluster']['nodes'] || 2
+def get_num_vms
+  get_num_nodes + 2 + get_num_apiservers # nodes + apiservers + (etcd + master)
+end
+
+def get_vm_ip(i)
+  i += 3 # XXX: AWS VPC reserves the first 4 address in a subnet; we'll just assume we don't run into the reserved last address
+  i.times.inject(base_ip_address) { |ip,_| ip.succ }.to_s
+end
+
+def final_node_ip
+  get_vm_ip(get_num_vms)
 end
 
 def get_num_apiservers
@@ -137,13 +140,15 @@ def get_total_instances
   get_num_nodes.to_i + get_num_apiservers.to_i + 2
 end
 
-def apiserver_ips
-  ips = [] 
-  (1..get_num_apiservers.to_i).each do |i|
-    ips.push( base_ip_address + "#{i + 200}" )
+def apiserver_pool
+  pool = []
+  tot_wout_apiservers = get_num_nodes + 3
+
+  (tot_wout_apiservers..get_num_vms).each do |i|
+    pool.push( "server #{get_vm_ip(i)}:8080" )
   end
 
-  ips
+  pool.join("; ")
 end
 
 def cluster_services
@@ -199,9 +204,9 @@ def build_coreos_userdata(host_number)
   node_info = get_coreos_node_info(host_number)
   settings = cluster_settings
 
-  etcd_cluster_ip = base_ip_address + "#{1+100}"
-  master_cluster_ip = base_ip_address + "#{2+100}"
-  proxy_cluster_ip = base_ip_address + "#{3+100}"
+  kube_etcd_ip = get_vm_ip(1)
+  master_cluster_ip = get_vm_ip(2)
+  proxy_cluster_ip = get_vm_ip(3)
   proxy_public_ip = ENV.fetch('NODE_PUBLIC_IP', proxy_cluster_ip)
   if settings.has_key?('aws')
     proxy_public_ip = settings['aws'].fetch('nodePublicIp', settings['aws'].fetch('proxyHostName', proxy_public_ip))
@@ -228,21 +233,41 @@ def build_coreos_userdata(host_number)
   end
 
   render_vars = {
-    :etcd_cluster_ip => etcd_cluster_ip,
-    :master_cluster_ip => master_cluster_ip, # deprecated
+    :kube_etcd_ip => kube_etcd_ip,
+    :master_cluster_ip => master_cluster_ip,
+    :apiserver_pool => apiserver_pool,
+    :service_public_ip => proxy_cluster_ip,
+    :node_01_private_ip => proxy_cluster_ip,
+    :node_01_public_ip => proxy_public_ip,
+    :final_node_ip => final_node_ip,
+    :docker_cache => kube_etcd_ip,
     :kubernetes_release => 'v' + kubernetes_release,
     :api_version => settings['cluster']['apiVersion'],
-    :kubernetes_verbosity => '2',
+    :kube_apiserver_v => '1',
+    :kube_controller_manager_v => '4',
+    :kube_scheduler_v => '4',
+    :kubelet_v => '1',
+    :kube_proxy_v => '1',
     :reboot_strategy => settings['coreos']['rebootStrategy'] || 'off',
     :cloud_provider => 'vagrant',
     :dns_domain => 'kubernetes.local',
     :hostname => node_info[:hostname],
-    :service_public_ip => proxy_cluster_ip,
-    :docker_cache => etcd_cluster_ip,
-    :node_01_private_ip => proxy_cluster_ip,
-    :node_01_public_ip => proxy_public_ip,
-    :final_node_ip => final_node_ip,
-    :drive_type => storage_type
+    :drive_type => storage_type,
+    :kube_apiserver_event_ttl => 0, # "Default 1 hour", what shold this be?
+    :kube_apiserver_kubelet_timeout => 0, # what should this be? what are the units?
+    :kube_apiserver_max_requests_inflight => 1600, # 4X default
+    :kube_controller_manager_concurrent_rc_syncs => '5', # default
+    :kube_controller_manager_concurrent_endpoint_syncs => '5', # default
+    :kube_controller_manager_node_monitor_grace_period => '40s', # default
+    :kube_controller_manager_node_monitor_period => '5s', # default
+    :kube_controller_manager_pod_eviction_timeout => '1m', # ???
+    :kube_controller_manager_resource_quota_sync_period => '20s', # ???
+    :kubelet_max_pods => 40, # default
+    :kubelet_file_check_frequency => '20s', # default
+    :kubelet_http_check_frequency => '20s', # default
+    :kubelet_node_status_update_frequency => '10s', # default
+    :kubelet_sync_frequency => '10s' # default
+
   }
 
   render_vars[:dockercfg_base64] =
@@ -295,7 +320,7 @@ def set_kubeconfig(cluster)
   #   alias kub<cluster>="kubectl --cluster=local"
   settings = cluster_settings
 
-  master = settings['id'] == 'aws' ? aws_master : base_ip_address + "#{2+100}"
+  master = settings['id'] == 'aws' ? aws_master : get_vm_ip(2)
   api_version = settings['cluster']['apiVersion']
   puts "\n\033[34mYou can now access the Kubernetes cluster by creating a new cluster in your kubeconfig by running:\033[0m"
   puts "\033[34mkubectl config set-cluster #{cluster} --server=http://#{master}:8080 --api-version=#{api_version}\033[0m"
