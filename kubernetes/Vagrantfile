@@ -118,7 +118,7 @@ def get_num_nodes
 end
 
 def get_num_vms
-  get_num_nodes + 2 # nodes + (etcd + master)
+  get_num_nodes + 2 + get_num_apiservers # nodes + apiservers + (etcd + master)
 end
 
 def get_vm_ip(i)
@@ -128,6 +128,22 @@ end
 
 def final_node_ip
   get_vm_ip(get_num_vms)
+end
+
+def get_num_apiservers
+  settings = cluster_settings
+  settings['cluster']['apiservers'] || 1
+end
+
+def apiserver_pool
+  pool = []
+  tot_wout_apiservers = get_num_nodes + 3
+
+  (tot_wout_apiservers..get_num_vms).each do |i|
+    pool.push( "server #{get_vm_ip(i)}:8080" )
+  end
+
+  pool.join("; ")
 end
 
 def cluster_services
@@ -141,6 +157,11 @@ end
 def get_coreos_node_info(host_number)
   node_info = Hash.new
   settings = cluster_settings
+  # SubTotal of instances excluding apiservers
+  subtotal = get_num_vms - get_num_apiservers
+  # Total number of instances including apiservers
+  total = get_num_vms
+
 
   case host_number
   when 1
@@ -155,6 +176,14 @@ def get_coreos_node_info(host_number)
     node_info[:user_data] = File.join(CLOUDCONFIG_PATH, 'master.yaml.erb')
     node_info[:memory] = settings['vmSettings']['master']['memory'] || 512 unless settings['vmSettings'].nil?
     node_info[:cpus] = settings['vmSettings']['master']['cpus'] || 1 unless settings['vmSettings'].nil?
+  when (subtotal + 1)..total
+    node_info[:hostname] = "apiserver-%02d" % (host_number - (subtotal))
+    node_info[:type] = 'apiserver'
+    node_info[:user_data] = File.join(CLOUDCONFIG_PATH, 'apiserver.yaml.erb')
+    # User node vm settings for apiserver
+    node_info[:memory] = settings['vmSettings']['node']['memory'] || 1024 unless settings['vmSettings'].nil?
+    node_info[:cpus] = settings['vmSettings']['node']['cpus'] || 1 unless settings['vmSettings'].nil?
+
   else
     node_info[:hostname] = "node-%02d" % (host_number - 2)
     node_info[:type] = 'node'
@@ -193,12 +222,15 @@ def build_coreos_userdata(host_number)
 
       storage_setting = "instanceStorageType_#{node_info[:hostname].gsub('-','_')}"
       storage_type = aws_settings[storage_setting] unless aws_settings[storage_setting].nil?
+    else
+      storage_type = aws_settings['instanceStorageTypeNode'] unless aws_settings['instanceStorageTypeNode'].nil?
     end
   end
 
   render_vars = {
     :kube_etcd_ip => kube_etcd_ip,
     :master_cluster_ip => master_cluster_ip,
+    :apiserver_pool => apiserver_pool,
     :service_public_ip => proxy_cluster_ip,
     :node_01_private_ip => proxy_cluster_ip,
     :node_01_public_ip => proxy_public_ip,

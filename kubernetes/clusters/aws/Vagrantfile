@@ -218,7 +218,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   (1..get_num_vms).each do |i|
-
     tmp_user_data = build_coreos_userdata(i)
     node_info = get_coreos_node_info(i)
     vm_ip = get_vm_ip(i)
