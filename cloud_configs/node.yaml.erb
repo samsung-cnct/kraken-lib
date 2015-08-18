@@ -185,8 +185,21 @@ coreos:
         After=network-online.target
 
         [Service]
-        ExecStart=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kubectl
+        ExecStart=/usr/bin/wget -N -P /opt/bin <%= kubernetes_download_uri %>/kubectl
         ExecStart=/usr/bin/chmod +x /opt/bin/kubectl
+        Type=oneshot
+        RemainAfterExit=true
+    - name: install-hyperkube.service
+      command: start
+      content: |
+        [Unit]
+        Description=Install hyperkube
+        Requires=network-online.target
+        After=wait4apiserver.target
+
+        [Service]
+        ExecStart=/usr/bin/wget -N -P /opt/bin <%= kubernetes_download_uri %>/hyperkube
+        ExecStart=/usr/bin/chmod +x /opt/bin/hyperkube
         Type=oneshot
         RemainAfterExit=true
     - name: kube-proxy.service
@@ -194,15 +207,13 @@ coreos:
       content: |
         [Unit]
         Description=Kubernetes Proxy
-        Documentation=https://github.com/GoogleCloudPlatform/kubernetes
-        Requires=wait4apiserver.service
+        Documentation=https://github.com/kubernetes/kubernetes
+        Requires=install-hyperkube.service
         After=wait4apiserver.service
 
         [Service]
         LimitNOFILE=infinity
-        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kube-proxy
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-proxy
-        ExecStart=/opt/bin/kube-proxy \
+        ExecStart=/opt/bin/hyperkube proxy \
         --master=<%= master_cluster_ip %>:8080 \
         --logtostderr=true \
         --v=<%= kube_proxy_v %>
@@ -213,15 +224,13 @@ coreos:
       content: |
         [Unit]
         Description=Kubernetes Kubelet
-        Documentation=https://github.com/GoogleCloudPlatform/kubernetes
-        Requires=wait4apiserver.service
+        Documentation=https://github.com/kubernetes/kubernetes
+        Requires=install-hyperkube.service
         After=wait4apiserver.service
 
         [Service]
         EnvironmentFile=/etc/network-environment
-        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kubelet
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/kubelet
-        ExecStart=/opt/bin/kubelet \
+        ExecStart=/opt/bin/hyperkube kubelet \
         --address=0.0.0.0 \
         --api_servers=<%= master_cluster_ip %>:8080 \
         --cadvisor_port=4194 \
@@ -233,7 +242,6 @@ coreos:
         --healthz_port=10254 \
         --hostname_override=$private_ipv4 \
         --http-check-frequency=<%= kubelet_http_check_frequency %> \
-        --log_cadvisor_usage=true \
         --logtostderr=true \
         --max-pods=<%= kubelet_max_pods %> \
         --node-status-update-frequency=<%= kubelet_node_status_update_frequency %> \
@@ -260,12 +268,11 @@ coreos:
       command: start
       content: |
         [Unit]
-        Description=Try labeling ourselves
-        Requires=wait4node.service
+        Description=Apply kraken-node k8s label
+        Requires=install-kubectl.service
         After=wait4node.service
 
         [Service]
-        ExecStart=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/<%= kubernetes_release %>/bin/linux/amd64/kubectl
         ExecStart=/opt/bin/kubectl --server=<%= master_cluster_ip %>:8080 label nodes $private_ipv4 kraken-node=<%= hostname %>
         Type=oneshot
         RemainAfterExit=true
