@@ -35,9 +35,9 @@ File contents should be vairable pairs:
     
 As described [here](https://www.terraform.io/intro/getting-started/variables.html). Local cluster has no required variables. For AWS cluster you __have__ to provide:
 
-    aws_access_key=<your aws key id>
-    aws_secret_key=<your aws secret key>
-    aws_user_prefix=<prefix to use for named resources>
+    aws_access_key="<your aws key id>"
+    aws_secret_key="<your aws secret key>"
+    aws_user_prefix="<prefix to use for named resources>"
     
 Alternatively, you can provide these variables as -var 'variable=value' switches to 'terraform' command. 
 
@@ -53,7 +53,7 @@ Once you are done with tools setup and variable settings you should be able to c
     
 For example, to create an AWS cluster:
 
-    terraform apply -input=false -state=terraform/local/terraform.tfstate terraform/local
+    terraform apply -input=false -state=terraform/aws/terraform.tfstate terraform/aws
     
 or 
 
