@@ -178,7 +178,7 @@ resource "aws_security_group" "vpc_secgroup" {
   }
 
   tags {
-    Name = "Pipelet security group"
+    Name = "Security group for ${var.aws_user_prefix} ${var.aws_cluster_prefix} cluster"
   }
 }
 
