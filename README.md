@@ -46,16 +46,18 @@ All available variables to override and set are under terraform/<cluster type>/v
 ## Create cluster.
 
 Once you are done with tools setup and variable settings you should be able to create a cluster:
-
-    terraform plan -input=false terraform/<cluster type>
+    
+    terraform apply -input=false -state=terraform/<cluster type>/terraform.tfstate terraform/<cluster type>
     
 For example, to create an AWS cluster:
 
-    terraform apply -input=false terraform/aws
+    terraform apply -input=false -state=terraform/local/terraform.tfstate terraform/local
     
 or 
 
-    terraform apply -input=false -var 'node_count=10' terraform/aws
+    terraform apply -input=false -state=terraform/aws/terraform.tfstate -var 'node_count=10' terraform/aws
+
+If you don't specify the -state switch, terraform will write the current 'state' to pwd - which could be a problem if you are using multiple cluster types. 
     
 Overriding the node_count variable.
 
@@ -71,7 +73,7 @@ for example
 ## Destroy Cluster
 Destroy a running cluster by running:
 
-    terraform destroy -input=false terraform/<cluster type>
+    terraform destroy -input=false -state=terraform/<cluster type>/terraform.tfstate terraform/<cluster type>
 
 ## Optional remote setup for Terraform
 You could setup [remote state](https://www.terraform.io/intro/getting-started/remote.html) for Terraform, if you want to be able to control your cluster lifecycle from multiple machines (only applies to non-local clusters)
