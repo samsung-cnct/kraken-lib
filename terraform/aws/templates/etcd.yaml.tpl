@@ -25,22 +25,48 @@ coreos:
         RemainAfterExit=yes
         ExecStart=/usr/sbin/wipefs -f ${format_docker_storage_mnt}
         ExecStart=/usr/sbin/mkfs.ext4 -F ${format_docker_storage_mnt}
-    - name: var-lib-docker.mount
+    - name: var-lib-etcd2.mount
       command: start
       content: |
         [Unit]
-        Description=Mount EBS to /var/lib/docker
+        Description=Mount EBS to /var/lib/etcd2
         Requires=format-ebs.service
         After=format-ebs.service
-        Before=docker.service
+        Before=etcd2.service
         [Mount]
         What=${format_docker_storage_mnt}
-        Where=/var/lib/docker
+        Where=/var/lib/etcd2
         Type=ext4
+    - name: set-etcd2-permissions.service
+      command: start
+      content: |
+        [Unit]
+        Before=etcd2.service
+        [Service]
+        ExecStart=/usr/bin/chown -R etcd:etcd /var/lib/etcd2
+    - name: gen-etcd2-envfile.service
+      command: start
+      content: |
+        [Unit]
+        Description=generate env file for etcd2.service
+        Before=etcd2.service
+
+        [Service]
+        ExecStartPre=/usr/bin/bash -c 'mkdir -p /opt/bin'
+        ExecStart=/usr/bin/bash -c 'echo "GOMAXPROCS=$(nproc)" > /opt/bin/etcd2.env'
+        RemainAfterExit=true
+        Type=oneshot
     - name: fleet.service
       command: start
     - name: etcd2.service
       command: start
+      drop-ins:
+        - name: 30-gomaxprocs.conf
+          content: |
+            [Unit]
+            Requires=gen-etcd2-envfile.service
+            [Service]
+            EnvironmentFile=/opt/bin/etcd2.env
     - name: systemd-journal-gatewayd.socket
       command: start
       enable: yes
