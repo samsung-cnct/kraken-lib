@@ -41,7 +41,9 @@ As described [here](https://www.terraform.io/intro/getting-started/variables.htm
     
 Alternatively, you can provide these variables as -var 'variable=value' switches to 'terraform' command. 
 
-All available variables to override and set are under terraform/<cluster type>/variables.tf
+All available variables to override and set are under 
+
+    terraform/<cluster type>/variables.tf
 
 ## Create cluster.
 
