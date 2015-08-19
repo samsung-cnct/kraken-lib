@@ -66,7 +66,7 @@ variable "dockercfg_base64" {
   description = "Docker base64-encoded configuration string"
 }
 variable "kubernetes_version" {
-  default = "1.0.1"
+  default = "1.0.3"
   description = "Kubernetes version, numbers only"
 }
 variable "kubernetes_api_version" {
