@@ -9,8 +9,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vbguest.auto_update = false
   end
 
-  # always use Vagrants' insecure key
   config.ssh.insert_key = false
+  config.ssh.private_key_path = File.expand_path(ENV['KRAKEN_VAGRANT_PRIVATE_KEY'])
   config.ssh.forward_agent = true
   config.ssh.username = 'core'
 
@@ -20,7 +20,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.trigger.before :up, :vm => 'etcd'  do
     info "getting ansible roles"
-    run "ansible-galaxy install defunctzombie.coreos-bootstrap --force"
+    run "ansible-galaxy install defunctzombie.coreos-bootstrap --ignore-errors"
     run "touch #{ENV['VAGRANT_CWD']}/rendered/ansible.inventory"
   end
 
@@ -74,7 +74,19 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           :master_ip => master_private_ip,
           :etcd_ip => base_ip_address + "#{1+100}",
           :node_public_ips => node_ips,
-          :node_01_ip => base_ip_address + "#{3+100}"
+          :node_01_ip => base_ip_address + "#{3+100}",
+          :kraken_services_repo => ENV['KRAKEN_SERVICES_REPO'],
+          :kraken_services_branch => ENV['KRAKEN_SERVICES_BRANCH'],
+          :dns_domain => ENV['KRAKEN_DNS_DOMAIN'],
+          :dns_ip => ENV['KRAKEN_DNS_IP'],
+          :dockercfg_base64 => ENV['KRAKEN_DOCKERCFG_BASE64'],
+          :kubernetes_version => ENV['KRAKEN_KUBERNETES_VERSION'],
+          :kubernetes_api_version => ENV['KRAKEN_KUBERNETES_API_VERSION'],
+          :kubernetes_verbosity => ENV['KRAKEN_KUBERNETES_VERBOSITY'],
+          :kraken_services_dirs => ENV['KRAKEN_SERVICES_DIRS'],
+          :logentries_token => ENV['KRAKEN_LOGENTRIES_TOKEN'],
+          :logentries_url => ENV['KRAKEN_LOGENTRIES_URL'],
+          :interface_name => ENV['KRAKEN_INTERFACE_NAME'] 
         }
 
         render("#{ENV['VAGRANT_CWD']}/templates/ansible.inventory.erb", "#{ENV['VAGRANT_CWD']}/rendered/ansible.inventory", render_vars)
@@ -82,7 +94,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         config2.vm.provision 'ansible' do |ansible|
           ansible.limit = 'cluster'
           ansible.inventory_path = "#{ENV['VAGRANT_CWD']}/rendered/ansible.inventory"
-          ansible.playbook = "../../../ansible/vagrant_provision.yaml"
+          ansible.playbook = "../../ansible/vagrant_provision.yaml"
         end
       end
     end

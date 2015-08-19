@@ -85,7 +85,50 @@ variable "coreos_reboot_strategy" {
   default = "off"
   description = "Core OS reboot strategy"
 }
-
+variable "kraken_services_repo" {
+  default = "git://github.com/samsung-ag/kraken-services"
+  description = "Kraken services git repo"
+}
+variable "kraken_services_branch" {
+  default = "stable"
+  description = "Kraken services repo branch"
+}
+variable "dns_domain" {
+  default = "kubernetes.local"
+  description = "Kubenretes DNS domain"
+}
+variable "dns_ip" {
+  default = "10.100.0.10"
+  description = "Kubernetes DNS ip"
+}
+variable "dockercfg_base64" {
+  default = ""
+  description = "Docker base64-encoded configuration string"
+}
+variable "kubernetes_version" {
+  default = "1.0.1"
+  description = "Kubernetes version, numbers only"
+}
+variable "kubernetes_api_version" {
+  default = "v1"
+  description = "Kubernetes api version"
+}
+variable "kubernetes_verbosity" {
+  default = "2"
+  description = "Kubernetes log verbosity"
+}
+variable "kraken_services_dirs" {
+  default = "heapster influxdb-grafana kube-ui loadtest prometheus"
+  description = "Kraken services folders under kraken repo to deploy kubernetes services from."
+}
+variable "logentries_token" {
+  default = ""
+  description = "Logentries.com token"
+}
+variable "logentries_url" {
+  default = "api.logentries.com:20000"
+  description = "Logentries.com API url"
+}
 
 
 

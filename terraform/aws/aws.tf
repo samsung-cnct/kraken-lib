@@ -280,6 +280,7 @@ resource "aws_route53_record" "proxy_record" {
 }
 
 resource "template_file" "ansible_inventory" {
+  depends_on = ["aws_route53_record.proxy_record", "aws_route53_record.master_record"]
   filename = "${path.module}/templates/ansible.inventory.tpl"
   vars {
     master_public_ip = "${aws_instance.kubernetes_master.public_ip}"
@@ -291,13 +292,33 @@ resource "template_file" "ansible_inventory" {
     node_01_public_ip = "${aws_instance.kubernetes_node.0.public_ip}"
     cluster_name = "aws"
     cluster_master_record = "http://${var.aws_user_prefix}-master.${var.aws_cluster_domain}:8080"
+    kraken_services_repo = "${var.kraken_services_repo}"
+    kraken_services_branch = "${var.kraken_services_branch}"
+    dns_domain = "${var.dns_domain}"
+    dns_ip = "${var.dns_ip}"
+    dockercfg_base64 = "${var.dockercfg_base64}"
+    kubernetes_version = "${var.kubernetes_version}"
+    kubernetes_api_version = "${var.kubernetes_api_version}"
+    kubernetes_verbosity = "${var.kubernetes_verbosity}"
+    kraken_services_dirs = "${var.kraken_services_dirs}"
+    logentries_token = "${var.logentries_token}"
+    logentries_url = "${var.logentries_url}"
+    interface_name = "eth0"
   }
 
   provisioner "local-exec" {
     command = "cat << 'EOF' > ${path.module}/rendered/ansible.inventory\n${self.rendered}\nEOF"
   }
-}
 
-output "inventory" {
-  value = "${path.module}/rendered/ansible.inventory"
+  provisioner "local-exec" {
+    command = "ansible-galaxy install defunctzombie.coreos-bootstrap --ignore-errors"
+  }
+
+  provisioner "local-exec" {
+    command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ${path.module}/rendered/ansible.inventory ${path.module}/../../ansible/setup-python.yaml"
+  }
+
+  provisioner "local-exec" {
+    command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ${path.module}/rendered/ansible.inventory ${path.module}/../../ansible/setup-kubernetes.yaml"
+  }
 }

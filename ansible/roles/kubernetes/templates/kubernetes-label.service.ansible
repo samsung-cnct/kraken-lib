@@ -4,6 +4,6 @@ Requires=wait4node.service
 After=wait4node.service
 
 [Service]
-ExecStart=/opt/bin/kubectl --server={{master_private_ip}}:8080 label nodes {{ ansible_default_ipv4.address }} kraken-node={{ansible_hostname}} --overwrite
+ExecStart=/opt/bin/kubectl --server={{master_private_ip}}:8080 label nodes {{ ansible_local.kubernetes_node_ip_fact.node_ip_address }} kraken-node={{ansible_hostname}} --overwrite
 Type=oneshot
 RemainAfterExit=true
