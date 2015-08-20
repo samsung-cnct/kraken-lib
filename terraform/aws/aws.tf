@@ -99,6 +99,7 @@ resource "aws_security_group" "vpc_secgroup" {
   description = "Security group for ${var.aws_user_prefix} ${var.aws_cluster_prefix} cluster"
   vpc_id = "${aws_vpc.vpc.id}"
 
+  # ssh
   ingress {
     from_port = 22
     to_port = 22
@@ -106,6 +107,7 @@ resource "aws_security_group" "vpc_secgroup" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # http
   ingress {
     from_port = 80
     to_port = 80
@@ -113,6 +115,7 @@ resource "aws_security_group" "vpc_secgroup" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # https
   ingress {
     from_port = 443
     to_port = 443
@@ -120,6 +123,7 @@ resource "aws_security_group" "vpc_secgroup" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # etcd
   ingress {
     from_port = 4001
     to_port = 4001
@@ -127,6 +131,7 @@ resource "aws_security_group" "vpc_secgroup" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # cadvisor (TODO: does this have to be world open)
   ingress {
     from_port = 4194
     to_port = 4194
@@ -134,6 +139,15 @@ resource "aws_security_group" "vpc_secgroup" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # cadvisor (TODO: does this have to be world open)
+  ingress {
+    from_port = 8094
+    to_port = 8094
+    protocol = "TCP"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # ???
   ingress {
     from_port = 6443
     to_port = 6443
@@ -141,6 +155,7 @@ resource "aws_security_group" "vpc_secgroup" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # ???
   ingress {
     from_port = 8000
     to_port = 8999
@@ -148,6 +163,7 @@ resource "aws_security_group" "vpc_secgroup" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # icmp (intra-group)
   ingress {
     self = true
     from_port = 0
@@ -155,6 +171,7 @@ resource "aws_security_group" "vpc_secgroup" {
     protocol = "-1"
   }
 
+  # icmp (with the default group)
   ingress {
     from_port = 0
     to_port = 0
@@ -162,7 +179,7 @@ resource "aws_security_group" "vpc_secgroup" {
     security_groups = ["${aws_vpc.vpc.default_security_group_id}"]
   }
 
-  # kraken services
+  # kubelet nodeport range
   ingress {
     from_port = "${var.kraken_port_low}"
     to_port = "${var.kraken_port_high}"
@@ -170,6 +187,7 @@ resource "aws_security_group" "vpc_secgroup" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # icmp (outbound)
   egress {
     from_port = 0
     to_port = 0
