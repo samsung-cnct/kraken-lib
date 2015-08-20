@@ -8,9 +8,9 @@ Restart=always
 ExecStartPre=-/usr/bin/docker kill kube-proxy
 ExecStartPre=-/usr/bin/docker rm kube-proxy
 ExecStart=/usr/bin/docker run \
+  --name kube-proxy \
   --net=host \
   --privileged \
-  --name kube-proxy \
   {{hyperkube_image}} \
     /hyperkube proxy \
     --master=http://127.0.0.1:8080 \

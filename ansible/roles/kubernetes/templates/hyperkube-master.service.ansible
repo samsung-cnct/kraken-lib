@@ -11,15 +11,15 @@ ExecStartPre=-/usr/bin/docker rm kube-master
 ExecStartPre=-/usr/bin/docker kill $(docker ps -a -q --filter="name=k8s-master")
 ExecStartPre=-/usr/bin/docker rm $(docker ps -a -q --filter="name=k8s-master")
 ExecStart=/usr/bin/docker run \
-  --net=host \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v /opt/bin/manifests:/etc/kubernetes/manifests-override \
   --name kube-master \
+  --net=host \
+  -v /opt/bin/manifests:/etc/kubernetes/manifests-override \
+  -v /var/run/docker.sock:/var/run/docker.sock \
   {{hyperkube_image}} \
     /hyperkube \
     kubelet \
+    --cluster_dns={{dns_ip}} \
+    --cluster_domain={{dns_domain}} \
     --config=/etc/kubernetes/manifests-override \
     --enable_server \
-    --cluster_domain={{dns_domain}} \
-    --cluster_dns={{dns_ip}} \
     --hostname_override={{master_private_ip}}
