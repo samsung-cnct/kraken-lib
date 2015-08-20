@@ -1,22 +1,27 @@
 [master]
-<%= master_ip %>
+master ansible_ssh_host=<%= master_ip %>
 
 [etcd]
-<%= etcd_ip %>
+etcd ansible_ssh_host=<%= etcd_ip %>
 
 [nodes]
-<%= node_public_ips %>
+<%= nodes_inventory_info %>
 
 [cluster:children]
 master
 etcd
 nodes
 
+[local]
+localhost ansible_connection=local
+
 [cluster:vars]
 ansible_ssh_user=core
 ansible_python_interpreter="PATH=/home/core/bin:$PATH python"
 master_private_ip=<%= master_ip %>
+master_public_ip=<%= master_ip %>
 etcd_private_ip=<%= etcd_ip %>
+etcd_public_ip=<%= etcd_ip %>
 node_01_public_ip=<%= node_01_ip %>
 node_01_private_ip=<%= node_01_ip %>
 cluster_name=local
@@ -33,3 +38,9 @@ kraken_services_dirs=<%= kraken_services_dirs %>
 logentries_token=<%= logentries_token %>
 logentries_url=<%= logentries_url %>
 interface_name=<%= interface_name %>
+
+[local:vars]
+cluster_name=local
+master_public_ip=<%= master_ip %>
+etcd_public_ip=<%= etcd_ip %>
+ansible_ssh_private_key_file=<%= ansible_ssh_private_key_file %>

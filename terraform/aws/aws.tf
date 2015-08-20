@@ -257,7 +257,8 @@ resource "aws_instance" "kubernetes_node" {
   }
   user_data = "${template_file.node_cloudinit.rendered}"
   tags {
-    Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_node-${count.index+1}"
+    Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_node-${format("%03d", count.index+1)}"
+    ShortName = "${format("node-%03d", count.index+1)}"
   }
 }
 
@@ -283,9 +284,10 @@ resource "template_file" "ansible_inventory" {
   depends_on = ["aws_route53_record.proxy_record", "aws_route53_record.master_record"]
   filename = "${path.module}/templates/ansible.inventory.tpl"
   vars {
+    ansible_ssh_private_key_file = "${var.aws_local_private_key}"
     master_public_ip = "${aws_instance.kubernetes_master.public_ip}"
     etcd_public_ip = "${aws_instance.kubernetes_etcd.public_ip}"
-    node_public_ips = "${join("\n", aws_instance.kubernetes_node.*.public_ip)}"
+    nodes_inventory_info = "${join("\n", formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_node.*.tags.ShortName, aws_instance.kubernetes_node.*.public_ip))}"
     master_private_ip = "${aws_instance.kubernetes_master.private_ip}"
     etcd_private_ip = "${aws_instance.kubernetes_etcd.private_ip}"
     node_01_private_ip = "${aws_instance.kubernetes_node.0.private_ip}"
@@ -315,10 +317,6 @@ resource "template_file" "ansible_inventory" {
   }
 
   provisioner "local-exec" {
-    command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ${path.module}/rendered/ansible.inventory ${path.module}/../../ansible/setup-python.yaml"
-  }
-
-  provisioner "local-exec" {
-    command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ${path.module}/rendered/ansible.inventory ${path.module}/../../ansible/setup-kubernetes.yaml"
+    command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ${path.module}/rendered/ansible.inventory ${path.module}/../../ansible/iaas_provision.yaml"
   }
 }

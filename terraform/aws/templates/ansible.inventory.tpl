@@ -1,16 +1,19 @@
 [master]
-${master_public_ip}
+master ansible_ssh_host=${master_public_ip}
 
 [etcd]
-${etcd_public_ip}
+etcd ansible_ssh_host=${etcd_public_ip}
 
 [nodes]
-${node_public_ips}
+${nodes_inventory_info}
 
 [cluster:children]
 master
 etcd
 nodes
+
+[local]
+localhost ansible_connection=local
 
 [cluster:vars]
 ansible_ssh_user=core
@@ -35,3 +38,9 @@ kraken_services_dirs=${kraken_services_dirs}
 logentries_token=${logentries_token}
 logentries_url=${logentries_url}
 interface_name=${interface_name}
+
+[local:vars]
+cluster_name=${cluster_name}
+master_public_ip=${master_public_ip}
+etcd_public_ip=${etcd_public_ip}
+ansible_ssh_private_key_file=${ansible_ssh_private_key_file}

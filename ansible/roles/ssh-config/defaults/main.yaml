@@ -1,0 +1,4 @@
+---
+ssh_config_user: "{{ ansible_env.USER }}"
+ssh_config_home: "{{ ansible_env.HOME }}"
+ssh_config_name: "config_{{ cluster_name }}"

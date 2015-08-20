@@ -80,6 +80,15 @@ Destroy a running cluster by running:
 ## Optional remote setup for Terraform
 You could setup [remote state](https://www.terraform.io/intro/getting-started/remote.html) for Terraform, if you want to be able to control your cluster lifecycle from multiple machines (only applies to non-local clusters)
 
+## SSH to cluster nodes
+Ansible provisioning creates a ssh config file for each cluster type in you .ssh folder. You can ssh to node names using this file:
+
+    ssh -F ~/.ssh/config_aws node-001
+    ssh -F ~/.ssh/config_aws master
+    ssh -F ~/.ssh/config_local etcd
+
+And so on
+
 ## Using LogEntries.com
 
 1. First, create an account on logentries.com.

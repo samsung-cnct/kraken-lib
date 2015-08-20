@@ -61,7 +61,7 @@ def build_coreos_userdata(host_number)
   when 2
     user_data = { name: 'master', data: File.join(__dir__, 'rendered', 'master.yaml'), cpus: ENV['KRAKEN_MASTER_CPUS'], mem: ENV['KRAKEN_MASTER_MEM']  }
   else
-    user_data = { name: "node-#{host_number - 2}", data: File.join(__dir__, 'rendered', 'node.yaml'), cpus: ENV['KRAKEN_NODE_CPUS'], mem: ENV['KRAKEN_NODE_MEM'] }
+    user_data = { name: "node-%03d" % (host_number - 2), data: File.join(__dir__, 'rendered', 'node.yaml'), cpus: ENV['KRAKEN_NODE_CPUS'], mem: ENV['KRAKEN_NODE_MEM'] }
   end
 
   user_data
@@ -73,14 +73,11 @@ def final_node_ip
 end
 
 def render(templatepath, destinationpath, variables)
-  puts templatepath
   if File.file?(templatepath)
     template = File.open(templatepath, "rb").read
     content = ERB.new(template).result(OpenStruct.new(variables).instance_eval { binding })
     outputpath = destinationpath.end_with?('/') ? "#{destinationpath}/#{File.basename(templatepath, '.erb')}" : destinationpath
     FileUtils.mkdir_p(File.dirname(outputpath))
     File.open(outputpath, "wb") { |f| f.write(content) }
-  else
-    puts "WWWWAAAAAAAAAa"
   end
 end

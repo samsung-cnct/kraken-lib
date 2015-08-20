@@ -25,7 +25,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   # array of non master or etcd nodes for ansible inventory
-  node_ips = ""
+  node_host_data = ""
 
   (1..(get_num_nodes.to_i + 2)).each do |i| # number of 'node' nodes + master and etcd nodes
 
@@ -56,7 +56,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       config2.vm.network :private_network, ip: ip_address
 
       # add non-etcd or master ip to the list
-      node_ips += "#{ip_address}\n" if i > 2
+      node_host_data += "#{"node-%03d" % (i - 2)} ansible_ssh_host=#{ip_address}\n" if i > 2
 
       if File.exist?(user_data[:data])
         config2.vm.provision :file, :source => "#{user_data[:data]}", :destination => "/tmp/vagrantfile-user-data"
@@ -71,9 +71,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
       if base_ip_address + "#{i+100}" == final_node_ip
         render_vars = {
+          :ansible_ssh_private_key_file => File.expand_path(ENV['KRAKEN_VAGRANT_PRIVATE_KEY']),
           :master_ip => master_private_ip,
           :etcd_ip => base_ip_address + "#{1+100}",
-          :node_public_ips => node_ips,
+          :nodes_inventory_info => node_host_data,
           :node_01_ip => base_ip_address + "#{3+100}",
           :kraken_services_repo => ENV['KRAKEN_SERVICES_REPO'],
           :kraken_services_branch => ENV['KRAKEN_SERVICES_BRANCH'],

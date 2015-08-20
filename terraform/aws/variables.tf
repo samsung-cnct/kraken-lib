@@ -69,6 +69,10 @@ variable "aws_local_public_key" {
   default = "~/.ssh/id_rsa.pub"
   description = "Location of public key material to import into the <aws_user_prefix>_<aws_cluster_prefix>_keypair"
 }
+variable "aws_local_private_key" {
+  default = "~/.ssh/id_rsa"
+  description = "Location of private key material"
+}
 variable "aws_cluster_domain" {
   default = "kubeme.io"
   description = "Location of public key material to import into the <aws_user_prefix>_<aws_cluster_prefix>_keypair"
