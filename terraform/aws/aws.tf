@@ -320,6 +320,7 @@ resource "template_file" "ansible_inventory" {
     dns_domain = "${var.dns_domain}"
     dns_ip = "${var.dns_ip}"
     dockercfg_base64 = "${var.dockercfg_base64}"
+    hyperkube_image = "${var.hyperkube_image}"
     kubernetes_version = "${var.kubernetes_version}"
     kubernetes_api_version = "${var.kubernetes_api_version}"
     kubernetes_verbosity = "${var.kubernetes_verbosity}"

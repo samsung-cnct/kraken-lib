@@ -8,5 +8,23 @@ After=network-online.target
 Restart=always
 ExecStartPre=-/usr/bin/docker kill kube-node
 ExecStartPre=-/usr/bin/docker rm kube-node
-ExecStart=/usr/bin/docker run --net=host -v /var/run/docker.sock:/var/run/docker.sock --name kube-node gcr.io/google_containers/hyperkube:v{{kubernetes_version}} /hyperkube kubelet --api_servers=http://{{master_private_ip}}:8080 --v={{kubernetes_verbosity}} --address=0.0.0.0 --port=10250 --read_only_port=10255 --hostname_override={{ansible_local.kubernetes_node_ip_fact.node_ip_address}} --enable_server --cluster_domain={{dns_domain}} --cluster_dns={{dns_ip}} --healthz_bind_address=0.0.0.0 --healthz_port=10254 --cadvisor_port=4194 --logtostderr=true
+ExecStart=/usr/bin/docker run \
+  --net=host \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  --name kube-node \
+  {{hyperkube_image}} \
+    /hyperkube kubelet \
+    --api_servers=http://{{master_private_ip}}:8080 \
+    --v={{kubernetes_verbosity}} \
+    --address=0.0.0.0 \
+    --port=10250 \
+    --read_only_port=10255 \
+    --hostname_override={{ansible_local.kubernetes_node_ip_fact.node_ip_address}} \
+    --enable_server \
+    --cluster_domain={{dns_domain}} \
+    --cluster_dns={{dns_ip}} \
+    --healthz_bind_address=0.0.0.0 \
+    --healthz_port=10254 \
+    --cadvisor_port=4194 \
+    --logtostderr=true
 

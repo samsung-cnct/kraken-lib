@@ -7,4 +7,11 @@ After=hyperkube-node.service
 Restart=always
 ExecStartPre=-/usr/bin/docker kill kube-proxy
 ExecStartPre=-/usr/bin/docker rm kube-proxy
-ExecStart=/usr/bin/docker run --net=host --privileged --name kube-proxy gcr.io/google_containers/hyperkube:v{{kubernetes_version}} /hyperkube proxy --master=http://{{master_private_ip}}:8080 --v={{kubernetes_verbosity}}
+ExecStart=/usr/bin/docker run \
+  --net=host \
+  --privileged \
+  --name kube-proxy \
+  {{hyperkube_image}} \
+    /hyperkube proxy \
+    --master=http://{{master_private_ip}}:8080 \
+    --v={{kubernetes_verbosity}}
