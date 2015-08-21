@@ -1,4 +1,8 @@
 ---
+- name: set hostname
+  command: hostnamectl set-hostname {{ inventory_hostname }}
+  sudo: yes
+
 - name: create logentries-url.service
   template: src=logentries-url.service.ansible dest=/etc/systemd/system/logentries-url.service
   sudo: yes
