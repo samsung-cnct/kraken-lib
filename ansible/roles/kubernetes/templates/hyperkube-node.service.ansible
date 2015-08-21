@@ -27,4 +27,4 @@ ExecStart=/usr/bin/docker run \
     --logtostderr=true \
     --port=10250 \
     --read_only_port=10255 \
-    --v={{kubernetes_verbosity}}
+    --v={{kubelet_v}}

@@ -14,4 +14,4 @@ ExecStart=/usr/bin/docker run \
   {{hyperkube_image}} \
     /hyperkube proxy \
     --master=http://{{master_private_ip}}:8080 \
-    --v={{kubernetes_verbosity}}
+    --v={{kube_proxy_v}}

@@ -131,9 +131,25 @@ variable "kubernetes_api_version" {
   default = "v1"
   description = "Kubernetes api version"
 }
-variable "kubernetes_verbosity" {
+variable "kube_apiserver_v" {
   default = "2"
-  description = "Kubernetes log verbosity"
+  description = "kubernetes apiserver verbosity"
+}
+variable "kube_controller_manager_v" {
+  default = "2"
+  description = "kubernetes controller manager verbosity"
+}
+variable "kube_scheduler_v" {
+  default = "2"
+  description = "kubernetes scheduler verbosity"
+}
+variable "kubelet_v" {
+  default = "2"
+  description = "kubernetes kubelet verbosity"
+}
+variable "kube_proxy_v" {
+  default = "2"
+  description = "kubernetes proxy verbosity"
 }
 variable "kraken_services_dirs" {
   default = "heapster influxdb-grafana kube-ui loadtest prometheus"
