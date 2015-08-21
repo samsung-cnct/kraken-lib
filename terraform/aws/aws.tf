@@ -242,11 +242,12 @@ resource "template_file" "node_cloudinit" {
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
   }
 }
-resource "aws_instance" "kubernetes_node" {
+
+resource "aws_instance" "kubernetes_node_typed" {
   depends_on = ["aws_instance.kubernetes_etcd"]
-  count = "${var.node_count}"
+  count = "${length(split(",", var.aws_node_type.special))}"
   ami = "${lookup(var.coreos_ami, var.aws_region)}"
-  instance_type = "${var.aws_node_type}"
+  instance_type = "${element(split(",", var.aws_node_type.special), count.index)}"
   key_name = "${aws_key_pair.keypair.key_name}"
   vpc_security_group_ids = [ "${aws_security_group.vpc_secgroup.id}" ]
   subnet_id = "${aws_subnet.vpc_subnet.id}"
@@ -259,6 +260,26 @@ resource "aws_instance" "kubernetes_node" {
   tags {
     Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_node-${format("%03d", count.index+1)}"
     ShortName = "${format("node-%03d", count.index+1)}"
+  }
+}
+
+resource "aws_instance" "kubernetes_node" {
+  depends_on = ["aws_instance.kubernetes_etcd"]
+  count = "${var.node_count - length(split(",", var.aws_node_type.special))}"
+  ami = "${lookup(var.coreos_ami, var.aws_region)}"
+  instance_type = "${var.aws_node_type.other}"
+  key_name = "${aws_key_pair.keypair.key_name}"
+  vpc_security_group_ids = [ "${aws_security_group.vpc_secgroup.id}" ]
+  subnet_id = "${aws_subnet.vpc_subnet.id}"
+  associate_public_ip_address = true
+  ebs_block_device {
+    device_name = "/dev/sdf"
+    volume_size = "${var.aws_volume_size}"
+  }
+  user_data = "${template_file.node_cloudinit.rendered}"
+  tags {
+    Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_node-${format("%03d", count.index+length(split(",", var.aws_node_type.special))+1)}"
+    ShortName = "${format("node-%03d", count.index+length(split(",", var.aws_node_type.special))+1)}"
   }
 }
 
@@ -277,7 +298,7 @@ resource "aws_route53_record" "proxy_record" {
   name = "${var.aws_user_prefix}-proxy.${var.aws_cluster_domain}"
   type = "A"
   ttl = "30"
-  records = ["${aws_instance.kubernetes_node.0.public_ip}"]
+  records = ["${aws_instance.kubernetes_node_typed.0.public_ip}"]
 }
 
 resource "template_file" "ansible_inventory" {
@@ -287,7 +308,7 @@ resource "template_file" "ansible_inventory" {
     ansible_ssh_private_key_file = "${var.aws_local_private_key}"
     master_public_ip = "${aws_instance.kubernetes_master.public_ip}"
     etcd_public_ip = "${aws_instance.kubernetes_etcd.public_ip}"
-    nodes_inventory_info = "${join("\n", formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_node.*.tags.ShortName, aws_instance.kubernetes_node.*.public_ip))}"
+    nodes_inventory_info = "${join("\n", concat(formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_node_typed.*.tags.ShortName, aws_instance.kubernetes_node_typed.*.public_ip), formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_node.*.tags.ShortName, aws_instance.kubernetes_node.*.public_ip)))}"
     master_private_ip = "${aws_instance.kubernetes_master.private_ip}"
     etcd_private_ip = "${aws_instance.kubernetes_etcd.private_ip}"
     node_01_private_ip = "${aws_instance.kubernetes_node.0.private_ip}"
