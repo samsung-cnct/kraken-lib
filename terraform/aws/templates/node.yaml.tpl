@@ -72,6 +72,8 @@ coreos:
       command: start
     - name: etcd2.service
       command: start
+    - name: flanneld.service
+      command: start
     - name: systemd-journal-gatewayd.socket
       command: start
       enable: yes

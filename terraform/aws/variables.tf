@@ -119,6 +119,10 @@ variable "dockercfg_base64" {
   default = ""
   description = "Docker base64-encoded configuration string"
 }
+variable "hyperkube_image" {
+  default = "gcr.io/google_containers/hyperkube:v1.0.3"
+  description = "docker image to launch hyperkube"
+}
 variable "kubernetes_version" {
   default = "1.0.3"
   description = "Kubernetes version, numbers only"

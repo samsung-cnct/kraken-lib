@@ -3,6 +3,7 @@ kraken_services_branch: stable
 dns_domain: kubernetes.local
 dns_ip: 10.100.0.10
 dockercfg_base64:
+hyperkube_image: gcr.io/google_containers/hyperkube:v1.0.1
 kubernetes_version: 1.0.1
 kubernetes_api_version: v1
 kubernetes_verbosity: 2

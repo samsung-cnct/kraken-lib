@@ -31,6 +31,7 @@ kraken_services_branch=${kraken_services_branch}
 dns_domain=${dns_domain}
 dns_ip=${dns_ip}
 dockercfg_base64=${dockercfg_base64}
+hyperkube_image=${hyperkube_image}
 kubernetes_version=${kubernetes_version}
 kubernetes_api_version=${kubernetes_api_version}
 kubernetes_verbosity=${kubernetes_verbosity}
