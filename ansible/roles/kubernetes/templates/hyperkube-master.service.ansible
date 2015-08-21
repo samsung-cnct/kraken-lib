@@ -13,6 +13,7 @@ ExecStartPre=-/usr/bin/docker rm $(docker ps -a -q --filter="name=k8s-master")
 ExecStart=/usr/bin/docker run \
   --name kube-master \
   --net=host \
+  --privileged \
   -v /opt/bin/manifests:/etc/kubernetes/manifests-override \
   -v /var/run/docker.sock:/var/run/docker.sock \
   {{hyperkube_image}} \

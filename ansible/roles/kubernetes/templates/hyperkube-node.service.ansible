@@ -9,9 +9,10 @@ Restart=always
 ExecStartPre=-/usr/bin/docker kill kube-node
 ExecStartPre=-/usr/bin/docker rm kube-node
 ExecStart=/usr/bin/docker run \
-  --net=host \
-  -v /var/run/docker.sock:/var/run/docker.sock \
   --name kube-node \
+  --net=host \
+  --privileged \
+  -v /var/run/docker.sock:/var/run/docker.sock \
   {{hyperkube_image}} \
     /hyperkube kubelet \
     --address=0.0.0.0 \
