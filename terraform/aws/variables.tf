@@ -49,12 +49,10 @@ variable "aws_etcd_type" {
   default = "m3.large"
   description = "Kubernetes etcd instance type"
 }
-
 variable "aws_node_type_file" {
   default = "default_typefile"
   description = "location of a file with comma-separated list of node types from 1 to n"
 }
-
 variable "aws_node_type" {
   description = "Types of nodes. Special - type per node, starting with node 1. Other - all other nodes not covered in special. Special count must be < node_count."
   default = {
@@ -62,9 +60,8 @@ variable "aws_node_type" {
     "other" = "m3.medium"
   }
 }
-
 variable "aws_volume_size" {
-  default = "300"
+  default = "30"
   description = "Size of EBS volume attached to each AWS instance in gigabytes"
 }
 variable "kraken_port_low" {
