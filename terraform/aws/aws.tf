@@ -235,7 +235,7 @@ resource "template_file" "master_cloudinit" {
   filename = "${path.module}/templates/master.yaml.tpl"
   vars {
     etcd_private_ip = "${aws_instance.kubernetes_etcd.private_ip}"
-    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type.etcd)}"
+    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type.master)}"
     coreos_update_channel = "${var.coreos_update_channel}"
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
   }
