@@ -25,6 +25,7 @@ write_files:
 
             location / {
                 proxy_pass http://apiservers;
+                proxy_read_timeout 600;
             }
         }
     }
