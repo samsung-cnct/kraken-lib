@@ -148,6 +148,10 @@ variable "kube_proxy_v" {
   default = "2"
   description = "kubernetes proxy verbosity"
 }
+variable "ansible_forks" {
+  default = "5"
+  description = "number of parallel processes to use for ansible-playbook run"
+}
 variable "kraken_services_dirs" {
   default = "heapster influxdb-grafana kube-ui loadtest prometheus"
   description = "Kraken services folders under kraken repo to deploy kubernetes services from."

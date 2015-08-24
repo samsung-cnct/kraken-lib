@@ -66,11 +66,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         EOF
       end
 
-      # run ansible
-      master_private_ip = base_ip_address + "#{2+100}"
-
+      # Only execute the ansible provisioner once, when all machines are up and ready
       if base_ip_address + "#{i+100}" == final_node_ip
-        env_var_list = %w(
+        kraken_env_var_entries = %w(
           dns_domain
           dns_ip
           dockercfg_base64
@@ -89,24 +87,26 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           logentries_token
           logentries_url
         ).map { |s| [s.to_sym, ENV["KRAKEN_#{s.upcase}"]] }
-        env_vars = Hash[env_var_list]
+        kraken_env_vars = Hash[kraken_env_var_entries]
 
         other_vars = {
           :ansible_ssh_private_key_file => File.expand_path(ENV['KRAKEN_VAGRANT_PRIVATE_KEY']),
-          :master_ip => master_private_ip,
           :etcd_ip => base_ip_address + "#{1+100}",
-          :nodes_inventory_info => node_host_data,
-          :node_01_ip => base_ip_address + "#{3+100}"
+          :master_ip => base_ip_address + "#{2+100}",
+          :node_01_ip => base_ip_address + "#{3+100}",
+          :nodes_inventory_info => node_host_data
         }
 
-        render_vars = other_vars.merge(env_vars)
+        render_vars = other_vars.merge(kraken_env_vars)
 
         render("#{ENV['VAGRANT_CWD']}/templates/ansible.inventory.erb", "#{ENV['VAGRANT_CWD']}/rendered/ansible.inventory", render_vars)
 
+        ansible_forks = ENV['ANSIBLE_FORKS']
         config2.vm.provision 'ansible' do |ansible|
           ansible.limit = 'cluster'
           ansible.inventory_path = "#{ENV['VAGRANT_CWD']}/rendered/ansible.inventory"
           ansible.playbook = "../../ansible/vagrant_provision.yaml"
+          ansible.raw_arguments = ["--forks=#{ansible_forks}"]
         end
       end
     end
