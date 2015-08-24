@@ -15,11 +15,11 @@ coreos:
     etcd-endpoints: http://${etcd_private_ip}:4001
     interface: $private_ipv4
   units:
-    - name: format-ebs.service
+    - name: format-storage.service
       command: start
       content: |
         [Unit]
-        Description=Formats the EBS drive
+        Description=Formats a drive
         [Service]
         Type=oneshot
         RemainAfterExit=yes
@@ -29,9 +29,9 @@ coreos:
       command: start
       content: |
         [Unit]
-        Description=Mount EBS to /var/lib/docker
-        Requires=format-ebs.service
-        After=format-ebs.service
+        Description=Mount to /var/lib/docker
+        Requires=format-storage.service
+        After=format-storage.service
         Before=docker.service
         [Mount]
         What=${format_docker_storage_mnt}

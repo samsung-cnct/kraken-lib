@@ -49,10 +49,6 @@ variable "aws_etcd_type" {
   default = "m3.large"
   description = "Kubernetes etcd instance type"
 }
-variable "aws_node_type_file" {
-  default = "default_typefile"
-  description = "location of a file with comma-separated list of node types from 1 to n"
-}
 variable "aws_node_type" {
   description = "Types of nodes. Special - type per node, starting with node 1. Other - all other nodes not covered in special. Special count must be < node_count."
   default = {
@@ -60,9 +56,37 @@ variable "aws_node_type" {
     "other" = "m3.medium"
   }
 }
+variable "aws_storage_type" {
+  description = "Storage types for nodes. ebs or ephemeral. special_nodes is a list of types, must be < node_count. Must be same length as special node type list."
+  default = {
+    "master" = "ebs"
+    "etcd" = "ebs"
+    "special_nodes" = "ephemeral,ebs"
+    "other_nodes" = "ebs"
+  }
+}
 variable "aws_volume_size" {
-  default = "30"
-  description = "Size of EBS volume attached to each AWS instance in gigabytes"
+  default = {
+    "master" = "30"
+    "etcd" = "30"
+    "special_nodes" = "1,30"
+    "other_nodes" = "30"
+  }
+  description = "Size of EBS volume attached to each AWS instance in gigabytes. special_nodes is a list of sizes, must be < node_count. Must be same length as special node type list."
+}
+variable "aws_storage_path" {
+  default =  {
+    "ebs" = "/dev/sdf"
+    "ephemeral" = "/dev/sdb"
+  }
+  description = "Storage device path"
+}
+variable "format_docker_storage_mnt" {
+  default =  {
+    "ebs" = "/dev/xvdf"
+    "ephemeral" = "/dev/xvdb"
+  }
+  description = "Mount point for EBS drive to move /var/docker to"
 }
 variable "kraken_port_low" {
   default = "30000"
@@ -83,10 +107,6 @@ variable "aws_local_private_key" {
 variable "aws_cluster_domain" {
   default = "kubeme.io"
   description = "Location of public key material to import into the <aws_user_prefix>_<aws_cluster_prefix>_keypair"
-}
-variable "format_docker_storage_mnt" {
-  default = "/dev/xvdf"
-  description = "Mount point for EBS drive to move /var/docker to"
 }
 variable "coreos_update_channel" {
   default = "alpha"

@@ -1,8 +1,8 @@
 [master]
-master ansible_ssh_host=${master_public_ip}
+${master_short_name} ansible_ssh_host=${master_public_ip}
 
 [etcd]
-etcd ansible_ssh_host=${etcd_public_ip}
+${etcd_short_name} ansible_ssh_host=${etcd_public_ip}
 
 [nodes]
 ${nodes_inventory_info}
