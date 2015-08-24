@@ -4,11 +4,12 @@
   roles:
     - defunctzombie.coreos-bootstrap
 
-- hosts: cluster
-  roles:
-    - kubernetes
-
 - hosts: local
   sudo: false
   roles:
     - ssh-config
+
+- hosts: cluster
+  roles:
+    - kubernetes
+
