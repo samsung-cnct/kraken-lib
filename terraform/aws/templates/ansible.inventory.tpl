@@ -16,6 +16,7 @@ nodes
 localhost ansible_connection=local
 
 [cluster:vars]
+ansible_connection=ssh
 ansible_ssh_user=core
 ansible_python_interpreter="PATH=/home/core/bin:$PATH python"
 master_private_ip=${master_private_ip}
