@@ -402,6 +402,6 @@ resource "template_file" "ansible_inventory" {
   }
 
   provisioner "local-exec" {
-    command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -f ${var.ansible_forks} -i ${path.module}/rendered/ansible.inventory ${path.module}/../../ansible/iaas_provision.yaml"
+    command = "ANSIBLE_SSH_PIPELINING=True ANSIBLE_SSH_RETRIES=3 ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -f ${var.ansible_forks} -i ${path.module}/rendered/ansible.inventory ${path.module}/../../ansible/iaas_provision.yaml"
   }
 }
