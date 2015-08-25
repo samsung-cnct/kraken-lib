@@ -3,7 +3,7 @@ variable "node_count" {
   description = "How many nodes (not counting master and etcd to bring up)"
 }
 variable "coreos_update_channel" {
-  default = "alpha"
+  default = "beta"
   description = "Core OS update channel. Alpha, beta, stable or some custom value"
 }
 
@@ -12,10 +12,6 @@ variable "coreos_reboot_strategy" {
   description = "Core OS reboot strategy."
 }
 
-variable "coreos_release" {
-  default = "779.0.0"
-  description = "Core OS release"
-}
 variable "ip_base" {
   default = "172.16.1"
   description = "IP addresses will be assigned from ip_base.103 to ip_base.102 + number of nodes"
