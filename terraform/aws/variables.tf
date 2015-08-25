@@ -94,7 +94,7 @@ variable "aws_cluster_domain" {
   description = "Location of public key material to import into the <aws_user_prefix>_<aws_cluster_prefix>_keypair"
 }
 variable "coreos_update_channel" {
-  default = "alpha"
+  default = "beta"
   description = "Core OS update channel. Alpha, beta, stable or some custom value"
 }
 variable "coreos_reboot_strategy" {
