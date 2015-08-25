@@ -13,7 +13,7 @@ variable "coreos_reboot_strategy" {
 }
 
 variable "coreos_release" {
-  default = "773.1.0"
+  default = "779.0.0"
   description = "Core OS release"
 }
 variable "ip_base" {

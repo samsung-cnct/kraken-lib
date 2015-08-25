@@ -200,6 +200,12 @@ resource "aws_security_group" "vpc_secgroup" {
   }
 }
 
+resource "coreos_ami" "latest_ami" {
+  channel = "${var.coreos_update_channel}"
+  type = "hvm"
+  region = "${var.aws_region}"
+}
+
 resource "template_file" "etcd_cloudinit" {
   filename = "${path.module}/templates/etcd.yaml.tpl"
   vars {
@@ -209,7 +215,7 @@ resource "template_file" "etcd_cloudinit" {
   }
 }
 resource "aws_instance" "kubernetes_etcd" {
-  ami = "${lookup(var.coreos_ami, var.aws_region)}"
+  ami = "${coreos_ami.latest_ami.ami}"
   instance_type = "${var.aws_etcd_type}"
   key_name = "${aws_key_pair.keypair.key_name}"
   vpc_security_group_ids = [ "${aws_security_group.vpc_secgroup.id}" ]
@@ -241,7 +247,7 @@ resource "template_file" "master_cloudinit" {
   }
 }
 resource "aws_instance" "kubernetes_master" {
-  ami = "${lookup(var.coreos_ami, var.aws_region)}"
+  ami = "${coreos_ami.latest_ami.ami}"
   instance_type = "${var.aws_master_type}"
   key_name = "${aws_key_pair.keypair.key_name}"
   vpc_security_group_ids = [ "${aws_security_group.vpc_secgroup.id}" ]
@@ -277,7 +283,7 @@ resource "template_file" "node_cloudinit_typed" {
 resource "aws_instance" "kubernetes_node_typed" {
   depends_on = ["aws_instance.kubernetes_etcd"]
   count = "${length(split(",", var.aws_node_type.special))}"
-  ami = "${lookup(var.coreos_ami, var.aws_region)}"
+  ami = "${coreos_ami.latest_ami.ami}"
   instance_type = "${element(split(",", var.aws_node_type.special), count.index)}"
   key_name = "${aws_key_pair.keypair.key_name}"
   vpc_security_group_ids = [ "${aws_security_group.vpc_secgroup.id}" ]
@@ -312,7 +318,7 @@ resource "template_file" "node_cloudinit" {
 resource "aws_instance" "kubernetes_node" {
   depends_on = ["aws_instance.kubernetes_etcd"]
   count = "${var.node_count - length(split(",", var.aws_node_type.special))}"
-  ami = "${lookup(var.coreos_ami, var.aws_region)}"
+  ami = "${coreos_ami.latest_ami.ami}"
   instance_type = "${var.aws_node_type.other}"
   key_name = "${aws_key_pair.keypair.key_name}"
   vpc_security_group_ids = [ "${aws_security_group.vpc_secgroup.id}" ]
