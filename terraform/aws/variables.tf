@@ -10,21 +10,6 @@ variable "aws_user_prefix" {
 }
 
 # variables with defaults
-variable "coreos_ami" {
-  description = "CoreOS AMI defaults"
-  default = {
-    "ap-northeest-1" = "ami-f2338ff2"
-    "ap-southeast-1" = "ami-b6d8d4e4"
-    "ap-southeast-2" = "ami-8f88c8b5"
-    "eu-central-1" = "ami-bececaa3"
-    "eu-west-1" = "ami-0e104179"
-    "sa-east-1" = "ami-11e9600c"
-    "us-east-1" = "ami-3d73d356"
-    "us-gov-west-1" = "ami-c75033e4"
-    "us-west-1" = "ami-1db04f59"
-    "us-west-2" = "ami-85ada4b5"
-  }
-}
 variable "aws_cluster_prefix" {
   default = "kubernetes"
   description = "AWS cluster prefix - all resources with names will be identified as <aws_user_prefix>_<aws_cluster_prefix>_<name>"
