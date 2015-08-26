@@ -4,3 +4,7 @@ README_local*
 tls*
 temp_*
 .DS_Store
+**/terraform.tfstate
+**/terraform.tfstate.backup
+**/.terraform
+**/terraform.tfvars

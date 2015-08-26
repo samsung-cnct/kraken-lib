@@ -1,0 +1,17 @@
+[Unit]
+Description=Launch hyperkube node proxy
+Requires=hyperkube-node.service
+After=hyperkube-node.service
+
+[Service]
+Restart=always
+ExecStartPre=-/usr/bin/docker kill kube-proxy
+ExecStartPre=-/usr/bin/docker rm kube-proxy
+ExecStart=/usr/bin/docker run \
+  --name kube-proxy \
+  --net=host \
+  --privileged \
+  {{hyperkube_image}} \
+    /hyperkube proxy \
+    --master=http://{{master_private_ip}}:8080 \
+    --v={{kube_proxy_v}}

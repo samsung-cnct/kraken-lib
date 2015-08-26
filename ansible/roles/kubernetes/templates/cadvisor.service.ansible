@@ -1,0 +1,17 @@
+[Unit]
+Description=Download and run cadvisor
+Requires=early-docker.service
+
+[Service]
+Restart=always
+ExecStartPre=-/usr/bin/docker kill cadvisor
+ExecStartPre=-/usr/bin/docker rm cadvisor
+ExecStart=/usr/bin/bash -c \
+  "/usr/bin/docker run \
+  --name=cadvisor \
+  --publish=8094:8080 \
+  --volume=/:/rootfs:ro \
+  --volume=/sys:/sys:ro \
+  --volume=/var/lib/docker/:/var/lib/docker:ro \
+  --volume=/var/run:/var/run:rw \
+  google/cadvisor:latest"

@@ -1,0 +1,16 @@
+---
+# Common tasks for every node
+- include: common.yaml
+
+- include: etcd.yaml
+  when: "'etcd' in group_names"
+
+# Kubernetes master specific tasks
+- include: master.yaml
+  when: "'master' in group_names"
+- include: kraken.yaml
+  when: "'master' in group_names"
+
+# Kubernetes node specific tasks
+- include: node.yaml
+  when: "'nodes' in group_names"

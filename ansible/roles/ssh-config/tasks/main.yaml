@@ -1,0 +1,6 @@
+---
+ - name: ensure .ssh exists
+   file: path={{ssh_config_home}}/.ssh state=directory follow=yes
+
+ - name: render config_cluster-name to .ssh
+   template: src=ssh_config.ansible dest={{ssh_config_home}}/.ssh/{{ssh_config_name}}

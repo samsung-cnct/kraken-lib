@@ -1,0 +1,7 @@
+#! /usr/bin/bash
+set -x
+cd /opt/bin/kraken-services
+for dir in $*; do
+  /opt/bin/kubectl --server=http://{{master_private_ip}}:8080 delete -f ./$dir/ || true
+  /opt/bin/kubectl --server=http://{{master_private_ip}}:8080 create -f ./$dir/
+done

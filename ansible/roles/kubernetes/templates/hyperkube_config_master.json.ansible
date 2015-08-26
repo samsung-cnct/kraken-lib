@@ -1,0 +1,69 @@
+{
+  "apiVersion": "v1",
+  "kind": "Pod",
+  "metadata": {
+    "name": "k8s-master"
+  },
+  "spec": {
+    "hostNetwork": true,
+    "containers": [
+      {
+        "name": "controller-manager",
+        "image": "{{hyperkube_image}}",
+        "command": [
+          "/hyperkube",
+          "controller-manager",
+          "--address={{master_private_ip}}",
+          "--logtostderr=true",
+          "--master={{master_private_ip}}:8080",
+          "--pod_eviction_timeout=1m",
+          "--port=10252",
+          "--resource_quota_sync_period=20s",
+          "--v={{kube_controller_manager_v}}"
+        ]
+      },
+      {
+        "name": "apiserver",
+        "image": "{{hyperkube_image}}",
+        "command": [
+          "/hyperkube",
+          "apiserver",
+          "--cors_allowed_origins=.*",
+          "--etcd_servers=http://127.0.0.1:4001",
+          "--insecure_bind_address=0.0.0.0",
+          "--insecure_port=8080",
+          "--logtostderr=true",
+          "--portal_net=10.100.0.0/16",
+          "--public_address_override={{master_private_ip}}",
+          "--runtime_config=api/{{kubernetes_api_version}}",
+          "--v={{kube_apiserver_v}}"
+        ],
+        "ports": [
+          {
+            "name": "https",
+            "hostPort": 443,
+            "containerPort": 443
+          },
+          {
+            "name": "local",
+            "hostPort": 8080,
+            "containerPort": 8080
+          }
+        ]
+      },
+      {
+        "name": "scheduler",
+        "image": "{{hyperkube_image}}",
+        "command": [
+          "/hyperkube",
+          "scheduler",
+          "--address={{master_private_ip}}",
+          "--logtostderr=true",
+          "--master={{master_private_ip}}:8080",
+          "--port=10251",
+          "--v={{kube_scheduler_v}}"
+        ]
+      }
+    ]
+  }
+}
