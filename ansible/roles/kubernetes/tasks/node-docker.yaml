@@ -25,8 +25,8 @@
   sudo: yes
 
 - name: Create hyperkube node
-  template: src=hyperkube-node.service.ansible
-            dest=/etc/systemd/system/hyperkube-node.service
+  template: src=hyperkube-docker-node.service.ansible
+            dest=/etc/systemd/system/hyperkube-docker-node.service
   sudo: yes
 
 - name: Create wait4node
@@ -35,8 +35,8 @@
   sudo: yes
 
 - name: Create hyperkube node proxy
-  template: src=hyperkube-proxy-node.service.ansible
-            dest=/etc/systemd/system/hyperkube-proxy-node.service
+  template: src=hyperkube-docker-proxy-node.service.ansible
+            dest=/etc/systemd/system/hyperkube-docker-proxy-node.service
   sudo: yes
 
 - name: Create labeler service
@@ -48,8 +48,8 @@
   command: systemctl daemon-reload
   sudo: yes
 
-- name: start hyperkube-node and set to start on startup
-  service: name=hyperkube-node state=restarted enabled=yes
+- name: start hyperkube-docker-node and set to start on startup
+  service: name=hyperkube-docker-node state=restarted enabled=yes
   sudo: yes
 
 - name: start wait4node and set to start on startup
@@ -60,6 +60,6 @@
   service: name=kubernetes-label state=restarted enabled=yes
   sudo: yes
 
-- name: start hyperkube-proxy-node and set to start on startup
-  service: name=hyperkube-proxy-node state=restarted enabled=yes
+- name: start hyperkube-docker-proxy-node and set to start on startup
+  service: name=hyperkube-docker-proxy-node state=restarted enabled=yes
   sudo: yes

@@ -121,13 +121,17 @@ variable "dockercfg_base64" {
   default = ""
   description = "Docker base64-encoded configuration string"
 }
+variable "hyperkube_deployment_mode" {
+  default = "binary"
+  description = "Run inside 'docker' or run on host as 'binary'"
+}
 variable "hyperkube_image" {
   default = "gcr.io/google_containers/hyperkube:v1.0.3"
-  description = "docker image to launch hyperkube"
+  description = "image to use when running with hyperkube_deploy_mode 'docker'"
 }
-variable "kubernetes_version" {
-  default = "1.0.3"
-  description = "Kubernetes version, numbers only"
+variable "kubernetes_binaries_uri" {
+  default = "https://storage.googleapis.com/kubernetes-release/release/v1.0.3/bin/linux/amd64"
+  description = "url to fetch hyperkube, kubectl binaries from in hyperkube_deploy_mode 'binary'"
 }
 variable "kubernetes_api_version" {
   default = "v1"

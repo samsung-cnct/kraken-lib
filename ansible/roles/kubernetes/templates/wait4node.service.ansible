@@ -1,7 +1,6 @@
 [Unit]
 Description=Wait for node to register with kube-apiserver
-Requires=hyperkube-node.service
-After=hyperkube-node.service
+Requires=network-online.target
 
 [Service]
 ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4node.sh

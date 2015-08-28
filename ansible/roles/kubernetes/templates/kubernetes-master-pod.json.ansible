@@ -29,7 +29,7 @@
           "/hyperkube",
           "apiserver",
           "--cors_allowed_origins=.*",
-          "--etcd_servers=http://127.0.0.1:4001",
+          "--etcd_servers=http://{{etcd_private_ip}}:4001",
           "--insecure_bind_address=0.0.0.0",
           "--insecure_port=8080",
           "--logtostderr=true",

@@ -1,7 +1,3 @@
-[Unit]
-Requires=hyperkube-proxy.service
-After=hyperkube-proxy.service
-
 [Service]
 TimeoutStartSec=0
 ExecStartPre=/usr/bin/chmod +x /opt/bin/kraken-render.sh

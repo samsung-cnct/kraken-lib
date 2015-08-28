@@ -1,0 +1,19 @@
+[Unit]
+Description=Launch hyperkube apiserver
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+Restart=always
+LimitNOFILE=infinity
+# TODO: etcd_servers is incorrect
+ExecStart=/opt/bin/hyperkube apiserver \
+  --cors_allowed_origins=.* \
+  --etcd_servers=http://{{etcd_private_ip}}:4001 \
+  --insecure_bind_address=0.0.0.0 \
+  --insecure_port=8080 \
+  --logtostderr=true \
+  --public_address_override={{master_private_ip}} \
+  --runtime_config=api/{{kubernetes_api_version}} \
+  --service-cluster-ip-range=10.100.0.0/16 \
+  --v={{kube_apiserver_v}}

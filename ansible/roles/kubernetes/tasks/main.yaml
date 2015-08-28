@@ -2,15 +2,19 @@
 # Common tasks for every node
 - include: common.yaml
 
-- include: etcd.yaml
-  when: "'etcd' in group_names"
+- include: cadvisor.yaml
+  when: "'master' in group_names or 'etcd' in group_names"
 
 # Kubernetes master specific tasks
-- include: master.yaml
-  when: "'master' in group_names"
-- include: kraken.yaml
+- include: master-binary.yaml
+  when: "'master' in group_names and hyperkube_deployment_mode == 'binary'"
+- include: master-docker.yaml
+  when: "'master' in group_names and hyperkube_deployment_mode == 'docker'"
+- include: kraken-services.yaml
   when: "'master' in group_names"
 
 # Kubernetes node specific tasks
-- include: node.yaml
-  when: "'nodes' in group_names"
+- include: node-binary.yaml
+  when: "'nodes' in group_names and hyperkube_deployment_mode == 'binary'"
+- include: node-docker.yaml
+  when: "'nodes' in group_names and hyperkube_deployment_mode == 'docker'"

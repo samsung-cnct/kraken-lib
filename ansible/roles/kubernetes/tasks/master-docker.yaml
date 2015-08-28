@@ -1,0 +1,38 @@
+---
+- name: Create /opt/bin/manifests for configs
+  sudo: yes
+  file: >
+    path=/opt/bin/manifests
+    state=directory
+    owner=core
+    group=core
+
+- name: copy master manifest config
+  template: src=kubernetes-master-pod.json.ansible
+            dest=/opt/bin/manifests/master.json
+  sudo: yes
+
+- name: Create hyperkube master
+  template: src=hyperkube-docker-master.service.ansible
+            dest=/etc/systemd/system/hyperkube-docker-master.service
+  sudo: yes
+
+- name: Create hyperkube proxy
+  template: src=hyperkube-docker-proxy.service.ansible
+            dest=/etc/systemd/system/hyperkube-docker-proxy.service
+  sudo: yes
+
+- name: notify systemd of config changes
+  command: systemctl daemon-reload
+  sudo: yes
+
+- name: start hyperkube master and set to start on startup
+  service: name=hyperkube-docker-master state=restarted enabled=yes
+  sudo: yes
+
+- name: start hyperkube proxy and set to start on startup
+  service: name=hyperkube-docker-proxy state=restarted enabled=yes
+  sudo: yes
+
+- name: write kube config
+  local_action: shell kubectl config set-cluster {{cluster_name}} --server={{cluster_master_record}}
