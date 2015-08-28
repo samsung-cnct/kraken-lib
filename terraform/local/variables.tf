@@ -73,10 +73,6 @@ variable "kubernetes_binaries_uri" {
   default = "https://storage.googleapis.com/kubernetes-release/release/v1.0.3/bin/linux/amd64"
   description = "url to fetch hyperkube, kubectl binaries from in hyperkube_deploy_mode 'binary'"
 }
-variable "kubernetes_version" {
-  default = "1.0.3"
-  description = "Kubernetes version, numbers only"
-}
 variable "kubernetes_api_version" {
   default = "v1"
   description = "Kubernetes api version"

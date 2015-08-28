@@ -6,7 +6,6 @@ dockercfg_base64:
 hyperkube_image: gcr.io/google_containers/hyperkube:v1.0.3
 hyperkube_deployment_mode: binary
 kubernetes_binaries_uri: https://storage.googleapis.com/kubernetes-release/release/v1.0.3/bin/linux/amd64
-kubernetes_version: 1.0.3
 kubernetes_api_version: v1
 kube_apiserver_v: 4
 kube_controller_manager_v: 4
