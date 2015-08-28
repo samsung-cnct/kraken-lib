@@ -1,3 +1,4 @@
+---
 - name: Create cadvisor service
   template: src=cadvisor.service.ansible
             dest=/etc/systemd/system/cadvisor.service
@@ -5,4 +6,8 @@
 
 - name: notify systemd of config changes
   command: systemctl daemon-reload
+  sudo: yes
+
+- name: start cadvisor and set to start on startup
+  service: name=cadvisor state=restarted enabled=yes
   sudo: yes

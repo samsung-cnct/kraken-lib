@@ -1,7 +1,7 @@
 [Unit]
 Description=Launch hyperkube proxy
-Requires=hyperkube-master.service
-After=hyperkube-master.service
+Requires=hyperkube-docker-master.service
+After=hyperkube-docker-master.service
 
 [Service]
 Restart=always

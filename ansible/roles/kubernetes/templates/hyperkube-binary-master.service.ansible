@@ -1,0 +1,15 @@
+[Unit]
+Description=Launch hyperkube master
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+Restart=always
+LimitNOFILE=infinity
+ExecStart=/opt/bin/hyperkube kubelet \
+  --cluster_dns={{dns_ip}} \
+  --cluster_domain={{dns_domain}} \
+  --config=/etc/kubernetes/manifests-override \
+  --enable_server \
+  --hostname_override={{master_private_ip}} \
+  --v={{kubelet_v}}

@@ -1,0 +1,14 @@
+[Unit]
+Description=Launch hyperkube scheduler
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+Restart=always
+LimitNOFILE=infinity
+ExecStart=/opt/bin/hyperkube scheduler \
+  --address={{master_private_ip}} \
+  --port=10251 \
+  --master={{master_private_ip}}:8080 \
+  --logtostderr=true \
+  --v={{kube_scheduler_v}}

@@ -13,8 +13,12 @@
   sudo: yes
   when: logentries_token|default("") != ""
 
-- name: create kubectl.service
-  template: src=kubectl.service.ansible dest=/etc/systemd/system/kubectl.service
+- name: create install-kubectl.service
+  template: src=install-kubectl.service.ansible dest=/etc/systemd/system/install-kubectl.service
+  sudo: yes
+
+- name: create install-hyperkube.service
+  template: src=install-hyperkube.service.ansible dest=/etc/systemd/system/install-hyperkube.service
   sudo: yes
 
 - name: create journal-2-logentries.service
@@ -41,6 +45,10 @@
   sudo: yes
   when: logentries_token|default("") != ""
 
-- name: start kubectl.service and set to start on startup
-  service: name=kubectl state=restarted enabled=yes
+- name: start install-hyperkube.service and set to start on startup
+  service: name=install-hyperkube state=restarted enabled=yes
+  sudo: yes
+
+- name: start install-kubectl.service and set to start on startup
+  service: name=install-kubectl state=restarted enabled=yes
   sudo: yes

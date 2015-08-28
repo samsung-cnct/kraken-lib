@@ -1,7 +1,7 @@
 [Unit]
 Description=Launch hyperkube node proxy
-Requires=hyperkube-node.service
-After=hyperkube-node.service
+Requires=hyperkube-docker-node.service
+After=hyperkube-docker-node.service
 
 [Service]
 Restart=always

@@ -1,3 +1,12 @@
+---
+- name: Create /opt/bin/kraken-services for custom binaries
+  sudo: yes
+  file: >
+    path=/opt/bin/kraken-services
+    state=directory
+    owner=core
+    group=core
+
 - name: Download services
   git: repo={{kraken_services_repo}}
        dest=/opt/bin/kraken-services

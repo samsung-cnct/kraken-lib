@@ -1,0 +1,16 @@
+[Unit]
+Description=Launch hyperkube controller-manager
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+Restart=always
+LimitNOFILE=infinity
+ExecStart=/opt/bin/hyperkube controller-manager \
+  --address={{master_private_ip}} \
+  --port=10252
+  --logtostderr=true \
+  --master={{master_private_ip}}:8080 \
+  --pod_eviction_timeout=1m \
+  --resource_quota_sync_period=20s \
+  --v={{kube_controller_manager_v}}
