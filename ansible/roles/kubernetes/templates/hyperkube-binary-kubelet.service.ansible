@@ -11,7 +11,7 @@ ExecStartPre=-/usr/bin/mv -v /opt/bin/hyperkube.pending /opt/bin/hyperkube
 ExecStart=/opt/bin/hyperkube kubelet \
   --address=0.0.0.0 \
   --api_servers=http://{{master_private_ip}}:8080 \
-  --cadvisor_port=4194 \
+  --cadvisor_port=0 \
   --cluster_dns={{dns_ip}} \
   --cluster_domain={{dns_domain}} \
   --enable_server \

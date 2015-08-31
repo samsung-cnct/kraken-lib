@@ -92,6 +92,6 @@
 
 # cadvisor
 
-- name: start cadvisor
+- name: restart cadvisor
   service: name=cadvisor state=restarted enabled=yes
   sudo: yes
