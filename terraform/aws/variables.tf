@@ -10,6 +10,10 @@ variable "aws_user_prefix" {
 }
 
 # variables with defaults
+variable "max_retries" {
+  default = "100"
+  description = "Max number of API call retries before failure"
+}
 variable "aws_cluster_prefix" {
   default = "kubernetes"
   description = "AWS cluster prefix - all resources with names will be identified as <aws_user_prefix>_<aws_cluster_prefix>_<name>"
@@ -31,13 +35,13 @@ variable "aws_master_type" {
   description = "Kubernetes master instance type"
 }
 variable "aws_etcd_type" {
-  default = "m3.large"
+  default = "m3.xlarge"
   description = "Kubernetes etcd instance type"
 }
 variable "aws_node_type" {
   description = "Types of nodes. Special - type per node, starting with node 1. Other - all other nodes not covered in special. Special count must be < node_count."
   default = {
-    "special" = "m3.xlarge,m3.medium"
+    "special" = "m3.xlarge"
     "other" = "m3.medium"
   }
 }
@@ -46,7 +50,7 @@ variable "aws_storage_type" {
   default = {
     "master" = "ebs"
     "etcd" = "ebs"
-    "special_nodes" = "ephemeral,ebs"
+    "special_nodes" = "ebs"
     "other_nodes" = "ebs"
   }
 }
@@ -54,10 +58,19 @@ variable "aws_volume_size" {
   default = {
     "master" = "30"
     "etcd" = "30"
-    "special_nodes" = "1,30"
+    "special_nodes" = "30"
     "other_nodes" = "30"
   }
   description = "Size of EBS volume attached to each AWS instance in gigabytes. special_nodes is a list of sizes, must be < node_count. Must be same length as special node type list."
+}
+variable "aws_volume_type" {
+  default = {
+    "master" = "gp2"
+    "etcd" = "gp2"
+    "special_nodes" = "gp2"
+    "other_nodes" = "gp2"
+  }
+  description = "Type of EBS volume attached to each AWS instance. special_nodes is a list of types, must be < node_count. Must be same length as special node type list."
 }
 variable "aws_storage_path" {
   default =  {
