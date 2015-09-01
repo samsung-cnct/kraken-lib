@@ -56,10 +56,10 @@ variable "aws_storage_type" {
 }
 variable "aws_volume_size" {
   default = {
-    "master" = "10"
-    "etcd" = "10"
-    "special_nodes" = "10"
-    "other_nodes" = "10"
+    "master" = "30"
+    "etcd" = "30"
+    "special_nodes" = "30"
+    "other_nodes" = "30"
   }
   description = "Size of EBS volume attached to each AWS instance in gigabytes. special_nodes is a list of sizes, must be < node_count. Must be same length as special node type list."
 }
