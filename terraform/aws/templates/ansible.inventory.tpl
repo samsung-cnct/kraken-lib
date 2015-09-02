@@ -13,12 +13,13 @@ etcd
 nodes
 
 [local]
-localhost ansible_connection=local
+localhost
 
 [cluster:vars]
 ansible_connection=ssh
 ansible_python_interpreter="PATH=/home/core/bin:$PATH python"
 ansible_ssh_user=core
+ansible_ssh_private_key_file=${ansible_ssh_private_key_file}
 cluster_master_record=${cluster_master_record}
 cluster_name=${cluster_name}
 dns_domain=${dns_domain}
@@ -47,6 +48,7 @@ node_01_private_ip=${node_01_private_ip}
 node_01_public_ip=${node_01_public_ip}
 
 [local:vars]
+ansible_connection=local
 ansible_ssh_private_key_file=${ansible_ssh_private_key_file}
 cluster_name=${cluster_name}
 etcd_public_ip=${etcd_public_ip}

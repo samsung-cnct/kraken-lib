@@ -26,9 +26,13 @@ variable "aws_zone_id" {
   default = "ZX7O08V47RE60"
   description = "Route53 hosted zone id"
 }
+variable "special_node_count" {
+  default = "1"
+  description = "How many nodes (not counting master, etcd and special nodes to bring up)"
+}
 variable "node_count" {
-  default = "3"
-  description = "How many nodes (not counting master and etcd to bring up)"
+  default = "999"
+  description = "How many nodes (not counting master, etcd and special nodes to bring up)"
 }
 variable "aws_master_type" {
   default = "m3.xlarge"
@@ -38,39 +42,61 @@ variable "aws_etcd_type" {
   default = "m3.xlarge"
   description = "Kubernetes etcd instance type"
 }
+variable "aws_special_node_type" {
+  description = "Types of nodes. Type per node, comma separated, starting with node 1. Number of must be = special_node_count."
+  default = "m3.xlarge"
+}
 variable "aws_node_type" {
-  description = "Types of nodes. Special - type per node, starting with node 1. Other - all other nodes not covered in special. Special count must be < node_count."
-  default = {
-    "special" = "m3.xlarge"
-    "other" = "m3.medium"
-  }
+  description = "Types of nodes, other than special nodes"
+  default = "t2.micro"
+}
+variable "aws_storage_type_master" {
+  description = "Primary volume type for master"
+  default = "ebs"
+}
+variable "aws_storage_type_etcd" {
+  description = "Primary volume type for master"
+  default = "ebs"
+}
+variable "aws_storage_type_special" {
+  description = "Primary volume type for sepcial nodes. Comma-sperated list. Count must = special_node_count"
+  default = "ebs"
 }
 variable "aws_storage_type" {
-  description = "Storage types for nodes. ebs or ephemeral. special_nodes is a list of types, must be < node_count. Must be same length as special node type list."
-  default = {
-    "master" = "ebs"
-    "etcd" = "ebs"
-    "special_nodes" = "ebs"
-    "other_nodes" = "ebs"
-  }
+  description = "Primary volume type for all other nodes"
+  default = "ebs"
+}
+variable "aws_volume_size_master" {
+  default = "30"
+  description = "Size of EBS volume attached to master instance in gigabytes."
+}
+variable "aws_volume_size_etcd" {
+  default = "30"
+  description = "Size of EBS volume attached to etcd instance in gigabytes."
+}
+variable "aws_volume_size_special" {
+  default = "30"
+  description = "Sizes of EBS volume attached to special nodes. Comma-sperated list. Count must = special_node_count."
 }
 variable "aws_volume_size" {
-  default = {
-    "master" = "30"
-    "etcd" = "30"
-    "special_nodes" = "30"
-    "other_nodes" = "30"
-  }
-  description = "Size of EBS volume attached to each AWS instance in gigabytes. special_nodes is a list of sizes, must be < node_count. Must be same length as special node type list."
+  default = "30"
+  description = "Size of EBS volume attached to all other nodes in gigabytes."
+}
+variable "aws_volume_type_master" {
+  default = "gp2"
+  description = "Type of EBS volume attached to master AWS instance. "
+}
+variable "aws_volume_type_etcd" {
+  default = "gp2"
+  description = "Type of EBS volume attached to etcd AWS instance. "
+}
+variable "aws_volume_special" {
+  default = "gp2"
+  description = "Type of EBS volume attached special nodes. Comma-sperated list. Count must = special_node_count."
 }
 variable "aws_volume_type" {
-  default = {
-    "master" = "gp2"
-    "etcd" = "gp2"
-    "special_nodes" = "gp2"
-    "other_nodes" = "gp2"
-  }
-  description = "Type of EBS volume attached to each AWS instance. special_nodes is a list of types, must be < node_count. Must be same length as special node type list."
+  default = "gp2"
+  description = "Type of EBS volume attached to all other nodes."
 }
 variable "aws_storage_path" {
   default =  {
