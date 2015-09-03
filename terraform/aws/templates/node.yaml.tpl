@@ -1,6 +1,42 @@
 #cloud-config
 
 ---
+write_files:
+  - path: /etc/inventory.ansible
+    content: |
+      [node]
+      ${short_name} ansible_ssh_host=$private_ipv4
+
+      [node:vars]
+      ansible_connection=ssh
+      ansible_python_interpreter="PATH=/home/core/bin:$PATH python"
+      ansible_ssh_user=core
+      ansible_ssh_private_key_file=/opt/ansible/private_key
+      cluster_master_record=${cluster_master_record}
+      cluster_proxy_record=${cluster_proxy_record}
+      cluster_name=${cluster_name}
+      dns_domain=${dns_domain}
+      dns_ip=${dns_ip}
+      dockercfg_base64=${dockercfg_base64}
+      etcd_private_ip=${etcd_private_ip}
+      etcd_public_ip=${etcd_public_ip}
+      hyperkube_deployment_mode=${hyperkube_deployment_mode}
+      hyperkube_image=${hyperkube_image}
+      interface_name=${interface_name}
+      kraken_services_branch=${kraken_services_branch}
+      kraken_services_dirs=${kraken_services_dirs}
+      kraken_services_repo=${kraken_services_repo}
+      kube_apiserver_v=${kube_apiserver_v}
+      kube_controller_manager_v=${kube_controller_manager_v}
+      kube_proxy_v=${kube_proxy_v}
+      kube_scheduler_v=${kube_scheduler_v}
+      kubelet_v=${kubelet_v}
+      kubernetes_api_version=${kubernetes_api_version}
+      kubernetes_binaries_uri=${kubernetes_binaries_uri}
+      logentries_token=${logentries_token}
+      logentries_url=${logentries_url}
+      master_private_ip=${master_private_ip}
+      master_public_ip=${master_public_ip}
 coreos:
   etcd2:
     proxy: on
@@ -78,13 +114,34 @@ coreos:
       command: start
       enable: yes
       content: |
-        [Unit] 
+        [Unit]
         Description=Journal Gateway Service Socket
-        [Socket] 
+        [Socket]
         ListenStream=/var/run/journald.sock
         Service=systemd-journal-gatewayd.service
-        [Install] 
+        [Install]
         WantedBy=sockets.target
+    - name: generate-ansible-keys.service
+      command: start
+      content: |
+        [Unit]
+        Description=Generates SSH keys for ansible container
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=ssh-keygen -f /home/core/.ssh/ansible_rsa -N ''
+        ExecStart=cat /home/core/.ssh/ansible_rsa.pub >> /home/core/.ssh/authorized_keys
+    - name: ansible-in-docker.service
+      command: start
+      content: |
+        [Unit]
+        Requires=generate-ansible-keys.service
+        After=generate-ansible-keys.service
+        Description=Runs a prebaked ansible container
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=docker run -it -v /etc/inventory.ansible:/etc/inventory.ansible -v /home/core/.ssh/ansible_rsa:/opt/ansible/private_key quay.io/samsung_ag/kraken_ansible /sbin/my_init -- skip-startup-files --skip-runit -- ansible-playbook /opt/ansible/iaas_provision.yaml -i /etc/inventory.ansible
   update:
     group: ${coreos_update_channel}
     reboot-strategy: ${coreos_reboot_strategy}
