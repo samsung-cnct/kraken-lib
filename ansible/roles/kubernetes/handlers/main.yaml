@@ -52,10 +52,6 @@
 
 # node-common
 
-- name: restart wait4node
-  service: name=wait4node state=restarted enabled=yes
-  sudo: yes
-
 - name: restart kubernetes-label
   service: name=kubernetes-label state=restarted enabled=yes
   sudo: yes

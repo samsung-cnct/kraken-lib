@@ -1,50 +1,5 @@
 ---
 
-# TODO: node-common
-
-- name: ensure custom facts directory exists
-  file: >
-    path=/etc/ansible/facts.d
-    recurse=yes
-    state=directory
-  sudo: yes
-
-- name: install custom fact module for IP address
-  template: >
-    src=node_ip_address_fact.sh.ansible
-    dest=/etc/ansible/facts.d/kubernetes_node_ip_fact.fact
-    mode=0755
-  sudo: yes
-
-- name: reload ansible_local
-  setup: filter=ansible_local
-
-- name: Wait for kubernetes master
-  wait_for: host={{master_private_ip}} port=8080 timeout=300
-
-- name: Create wait4node script
-  template: src=wait4node.sh.ansible
-            dest=/opt/bin/wait4node.sh
-  sudo: yes
-
-- name: Create wait4node
-  template: src=wait4node.service.ansible
-            dest=/etc/systemd/system/wait4node.service
-  sudo: yes
-  notify:
-    - reload systemd
-    - restart wait4node
-
-- name: Create kubernetes-label
-  template: src=kubernetes-label.service.ansible
-            dest=/etc/systemd/system/kubernetes-label.service
-  sudo: yes
-  notify:
-    - reload systemd
-    - restart kubernetes-label
-
-# node-binary
-
 - name: Create hyperkube-binary-kubelet
   template: src=hyperkube-binary-kubelet.service.ansible
             dest=/etc/systemd/system/hyperkube-binary-kubelet.service
@@ -60,4 +15,3 @@
   notify:
     - reload systemd
     - restart hyperkube-binary-proxy
-

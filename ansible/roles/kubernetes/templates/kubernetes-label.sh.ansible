@@ -1,0 +1,16 @@
+#!/bin/sh
+
+labeled=false
+while true; do
+  if ! $labeled; then
+    /opt/bin/kubectl --server={{master_private_ip}}:8080 \
+      label nodes {{ ansible_local.kubernetes_node_ip_fact.node_ip_address }} \
+      kraken-node={{inventory_hostname}} \
+      --overwrite
+    labeled=$?
+    sleep 5
+  else
+    sleep 900
+  fi
+done
+

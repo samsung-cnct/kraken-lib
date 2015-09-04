@@ -1,9 +1,9 @@
 [Unit]
 Description=Try labeling ourselves
-Requires=wait4node.service
-After=wait4node.service
+Requires=install-kubectl.service
 
 [Service]
-ExecStart=/opt/bin/kubectl --server={{master_private_ip}}:8080 label nodes {{ ansible_local.kubernetes_node_ip_fact.node_ip_address }} kraken-node={{inventory_hostname}} --overwrite
-Type=oneshot
+Restart=always
+ExecStartPre=-/usr/bin/chmod +x /opt/bin/kubernetes-label.sh
+ExecStart=/opt/bin/kubernetes-label.sh
 RemainAfterExit=true

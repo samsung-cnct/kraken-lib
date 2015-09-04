@@ -1,6 +1,4 @@
 ---
-- name: Wait for kubernetes master
-  wait_for: host={{master_private_ip}} port=8080 timeout=300
 
 - name: Create /opt/bin/kraken-services for custom binaries
   sudo: yes
