@@ -6,6 +6,7 @@ After=network-online.target
 
 [Service]
 Restart=always
+ExecStartPre=-/usr/bin/mv -v /opt/bin/hyperkube.pending /opt/bin/hyperkube
 ExecStart=/opt/bin/hyperkube kubelet \
   --address=0.0.0.0 \
   --api_servers=http://{{master_private_ip}}:8080 \
