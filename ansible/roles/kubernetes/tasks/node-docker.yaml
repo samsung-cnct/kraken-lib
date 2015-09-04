@@ -1,4 +1,7 @@
 ---
+
+# TODO: node-common
+
 - name: ensure custom facts directory exists
   file: >
     path=/etc/ansible/facts.d
@@ -24,42 +27,36 @@
             dest=/opt/bin/wait4node.sh
   sudo: yes
 
-- name: Create hyperkube node
-  template: src=hyperkube-docker-node.service.ansible
-            dest=/etc/systemd/system/hyperkube-docker-node.service
-  sudo: yes
-
 - name: Create wait4node
   template: src=wait4node.service.ansible
             dest=/etc/systemd/system/wait4node.service
   sudo: yes
+  notify:
+    - reload systemd
+    - restart wait4node
 
-- name: Create hyperkube node proxy
-  template: src=hyperkube-docker-proxy-node.service.ansible
-            dest=/etc/systemd/system/hyperkube-docker-proxy-node.service
-  sudo: yes
-
-- name: Create labeler service
+- name: Create kubernetes-label
   template: src=kubernetes-label.service.ansible
             dest=/etc/systemd/system/kubernetes-label.service
   sudo: yes
+  notify:
+    - reload systemd
+    - restart kubernetes-label
 
-- name: notify systemd of config changes
-  command: systemctl daemon-reload
-  sudo: yes
+# node-docker
 
-- name: start hyperkube-docker-node and set to start on startup
-  service: name=hyperkube-docker-node state=restarted enabled=yes
+- name: Create hyperkube-docker-node
+  template: src=hyperkube-docker-node.service.ansible
+            dest=/etc/systemd/system/hyperkube-docker-node.service
   sudo: yes
+  notify:
+    - reload systemd
+    - restart hyperkube-docker-node
 
-- name: start wait4node and set to start on startup
-  service: name=wait4node state=restarted enabled=yes
+- name: Create hyperkube-docker-node-proxy
+  template: src=hyperkube-docker-proxy-node.service.ansible
+            dest=/etc/systemd/system/hyperkube-docker-proxy-node.service
   sudo: yes
-
-- name: start kubernetes-label and set to start on startup
-  service: name=kubernetes-label state=restarted enabled=yes
-  sudo: yes
-
-- name: start hyperkube-docker-proxy-node and set to start on startup
-  service: name=hyperkube-docker-proxy-node state=restarted enabled=yes
-  sudo: yes
+  notify:
+    - reload systemd
+    - restart hyperkube-docker-proxy-node

@@ -1,34 +1,32 @@
 ---
-- name: Create hyperkube apiserver
+
+# master-binary
+
+- name: Create hyperkube-binary-apiserver
   template: src=hyperkube-binary-apiserver.service.ansible
             dest=/etc/systemd/system/hyperkube-binary-apiserver.service
   sudo: yes
+  notify:
+    - reload systemd
+    - restart hyperkube-binary-apiserver
 
-- name: Create hyperkube controller-manager
+- name: Create hyperkube-binary-controller-manager
   template: src=hyperkube-binary-controller-manager.service.ansible
             dest=/etc/systemd/system/hyperkube-binary-controller-manager.service
   sudo: yes
+  notify:
+    - reload systemd
+    - restart hyperkube-binary-controller-manager
 
-- name: Create hyperkube scheduler
+- name: Create hyperkube-binary-scheduler
   template: src=hyperkube-binary-scheduler.service.ansible
             dest=/etc/systemd/system/hyperkube-binary-scheduler.service
   sudo: yes
+  notify:
+    - reload systemd
+    - restart hyperkube-binary-scheduler
 
-- name: notify systemd of config changes
-  command: systemctl daemon-reload
-  sudo: yes
-
-- name: start hyperkube apiserver and set to start on startup
-  service: name=hyperkube-binary-apiserver state=restarted enabled=yes
-  sudo: yes
-
-- name: start hyperkube controller-manager and set to start on startup
-  service: name=hyperkube-binary-controller-manager state=restarted enabled=yes
-  sudo: yes
-
-- name: start hyperkube scheduler and set to start on startup
-  service: name=hyperkube-binary-scheduler state=restarted enabled=yes
-  sudo: yes
+# master-common
 
 - name: write kube config
   local_action: shell kubectl config set-cluster {{cluster_name}} --server={{cluster_master_record}}
