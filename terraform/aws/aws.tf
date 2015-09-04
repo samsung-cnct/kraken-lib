@@ -210,9 +210,12 @@ resource "coreos_ami" "latest_ami" {
 resource "template_file" "etcd_cloudinit" {
   filename = "${path.module}/templates/etcd.yaml.tpl"
   vars {
-    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type.etcd)}"
+    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_etcd)}"
     coreos_update_channel = "${var.coreos_update_channel}"
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
+    kubernetes_binaries_uri = "${var.kubernetes_binaries_uri}"
+    logentries_token = "${var.logentries_token}"
+    logentries_url = "${var.logentries_url}"
   }
 }
 resource "aws_instance" "kubernetes_etcd" {
@@ -331,7 +334,6 @@ resource "template_file" "node_cloudinit_special" {
   }
 }
 resource "aws_instance" "kubernetes_node_special" {
-  depends_on = ["aws_instance.kubernetes_master"]
   count = "${var.special_node_count}"
   ami = "${coreos_ami.latest_ami.ami}"
   instance_type = "${element(split(",", var.aws_special_node_type), count.index)}"
@@ -348,7 +350,7 @@ resource "aws_instance" "kubernetes_node_special" {
     device_name = "${var.aws_storage_path.ephemeral}"
     virtual_name = "ephemeral0"
   }
-  user_data = "${element(template_file.node_cloudinit_typed.*.rendered, count.index)}"
+  user_data = "${element(template_file.node_cloudinit_special.*.rendered, count.index)}"
   tags {
     Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_node-${format("%03d", count.index+1)}"
     ShortName = "${format("node-%03d", count.index+1)}"
@@ -391,7 +393,6 @@ resource "template_file" "node_cloudinit" {
   }
 }
 resource "aws_launch_configuration" "kubernetes_node" {
-  depends_on = ["aws_instance.kubernetes_etcd"]
   image_id = "${coreos_ami.latest_ami.ami}"
   instance_type = "${var.aws_node_type}"
   key_name = "${aws_key_pair.keypair.key_name}"
@@ -407,18 +408,14 @@ resource "aws_launch_configuration" "kubernetes_node" {
     device_name = "${var.aws_storage_path.ephemeral}"
     virtual_name = "ephemeral0"
   }
-  lifecycle {
-    create_before_destroy = true
-  }
 }
 resource "aws_autoscaling_group" "kubernetes_nodes" {
-  depends_on = ["aws_instance.kubernetes_etcd", "aws_instance.kubernetes_master", "aws_instance.kubernetes_node_special"]
   name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_nodes"
   max_size = "${var.node_count}"
   min_size = "${var.node_count}"
   desired_capacity = "${var.node_count}"
   force_delete = false
-  vpc_zone_identifier = "${aws_subnet.vpc_subnet.id}"
+  vpc_zone_identifier = ["${aws_subnet.vpc_subnet.id}"]
   launch_configuration = "${aws_launch_configuration.kubernetes_node.name}"
   health_check_type = "EC2"
   tag {
@@ -436,14 +433,6 @@ resource "aws_autoscaling_group" "kubernetes_nodes" {
     value = "node-autoscaled"
     propagate_at_launch = true
   }
-  lifecycle {
-    create_before_destroy = true
-  }
-
-  # launch scripts to add additional tags
-  provisioner "local-exec" {
-    command = "cat << 'EOF' > ${path.module}/rendered/ansible.inventory\n${self.rendered}\nEOF"
-  }
 }
 
 resource "aws_route53_record" "master_record" {
@@ -453,7 +442,6 @@ resource "aws_route53_record" "master_record" {
   ttl = "30"
   records = ["${aws_instance.kubernetes_master.public_ip}"]
 }
-
 resource "aws_route53_record" "proxy_record" {
   zone_id = "${var.aws_zone_id}"
   name = "${var.aws_user_prefix}-proxy.${var.aws_cluster_domain}"
@@ -463,7 +451,6 @@ resource "aws_route53_record" "proxy_record" {
 }
 
 resource "template_file" "ansible_inventory" {
-  depends_on = ["aws_route53_record.proxy_record", "aws_route53_record.master_record"]
   filename = "${path.module}/templates/ansible.inventory.tpl"
   vars {
     ansible_ssh_private_key_file = "${var.aws_local_private_key}"

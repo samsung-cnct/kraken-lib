@@ -129,8 +129,8 @@ coreos:
         [Service]
         Type=oneshot
         RemainAfterExit=yes
-        ExecStart=ssh-keygen -f /home/core/.ssh/ansible_rsa -N ''
-        ExecStart=cat /home/core/.ssh/ansible_rsa.pub >> /home/core/.ssh/authorized_keys
+        ExecStart=/usr/bin/bash -c "ssh-keygen -f /home/core/.ssh/ansible_rsa -N ''"
+        ExecStart=/usr/bin/bash -c "cat /home/core/.ssh/ansible_rsa.pub >> /home/core/.ssh/authorized_keys"
     - name: ansible-in-docker.service
       command: start
       content: |
@@ -141,7 +141,7 @@ coreos:
         [Service]
         Type=oneshot
         RemainAfterExit=yes
-        ExecStart=docker run -it -v /etc/inventory.ansible:/etc/inventory.ansible -v /home/core/.ssh/ansible_rsa:/opt/ansible/private_key quay.io/samsung_ag/kraken_ansible /sbin/my_init -- skip-startup-files --skip-runit -- ansible-playbook /opt/ansible/iaas_provision.yaml -i /etc/inventory.ansible
+        ExecStart=/usr/bin/docker run -it -v /etc/inventory.ansible:/etc/inventory.ansible -v /home/core/.ssh/ansible_rsa:/opt/ansible/private_key quay.io/samsung_ag/kraken_ansible /sbin/my_init -- skip-startup-files --skip-runit -- ansible-playbook /opt/ansible/iaas_provision.yaml -i /etc/inventory.ansible
   update:
     group: ${coreos_update_channel}
     reboot-strategy: ${coreos_reboot_strategy}

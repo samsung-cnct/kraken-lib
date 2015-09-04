@@ -31,7 +31,7 @@ variable "special_node_count" {
   description = "How many nodes (not counting master, etcd and special nodes to bring up). At least 1."
 }
 variable "node_count" {
-  default = "999"
+  default = "3"
   description = "How many nodes (not counting master, etcd and special nodes to bring up)"
 }
 variable "aws_master_type" {
@@ -90,7 +90,7 @@ variable "aws_volume_type_etcd" {
   default = "gp2"
   description = "Type of EBS volume attached to etcd AWS instance. "
 }
-variable "aws_volume_special" {
+variable "aws_volume_type_special" {
   default = "gp2"
   description = "Type of EBS volume attached special nodes. Comma-sperated list. Count must = special_node_count."
 }
