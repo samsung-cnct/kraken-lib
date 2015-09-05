@@ -29,6 +29,3 @@
 - name: start hyperkube scheduler and set to start on startup
   service: name=hyperkube-binary-scheduler state=restarted enabled=yes
   sudo: yes
-
-- name: write kube config
-  local_action: shell kubectl config set-cluster {{cluster_name}} --server={{cluster_master_record}}

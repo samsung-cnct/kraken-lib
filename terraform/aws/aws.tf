@@ -456,6 +456,8 @@ resource "template_file" "ansible_inventory" {
     ansible_ssh_private_key_file = "${var.aws_local_private_key}"
     etcd_public_ip = "${aws_instance.kubernetes_etcd.public_ip}"
     master_public_ip = "${aws_instance.kubernetes_master.public_ip}"
+    cluster_name = "aws"
+    cluster_master_record = "http://${var.aws_user_prefix}-master.${var.aws_cluster_domain}:8080"
     nodes_inventory_info = "${join("\n", formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_node_special.*.tags.ShortName, aws_instance.kubernetes_node_special.*.public_ip))}"
   }
 
@@ -464,7 +466,7 @@ resource "template_file" "ansible_inventory" {
   }
 
   provisioner "local-exec" {
-    command = "ansible-playbook -i ${path.module}/rendered/ansible.inventory ${path.module}/../../ansible/iaas_provision.yaml"
+    command = "ansible-playbook -i ${path.module}/rendered/ansible.inventory ${path.module}/../../ansible/localhost_provision.yaml"
   }
 }
 
