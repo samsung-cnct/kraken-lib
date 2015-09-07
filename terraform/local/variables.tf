@@ -1,9 +1,13 @@
+variable "apiserver_count" {
+  default = "1"
+  description = "How many apiservers to run in a pool"
+}
 variable "node_count" {
-  default = "3"
+  default = "1"
   description = "How many nodes (not counting master and etcd to bring up)"
 }
 variable "coreos_update_channel" {
-  default = "beta"
+  default = "alpha"
   description = "Core OS update channel. Alpha, beta, stable or some custom value"
 }
 
@@ -33,6 +37,14 @@ variable "master_mem" {
   default = "1024"
   description = "megs of RAM for master VM"
 }
+variable "apiserver_cpus" {
+  default = "1"
+  description = "Number of cpus for master vm"
+}
+variable "apiserver_mem" {
+  default = "1024"
+  description = "megs of RAM for master VM"
+}
 variable "node_cpus" {
   default = "1"
   description = "Number of cpus for node vm"
@@ -40,14 +52,6 @@ variable "node_cpus" {
 variable "node_mem" {
   default = "1024"
   description = "megs of RAM for node VM"
-}
-variable "kraken_services_repo" {
-  default = "git://github.com/samsung-ag/kraken-services"
-  description = "Kraken services git repo"
-}
-variable "kraken_services_branch" {
-  default = "stable"
-  description = "Kraken services repo branch"
 }
 variable "dns_domain" {
   default = "kubernetes.local"
@@ -104,6 +108,14 @@ variable "ansible_forks" {
 variable "kraken_services_dirs" {
   default = "heapster influxdb-grafana kube-ui loadtest prometheus"
   description = "Kraken services folders under kraken repo to deploy kubernetes services from."
+}
+variable "kraken_services_repo" {
+  default = "git://github.com/samsung-ag/kraken-services"
+  description = "Kraken services git repo"
+}
+variable "kraken_services_branch" {
+  default = "stable"
+  description = "Kraken services repo branch"
 }
 variable "logentries_token" {
   default = ""

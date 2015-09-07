@@ -1,9 +1,4 @@
 ---
-- name: Create hyperkube apiserver
-  template: src=hyperkube-binary-apiserver.service.ansible
-            dest=/etc/systemd/system/hyperkube-binary-apiserver.service
-  sudo: yes
-
 - name: Create hyperkube controller-manager
   template: src=hyperkube-binary-controller-manager.service.ansible
             dest=/etc/systemd/system/hyperkube-binary-controller-manager.service
@@ -16,10 +11,6 @@
 
 - name: notify systemd of config changes
   command: systemctl daemon-reload
-  sudo: yes
-
-- name: start hyperkube apiserver and set to start on startup
-  service: name=hyperkube-binary-apiserver state=restarted enabled=yes
   sudo: yes
 
 - name: start hyperkube controller-manager and set to start on startup

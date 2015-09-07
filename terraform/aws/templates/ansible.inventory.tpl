@@ -4,12 +4,16 @@ ${master_short_name} ansible_ssh_host=${master_public_ip}
 [etcd]
 ${etcd_short_name} ansible_ssh_host=${etcd_public_ip}
 
+[apiserver]
+${apiserver_inventory_info}
+
 [nodes]
 ${nodes_inventory_info}
 
 [cluster:children]
 master
 etcd
+apiserver
 nodes
 
 [local]
@@ -43,8 +47,8 @@ logentries_token=${logentries_token}
 logentries_url=${logentries_url}
 master_private_ip=${master_private_ip}
 master_public_ip=${master_public_ip}
-node_01_private_ip=${node_01_private_ip}
-node_01_public_ip=${node_01_public_ip}
+node_001_private_ip=${node_001_private_ip}
+node_001_public_ip=${node_001_public_ip}
 
 [local:vars]
 ansible_ssh_private_key_file=${ansible_ssh_private_key_file}

@@ -389,8 +389,8 @@ resource "template_file" "ansible_inventory" {
     master_private_ip = "${aws_instance.kubernetes_master.private_ip}"
     master_public_ip = "${aws_instance.kubernetes_master.public_ip}"
     master_short_name = "${aws_instance.kubernetes_master.tags.ShortName}"
-    node_01_private_ip = "${aws_instance.kubernetes_node.0.private_ip}"
-    node_01_public_ip = "${aws_instance.kubernetes_node.0.public_ip}"
+    node_001_private_ip = "${aws_instance.kubernetes_node.0.private_ip}"
+    node_001_public_ip = "${aws_instance.kubernetes_node.0.public_ip}"
     nodes_inventory_info = "${join("\n", concat(formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_node_typed.*.tags.ShortName, aws_instance.kubernetes_node_typed.*.public_ip), formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_node.*.tags.ShortName, aws_instance.kubernetes_node.*.public_ip)))}"
   }
 

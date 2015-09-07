@@ -3,7 +3,7 @@
 - include: common.yaml
 
 - include: cadvisor.yaml
-  when: "'master' in group_names or 'etcd' in group_names"
+  when: "'master' in group_names or 'etcd' in group_names or 'apiserver' in group_names"
 
 # Kubernetes master specific tasks
 - include: master-binary.yaml
@@ -12,6 +12,12 @@
   when: "'master' in group_names and hyperkube_deployment_mode == 'docker'"
 - include: kraken-services.yaml
   when: "'master' in group_names"
+
+# Kubernetes apiserver specific tasks
+- include: apiserver-binary.yaml
+  when: "'apiservers' in group_names and hyperkube_deployment_mode == 'binary'"
+- include: apiserver-docker.yaml
+  when: "'apiservers' in group_names and hyperkube_deployment_mode == 'docker'"
 
 # Kubernetes node specific tasks
 - include: node-binary.yaml
