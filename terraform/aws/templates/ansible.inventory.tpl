@@ -4,8 +4,8 @@ ${master_short_name} ansible_ssh_host=${master_public_ip}
 [etcd]
 ${etcd_short_name} ansible_ssh_host=${etcd_public_ip}
 
-[apiserver]
-${apiserver_inventory_info}
+[apiservers]
+${apiservers_inventory_info}
 
 [nodes]
 ${nodes_inventory_info}
@@ -13,7 +13,7 @@ ${nodes_inventory_info}
 [cluster:children]
 master
 etcd
-apiserver
+apiservers
 nodes
 
 [local]

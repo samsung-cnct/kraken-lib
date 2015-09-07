@@ -2,6 +2,7 @@ provider "aws" {
   access_key = "${var.aws_access_key}"
   secret_key = "${var.aws_secret_key}"
   region = "${var.aws_region}"
+  max_retries = "${var.max_retries}"
 }
 
 resource "aws_vpc" "vpc" {
@@ -224,6 +225,7 @@ resource "aws_instance" "kubernetes_etcd" {
   ebs_block_device {
     device_name = "${var.aws_storage_path.ebs}"
     volume_size = "${var.aws_volume_size.etcd}"
+    volume_type = "${var.aws_volume_type.etcd}"
   }
   ephemeral_block_device {
     device_name = "${var.aws_storage_path.ephemeral}"
@@ -256,6 +258,7 @@ resource "aws_instance" "kubernetes_master" {
   ebs_block_device {
     device_name = "${var.aws_storage_path.ebs}"
     volume_size = "${var.aws_volume_size.master}"
+    volume_type = "${var.aws_volume_type.master}"
   }
   ephemeral_block_device {
     device_name = "${var.aws_storage_path.ephemeral}"
@@ -292,6 +295,7 @@ resource "aws_instance" "kubernetes_node_typed" {
   ebs_block_device {
     device_name = "${var.aws_storage_path.ebs}"
     volume_size = "${element(split(",", var.aws_volume_size.special_nodes), count.index)}"
+    volume_type = "${element(split(",", var.aws_volume_type.special_nodes), count.index)}"
   }
   ephemeral_block_device {
     device_name = "${var.aws_storage_path.ephemeral}"
@@ -327,6 +331,7 @@ resource "aws_instance" "kubernetes_node" {
   ebs_block_device {
     device_name = "${var.aws_storage_path.ebs}"
     volume_size = "${var.aws_volume_size.other_nodes}"
+    volume_type = "${var.aws_volume_type.other_nodes}"
   }
   ephemeral_block_device {
     device_name = "${var.aws_storage_path.ephemeral}"
@@ -403,6 +408,6 @@ resource "template_file" "ansible_inventory" {
   }
 
   provisioner "local-exec" {
-    command = "ANSIBLE_SSH_PIPELINING=True ANSIBLE_SSH_RETRIES=3 ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -f ${var.ansible_forks} -i ${path.module}/rendered/ansible.inventory ${path.module}/../../ansible/iaas_provision.yaml"
+    command = "ANSIBLE_SSH_PIPELINING=True ANSIBLE_SSH_RETRIES=100 ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -f ${var.ansible_forks} -i ${path.module}/rendered/ansible.inventory ${path.module}/../../ansible/iaas_provision.yaml"
   }
 }
