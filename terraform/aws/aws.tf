@@ -459,10 +459,40 @@ resource "template_file" "ansible_inventory" {
     cluster_name = "aws"
     cluster_master_record = "http://${var.aws_user_prefix}-master.${var.aws_cluster_domain}:8080"
     nodes_inventory_info = "${join("\n", formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_node_special.*.tags.ShortName, aws_instance.kubernetes_node_special.*.public_ip))}"
+    dns_domain = "${var.dns_domain}"
+    dns_ip = "${var.dns_ip}"
+    dockercfg_base64 = "${var.dockercfg_base64}"
+    etcd_private_ip = "${aws_instance.kubernetes_etcd.private_ip}"
+    etcd_public_ip = "${aws_instance.kubernetes_etcd.public_ip}"
+    hyperkube_deployment_mode = "${var.hyperkube_deployment_mode}"
+    hyperkube_image = "${var.hyperkube_image}"
+    interface_name = "eth0"
+    kraken_services_branch = "${var.kraken_services_branch}"
+    kraken_services_dirs = "${var.kraken_services_dirs}"
+    kraken_services_repo = "${var.kraken_services_repo}"
+    kube_apiserver_v = "${var.kube_apiserver_v}"
+    kube_controller_manager_v = "${var.kube_controller_manager_v}"
+    kube_proxy_v = "${var.kube_proxy_v}"
+    kube_scheduler_v = "${var.kube_scheduler_v}"
+    kubelet_v = "${var.kubelet_v}"
+    kubernetes_api_version = "${var.kubernetes_api_version}"
+    kubernetes_binaries_uri = "${var.kubernetes_binaries_uri}"
+    logentries_token = "${var.logentries_token}"
+    logentries_url = "${var.logentries_url}"
+    master_private_ip = "${aws_instance.kubernetes_master.private_ip}"
+    master_public_ip = "${aws_instance.kubernetes_master.public_ip}"
+    cluster_proxy_record = "${var.aws_user_prefix}-proxy.${var.aws_cluster_domain}"
+    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type)}"
+    coreos_update_channel = "${var.coreos_update_channel}"
+    coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
   }
 
   provisioner "local-exec" {
     command = "cat << 'EOF' > ${path.module}/rendered/ansible.inventory\n${self.rendered}\nEOF"
+  }
+
+  provisioner "local-exec" {
+    command = "${path.module}/kraken_asg_helper.sh --cluster aws --limit ${var.node_count + var.special_node_count} --name ${aws_autoscaling_group.kubernetes_nodes.name} --output ${path.module}/rendered/ansible.inventory --singlewait 10 --totalwaits 360 --offset ${var.special_node_count}"
   }
 
   provisioner "local-exec" {
