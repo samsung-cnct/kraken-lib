@@ -15,7 +15,7 @@ variable "max_retries" {
   description = "Max number of API call retries before failure"
 }
 variable "aws_cluster_prefix" {
-  default = "kube"
+  default = "kubernetes"
   description = "AWS cluster prefix - all resources with names will be identified as <aws_user_prefix>_<aws_cluster_prefix>_<name>"
 }
 variable "aws_region" {

@@ -59,7 +59,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
       # add non-etcd or master ip to the list
       if i.between?(3, (get_num_apiservers + 2))
-        apiserver_nginx_pool += "server #{ip_address}:8080;\n"
+        apiserver_nginx_pool += "server #{ip_address}:8080; "
         apiserver_host_data += "#{"apiserver-%03d" % (i - 2)} ansible_ssh_host=#{ip_address}\n "
       end
       node_host_data += "#{"node-%03d" % (i - (2 + get_num_apiservers))} ansible_ssh_host=#{ip_address}\n" if i > (2 + get_num_apiservers)

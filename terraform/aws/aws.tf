@@ -432,7 +432,7 @@ resource "template_file" "ansible_inventory" {
     master_short_name = "${aws_instance.kubernetes_master.tags.ShortName}"
     node_001_private_ip = "${aws_instance.kubernetes_node.0.private_ip}"
     node_001_public_ip = "${aws_instance.kubernetes_node.0.public_ip}"
-    apiserver_nginx_pool = "${join("\n", concat(formatlist("server %v;    ", aws_instance.kubernetes_apiserver.*.private_ip)))}"
+    apiserver_nginx_pool = "${join(" ", concat(formatlist("server %v:8080;", aws_instance.kubernetes_apiserver.*.private_ip)))}"
     apiservers_inventory_info = "${join("\n", concat(formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_apiserver.*.tags.ShortName, aws_instance.kubernetes_apiserver.*.public_ip)))}"
     nodes_inventory_info = "${join("\n", concat(formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_node_typed.*.tags.ShortName, aws_instance.kubernetes_node_typed.*.public_ip), formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_node.*.tags.ShortName, aws_instance.kubernetes_node.*.public_ip)))}"
   }
