@@ -117,7 +117,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           ansible.inventory_path = "#{ENV['VAGRANT_CWD']}/rendered/ansible.inventory"
           ansible.playbook = "../../ansible/vagrant_provision.yaml"
           ansible.raw_arguments = ["--forks=#{ansible_forks}"]
-          ansible.verbose = "vvv"
+          ansible.verbose = "v"
         end
       end
     end

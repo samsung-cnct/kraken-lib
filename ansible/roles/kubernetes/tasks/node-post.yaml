@@ -1,0 +1,14 @@
+---
+
+- name: Create kubernetes-label script
+  template: src=kubernetes-label.sh.ansible
+            dest=/opt/bin/kubernetes-label.sh
+  sudo: yes
+
+- name: Create kubernetes-label
+  template: src=kubernetes-label.service.ansible
+            dest=/etc/systemd/system/kubernetes-label.service
+  sudo: yes
+  notify:
+    - reload systemd
+    - restart kubernetes-label

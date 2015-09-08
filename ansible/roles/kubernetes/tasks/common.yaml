@@ -7,48 +7,36 @@
   template: src=logentries-url.service.ansible dest=/etc/systemd/system/logentries-url.service
   sudo: yes
   when: logentries_token|default("") != ""
+  notify:
+    - reload systemd
+    - restart logentries-url
 
 - name: create logentries-token.service
   template: src=logentries-token.service.ansible dest=/etc/systemd/system/logentries-token.service
   sudo: yes
   when: logentries_token|default("") != ""
+  notify:
+    - reload systemd
+    - restart logentries-token
 
 - name: create install-kubectl.service
   template: src=install-kubectl.service.ansible dest=/etc/systemd/system/install-kubectl.service
   sudo: yes
+  notify:
+    - reload systemd
+    - restart install-kubectl
 
 - name: create install-hyperkube.service
   template: src=install-hyperkube.service.ansible dest=/etc/systemd/system/install-hyperkube.service
   sudo: yes
+  notify:
+    - reload systemd
+    - restart install-hyperkube
 
 - name: create journal-2-logentries.service
   template: src=journal-2-logentries.service.ansible dest=/etc/systemd/system/journal-2-logentries.service
   sudo: yes
   when: logentries_token|default("") != ""
-
-- name: notify systemd of config changes
-  command: systemctl daemon-reload
-  sudo: yes
-
-- name: start logentries-url.service and set to start on startup
-  service: name=logentries-url state=restarted enabled=yes
-  sudo: yes
-  when: logentries_token|default("") != ""
-
-- name: start logentries-token.service and set to start on startup
-  service: name=logentries-token state=restarted enabled=yes
-  sudo: yes
-  when: logentries_token|default("") != ""
-
-- name: start journal-2-logentries.service and set to start on startup
-  service: name=journal-2-logentries state=restarted enabled=yes
-  sudo: yes
-  when: logentries_token|default("") != ""
-
-- name: start install-hyperkube.service and set to start on startup
-  service: name=install-hyperkube state=restarted enabled=yes
-  sudo: yes
-
-- name: start install-kubectl.service and set to start on startup
-  service: name=install-kubectl state=restarted enabled=yes
-  sudo: yes
+  notify:
+    - reload systemd
+    - restart journal-2-logentries

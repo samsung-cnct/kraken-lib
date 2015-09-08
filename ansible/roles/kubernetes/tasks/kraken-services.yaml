@@ -1,4 +1,5 @@
 ---
+
 - name: Create /opt/bin/kraken-services for custom binaries
   sudo: yes
   file: >
@@ -7,7 +8,7 @@
     owner=core
     group=core
 
-- name: Download services
+- name: Download kraken-services
   git: repo={{kraken_services_repo}}
        dest=/opt/bin/kraken-services
        version={{kraken_services_branch}}
@@ -15,46 +16,58 @@
        force=yes
   sudo: yes
 
-- name: Create render services script
+- name: Create kraken-render script
   template: src=kraken-render.sh.ansible
             dest=/opt/bin/kraken-render.sh
   sudo: yes
 
-- name: Create create services script
+- name: Create kraken-create script
   template: src=kraken-create.sh.ansible
             dest=/opt/bin/kraken-create.sh
   sudo: yes
 
-- name: Create render services service
+- name: Create kraken-render
   template: src=kraken-render.service.ansible
             dest=/etc/systemd/system/kraken-render.service
   sudo: yes
+  notify:
+    - reload systemd
+    - restart kraken-render
 
-- name: Create skydns service
+- name: Create kraken-create-skydns
   template: src=kraken-create-skydns.service.ansible
             dest=/etc/systemd/system/kraken-create-skydns.service
   sudo: yes
+  notify:
+    - reload systemd
+    - restart kraken-create-skydns
 
-- name: Create kraken-create-services service
+- name: Create kraken-create-services
   template: src=kraken-create-services.service.ansible
             dest=/etc/systemd/system/kraken-create-services.service
   sudo: yes
+#<<<<<<< HEAD
+#
+#- name: notify systemd of config changes
+#  command: systemctl daemon-reload
+#  sudo: yes
+#
+#- name: start kraken-render and set to start on startup
+# service: name=kraken-render state=restarted enabled=yes
+#  sudo: yes
+#
+#- name: Wait for kubernetes master
+#  wait_for: host={{master_public_ip}} port=8080 timeout=300
 
-- name: notify systemd of config changes
-  command: systemctl daemon-reload
-  sudo: yes
+#- name: start kraken-create-skydns and set to start on startup
+#  service: name=kraken-create-skydns state=restarted enabled=yes
+#  sudo: yes
 
-- name: start kraken-render and set to start on startup
-  service: name=kraken-render state=restarted enabled=yes
-  sudo: yes
-
-- name: Wait for kubernetes master
-  wait_for: host={{master_public_ip}} port=8080 timeout=300
-
-- name: start kraken-create-skydns and set to start on startup
-  service: name=kraken-create-skydns state=restarted enabled=yes
-  sudo: yes
-
-- name: start kraken-create-services and set to start on startup
-  service: name=kraken-create-services state=restarted enabled=yes
-  sudo: yes
+#- name: start kraken-create-services and set to start on startup
+#  service: name=kraken-create-services state=restarted enabled=yes
+#  sudo: yes
+#=======
+  notify:
+    - reload systemd
+    - restart kraken-create-services
+#>>>>>>> master
