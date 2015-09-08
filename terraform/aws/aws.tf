@@ -281,7 +281,9 @@ resource "template_file" "apiserver_cloudinit" {
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
   }
 }
+
 resource "aws_instance" "kubernetes_apiserver" {
+  depends_on = ["aws_instance.kubernetes_etcd"]
   count = "${var.apiserver_count}"
   ami = "${coreos_ami.latest_ami.ami}"
   instance_type = "${var.aws_apiserver_type}"
@@ -300,8 +302,8 @@ resource "aws_instance" "kubernetes_apiserver" {
   }
   user_data = "${template_file.apiserver_cloudinit.rendered}"
   tags {
-    Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_apiserver-${format("%03d", count.index+1)"
-    ShortName = "master"
+    Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_apiserver-${format("%03d", count.index+1)}"
+    ShortName = "${format("apiserver-%03d", count.index+1)}"
     StorageType = "${var.aws_storage_type.apiserver}"
   }
 }
@@ -430,8 +432,8 @@ resource "template_file" "ansible_inventory" {
     master_short_name = "${aws_instance.kubernetes_master.tags.ShortName}"
     node_001_private_ip = "${aws_instance.kubernetes_node.0.private_ip}"
     node_001_public_ip = "${aws_instance.kubernetes_node.0.public_ip}"
-    apiserver_nginx_pool = "${join("\n", concat(formatlist("server %v;    ", aws_instance.kubernetes_apiserver.*.public_ip)))}"
-    apiserver_inventory_info = "${join("\n", concat(formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_apiserver.*.tags.ShortName, aws_instance.kubernetes_apiserver.*.public_ip)))}"
+    apiserver_nginx_pool = "${join("\n", concat(formatlist("server %v;    ", aws_instance.kubernetes_apiserver.*.private_ip)))}"
+    apiservers_inventory_info = "${join("\n", concat(formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_apiserver.*.tags.ShortName, aws_instance.kubernetes_apiserver.*.public_ip)))}"
     nodes_inventory_info = "${join("\n", concat(formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_node_typed.*.tags.ShortName, aws_instance.kubernetes_node_typed.*.public_ip), formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_node.*.tags.ShortName, aws_instance.kubernetes_node.*.public_ip)))}"
   }
 
