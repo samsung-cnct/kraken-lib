@@ -20,7 +20,9 @@
   when: "'apiservers' in group_names and hyperkube_deployment_mode == 'docker'"
 
 # Kubernetes node specific tasks
+- include: node-pre.yaml
 - include: node-binary.yaml
   when: "'nodes' in group_names and hyperkube_deployment_mode == 'binary'"
 - include: node-docker.yaml
   when: "'nodes' in group_names and hyperkube_deployment_mode == 'docker'"
+- include: node-post.yaml
