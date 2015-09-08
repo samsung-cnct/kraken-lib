@@ -1,0 +1,9 @@
+---
+- name: Create hyperkube apiserver
+  template: src=hyperkube-binary-apiserver.service.ansible
+            dest=/etc/systemd/system/hyperkube-binary-apiserver.service
+  sudo: yes
+
+- name: start hyperkube apiserver and set to start on startup
+  service: name=hyperkube-binary-apiserver state=restarted enabled=yes
+  sudo: yes

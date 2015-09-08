@@ -1,0 +1,27 @@
+[Unit]
+Description=Launch hyperkube apiserver
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+Restart=always
+LimitNOFILE=infinity
+ExecStartPre=-/usr/bin/docker kill kube-apiserver
+ExecStartPre=-/usr/bin/docker rm kube-apiserver
+ExecStartPre=-/usr/bin/docker kill $(docker ps -a -q --filter="name=k8s-apiserver")
+ExecStartPre=-/usr/bin/docker rm $(docker ps -a -q --filter="name=k8s-apiserver")
+ExecStart=/usr/bin/docker run \
+  --name kube-apiserver \
+  --net=host \
+  --privileged \
+  -v /opt/bin/manifests:/etc/kubernetes/manifests-override \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  {{hyperkube_image}} \
+    /hyperkube \
+    kubelet \
+    --cluster_dns={{dns_ip}} \
+    --cluster_domain={{dns_domain}} \
+    --config=/etc/kubernetes/manifests-override \
+    --enable_server \
+    --hostname_override={{master_private_ip}} \
+    --v={{kubelet_v}}

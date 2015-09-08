@@ -25,6 +25,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   # array of systems with multinodes for ansible inventory
+  apiserver_nginx_pool = ""
   apiserver_host_data = ""
   node_host_data = ""
 
@@ -57,7 +58,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       config2.vm.network :private_network, ip: ip_address
 
       # add non-etcd or master ip to the list
-      apiserver_host_data += "#{"apiserver-%03d" % (i - 2)} ansible_ssh_host=#{ip_address}\n " if i.between?(3, (get_num_apiservers + 2))
+      if i.between?(3, (get_num_apiservers + 2))
+        apiserver_nginx_pool += "server #{ip_address}:8080;\n"
+        apiserver_host_data += "#{"apiserver-%03d" % (i - 2)} ansible_ssh_host=#{ip_address}\n "
+      end
       node_host_data += "#{"node-%03d" % (i - (2 + get_num_apiservers))} ansible_ssh_host=#{ip_address}\n" if i > (2 + get_num_apiservers)
 
 
@@ -76,6 +80,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           dns_ip
           dockercfg_base64
           hyperkube_image
+          hyperkube_deployment_mode
           interface_name
           kraken_services_branch
           kraken_services_dirs
@@ -97,6 +102,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           :etcd_ip => base_ip_address + "#{1+100}",
           :master_ip => base_ip_address + "#{2+100}",
           :node_001_ip => base_ip_address + "#{(2 + get_num_apiservers)+100}",
+          :apiserver_nginx_pool => apiserver_nginx_pool,
           :apiservers_inventory_info => apiserver_host_data,
           :nodes_inventory_info => node_host_data
         }

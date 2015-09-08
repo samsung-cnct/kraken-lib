@@ -49,6 +49,7 @@ master_private_ip=${master_private_ip}
 master_public_ip=${master_public_ip}
 node_001_private_ip=${node_001_private_ip}
 node_001_public_ip=${node_001_public_ip}
+apiserver_nginx_pool=${apiserver_nginx_pool}
 
 [local:vars]
 ansible_ssh_private_key_file=${ansible_ssh_private_key_file}

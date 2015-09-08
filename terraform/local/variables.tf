@@ -3,7 +3,7 @@ variable "apiserver_count" {
   description = "How many apiservers to run in a pool"
 }
 variable "node_count" {
-  default = "1"
+  default = "2"
   description = "How many nodes (not counting master and etcd to bring up)"
 }
 variable "coreos_update_channel" {

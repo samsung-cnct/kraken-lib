@@ -272,6 +272,40 @@ resource "aws_instance" "kubernetes_master" {
   }
 }
 
+resource "template_file" "apiserver_cloudinit" {
+  filename = "${path.module}/templates/apiserver.yaml.tpl"
+  vars {
+    etcd_private_ip = "${aws_instance.kubernetes_etcd.private_ip}"
+    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type.apiserver)}"
+    coreos_update_channel = "${var.coreos_update_channel}"
+    coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
+  }
+}
+resource "aws_instance" "kubernetes_apiserver" {
+  count = "${var.apiserver_count}"
+  ami = "${coreos_ami.latest_ami.ami}"
+  instance_type = "${var.aws_apiserver_type}"
+  key_name = "${aws_key_pair.keypair.key_name}"
+  vpc_security_group_ids = [ "${aws_security_group.vpc_secgroup.id}" ]
+  subnet_id = "${aws_subnet.vpc_subnet.id}"
+  associate_public_ip_address = true
+  ebs_block_device {
+    device_name = "${var.aws_storage_path.ebs}"
+    volume_size = "${var.aws_volume_size.apiserver}"
+    volume_type = "${var.aws_volume_type.apiserver}"
+  }
+  ephemeral_block_device {
+    device_name = "${var.aws_storage_path.ephemeral}"
+    virtual_name = "ephemeral0"
+  }
+  user_data = "${template_file.apiserver_cloudinit.rendered}"
+  tags {
+    Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_apiserver-${format("%03d", count.index+1)"
+    ShortName = "master"
+    StorageType = "${var.aws_storage_type.apiserver}"
+  }
+}
+
 resource "template_file" "node_cloudinit_typed" {
   filename = "${path.module}/templates/node.yaml.tpl"
   count = "${length(split(",", var.aws_node_type.special))}"
@@ -396,6 +430,8 @@ resource "template_file" "ansible_inventory" {
     master_short_name = "${aws_instance.kubernetes_master.tags.ShortName}"
     node_001_private_ip = "${aws_instance.kubernetes_node.0.private_ip}"
     node_001_public_ip = "${aws_instance.kubernetes_node.0.public_ip}"
+    apiserver_nginx_pool = "${join("\n", concat(formatlist("server %v;    ", aws_instance.kubernetes_apiserver.*.public_ip)))}"
+    apiserver_inventory_info = "${join("\n", concat(formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_apiserver.*.tags.ShortName, aws_instance.kubernetes_apiserver.*.public_ip)))}"
     nodes_inventory_info = "${join("\n", concat(formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_node_typed.*.tags.ShortName, aws_instance.kubernetes_node_typed.*.public_ip), formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_node.*.tags.ShortName, aws_instance.kubernetes_node.*.public_ip)))}"
   }
 

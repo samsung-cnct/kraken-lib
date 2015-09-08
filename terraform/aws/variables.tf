@@ -30,6 +30,10 @@ variable "node_count" {
   default = "3"
   description = "How many nodes (not counting master and etcd to bring up)"
 }
+variable "apiserver_count" {
+  default = "1"
+  description = "How many apiservers to include in the apiserver pool"
+}
 variable "aws_master_type" {
   default = "m3.xlarge"
   description = "Kubernetes master instance type"
@@ -37,6 +41,10 @@ variable "aws_master_type" {
 variable "aws_etcd_type" {
   default = "m3.xlarge"
   description = "Kubernetes etcd instance type"
+}
+variable "aws_apiserver_type" {
+  default = "m3.large"
+  description = "Kubernetes apiserver instance type"
 }
 variable "aws_node_type" {
   description = "Types of nodes. Special - type per node, starting with node 1. Other - all other nodes not covered in special. Special count must be < node_count."
@@ -50,6 +58,7 @@ variable "aws_storage_type" {
   default = {
     "master" = "ebs"
     "etcd" = "ebs"
+    "apiserver" = "ebs"
     "special_nodes" = "ebs"
     "other_nodes" = "ebs"
   }
@@ -58,6 +67,7 @@ variable "aws_volume_size" {
   default = {
     "master" = "30"
     "etcd" = "30"
+    "apiserver" = "30"
     "special_nodes" = "30"
     "other_nodes" = "30"
   }
@@ -67,6 +77,7 @@ variable "aws_volume_type" {
   default = {
     "master" = "gp2"
     "etcd" = "gp2"
+    "apiserver" = "gp2"
     "special_nodes" = "gp2"
     "other_nodes" = "gp2"
   }
