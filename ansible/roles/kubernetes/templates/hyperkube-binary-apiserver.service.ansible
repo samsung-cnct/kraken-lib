@@ -6,7 +6,7 @@ After=network-online.target
 [Service]
 Restart=always
 LimitNOFILE=infinity
-# TODO: etcd_servers is incorrect
+ExecStartPre=-/usr/bin/mv -v /opt/bin/hyperkube.pending /opt/bin/hyperkube
 ExecStart=/opt/bin/hyperkube apiserver \
   --cors_allowed_origins=.* \
   --etcd_servers=http://{{etcd_private_ip}}:4001 \

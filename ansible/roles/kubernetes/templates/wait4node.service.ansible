@@ -1,9 +1,0 @@
-[Unit]
-Description=Wait for node to register with kube-apiserver
-Requires=network-online.target
-
-[Service]
-ExecStartPre=/usr/bin/chmod +x /opt/bin/wait4node.sh
-ExecStart=/usr/bin/bash /opt/bin/wait4node.sh
-RemainAfterExit=true
-Type=oneshot

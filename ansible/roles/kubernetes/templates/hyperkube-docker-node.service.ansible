@@ -3,6 +3,7 @@ Description=Launch hyperkube node
 EnvironmentFile=/etc/network-environment
 Requires=network-online.target
 After=network-online.target
+Before=kubernetes-label.service
 
 [Service]
 Restart=always

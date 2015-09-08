@@ -1,4 +1,7 @@
 ---
+
+# master-docker
+
 - name: Create /opt/bin/manifests for configs
   sudo: yes
   file: >
@@ -12,27 +15,23 @@
             dest=/opt/bin/manifests/master.json
   sudo: yes
 
-- name: Create hyperkube master
+- name: Create hyperkube-docker-master
   template: src=hyperkube-docker-master.service.ansible
             dest=/etc/systemd/system/hyperkube-docker-master.service
   sudo: yes
+  notify:
+    - reload systemd
+    - restart hyperkube-docker-master
 
-- name: Create hyperkube proxy
+- name: Create hyperkube-docker-proxy
   template: src=hyperkube-docker-proxy.service.ansible
             dest=/etc/systemd/system/hyperkube-docker-proxy.service
   sudo: yes
+  notify:
+    - reload systemd
+    - restart hyperkube-docker-proxy
 
-- name: notify systemd of config changes
-  command: systemctl daemon-reload
-  sudo: yes
-
-- name: start hyperkube master and set to start on startup
-  service: name=hyperkube-docker-master state=restarted enabled=yes
-  sudo: yes
-
-- name: start hyperkube proxy and set to start on startup
-  service: name=hyperkube-docker-proxy state=restarted enabled=yes
-  sudo: yes
+# master-common
 
 - name: write kube config
   local_action: shell kubectl config set-cluster {{cluster_name}} --server={{cluster_master_record}}
