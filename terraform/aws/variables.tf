@@ -215,6 +215,14 @@ variable "logentries_url" {
   default = "api.logentries.com:20000"
   description = "Logentries.com API url"
 }
+variable "asg_wait_single" {
+  default = "60"
+  description = "Sleep for x seconds between each check of number of nodes up"
+}
+variable "asg_wait_total" {
+  default = "120"
+  description = "Repeat up to X waits"
+}
 
 
 
