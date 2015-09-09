@@ -7,11 +7,36 @@ hyperkube_image: gcr.io/google_containers/hyperkube:v1.0.3
 hyperkube_deployment_mode: binary
 kubernetes_binaries_uri: https://storage.googleapis.com/kubernetes-release/release/v1.0.3/bin/linux/amd64
 kubernetes_api_version: v1
-kube_apiserver_v: 4
-kube_controller_manager_v: 4
-kube_scheduler_v: 4
-kubelet_v: 1
-kube_proxy_v: 1
+kube_apiserver:
+  cors_allowed_origins: .*
+  insecure_bind_address: 0.0.0.0
+  insecure_port: 8080
+  logtostderr: true
+  service-cluster-ip-range: 10.100.0.0/16
+  v: 1
+kube_controller_manager:
+  port: 10252
+  logtostderr: true
+  pod_eviction_timeout: 1m
+  resource_quota_sync_period: 20s
+  v: 1
+kubelet:
+  address: 0.0.0.0
+  cadvisor_port: 0
+  enable_server: true
+  healthz_bind_address: 0.0.0.0
+  healthz_port: 10254
+  logtostderr: true
+  port: 10250
+  read_only_port: 10255
+  v: 1
+kube_proxy:
+  logtostderr: true
+  v: 1
+kube_scheduler:
+  logtostderr: true
+  port: 10251
+  v: 1
 kraken_services_dirs: 
 logentries_token:
 logentries_url:

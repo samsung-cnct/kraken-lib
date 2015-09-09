@@ -7,12 +7,9 @@ Restart=always
 LimitNOFILE=infinity
 ExecStartPre=-/usr/bin/mv -v /opt/bin/hyperkube.pending /opt/bin/hyperkube
 ExecStart=/opt/bin/hyperkube apiserver \
-  --cors_allowed_origins=.* \
+  {% for k,v in kube_apiserver.iteritems() %}
+    --{{k}}={{v}} \
+  {% endfor %}
   --etcd_servers=http://{{etcd_private_ip}}:4001 \
-  --insecure_bind_address=0.0.0.0 \
-  --insecure_port=8080 \
-  --logtostderr=true \
   --public_address_override={{master_private_ip}} \
-  --runtime_config=api/{{kubernetes_api_version}} \
-  --service-cluster-ip-range=10.100.0.0/16 \
-  --v={{kube_apiserver_v}}
+  --runtime_config=api/{{kubernetes_api_version}}
