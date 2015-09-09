@@ -19,11 +19,11 @@
   sudo: yes
 
 - name: restart install-hyperkube
-  service: name=install-hyperkube state=restarted enabled=yes
+  service: name=install-hyperkube state=restarted enabled=yes args=--no-block
   sudo: yes
 
 - name: restart install-kubectl
-  service: name=install-kubectl state=restarted enabled=yes
+  service: name=install-kubectl state=restarted enabled=yes args=--no-block
   sudo: yes
 
 # apiserver-binary
