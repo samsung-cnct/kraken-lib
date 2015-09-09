@@ -6,5 +6,6 @@ After=network-online.target
 [Service]
 ExecStart=/usr/bin/wget --timestamp -O /opt/bin/hyperkube.pending {{kubernetes_binaries_uri}}/hyperkube
 ExecStart=/usr/bin/chmod +x /opt/bin/hyperkube.pending
+ExecStart=/usr/bin/mv -v /opt/bin/hyperkube.pending /opt/bin/hyperkube
 Type=oneshot
 RemainAfterExit=true

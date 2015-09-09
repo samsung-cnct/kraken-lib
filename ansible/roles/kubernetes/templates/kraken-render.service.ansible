@@ -4,6 +4,8 @@ Requires=install-kubectl.service
 
 [Service]
 TimeoutStartSec=0
+ExecStartPre=-/usr/bin/mv -v /opt/bin/kubectl.pending /opt/bin/kubectl
+ExecStartPre=-/usr/bin/chmod +x /opt/bin/kubectl
 ExecStartPre=/usr/bin/chmod +x /opt/bin/kraken-render.sh
 ExecStart=/usr/bin/bash /opt/bin/kraken-render.sh
 RemainAfterExit=true

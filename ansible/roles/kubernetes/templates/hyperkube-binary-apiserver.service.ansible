@@ -1,11 +1,12 @@
 [Unit]
 Description=Launch hyperkube apiserver
 Requires=install-hyperkube.service
+ConditionFileIsExecutable=/opt/bin/hyperkube
 
 [Service]
 Restart=always
+RestartSec=5
 LimitNOFILE=infinity
-ExecStartPre=-/usr/bin/mv -v /opt/bin/hyperkube.pending /opt/bin/hyperkube
 ExecStart=/opt/bin/hyperkube apiserver \
   {% for k,v in kube_apiserver.iteritems() %}
     --{{k}}={{v}} \
