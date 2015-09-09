@@ -1,7 +1,6 @@
 [Unit]
 Description=Launch hyperkube scheduler
-Requires=network-online.target
-After=network-online.target
+Requires=install-hyperkube.service
 
 [Service]
 Restart=always
