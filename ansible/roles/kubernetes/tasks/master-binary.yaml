@@ -2,6 +2,16 @@
 
 # master-binary
 
+- name: create install-hyperkube.service
+  template: src=install-hyperkube.service.ansible dest=/etc/systemd/system/install-hyperkube.service
+  sudo: yes
+  notify:
+    - reload systemd
+    - restart install-hyperkube
+    # XXX: since I haven't figured out how to get systemd to do this when install-hyperkube restarts
+    - restart hyperkube-binary-controller-manager
+    - restart hyperkube-binary-scheduler
+
 - name: Create hyperkube-binary-controller-manager
   template: src=hyperkube-binary-controller-manager.service.ansible
             dest=/etc/systemd/system/hyperkube-binary-controller-manager.service

@@ -1,5 +1,15 @@
 ---
 
+- name: create install-hyperkube.service
+  template: src=install-hyperkube.service.ansible dest=/etc/systemd/system/install-hyperkube.service
+  sudo: yes
+  notify:
+    - reload systemd
+    - restart install-hyperkube
+    # XXX: since I haven't yet figured how to get systemd to do this when install-hyperkube restarts
+    - restart hyperkube-binary-kubelet
+    - restart hyperkube-binary-proxy
+
 - name: Create hyperkube-binary-kubelet
   template: src=hyperkube-binary-kubelet.service.ansible
             dest=/etc/systemd/system/hyperkube-binary-kubelet.service
