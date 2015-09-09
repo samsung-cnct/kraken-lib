@@ -16,11 +16,6 @@
   template: src=hyperkube-docker-apiserver.service.ansible
             dest=/etc/systemd/system/hyperkube-docker-apiserver.service
   sudo: yes
-
-- name: notify systemd of config changes
-  command: systemctl daemon-reload
-  sudo: yes
-
-- name: start hyperkube master and set to start on startup
-  service: name=hyperkube-docker-apiserver state=restarted enabled=yes
-  sudo: yes
+  notify:
+    - reload systemd
+    - restart hyperkube-docker-master

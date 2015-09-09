@@ -16,11 +16,6 @@
   template: src=nginx-docker.service.ansible
             dest=/etc/systemd/system/nginx-docker.service
   sudo: yes
-
-- name: notify systemd of config changes
-  command: systemctl daemon-reload
-  sudo: yes
-
-- name: start nginx load balancer and set to start on startup
-  service: name=nginx-docker state=restarted enabled=yes
-  sudo: yes
+  notify:
+    - reload systemd
+    - restart nginx-docker

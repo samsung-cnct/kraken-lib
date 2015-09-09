@@ -2,14 +2,6 @@
 
 # master-binary
 
-- name: Create hyperkube-binary-apiserver
-  template: src=hyperkube-binary-apiserver.service.ansible
-            dest=/etc/systemd/system/hyperkube-binary-apiserver.service
-  sudo: yes
-  notify:
-    - reload systemd
-    - restart hyperkube-binary-apiserver
-
 - name: Create hyperkube-binary-controller-manager
   template: src=hyperkube-binary-controller-manager.service.ansible
             dest=/etc/systemd/system/hyperkube-binary-controller-manager.service

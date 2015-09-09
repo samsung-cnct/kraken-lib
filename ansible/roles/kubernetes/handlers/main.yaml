@@ -26,11 +26,25 @@
   service: name=install-kubectl state=restarted enabled=yes
   sudo: yes
 
-# master-binary
+# apiserver-binary
 
 - name: restart hyperkube-binary-apiserver 
   service: name=hyperkube-binary-apiserver state=restarted enabled=yes
   sudo: yes
+
+# master-common
+
+- name: restart nginx-docker
+  service: name=nginx-docker state=restarted enabled=yes
+  sudo: yes
+
+# apiserver-docker
+
+- name: restart hyperkube-docker-apiserver
+  service: name=hyperkube-docker-apiserver state=restarted enabled=yes
+  sudo: yes
+
+# master-binary
 
 - name: restart hyperkube-binary-controller-manager
   service: name=hyperkube-binary-controller-manager state=restarted enabled=yes
