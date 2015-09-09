@@ -1,6 +1,7 @@
 #! /usr/bin/bash
 set -x
-cd /opt/bin/kraken-services
+cp -vr /opt/bin/kraken-services /opt/bin/kraken-services-rendered
+cd /opt/bin/kraken-services-rendered
 sed -e 's,$CLUSTER_DOMAIN,{{dns_domain}},g' \
     -e 's,$DOCKERCFG_BASE64,{{dockercfg_base64}},g' \
     -e 's,$INFLUXDB_EXTERNAL_HOST,{{cluster_proxy_record}},g' \
