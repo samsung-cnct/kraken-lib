@@ -73,11 +73,10 @@ do
 done
 
 if (( success )); then
-  ec2_ips=$(aws --output json \
+  ec2_ips=$(aws --output text \
     --query "Reservations[*].Instances[*].PublicIpAddress" \
     ec2 describe-instances --instance-ids \
-    `aws --output text --query "AutoScalingGroups[0].Instances[*].InstanceId" autoscaling describe-auto-scaling-groups --auto-scaling-group-names "${ASG_NAME}"` \
-    | jq -r '.[] | join(" ")')
+    `aws --output text --query "AutoScalingGroups[0].Instances[*].InstanceId" autoscaling describe-auto-scaling-groups --auto-scaling-group-names "${ASG_NAME}"`)
   
   current_node=$((NUMBERING_OFFSET+1))
   output="\n[nodes]\n"

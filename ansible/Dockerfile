@@ -6,8 +6,6 @@ RUN apt-get update && \
 
 RUN pip install ansible
 RUN ansible-galaxy install defunctzombie.coreos-bootstrap
-ADD iaas_provision.yaml /opt/ansible/iaas_provision.yaml
-ADD roles/kubernetes /opt/ansible/roles/kubernetes
 COPY ansible.cfg /etc/ansible/ansible.cfg
 
 CMD ["/sbin/my_init"]

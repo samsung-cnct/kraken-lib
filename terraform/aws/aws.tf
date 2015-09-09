@@ -216,6 +216,8 @@ resource "template_file" "etcd_cloudinit" {
     kubernetes_binaries_uri = "${var.kubernetes_binaries_uri}"
     logentries_token = "${var.logentries_token}"
     logentries_url = "${var.logentries_url}"
+    kraken_repo = "${var.kraken_repo.repo}"
+    kraken_branch = "${var.kraken_repo.branch}"
   }
 }
 resource "aws_instance" "kubernetes_etcd" {
@@ -272,6 +274,8 @@ resource "template_file" "master_cloudinit" {
     format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_master)}"
     coreos_update_channel = "${var.coreos_update_channel}"
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
+    kraken_repo = "${var.kraken_repo.repo}"
+    kraken_branch = "${var.kraken_repo.branch}"
   }
 }
 resource "aws_instance" "kubernetes_master" {
@@ -331,6 +335,8 @@ resource "template_file" "node_cloudinit_special" {
     coreos_update_channel = "${var.coreos_update_channel}"
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
     short_name = "node-${format("%03d", count.index+1)}"
+    kraken_repo = "${var.kraken_repo.repo}"
+    kraken_branch = "${var.kraken_repo.branch}"
   }
 }
 resource "aws_instance" "kubernetes_node_special" {
@@ -390,6 +396,8 @@ resource "template_file" "node_cloudinit" {
     coreos_update_channel = "${var.coreos_update_channel}"
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
     short_name = "autoscaled"
+    kraken_repo = "${var.kraken_repo.repo}"
+    kraken_branch = "${var.kraken_repo.branch}"
   }
 }
 resource "aws_launch_configuration" "kubernetes_node" {
@@ -493,7 +501,7 @@ resource "template_file" "ansible_inventory" {
   }
 
   provisioner "local-exec" {
-    command = "${path.module}/kraken_asg_helper.sh --cluster aws --limit ${var.node_count + var.special_node_count} --name ${aws_autoscaling_group.kubernetes_nodes.name} --output ${path.module}/rendered/ansible.inventory --singlewait 10 --totalwaits 360 --offset ${var.special_node_count}"
+    command = "AWS_ACCESS_KEY_ID=${var.aws_access_key} AWS_SECRET_ACCESS_KEY=${var.aws_secret_key} AWS_DEFAULT_REGION=${var.aws_region} ${path.module}/kraken_asg_helper.sh --cluster aws --limit ${var.node_count + var.special_node_count} --name ${aws_autoscaling_group.kubernetes_nodes.name} --output ${path.module}/rendered/ansible.inventory --singlewait 60 --totalwaits 120 --offset ${var.special_node_count}"
   }
 
   provisioner "local-exec" {

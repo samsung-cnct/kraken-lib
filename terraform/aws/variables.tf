@@ -141,8 +141,15 @@ variable "coreos_reboot_strategy" {
   description = "Core OS reboot strategy"
 }
 variable "kraken_services_repo" {
-  default = "git://github.com/samsung-ag/kraken-services"
+  default = "https://github.com/samsung-ag/kraken-services"
   description = "Kraken services git repo"
+}
+variable "kraken_repo" {
+  default = {
+    "repo" = "https://github.com/Samsung-AG/kraken.git"
+    "branch" = "master"
+  }
+  description = "Kraken git repo"
 }
 variable "kraken_services_branch" {
   default = "stable"
