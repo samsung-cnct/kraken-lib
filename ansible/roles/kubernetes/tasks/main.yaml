@@ -15,6 +15,14 @@
 
 # Kubernetes node specific tasks
 - include: node-binary.yaml
+  when: "'node' in group_names and hyperkube_deployment_mode == 'binary'"
+- include: node-docker.yaml
+  when: "'node' in group_names and hyperkube_deployment_mode == 'docker'"
+- include: node-binary.yaml
   when: "'nodes' in group_names and hyperkube_deployment_mode == 'binary'"
 - include: node-docker.yaml
   when: "'nodes' in group_names and hyperkube_deployment_mode == 'docker'"
+- include: node-binary.yaml
+  when: "'specialnodes' in group_names and hyperkube_deployment_mode == 'binary'"
+- include: node-docker.yaml
+  when: "'specialnodes' in group_names and hyperkube_deployment_mode == 'docker'"

@@ -19,6 +19,7 @@ localhost ansible_connection=local
 ansible_connection=ssh
 ansible_python_interpreter="PATH=/home/core/bin:$PATH python"
 ansible_ssh_user=core
+ansible_ssh_private_key_file=<%= ansible_ssh_private_key_file %>
 cluster_master_record=http://<%= master_ip %>:8080
 cluster_name=local
 dns_domain=<%= dns_domain %>
@@ -47,6 +48,7 @@ node_01_private_ip=<%= node_01_ip %>
 node_01_public_ip=<%= node_01_ip %>
 
 [local:vars]
+ansible_connection=local
 ansible_ssh_private_key_file=<%= ansible_ssh_private_key_file %>
 cluster_name=local
 etcd_public_ip=<%= etcd_ip %>
