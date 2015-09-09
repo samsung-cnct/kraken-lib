@@ -1,7 +1,6 @@
 [Unit]
 Description=Launch hyperkube proxy
-Requires=network-online.target
-After=network-online.target
+Requires=install-hyperkube.service
 
 [Service]
 Restart=always
@@ -9,6 +8,7 @@ RestartSec=10
 LimitNOFILE=infinity
 ExecStartPre=-/usr/bin/mv -v /opt/bin/hyperkube.pending /opt/bin/hyperkube
 ExecStart=/opt/bin/hyperkube proxy \
-  --master={{master_private_ip}}:8080 \
-  --logtostderr=true \
-  --v={{kube_proxy_v}}
+  {% for k,v in kube_proxy.iteritems() %}
+    --{{k}}={{v}} \
+  {% endfor %}
+  --master={{master_private_ip}}:8080

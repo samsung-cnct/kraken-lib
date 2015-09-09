@@ -13,13 +13,11 @@
         "command": [
           "/hyperkube",
           "controller-manager",
+          {% for k,v in kube_controller_manager.iteritems() %}
+            "--{{k}}={{v}}",
+          {% endfor %}
           "--address={{master_private_ip}}",
-          "--logtostderr=true",
-          "--master={{master_private_ip}}:8080",
-          "--pod_eviction_timeout=1m",
-          "--port=10252",
-          "--resource_quota_sync_period=20s",
-          "--v={{kube_controller_manager_v}}"
+          "--master={{master_private_ip}}:8080"
         ]
       },
       {
@@ -28,11 +26,11 @@
         "command": [
           "/hyperkube",
           "scheduler",
+          {% for k,v in kube_scheduler.iteritems() %}
+            "--{{k}}={{v}}",
+          {% endfor %}
           "--address={{master_private_ip}}",
-          "--logtostderr=true",
-          "--master={{master_private_ip}}:8080",
-          "--port=10251",
-          "--v={{kube_scheduler_v}}"
+          "--master={{master_private_ip}}:8080"
         ]
       }
     ]

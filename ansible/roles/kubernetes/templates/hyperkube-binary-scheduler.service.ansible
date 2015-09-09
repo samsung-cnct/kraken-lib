@@ -1,15 +1,14 @@
 [Unit]
 Description=Launch hyperkube scheduler
-Requires=network-online.target
-After=network-online.target
+Requires=install-hyperkube.service
 
 [Service]
 Restart=always
 LimitNOFILE=infinity
 ExecStartPre=-/usr/bin/mv -v /opt/bin/hyperkube.pending /opt/bin/hyperkube
 ExecStart=/opt/bin/hyperkube scheduler \
+  {% for k,v in kube_scheduler.iteritems() %}
+    --{{k}}={{v}} \
+  {% endfor %}
   --address={{master_private_ip}} \
-  --port=10251 \
-  --master={{master_private_ip}}:8080 \
-  --logtostderr=true \
-  --v={{kube_scheduler_v}}
+  --master={{master_private_ip}}:8080

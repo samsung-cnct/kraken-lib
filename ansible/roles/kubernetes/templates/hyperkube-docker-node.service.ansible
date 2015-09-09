@@ -16,16 +16,10 @@ ExecStart=/usr/bin/docker run \
   -v /var/run/docker.sock:/var/run/docker.sock \
   {{hyperkube_image}} \
     /hyperkube kubelet \
-    --address=0.0.0.0 \
+    {% for k,v in kubelet.iteritems() %}
+      --{{k}}={{v}} \
+    {% endfor %}
     --api_servers=http://{{master_private_ip}}:8080 \
-    --cadvisor_port=4194 \
     --cluster_dns={{dns_ip}} \
     --cluster_domain={{dns_domain}} \
-    --enable_server \
-    --healthz_bind_address=0.0.0.0 \
-    --healthz_port=10254 \
-    --hostname_override={{ansible_local.kubernetes_node_ip_fact.node_ip_address}} \
-    --logtostderr=true \
-    --port=10250 \
-    --read_only_port=10255 \
-    --v={{kubelet_v}}
+    --hostname_override={{ansible_local.kubernetes_node_ip_fact.node_ip_address}}

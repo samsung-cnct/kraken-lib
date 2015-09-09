@@ -82,16 +82,12 @@
   service: name=kraken-render state=restarted enabled=yes
   sudo: yes
 
-- name: restart kraken-create-skydns
-  service: name=kraken-create-skydns state=restarted enabled=yes
-  sudo: yes
-
 - name: restart kraken-create-services
   service: name=kraken-create-services state=restarted enabled=yes
   sudo: yes
 
 # cadvisor
 
-- name: start cadvisor
+- name: restart cadvisor
   service: name=cadvisor state=restarted enabled=yes
   sudo: yes

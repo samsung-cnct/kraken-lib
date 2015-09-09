@@ -13,5 +13,7 @@ ExecStart=/usr/bin/docker run \
   --privileged \
   {{hyperkube_image}} \
     /hyperkube proxy \
-    --master=http://{{master_private_ip}}:8080 \
-    --v={{kube_proxy_v}}
+    {% for k,v in kube_proxy.iteritems() %}
+      --{{k}}={{v}} \
+    {% endfor %}
+    --master=http://{{master_private_ip}}:8080

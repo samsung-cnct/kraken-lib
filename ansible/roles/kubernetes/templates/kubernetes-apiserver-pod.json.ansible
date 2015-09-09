@@ -13,15 +13,12 @@
         "command": [
           "/hyperkube",
           "apiserver",
-          "--cors_allowed_origins=.*",
+          {% for k,v in kube_apiserver.iteritems() %}
+            "--{{k}}={{v}}",
+          {% endfor %}
           "--etcd_servers=http://{{etcd_private_ip}}:4001",
-          "--insecure_bind_address=0.0.0.0",
-          "--insecure_port=8080",
-          "--logtostderr=true",
-          "--portal_net=10.100.0.0/16",
           "--public_address_override={{master_private_ip}}",
-          "--runtime_config=api/{{kubernetes_api_version}}",
-          "--v={{kube_apiserver_v}}"
+          "--runtime_config=api/{{kubernetes_api_version}}"
         ],
         "ports": [
           {

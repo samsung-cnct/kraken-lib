@@ -1,3 +1,7 @@
+[Unit]
+Description=Render kraken-services templates
+Requires=install-kubectl.service
+
 [Service]
 TimeoutStartSec=0
 ExecStartPre=/usr/bin/chmod +x /opt/bin/kraken-render.sh
