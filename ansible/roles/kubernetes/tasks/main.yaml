@@ -13,12 +13,20 @@
 - include: kraken-services.yaml
   when: "'master' in group_names"
 
-# Kubernetes node specific tasks
+# Kubernetes node and special node specific tasks
 - include: node-pre.yaml
   when: "'nodes' in group_names"
+- include: node-pre.yaml
+  when: "'specialnodes' in group_names"
 - include: node-binary.yaml
   when: "'nodes' in group_names and hyperkube_deployment_mode == 'binary'"
+- include: node-binary.yaml
+  when: "'specialnodes' in group_names and hyperkube_deployment_mode == 'binary'"
 - include: node-docker.yaml
   when: "'nodes' in group_names and hyperkube_deployment_mode == 'docker'"
+- include: node-docker.yaml
+  when: "'specialnodes' in group_names and hyperkube_deployment_mode == 'docker'"
 - include: node-post.yaml
   when: "'nodes' in group_names"
+- include: node-post.yaml
+  when: "'specialnodes' in group_names"

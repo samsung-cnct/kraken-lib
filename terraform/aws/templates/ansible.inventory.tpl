@@ -1,25 +1,32 @@
 [master]
-${master_short_name} ansible_ssh_host=${master_public_ip}
+master ansible_ssh_host=${master_public_ip}
 
-[etcd]
-${etcd_short_name} ansible_ssh_host=${etcd_public_ip}
-
-[nodes]
+[specialnodes]
 ${nodes_inventory_info}
+
+[local]
+localhost
 
 [cluster:children]
 master
-etcd
+specialnodes
 nodes
 
-[local]
-localhost ansible_connection=local
+[local:vars]
+ansible_connection=local
+cluster_name=${cluster_name}
+cluster_master_record=${cluster_master_record}
+ansible_ssh_private_key_file=${ansible_ssh_private_key_file}
+etcd_public_ip=${etcd_public_ip}
+master_public_ip=${master_public_ip}
 
 [cluster:vars]
 ansible_connection=ssh
 ansible_python_interpreter="PATH=/home/core/bin:$PATH python"
 ansible_ssh_user=core
+ansible_ssh_private_key_file=${ansible_ssh_private_key_file}
 cluster_master_record=${cluster_master_record}
+cluster_proxy_record=${cluster_proxy_record}
 cluster_name=${cluster_name}
 dns_domain=${dns_domain}
 dns_ip=${dns_ip}
@@ -42,12 +49,4 @@ kubernetes_binaries_uri=${kubernetes_binaries_uri}
 logentries_token=${logentries_token}
 logentries_url=${logentries_url}
 master_private_ip=${master_private_ip}
-master_public_ip=${master_public_ip}
-node_01_private_ip=${node_01_private_ip}
-node_01_public_ip=${node_01_public_ip}
-
-[local:vars]
-ansible_ssh_private_key_file=${ansible_ssh_private_key_file}
-cluster_name=${cluster_name}
-etcd_public_ip=${etcd_public_ip}
 master_public_ip=${master_public_ip}

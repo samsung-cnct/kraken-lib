@@ -31,7 +31,5 @@
     - reload systemd
     - restart hyperkube-docker-proxy
 
-# master-common
-
 - name: write kube config
   local_action: shell kubectl config set-cluster {{cluster_name}} --server={{cluster_master_record}}
