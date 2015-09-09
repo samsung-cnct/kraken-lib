@@ -23,5 +23,4 @@ ExecStart=/usr/bin/docker run \
     --cluster_domain={{dns_domain}} \
     --config=/etc/kubernetes/manifests-override \
     --enable_server \
-    --hostname_override={{master_private_ip}} \
-    --v={{kubelet_v}}
+    --hostname_override={{master_private_ip}}
