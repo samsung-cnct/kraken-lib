@@ -274,7 +274,6 @@ resource "template_file" "apiserver_cloudinit" {
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
     kraken_repo = "${var.kraken_repo.repo}"
     kraken_branch = "${var.kraken_repo.branch}"
-    apiservers_inventory_info = "${join("\n", concat(formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_apiserver.*.tags.ShortName, aws_instance.kubernetes_apiserver.*.public_ip)))}"
   }
 }
 resource "aws_instance" "kubernetes_apiserver" {
@@ -551,6 +550,7 @@ resource "template_file" "ansible_inventory" {
     logentries_url = "${var.logentries_url}"
     master_private_ip = "${aws_instance.kubernetes_master.private_ip}"
     master_public_ip = "${aws_instance.kubernetes_master.public_ip}"
+    apiservers_inventory_info = "${join("\n", concat(formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_apiserver.*.tags.ShortName, aws_instance.kubernetes_apiserver.*.public_ip)))}"
     cluster_proxy_record = "${var.aws_user_prefix}-proxy.${var.aws_cluster_domain}"
     format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type)}"
     coreos_update_channel = "${var.coreos_update_channel}"

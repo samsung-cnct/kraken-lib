@@ -5,7 +5,7 @@ write_files:
   - path: /etc/inventory.ansible
     content: |
       [apiserver]
-      ${apiservers_inventory_info}
+      apiserver ansible_ssh_host=$private_ipv4
 
       [apiserver:vars]
       ansible_connection=ssh
