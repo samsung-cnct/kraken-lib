@@ -1,4 +1,4 @@
-st # Listing required vairables first
+# Listing required vairables first
 variable "aws_access_key" {
   description = "AWS key id"
 }

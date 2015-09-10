@@ -526,19 +526,12 @@ resource "template_file" "ansible_inventory" {
     logentries_url = "${var.logentries_url}"
     master_private_ip = "${aws_instance.kubernetes_master.private_ip}"
     master_public_ip = "${aws_instance.kubernetes_master.public_ip}"
-<<<<<<< HEAD
-    master_short_name = "${aws_instance.kubernetes_master.tags.ShortName}"
-    node_001_private_ip = "${aws_instance.kubernetes_node.0.private_ip}"
-    node_001_public_ip = "${aws_instance.kubernetes_node.0.public_ip}"
     apiserver_nginx_pool = "${join(" ", concat(formatlist("server %v:8080;", aws_instance.kubernetes_apiserver.*.private_ip)))}"
     apiservers_inventory_info = "${join("\n", concat(formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_apiserver.*.tags.ShortName, aws_instance.kubernetes_apiserver.*.public_ip)))}"
-    nodes_inventory_info = "${join("\n", concat(formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_node_typed.*.tags.ShortName, aws_instance.kubernetes_node_typed.*.public_ip), formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_node.*.tags.ShortName, aws_instance.kubernetes_node.*.public_ip)))}"
-=======
     cluster_proxy_record = "${var.aws_user_prefix}-proxy.${var.aws_cluster_domain}"
     format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type)}"
     coreos_update_channel = "${var.coreos_update_channel}"
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
->>>>>>> master
   }
 
   provisioner "local-exec" {
@@ -558,4 +551,3 @@ resource "template_file" "ansible_inventory" {
     command = "ansible-playbook -i ${path.module}/rendered/ansible.inventory ${path.module}/../../ansible/localhost_post_provision.yaml"
   }
 }
-
