@@ -1,15 +1,10 @@
 ---
-- hosts: cluster
+- hosts: master:nodes
   gather_facts: False
   roles:
     - defunctzombie.coreos-bootstrap
 
-- hosts: local
-  sudo: false
-  roles:
-    - ssh-config
-
-- hosts: cluster
+- hosts: master:nodes
   roles:
     - kubernetes
 

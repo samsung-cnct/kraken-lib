@@ -1,0 +1,5 @@
+---
+ - hosts: all
+   sudo: false
+   roles:
+    - kube-config
