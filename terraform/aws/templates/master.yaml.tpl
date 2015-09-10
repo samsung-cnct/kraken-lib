@@ -37,6 +37,7 @@ write_files:
       logentries_url=${logentries_url}
       master_private_ip=$private_ipv4
       master_public_ip=$public_ipv4
+      apiserver_nginx_pool=${apiserver_nginx_pool}
 coreos:
   etcd2:
     proxy: on
