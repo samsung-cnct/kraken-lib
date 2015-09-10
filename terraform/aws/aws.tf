@@ -218,6 +218,7 @@ resource "template_file" "etcd_cloudinit" {
     logentries_url = "${var.logentries_url}"
     kraken_repo = "${var.kraken_repo.repo}"
     kraken_branch = "${var.kraken_repo.branch}"
+    kraken_commit = "${var.kraken_repo.commit_sha}"
   }
 }
 resource "aws_instance" "kubernetes_etcd" {
@@ -276,6 +277,7 @@ resource "template_file" "master_cloudinit" {
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
     kraken_repo = "${var.kraken_repo.repo}"
     kraken_branch = "${var.kraken_repo.branch}"
+    kraken_commit = "${var.kraken_repo.commit_sha}"
   }
 }
 resource "aws_instance" "kubernetes_master" {
@@ -337,6 +339,7 @@ resource "template_file" "node_cloudinit_special" {
     short_name = "node-${format("%03d", count.index+1)}"
     kraken_repo = "${var.kraken_repo.repo}"
     kraken_branch = "${var.kraken_repo.branch}"
+    kraken_commit = "${var.kraken_repo.commit_sha}"
   }
 }
 resource "aws_instance" "kubernetes_node_special" {
@@ -398,6 +401,7 @@ resource "template_file" "node_cloudinit" {
     short_name = "autoscaled"
     kraken_repo = "${var.kraken_repo.repo}"
     kraken_branch = "${var.kraken_repo.branch}"
+    kraken_commit = "${var.kraken_repo.commit_sha}"
   }
 }
 resource "aws_launch_configuration" "kubernetes_node" {
