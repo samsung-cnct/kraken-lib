@@ -25,6 +25,3 @@
   notify:
     - reload systemd
     - restart hyperkube-binary-scheduler
-
-- name: write kube config
-  local_action: shell kubectl config set-cluster {{cluster_name}} --server={{cluster_master_record}}
