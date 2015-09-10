@@ -62,6 +62,10 @@ variable "aws_storage_type_master" {
   description = "Primary volume type for master"
   default = "ebs"
 }
+variable "aws_storage_type_apiserver" {
+  description = "Primary volume type for master"
+  default = "ebs"
+}
 variable "aws_storage_type_etcd" {
   description = "Primary volume type for master"
   default = "ebs"
@@ -78,6 +82,10 @@ variable "aws_volume_size_master" {
   default = "30"
   description = "Size of EBS volume attached to master instance in gigabytes."
 }
+variable "aws_volume_size_apiserver" {
+  default = "30"
+  description = "Size of EBS volume attached to master instance in gigabytes."
+}
 variable "aws_volume_size_etcd" {
   default = "30"
   description = "Size of EBS volume attached to etcd instance in gigabytes."
@@ -91,6 +99,10 @@ variable "aws_volume_size" {
   description = "Size of EBS volume attached to all other nodes in gigabytes."
 }
 variable "aws_volume_type_master" {
+  default = "gp2"
+  description = "Type of EBS volume attached to master AWS instance. "
+}
+variable "aws_volume_type_apiserver" {
   default = "gp2"
   description = "Type of EBS volume attached to master AWS instance. "
 }

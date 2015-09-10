@@ -12,7 +12,6 @@ localhost
 
 [cluster:children]
 master
-etcd
 apiservers
 specialnodes
 nodes
@@ -55,4 +54,3 @@ logentries_token=${logentries_token}
 logentries_url=${logentries_url}
 master_private_ip=${master_private_ip}
 master_public_ip=${master_public_ip}
-apiserver_nginx_pool=${apiserver_nginx_pool}

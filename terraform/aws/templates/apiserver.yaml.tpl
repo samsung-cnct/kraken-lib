@@ -4,16 +4,14 @@
 write_files:
   - path: /etc/inventory.ansible
     content: |
-      [master]
-      master ansible_ssh_host=$private_ipv4
+      [apiserver]
+      ${apiservers_inventory_info}
 
-      [master:vars]
+      [apiserver:vars]
       ansible_connection=ssh
       ansible_python_interpreter="PATH=/home/core/bin:$PATH python"
       ansible_ssh_user=core
       ansible_ssh_private_key_file=/opt/ansible/private_key
-      cluster_master_record=${cluster_master_record}
-      cluster_proxy_record=${cluster_proxy_record}
       cluster_name=${cluster_name}
       dns_domain=${dns_domain}
       dns_ip=${dns_ip}
