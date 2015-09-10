@@ -30,5 +30,3 @@
   when: "'nodes' in group_names"
 - include: node-post.yaml
   when: "'specialnodes' in group_names"
-- include: kubectl-config.yaml
-  when: "'local' in group_names"
