@@ -4,10 +4,10 @@
 write_files:
   - path: /etc/inventory.ansible
     content: |
-      [apiserver]
+      [apiservers]
       apiserver ansible_ssh_host=$private_ipv4
 
-      [apiserver:vars]
+      [apiservers:vars]
       ansible_connection=ssh
       ansible_python_interpreter="PATH=/home/core/bin:$PATH python"
       ansible_ssh_user=core
