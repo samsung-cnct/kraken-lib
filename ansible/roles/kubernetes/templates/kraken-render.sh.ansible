@@ -3,7 +3,7 @@ set -x
 cd /opt/bin/kraken-services
 sed -e 's,$CLUSTER_DOMAIN,{{dns_domain}},g' \
     -e 's,$DOCKERCFG_BASE64,{{dockercfg_base64}},g' \
-    -e 's,$INFLUXDB_EXTERNAL_HOST,{{node_001_public_ip}},g' \
+    -e 's,$INFLUXDB_EXTERNAL_HOST,{{cluster_proxy_record}},g' \
     -e 's,$KUBE_APISERVER_IP,{{master_private_ip}},g' \
     -e 's,$KUBE_CONTROLLER_IP,{{master_private_ip}},g' \
     -e 's,$KUBE_ETCD_IP,{{ etcd_private_ip }},g' \

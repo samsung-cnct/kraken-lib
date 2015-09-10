@@ -210,9 +210,14 @@ resource "coreos_ami" "latest_ami" {
 resource "template_file" "etcd_cloudinit" {
   filename = "${path.module}/templates/etcd.yaml.tpl"
   vars {
-    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type.etcd)}"
+    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_etcd)}"
     coreos_update_channel = "${var.coreos_update_channel}"
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
+    kubernetes_binaries_uri = "${var.kubernetes_binaries_uri}"
+    logentries_token = "${var.logentries_token}"
+    logentries_url = "${var.logentries_url}"
+    kraken_repo = "${var.kraken_repo.repo}"
+    kraken_branch = "${var.kraken_repo.branch}"
   }
 }
 resource "aws_instance" "kubernetes_etcd" {
@@ -224,8 +229,8 @@ resource "aws_instance" "kubernetes_etcd" {
   associate_public_ip_address = true
   ebs_block_device {
     device_name = "${var.aws_storage_path.ebs}"
-    volume_size = "${var.aws_volume_size.etcd}"
-    volume_type = "${var.aws_volume_type.etcd}"
+    volume_size = "${var.aws_volume_size_etcd}"
+    volume_type = "${var.aws_volume_type_etcd}"
   }
   ephemeral_block_device {
     device_name = "${var.aws_storage_path.ephemeral}"
@@ -235,17 +240,42 @@ resource "aws_instance" "kubernetes_etcd" {
   tags {
     Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_etcd"
     ShortName = "etcd"
-    StorageType = "${var.aws_storage_type.etcd}"
+    StorageType = "${var.aws_storage_type_etcd}"
   }
 }
 
 resource "template_file" "master_cloudinit" {
   filename = "${path.module}/templates/master.yaml.tpl"
   vars {
+    cluster_master_record = "http://${var.aws_user_prefix}-master.${var.aws_cluster_domain}:8080"
+    cluster_name = "aws"
+    dns_domain = "${var.dns_domain}"
+    dns_ip = "${var.dns_ip}"
+    dockercfg_base64 = "${var.dockercfg_base64}"
     etcd_private_ip = "${aws_instance.kubernetes_etcd.private_ip}"
-    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type.master)}"
+    etcd_public_ip = "${aws_instance.kubernetes_etcd.public_ip}"
+    hyperkube_deployment_mode = "${var.hyperkube_deployment_mode}"
+    hyperkube_image = "${var.hyperkube_image}"
+    interface_name = "eth0"
+    kraken_services_branch = "${var.kraken_services_branch}"
+    kraken_services_dirs = "${var.kraken_services_dirs}"
+    kraken_services_repo = "${var.kraken_services_repo}"
+    kube_apiserver_v = "${var.kube_apiserver_v}"
+    kube_controller_manager_v = "${var.kube_controller_manager_v}"
+    kube_proxy_v = "${var.kube_proxy_v}"
+    kube_scheduler_v = "${var.kube_scheduler_v}"
+    kubelet_v = "${var.kubelet_v}"
+    kubernetes_api_version = "${var.kubernetes_api_version}"
+    kubernetes_binaries_uri = "${var.kubernetes_binaries_uri}"
+    logentries_token = "${var.logentries_token}"
+    logentries_url = "${var.logentries_url}"
+    short_name = "master"
+    cluster_proxy_record = "${var.aws_user_prefix}-proxy.${var.aws_cluster_domain}"
+    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_master)}"
     coreos_update_channel = "${var.coreos_update_channel}"
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
+    kraken_repo = "${var.kraken_repo.repo}"
+    kraken_branch = "${var.kraken_repo.branch}"
   }
 }
 resource "aws_instance" "kubernetes_master" {
@@ -257,8 +287,8 @@ resource "aws_instance" "kubernetes_master" {
   associate_public_ip_address = true
   ebs_block_device {
     device_name = "${var.aws_storage_path.ebs}"
-    volume_size = "${var.aws_volume_size.master}"
-    volume_type = "${var.aws_volume_type.master}"
+    volume_size = "${var.aws_volume_size_master}"
+    volume_type = "${var.aws_volume_type_master}"
   }
   ephemeral_block_device {
     device_name = "${var.aws_storage_path.ephemeral}"
@@ -268,7 +298,7 @@ resource "aws_instance" "kubernetes_master" {
   tags {
     Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_master"
     ShortName = "master"
-    StorageType = "${var.aws_storage_type.master}"
+    StorageType = "${var.aws_storage_type_master}"
   }
 }
 
@@ -308,102 +338,10 @@ resource "aws_instance" "kubernetes_apiserver" {
   }
 }
 
-resource "template_file" "node_cloudinit_typed" {
+resource "template_file" "node_cloudinit_special" {
   filename = "${path.module}/templates/node.yaml.tpl"
-  count = "${length(split(",", var.aws_node_type.special))}"
+  count = "${var.special_node_count}"
   vars {
-    etcd_private_ip = "${aws_instance.kubernetes_etcd.private_ip}"
-    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, element(split(",", var.aws_storage_type.special_nodes), count.index))}"
-    coreos_update_channel = "${var.coreos_update_channel}"
-    coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
-  }
-}
-
-resource "aws_instance" "kubernetes_node_typed" {
-  depends_on = ["aws_instance.kubernetes_etcd"]
-  count = "${length(split(",", var.aws_node_type.special))}"
-  ami = "${coreos_ami.latest_ami.ami}"
-  instance_type = "${element(split(",", var.aws_node_type.special), count.index)}"
-  key_name = "${aws_key_pair.keypair.key_name}"
-  vpc_security_group_ids = [ "${aws_security_group.vpc_secgroup.id}" ]
-  subnet_id = "${aws_subnet.vpc_subnet.id}"
-  associate_public_ip_address = true
-  ebs_block_device {
-    device_name = "${var.aws_storage_path.ebs}"
-    volume_size = "${element(split(",", var.aws_volume_size.special_nodes), count.index)}"
-    volume_type = "${element(split(",", var.aws_volume_type.special_nodes), count.index)}"
-  }
-  ephemeral_block_device {
-    device_name = "${var.aws_storage_path.ephemeral}"
-    virtual_name = "ephemeral0"
-  }
-  user_data = "${element(template_file.node_cloudinit_typed.*.rendered, count.index)}"
-  tags {
-    Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_node-${format("%03d", count.index+1)}"
-    ShortName = "${format("node-%03d", count.index+1)}"
-    StorageType = "${element(split(",", var.aws_storage_type.special_nodes), count.index)}"
-  }
-}
-
-resource "template_file" "node_cloudinit" {
-  filename = "${path.module}/templates/node.yaml.tpl"
-  vars {
-    etcd_private_ip = "${aws_instance.kubernetes_etcd.private_ip}"
-    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type.other_nodes)}"
-    coreos_update_channel = "${var.coreos_update_channel}"
-    coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
-  }
-}
-
-resource "aws_instance" "kubernetes_node" {
-  depends_on = ["aws_instance.kubernetes_etcd"]
-  count = "${var.node_count - length(split(",", var.aws_node_type.special))}"
-  ami = "${coreos_ami.latest_ami.ami}"
-  instance_type = "${var.aws_node_type.other}"
-  key_name = "${aws_key_pair.keypair.key_name}"
-  vpc_security_group_ids = [ "${aws_security_group.vpc_secgroup.id}" ]
-  subnet_id = "${aws_subnet.vpc_subnet.id}"
-  associate_public_ip_address = true
-  ebs_block_device {
-    device_name = "${var.aws_storage_path.ebs}"
-    volume_size = "${var.aws_volume_size.other_nodes}"
-    volume_type = "${var.aws_volume_type.other_nodes}"
-  }
-  ephemeral_block_device {
-    device_name = "${var.aws_storage_path.ephemeral}"
-    virtual_name = "ephemeral0"
-  }
-  user_data = "${template_file.node_cloudinit.rendered}"
-  tags {
-    Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_node-${format("%03d", count.index+length(split(",", var.aws_node_type.special))+1)}"
-    ShortName = "${format("node-%03d", count.index+length(split(",", var.aws_node_type.special))+1)}"
-    StorageType = "${var.aws_storage_type.other_nodes}"
-  }
-}
-
-resource "aws_route53_record" "master_record" {
-  depends_on = ["aws_instance.kubernetes_master"]
-  zone_id = "${var.aws_zone_id}"
-  name = "${var.aws_user_prefix}-master.${var.aws_cluster_domain}"
-  type = "A"
-  ttl = "30"
-  records = ["${aws_instance.kubernetes_master.public_ip}"]
-}
-
-resource "aws_route53_record" "proxy_record" {
-  depends_on = ["aws_instance.kubernetes_master"]
-  zone_id = "${var.aws_zone_id}"
-  name = "${var.aws_user_prefix}-proxy.${var.aws_cluster_domain}"
-  type = "A"
-  ttl = "30"
-  records = ["${aws_instance.kubernetes_node_typed.0.public_ip}"]
-}
-
-resource "template_file" "ansible_inventory" {
-  depends_on = ["aws_route53_record.proxy_record", "aws_route53_record.master_record"]
-  filename = "${path.module}/templates/ansible.inventory.tpl"
-  vars {
-    ansible_ssh_private_key_file = "${var.aws_local_private_key}"
     cluster_master_record = "http://${var.aws_user_prefix}-master.${var.aws_cluster_domain}:8080"
     cluster_name = "aws"
     dns_domain = "${var.dns_domain}"
@@ -411,7 +349,6 @@ resource "template_file" "ansible_inventory" {
     dockercfg_base64 = "${var.dockercfg_base64}"
     etcd_private_ip = "${aws_instance.kubernetes_etcd.private_ip}"
     etcd_public_ip = "${aws_instance.kubernetes_etcd.public_ip}"
-    etcd_short_name = "${aws_instance.kubernetes_etcd.tags.ShortName}"
     hyperkube_deployment_mode = "${var.hyperkube_deployment_mode}"
     hyperkube_image = "${var.hyperkube_image}"
     interface_name = "eth0"
@@ -429,23 +366,196 @@ resource "template_file" "ansible_inventory" {
     logentries_url = "${var.logentries_url}"
     master_private_ip = "${aws_instance.kubernetes_master.private_ip}"
     master_public_ip = "${aws_instance.kubernetes_master.public_ip}"
+    cluster_proxy_record = "${var.aws_user_prefix}-proxy.${var.aws_cluster_domain}"
+    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, element(split(",", var.aws_storage_type_special), count.index))}"
+    coreos_update_channel = "${var.coreos_update_channel}"
+    coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
+    short_name = "node-${format("%03d", count.index+1)}"
+    kraken_repo = "${var.kraken_repo.repo}"
+    kraken_branch = "${var.kraken_repo.branch}"
+  }
+}
+resource "aws_instance" "kubernetes_node_special" {
+  count = "${var.special_node_count}"
+  ami = "${coreos_ami.latest_ami.ami}"
+  instance_type = "${element(split(",", var.aws_special_node_type), count.index)}"
+  key_name = "${aws_key_pair.keypair.key_name}"
+  vpc_security_group_ids = [ "${aws_security_group.vpc_secgroup.id}" ]
+  subnet_id = "${aws_subnet.vpc_subnet.id}"
+  associate_public_ip_address = true
+  ebs_block_device {
+    device_name = "${var.aws_storage_path.ebs}"
+    volume_size = "${element(split(",", var.aws_volume_size_special), count.index)}"
+    volume_type = "${element(split(",", var.aws_volume_type_special), count.index)}"
+  }
+  ephemeral_block_device {
+    device_name = "${var.aws_storage_path.ephemeral}"
+    virtual_name = "ephemeral0"
+  }
+  user_data = "${element(template_file.node_cloudinit_special.*.rendered, count.index)}"
+  tags {
+    Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_node-${format("%03d", count.index+1)}"
+    ShortName = "${format("node-%03d", count.index+1)}"
+    StorageType = "${element(split(",", var.aws_storage_type_special), count.index)}"
+  }
+}
+
+resource "template_file" "node_cloudinit" {
+  filename = "${path.module}/templates/node.yaml.tpl"
+  vars {
+    cluster_master_record = "http://${var.aws_user_prefix}-master.${var.aws_cluster_domain}:8080"
+    cluster_name = "aws"
+    dns_domain = "${var.dns_domain}"
+    dns_ip = "${var.dns_ip}"
+    dockercfg_base64 = "${var.dockercfg_base64}"
+    etcd_private_ip = "${aws_instance.kubernetes_etcd.private_ip}"
+    etcd_public_ip = "${aws_instance.kubernetes_etcd.public_ip}"
+    hyperkube_deployment_mode = "${var.hyperkube_deployment_mode}"
+    hyperkube_image = "${var.hyperkube_image}"
+    interface_name = "eth0"
+    kraken_services_branch = "${var.kraken_services_branch}"
+    kraken_services_dirs = "${var.kraken_services_dirs}"
+    kraken_services_repo = "${var.kraken_services_repo}"
+    kube_apiserver_v = "${var.kube_apiserver_v}"
+    kube_controller_manager_v = "${var.kube_controller_manager_v}"
+    kube_proxy_v = "${var.kube_proxy_v}"
+    kube_scheduler_v = "${var.kube_scheduler_v}"
+    kubelet_v = "${var.kubelet_v}"
+    kubernetes_api_version = "${var.kubernetes_api_version}"
+    kubernetes_binaries_uri = "${var.kubernetes_binaries_uri}"
+    logentries_token = "${var.logentries_token}"
+    logentries_url = "${var.logentries_url}"
+    master_private_ip = "${aws_instance.kubernetes_master.private_ip}"
+    master_public_ip = "${aws_instance.kubernetes_master.public_ip}"
+    cluster_proxy_record = "${var.aws_user_prefix}-proxy.${var.aws_cluster_domain}"
+    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type)}"
+    coreos_update_channel = "${var.coreos_update_channel}"
+    coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
+    short_name = "autoscaled"
+    kraken_repo = "${var.kraken_repo.repo}"
+    kraken_branch = "${var.kraken_repo.branch}"
+  }
+}
+resource "aws_launch_configuration" "kubernetes_node" {
+  image_id = "${coreos_ami.latest_ami.ami}"
+  instance_type = "${var.aws_node_type}"
+  key_name = "${aws_key_pair.keypair.key_name}"
+  security_groups  = [ "${aws_security_group.vpc_secgroup.id}" ]
+  associate_public_ip_address = true
+  user_data = "${template_file.node_cloudinit.rendered}"
+  ebs_block_device {
+    device_name = "${var.aws_storage_path.ebs}"
+    volume_size = "${var.aws_volume_size}"
+    volume_type = "${var.aws_volume_type}"
+  }
+  ephemeral_block_device {
+    device_name = "${var.aws_storage_path.ephemeral}"
+    virtual_name = "ephemeral0"
+  }
+}
+resource "aws_autoscaling_group" "kubernetes_nodes" {
+  name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_nodes"
+  max_size = "${var.node_count}"
+  min_size = "${var.node_count}"
+  desired_capacity = "${var.node_count}"
+  force_delete = false
+  wait_for_capacity_timeout = "0"
+  vpc_zone_identifier = ["${aws_subnet.vpc_subnet.id}"]
+  launch_configuration = "${aws_launch_configuration.kubernetes_node.name}"
+  health_check_type = "EC2"
+  tag {
+    key = "StorageType"
+    value = "${var.aws_storage_type}"
+    propagate_at_launch = true
+  }
+  tag {
+    key = "Name"
+    value = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_node-autoscaled"
+    propagate_at_launch = true
+  }
+  tag {
+    key = "ShortName"
+    value = "node-autoscaled"
+    propagate_at_launch = true
+  }
+}
+
+resource "aws_route53_record" "master_record" {
+  zone_id = "${var.aws_zone_id}"
+  name = "${var.aws_user_prefix}-master.${var.aws_cluster_domain}"
+  type = "A"
+  ttl = "30"
+  records = ["${aws_instance.kubernetes_master.public_ip}"]
+}
+resource "aws_route53_record" "proxy_record" {
+  zone_id = "${var.aws_zone_id}"
+  name = "${var.aws_user_prefix}-proxy.${var.aws_cluster_domain}"
+  type = "A"
+  ttl = "30"
+  records = ["${aws_instance.kubernetes_node_special.0.public_ip}"]
+}
+
+resource "template_file" "ansible_inventory" {
+  filename = "${path.module}/templates/ansible.inventory.tpl"
+  vars {
+    ansible_ssh_private_key_file = "${var.aws_local_private_key}"
+    etcd_public_ip = "${aws_instance.kubernetes_etcd.public_ip}"
+    master_public_ip = "${aws_instance.kubernetes_master.public_ip}"
+    cluster_name = "aws"
+    cluster_master_record = "http://${var.aws_user_prefix}-master.${var.aws_cluster_domain}:8080"
+    nodes_inventory_info = "${join("\n", formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_node_special.*.tags.ShortName, aws_instance.kubernetes_node_special.*.public_ip))}"
+    dns_domain = "${var.dns_domain}"
+    dns_ip = "${var.dns_ip}"
+    dockercfg_base64 = "${var.dockercfg_base64}"
+    etcd_private_ip = "${aws_instance.kubernetes_etcd.private_ip}"
+    etcd_public_ip = "${aws_instance.kubernetes_etcd.public_ip}"
+    hyperkube_deployment_mode = "${var.hyperkube_deployment_mode}"
+    hyperkube_image = "${var.hyperkube_image}"
+    interface_name = "eth0"
+    kraken_services_branch = "${var.kraken_services_branch}"
+    kraken_services_dirs = "${var.kraken_services_dirs}"
+    kraken_services_repo = "${var.kraken_services_repo}"
+    kube_apiserver_v = "${var.kube_apiserver_v}"
+    kube_controller_manager_v = "${var.kube_controller_manager_v}"
+    kube_proxy_v = "${var.kube_proxy_v}"
+    kube_scheduler_v = "${var.kube_scheduler_v}"
+    kubelet_v = "${var.kubelet_v}"
+    kubernetes_api_version = "${var.kubernetes_api_version}"
+    kubernetes_binaries_uri = "${var.kubernetes_binaries_uri}"
+    logentries_token = "${var.logentries_token}"
+    logentries_url = "${var.logentries_url}"
+    master_private_ip = "${aws_instance.kubernetes_master.private_ip}"
+    master_public_ip = "${aws_instance.kubernetes_master.public_ip}"
+<<<<<<< HEAD
     master_short_name = "${aws_instance.kubernetes_master.tags.ShortName}"
     node_001_private_ip = "${aws_instance.kubernetes_node.0.private_ip}"
     node_001_public_ip = "${aws_instance.kubernetes_node.0.public_ip}"
     apiserver_nginx_pool = "${join(" ", concat(formatlist("server %v:8080;", aws_instance.kubernetes_apiserver.*.private_ip)))}"
     apiservers_inventory_info = "${join("\n", concat(formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_apiserver.*.tags.ShortName, aws_instance.kubernetes_apiserver.*.public_ip)))}"
     nodes_inventory_info = "${join("\n", concat(formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_node_typed.*.tags.ShortName, aws_instance.kubernetes_node_typed.*.public_ip), formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_node.*.tags.ShortName, aws_instance.kubernetes_node.*.public_ip)))}"
+=======
+    cluster_proxy_record = "${var.aws_user_prefix}-proxy.${var.aws_cluster_domain}"
+    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type)}"
+    coreos_update_channel = "${var.coreos_update_channel}"
+    coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
+>>>>>>> master
   }
 
   provisioner "local-exec" {
     command = "cat << 'EOF' > ${path.module}/rendered/ansible.inventory\n${self.rendered}\nEOF"
   }
 
+  # a special trick to run against localhost without using inventory
   provisioner "local-exec" {
-    command = "ansible-galaxy install defunctzombie.coreos-bootstrap --ignore-errors"
+    command = "ansible-playbook -i 'localhost,' --connection=local ${path.module}/../../ansible/localhost_pre_provision.yaml --extra-vars 'cluster_name=aws cluster_master_record=http://${var.aws_user_prefix}-master.${var.aws_cluster_domain}:8080'"
   }
 
   provisioner "local-exec" {
-    command = "ANSIBLE_SSH_PIPELINING=True ANSIBLE_SSH_RETRIES=100 ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -f ${var.ansible_forks} -i ${path.module}/rendered/ansible.inventory ${path.module}/../../ansible/iaas_provision.yaml"
+    command = "AWS_ACCESS_KEY_ID=${var.aws_access_key} AWS_SECRET_ACCESS_KEY=${var.aws_secret_key} AWS_DEFAULT_REGION=${var.aws_region} ${path.module}/kraken_asg_helper.sh --cluster aws --limit ${var.node_count + var.special_node_count} --name ${aws_autoscaling_group.kubernetes_nodes.name} --output ${path.module}/rendered/ansible.inventory --singlewait ${var.asg_wait_single} --totalwaits ${var.asg_wait_total} --offset ${var.special_node_count}"
+  }
+
+  provisioner "local-exec" {
+    command = "ansible-playbook -i ${path.module}/rendered/ansible.inventory ${path.module}/../../ansible/localhost_post_provision.yaml"
   }
 }
+

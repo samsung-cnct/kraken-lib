@@ -14,12 +14,13 @@ Quick setup on OSX with [homewbrew](http://brew.sh/):
     brew tap Homebrew/bundle
     brew bundle
     
-This installs Ansible, Terraform, Vagrant, Virtualbox, kubectl and a custom terraform provider 'terraform-provider-execute'
+This installs Ansible, Terraform, Vagrant, Virtualbox, kubectl, awscli and a custom terraform provider 'terraform-provider-execute'
 
 Alternative/non-OSX setup:
 
 * Install [Ansible](https://github.com/ansible/ansible/releases)
-* Install [Terraform](https://terraform.io/downloads.html)
+* install awscli
+* Install Terraform. Currently we are using a patched terraform version (PR is pending in terraform master). Get it [here](https://github.com/Samsung-AG/homebrew-terraform/releases)
 * Install [Vagrant](https://www.vagrantup.com/downloads.html) if you will be working with a local cluster
 * Install [Virtualbox](https://www.virtualbox.org/wiki/Downloads) if you will be working with a local cluster
 * Download/Build terraform-provider-execute. OSX 64bit binary is available [here](https://github.com/Samsung-AG/terraform-provider-execute/releases). Copy the terraform-provider-execute binary to the the folder in which Terraform binary resides in.
