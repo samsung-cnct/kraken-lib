@@ -102,19 +102,54 @@ coreos:
         RemainAfterExit=yes
         ExecStart=/usr/bin/bash -c "ssh-keygen -f /home/core/.ssh/ansible_rsa -N ''"
         ExecStart=/usr/bin/bash -c "cat /home/core/.ssh/ansible_rsa.pub >> /home/core/.ssh/authorized_keys"
-    - name: ansible-in-docker.service
+    - name: kraken-git-pull.service
       command: start
       content: |
         [Unit]
         Requires=generate-ansible-keys.service
         After=generate-ansible-keys.service
-        Description=Runs a prebaked ansible container
+        Description=Fetches kraken repo
         [Service]
         Type=oneshot
         RemainAfterExit=yes
         ExecStart=/usr/bin/rm -rf /opt/kraken
         ExecStart=/usr/bin/git clone -b ${kraken_branch} ${kraken_repo} /opt/kraken
-        ExecStart=/usr/bin/docker run -v /etc/inventory.ansible:/etc/inventory.ansible -v /opt/kraken:/opt/kraken -v /home/core/.ssh/ansible_rsa:/opt/ansible/private_key -v /var/run:/ansible -e ANSIBLE_HOST_KEY_CHECKING=False quay.io/samsung_ag/kraken_ansible /sbin/my_init --skip-startup-files --skip-runit -- ansible-playbook /opt/kraken/ansible/iaas_provision.yaml -i /etc/inventory.ansible
+    - name: write-sha-file.service
+      command: start
+      content: |
+        [Unit]
+        Requires=kraken-git-pull.service
+        After=kraken-git-pull.service
+        Description=writes optional sha to a file
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/bin/echo ${kraken_commit} > /opt/kraken/commit.sha
+    - name: fetch-kraken-commit.service
+      command: start
+      content: |
+        [Unit]
+        Requires=write-sha-file.service
+        After=write-sha-file.service
+        Description=fetches an optional commit
+        ConditionFileNotEmpty=/opt/kraken/commit.sha
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        WorkingDirectory=/opt/kraken
+        ExecStart=/usr/bin/git fetch ${kraken_repo} +refs/pull/*:refs/remotes/origin/pr/*
+        ExecStart=/usr/bin/git checkout -f ${kraken_commit}
+    - name: ansible-in-docker.service
+      command: start
+      content: |
+        [Unit]
+        Requires=write-sha-file.service
+        After=fetch-kraken-commit.service
+        Description=Runs a prebaked ansible container
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/bin/docker run -v /etc/inventory.ansible:/etc/inventory.ansible -v /opt/kraken:/opt/kraken -v /home/core/.ssh/ansible_rsa:/opt/ansible/private_key -v /var/run:/ansible -e ANSIBLE_HOST_KEY_CHECKING=False -e ANSIBLE_SSH_RETRIES=100 quay.io/samsung_ag/kraken_ansible /sbin/my_init --skip-startup-files --skip-runit -- ansible-playbook /opt/kraken/ansible/iaas_provision.yaml -i /etc/inventory.ansible
   update:
     group: ${coreos_update_channel}
     reboot-strategy: ${coreos_reboot_strategy}

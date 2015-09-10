@@ -148,6 +148,7 @@ variable "kraken_repo" {
   default = {
     "repo" = "https://github.com/Samsung-AG/kraken.git"
     "branch" = "master"
+    "commit_sha" = ""
   }
   description = "Kraken git repo"
 }
