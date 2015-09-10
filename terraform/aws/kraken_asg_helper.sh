@@ -72,21 +72,24 @@ do
   fi
 done
 
-if (( success )); then
-  ec2_ips=$(aws --output text \
+ec2_ips=$(aws --output text \
     --query "Reservations[*].Instances[*].PublicIpAddress" \
     ec2 describe-instances --instance-ids \
     `aws --output text --query "AutoScalingGroups[0].Instances[*].InstanceId" autoscaling describe-auto-scaling-groups --auto-scaling-group-names "${ASG_NAME}"`)
   
-  current_node=$((NUMBERING_OFFSET+1))
-  output="\n[nodes]\n"
-  for ec2_ip in $ec2_ips; do
-    output="$output$(printf 'node-%03d' $current_node) ansible_ssh_host=$ec2_ip\n"
-    current_node=$((current_node+1))
-  done 
+current_node=$((NUMBERING_OFFSET+1))
+output="\n[nodes]\n"
+for ec2_ip in $ec2_ips; do
+  output="$output$(printf 'node-%03d' $current_node) ansible_ssh_host=$ec2_ip\n"
+  current_node=$((current_node+1))
+done 
 
-  echo -e $output >> ${OUTPUT_FILE}
+echo -e $output >> ${OUTPUT_FILE}
+
+if (( success )); then
   echo "Success!"
 else 
   echo "Failure!"
 fi
+
+exit $((!$success))

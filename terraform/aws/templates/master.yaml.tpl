@@ -149,6 +149,8 @@ coreos:
         [Service]
         Type=oneshot
         RemainAfterExit=yes
+        Restart=on-failure
+        RestartSec=3
         ExecStart=/usr/bin/rm -rf /opt/kraken
         ExecStart=/usr/bin/git clone -b ${kraken_branch} ${kraken_repo} /opt/kraken
     - name: write-sha-file.service
@@ -173,6 +175,8 @@ coreos:
         [Service]
         Type=oneshot
         RemainAfterExit=yes
+        Restart=on-failure
+        RestartSec=3
         WorkingDirectory=/opt/kraken
         ExecStart=/usr/bin/git fetch ${kraken_repo} +refs/pull/*:refs/remotes/origin/pr/*
         ExecStart=/usr/bin/git checkout -f ${kraken_commit}
@@ -186,7 +190,9 @@ coreos:
         [Service]
         Type=oneshot
         RemainAfterExit=yes
-        ExecStart=/usr/bin/docker run -v /etc/inventory.ansible:/etc/inventory.ansible -v /opt/kraken:/opt/kraken -v /home/core/.ssh/ansible_rsa:/opt/ansible/private_key -v /var/run:/ansible -e ANSIBLE_HOST_KEY_CHECKING=False -e ANSIBLE_SSH_RETRIES=100 quay.io/samsung_ag/kraken_ansible /sbin/my_init --skip-startup-files --skip-runit -- ansible-playbook /opt/kraken/ansible/iaas_provision.yaml -i /etc/inventory.ansible
+        Restart=on-failure
+        RestartSec=3
+        ExecStart=/usr/bin/docker run -v /etc/inventory.ansible:/etc/inventory.ansible -v /opt/kraken:/opt/kraken -v /home/core/.ssh/ansible_rsa:/opt/ansible/private_key -v /var/run:/ansible -e ANSIBLE_HOST_KEY_CHECKING=False -e quay.io/samsung_ag/kraken_ansible /sbin/my_init --skip-startup-files --skip-runit -- ansible-playbook /opt/kraken/ansible/iaas_provision.yaml -i /etc/inventory.ansible
   update:
     group: ${coreos_update_channel}
     reboot-strategy: ${coreos_reboot_strategy}
