@@ -149,7 +149,7 @@ coreos:
         [Service]
         Type=oneshot
         RemainAfterExit=yes
-        ExecStart=/usr/bin/docker run -v /etc/inventory.ansible:/etc/inventory.ansible -v /opt/kraken:/opt/kraken -v /home/core/.ssh/ansible_rsa:/opt/ansible/private_key -v /var/run:/ansible -e ANSIBLE_HOST_KEY_CHECKING=False quay.io/samsung_ag/kraken_ansible /sbin/my_init --skip-startup-files --skip-runit -- ansible-playbook /opt/kraken/ansible/iaas_provision.yaml -i /etc/inventory.ansible
+        ExecStart=/usr/bin/docker run -v /etc/inventory.ansible:/etc/inventory.ansible -v /opt/kraken:/opt/kraken -v /home/core/.ssh/ansible_rsa:/opt/ansible/private_key -v /var/run:/ansible -e ANSIBLE_HOST_KEY_CHECKING=False -e ANSIBLE_SSH_RETRIES=100 quay.io/samsung_ag/kraken_ansible /sbin/my_init --skip-startup-files --skip-runit -- ansible-playbook /opt/kraken/ansible/iaas_provision.yaml -i /etc/inventory.ansible
   update:
     group: ${coreos_update_channel}
     reboot-strategy: ${coreos_reboot_strategy}
