@@ -1,4 +1,0 @@
----
-
-- name: write kube config
-  shell: kubectl config set-cluster {{cluster_name}} --server={{cluster_master_record}}

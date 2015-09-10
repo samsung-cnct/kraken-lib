@@ -500,8 +500,9 @@ resource "template_file" "ansible_inventory" {
     command = "cat << 'EOF' > ${path.module}/rendered/ansible.inventory\n${self.rendered}\nEOF"
   }
 
+  # a special trick to run against localhost without using inventory
   provisioner "local-exec" {
-    command = "ansible-playbook -i ${path.module}/rendered/ansible.inventory ${path.module}/../../ansible/localhost_pre_provision.yaml"
+    command = "ansible-playbook -i localhost, ${path.module}/../../ansible/localhost_pre_provision.yaml"
   }
 
   provisioner "local-exec" {
