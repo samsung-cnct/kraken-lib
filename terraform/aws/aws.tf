@@ -502,7 +502,7 @@ resource "template_file" "ansible_inventory" {
 
   # a special trick to run against localhost without using inventory
   provisioner "local-exec" {
-    command = "ansible-playbook -i 'localhost,' --connection=local ${path.module}/../../ansible/localhost_pre_provision.yaml"
+    command = "ansible-playbook -i 'localhost,' --connection=local ${path.module}/../../ansible/localhost_pre_provision.yaml --extra-vars 'cluster_name=aws cluster_master_record=http://${var.aws_user_prefix}-master.${var.aws_cluster_domain}:8080'"
   }
 
   provisioner "local-exec" {
