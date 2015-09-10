@@ -166,8 +166,8 @@ variable "kraken_services_repo" {
 }
 variable "kraken_repo" {
   default = {
-    "repo" = "https://github.com/l337ch/kraken.git"
-    "branch" = "krak-119"
+    "repo" = "https://github.com/Samsung-AG/kraken.git"
+    "branch" = "master"
   }
   description = "Kraken git repo"
 }

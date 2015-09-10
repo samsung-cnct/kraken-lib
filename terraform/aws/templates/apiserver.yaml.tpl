@@ -127,7 +127,7 @@ coreos:
         Service=systemd-journal-gatewayd.service
         [Install] 
         WantedBy=sockets.target
-      - name: generate-ansible-keys.service
+    - name: generate-ansible-keys.service
       command: start
       content: |
         [Unit]
