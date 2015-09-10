@@ -4,6 +4,3 @@
 
  - name: render config_cluster-name to .ssh
    template: src=ssh_config.ansible dest={{ssh_config_home}}/.ssh/{{ssh_config_name}}
-
- - name: write kube config
-   shell: kubectl config set-cluster {{cluster_name}} --server={{cluster_master_record}}

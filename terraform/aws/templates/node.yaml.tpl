@@ -4,10 +4,10 @@
 write_files:
   - path: /etc/inventory.ansible
     content: |
-      [node]
+      [nodes]
       ${short_name} ansible_ssh_host=$private_ipv4
 
-      [node:vars]
+      [nodes:vars]
       ansible_connection=ssh
       ansible_python_interpreter="PATH=/home/core/bin:$PATH python"
       ansible_ssh_user=core
@@ -141,6 +141,7 @@ coreos:
         [Service]
         Type=oneshot
         RemainAfterExit=yes
+        ExecStart=/usr/bin/rm -rf /opt/kraken
         ExecStart=/usr/bin/git clone -b ${kraken_branch} ${kraken_repo} /opt/kraken
         ExecStart=/usr/bin/docker run -v /etc/inventory.ansible:/etc/inventory.ansible -v /opt/kraken:/opt/kraken -v /home/core/.ssh/ansible_rsa:/opt/ansible/private_key -v /var/run:/ansible -e ANSIBLE_HOST_KEY_CHECKING=False quay.io/samsung_ag/kraken_ansible /sbin/my_init --skip-startup-files --skip-runit -- ansible-playbook /opt/kraken/ansible/iaas_provision.yaml -i /etc/inventory.ansible
   update:
