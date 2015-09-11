@@ -222,6 +222,7 @@ resource "template_file" "etcd_cloudinit" {
   }
 }
 resource "aws_instance" "kubernetes_etcd" {
+  depends_on = ["aws_internet_gateway.vpc_gateway"] # explicit dependency 
   ami = "${coreos_ami.latest_ami.ami}"
   instance_type = "${var.aws_etcd_type}"
   key_name = "${aws_key_pair.keypair.key_name}"
@@ -269,12 +270,12 @@ resource "template_file" "apiserver_cloudinit" {
     kubernetes_binaries_uri = "${var.kubernetes_binaries_uri}"
     logentries_token = "${var.logentries_token}"
     logentries_url = "${var.logentries_url}"
-    short_name = "master"
     format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_master)}"
     coreos_update_channel = "${var.coreos_update_channel}"
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
     kraken_repo = "${var.kraken_repo.repo}"
     kraken_branch = "${var.kraken_repo.branch}"
+    kraken_commit = "${var.kraken_repo.commit_sha}"
   }
 }
 resource "aws_instance" "kubernetes_apiserver" {
