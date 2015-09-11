@@ -41,6 +41,16 @@ As described [here](https://www.terraform.io/intro/getting-started/variables.htm
     aws_access_key="<your aws key id>"
     aws_secret_key="<your aws secret key>"
     aws_user_prefix="<prefix to use for named resources>"
+
+Optionally, you can customize the cluster to better suite your needs by adding: 
+ 
+    apiserver_count = "<apiserver pool size>"
+    node_count = "<number of kubernetes nodes>"
+
+For better performance, you should consider adding and modifing the following configuration items:
+    
+    aws_etcd_type = "<aws instance type for etcd>"
+    aws_storage_type_etcd = "<ephemeral>"
     
 Alternatively, you can provide these variables as -var 'variable=value' switches to 'terraform' command. 
 
