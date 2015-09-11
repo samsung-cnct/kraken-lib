@@ -1,5 +1,5 @@
 kraken_services_repo: git://github.com/samsung-ag/kraken-services
-kraken_services_branch: stable
+kraken_services_branch: master
 dns_domain: kubernetes.local
 dns_ip: 10.100.0.10
 dockercfg_base64:
