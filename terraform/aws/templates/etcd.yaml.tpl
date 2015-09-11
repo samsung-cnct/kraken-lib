@@ -112,8 +112,6 @@ coreos:
         [Service]
         Type=oneshot
         RemainAfterExit=yes
-        Restart=on-failure
-        RestartSec=3
         ExecStart=/usr/bin/rm -rf /opt/kraken
         ExecStart=/usr/bin/git clone -b ${kraken_branch} ${kraken_repo} /opt/kraken
     - name: write-sha-file.service
@@ -138,8 +136,6 @@ coreos:
         [Service]
         Type=oneshot
         RemainAfterExit=yes
-        Restart=on-failure
-        RestartSec=3
         WorkingDirectory=/opt/kraken
         ExecStart=/usr/bin/git fetch ${kraken_repo} +refs/pull/*:refs/remotes/origin/pr/*
         ExecStart=/usr/bin/git checkout -f ${kraken_commit}
@@ -151,7 +147,7 @@ coreos:
         After=fetch-kraken-commit.service
         Description=Runs a prebaked ansible container
         [Service]
-        Type=oneshot
+        Type=simple
         RemainAfterExit=yes
         Restart=on-failure
         RestartSec=3
