@@ -28,17 +28,6 @@ resource "aws_vpc_dhcp_options_association" "vpc_dhcp_association" {
     dhcp_options_id = "${aws_vpc_dhcp_options.vpc_dhcp.id}"
 }
 
-resource "aws_route_table" "vpc_rt" {
-  vpc_id = "${aws_vpc.vpc.id}"
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = "${aws_internet_gateway.vpc_gateway.id}"
-  }
-  tags {
-    Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_rt"
-  }
-}
-
 resource "aws_network_acl" "vpc_acl" {
   vpc_id = "${aws_vpc.vpc.id}"
   egress {
@@ -76,16 +65,6 @@ resource "aws_subnet" "vpc_subnet" {
   tags {
       Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_subnet"
   }
-}
-
-resource "aws_route_table_association" "vpc_rt_association" {
-    subnet_id = "${aws_subnet.vpc_subnet.id}"
-    route_table_id = "${aws_route_table.vpc_rt.id}"
-}
-
-resource "aws_main_route_table_association" "a" {
-    vpc_id = "${aws_vpc.vpc.id}"
-    route_table_id = "${aws_route_table.vpc_rt.id}"
 }
 
 resource "aws_security_group" "vpc_secgroup" {
