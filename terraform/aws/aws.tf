@@ -245,6 +245,64 @@ resource "aws_instance" "kubernetes_etcd" {
   }
 }
 
+resource "template_file" "apiserver_cloudinit" {
+  filename = "${path.module}/templates/apiserver.yaml.tpl"
+  vars {
+    cluster_name = "aws"
+    dns_domain = "${var.dns_domain}"
+    dns_ip = "${var.dns_ip}"
+    dockercfg_base64 = "${var.dockercfg_base64}"
+    etcd_private_ip = "${aws_instance.kubernetes_etcd.private_ip}"
+    etcd_public_ip = "${aws_instance.kubernetes_etcd.public_ip}"
+    hyperkube_deployment_mode = "${var.hyperkube_deployment_mode}"
+    hyperkube_image = "${var.hyperkube_image}"
+    interface_name = "eth0"
+    kraken_services_branch = "${var.kraken_services_branch}"
+    kraken_services_dirs = "${var.kraken_services_dirs}"
+    kraken_services_repo = "${var.kraken_services_repo}"
+    kube_apiserver_v = "${var.kube_apiserver_v}"
+    kube_controller_manager_v = "${var.kube_controller_manager_v}"
+    kube_proxy_v = "${var.kube_proxy_v}"
+    kube_scheduler_v = "${var.kube_scheduler_v}"
+    kubelet_v = "${var.kubelet_v}"
+    kubernetes_api_version = "${var.kubernetes_api_version}"
+    kubernetes_binaries_uri = "${var.kubernetes_binaries_uri}"
+    logentries_token = "${var.logentries_token}"
+    logentries_url = "${var.logentries_url}"
+    short_name = "master"
+    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_master)}"
+    coreos_update_channel = "${var.coreos_update_channel}"
+    coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
+    kraken_repo = "${var.kraken_repo.repo}"
+    kraken_branch = "${var.kraken_repo.branch}"
+  }
+}
+resource "aws_instance" "kubernetes_apiserver" {
+  depends_on = ["aws_instance.kubernetes_etcd"]
+  count = "${var.apiserver_count}"
+  ami = "${coreos_ami.latest_ami.ami}"
+  instance_type = "${var.aws_apiserver_type}"
+  key_name = "${aws_key_pair.keypair.key_name}"
+  vpc_security_group_ids = [ "${aws_security_group.vpc_secgroup.id}" ]
+  subnet_id = "${aws_subnet.vpc_subnet.id}"
+  associate_public_ip_address = true
+  ebs_block_device {
+    device_name = "${var.aws_storage_path.ebs}"
+    volume_size = "${var.aws_volume_size_apiserver}"
+    volume_type = "${var.aws_volume_type_apiserver}"
+  }
+  ephemeral_block_device {
+    device_name = "${var.aws_storage_path.ephemeral}"
+    virtual_name = "ephemeral0"
+  }
+  user_data = "${template_file.apiserver_cloudinit.rendered}"
+  tags {
+    Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_apiserver-${format("%03d", count.index+1)}"
+    ShortName = "${format("apiserver-%03d", count.index+1)}"
+    StorageType = "${var.aws_storage_type_apiserver}"
+  }
+}
+
 resource "template_file" "master_cloudinit" {
   filename = "${path.module}/templates/master.yaml.tpl"
   vars {
@@ -277,10 +335,12 @@ resource "template_file" "master_cloudinit" {
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
     kraken_repo = "${var.kraken_repo.repo}"
     kraken_branch = "${var.kraken_repo.branch}"
+    apiserver_nginx_pool = "${join(" ", concat(formatlist("server %v:8080;", aws_instance.kubernetes_apiserver.*.private_ip)))}"
     kraken_commit = "${var.kraken_repo.commit_sha}"
   }
 }
 resource "aws_instance" "kubernetes_master" {
+  depends_on = ["aws_instance.kubernetes_apiserver"]
   ami = "${coreos_ami.latest_ami.ami}"
   instance_type = "${var.aws_master_type}"
   key_name = "${aws_key_pair.keypair.key_name}"
@@ -494,6 +554,7 @@ resource "template_file" "ansible_inventory" {
     logentries_url = "${var.logentries_url}"
     master_private_ip = "${aws_instance.kubernetes_master.private_ip}"
     master_public_ip = "${aws_instance.kubernetes_master.public_ip}"
+    apiservers_inventory_info = "${join("\n", concat(formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_apiserver.*.tags.ShortName, aws_instance.kubernetes_apiserver.*.public_ip)))}"
     cluster_proxy_record = "${var.aws_user_prefix}-proxy.${var.aws_cluster_domain}"
     format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type)}"
     coreos_update_channel = "${var.coreos_update_channel}"
@@ -517,4 +578,3 @@ resource "template_file" "ansible_inventory" {
     command = "ansible-playbook -i ${path.module}/rendered/ansible.inventory ${path.module}/../../ansible/localhost_post_provision.yaml"
   }
 }
-

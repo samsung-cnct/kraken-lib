@@ -1,0 +1,14 @@
+---
+- name: create install-kubectl.service
+  template: src=install-kubectl.service.ansible dest=/etc/systemd/system/install-kubectl.service
+  sudo: yes
+  notify:
+    - reload systemd
+    - restart install-kubectl
+
+- name: create install-hyperkube.service
+  template: src=install-hyperkube.service.ansible dest=/etc/systemd/system/install-hyperkube.service
+  sudo: yes
+  notify:
+    - reload systemd
+    - restart install-hyperkube

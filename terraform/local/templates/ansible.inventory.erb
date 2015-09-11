@@ -4,12 +4,16 @@ master ansible_ssh_host=<%= master_ip %>
 [etcd]
 etcd ansible_ssh_host=<%= etcd_ip %>
 
+[apiservers]
+<%= apiservers_inventory_info %>
+
 [nodes]
 <%= nodes_inventory_info %>
 
 [cluster:children]
 master
 etcd
+apiservers
 nodes
 
 [local]
@@ -44,8 +48,9 @@ logentries_token=<%= logentries_token %>
 logentries_url=<%= logentries_url %>
 master_private_ip=<%= master_ip %>
 master_public_ip=<%= master_ip %>
-node_01_private_ip=<%= node_01_ip %>
-node_01_public_ip=<%= node_01_ip %>
+node_001_private_ip=<%= node_001_ip %>
+node_001_public_ip=<%= node_001_ip %>
+apiserver_nginx_pool=<%= apiserver_nginx_pool %>
 
 [local:vars]
 ansible_connection=local

@@ -34,6 +34,10 @@ variable "node_count" {
   default = "3"
   description = "How many nodes (not counting master, etcd and special nodes to bring up)"
 }
+variable "apiserver_count" {
+  default = "1"
+  description = "How many apiservers to include in the apiserver pool"
+}
 variable "aws_master_type" {
   default = "m3.xlarge"
   description = "Kubernetes master instance type"
@@ -41,6 +45,10 @@ variable "aws_master_type" {
 variable "aws_etcd_type" {
   default = "m3.xlarge"
   description = "Kubernetes etcd instance type"
+}
+variable "aws_apiserver_type" {
+  default = "m3.large"
+  description = "Kubernetes apiserver instance type"
 }
 variable "aws_special_node_type" {
   description = "Types of nodes. Type per node, comma separated, starting with node 1. Number of must be = special_node_count."
@@ -51,6 +59,10 @@ variable "aws_node_type" {
   default = "t2.micro"
 }
 variable "aws_storage_type_master" {
+  description = "Primary volume type for master"
+  default = "ebs"
+}
+variable "aws_storage_type_apiserver" {
   description = "Primary volume type for master"
   default = "ebs"
 }
@@ -70,6 +82,10 @@ variable "aws_volume_size_master" {
   default = "30"
   description = "Size of EBS volume attached to master instance in gigabytes."
 }
+variable "aws_volume_size_apiserver" {
+  default = "30"
+  description = "Size of EBS volume attached to master instance in gigabytes."
+}
 variable "aws_volume_size_etcd" {
   default = "30"
   description = "Size of EBS volume attached to etcd instance in gigabytes."
@@ -83,6 +99,10 @@ variable "aws_volume_size" {
   description = "Size of EBS volume attached to all other nodes in gigabytes."
 }
 variable "aws_volume_type_master" {
+  default = "gp2"
+  description = "Type of EBS volume attached to master AWS instance. "
+}
+variable "aws_volume_type_apiserver" {
   default = "gp2"
   description = "Type of EBS volume attached to master AWS instance. "
 }
@@ -217,13 +237,10 @@ variable "logentries_url" {
   description = "Logentries.com API url"
 }
 variable "asg_wait_single" {
-  default = "60"
+  default = "10"
   description = "Sleep for x seconds between each check of number of nodes up"
 }
 variable "asg_wait_total" {
-  default = "120"
+  default = "720"
   description = "Repeat up to X waits"
 }
-
-
-
