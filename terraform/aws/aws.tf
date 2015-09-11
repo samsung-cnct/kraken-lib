@@ -222,6 +222,7 @@ resource "template_file" "etcd_cloudinit" {
   }
 }
 resource "aws_instance" "kubernetes_etcd" {
+  depends_on = ["aws_internet_gateway.vpc_gateway"] # explicit dependency 
   ami = "${coreos_ami.latest_ami.ami}"
   instance_type = "${var.aws_etcd_type}"
   key_name = "${aws_key_pair.keypair.key_name}"
