@@ -5,6 +5,7 @@ require 'fileutils'
 require 'ipaddr'
 require 'erb'
 require 'ostruct'
+require 'yaml'
 
 VAGRANTFILE_API_VERSION = "2"
 Vagrant.require_version ">= 1.7.2"
@@ -40,9 +41,17 @@ def coreos_boxname
   "coreos-#{ENV['KRAKEN_COREOS_CHANNEL']}"
 end
 
-def get_num_nodes
-  ENV['KRAKEN_NUMBER_NODES']
+def get_num_apiservers
+  ENV['KRAKEN_NUMBER_APISERVERS'].to_i
 end
+
+def get_num_nodes
+  ENV['KRAKEN_NUMBER_NODES'].to_i
+end
+
+def get_num_vms
+  get_num_nodes + get_num_apiservers + 2 # 2 represents the etcd and master vms
+end  
 
 def enable_serial_logging
   ENV['KRAKEN_SERIAL_LOGGING'] || false
@@ -55,21 +64,25 @@ end
 
 def build_coreos_userdata(host_number)
   user_data = nil
+  subtotal = 2 + get_num_apiservers
+  total = get_num_vms
   case host_number
   when 1
     user_data = { name: 'etcd', data: File.join(__dir__, 'rendered', 'etcd.yaml'), cpus: ENV['KRAKEN_ETCD_CPUS'], mem: ENV['KRAKEN_ETCD_MEM']}
   when 2
     user_data = { name: 'master', data: File.join(__dir__, 'rendered', 'master.yaml'), cpus: ENV['KRAKEN_MASTER_CPUS'], mem: ENV['KRAKEN_MASTER_MEM']  }
+  when (3)..subtotal
+    user_data = { name: "apiserver-%03d" % (host_number - 2), data: File.join(__dir__, 'rendered', 'apiserver.yaml'), cpus: ENV['KRAKEN_APISERVER_CPUS'], mem: ENV['KRAKEN_APISERVER_MEM']  }
   else
-    user_data = { name: "node-%03d" % (host_number - 2), data: File.join(__dir__, 'rendered', 'node.yaml'), cpus: ENV['KRAKEN_NODE_CPUS'], mem: ENV['KRAKEN_NODE_MEM'] }
+    user_data = { name: "node-%03d" % (host_number - (2 + get_num_apiservers)), data: File.join(__dir__, 'rendered', 'node.yaml'), cpus: ENV['KRAKEN_NODE_CPUS'], mem: ENV['KRAKEN_NODE_MEM'] }
   end
 
   user_data
 end
 
 def final_node_ip
-  number_of_nodes = get_num_nodes.to_i
-  base_ip_address + "#{(number_of_nodes + 2 + 100)}"
+  number_of_nodes = get_num_vms
+  base_ip_address + "#{(get_num_vms + 100)}"
 end
 
 def render(templatepath, destinationpath, variables)

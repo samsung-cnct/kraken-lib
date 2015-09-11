@@ -1,17 +1,17 @@
 [Unit]
-Description=Launch hyperkube master
+Description=Launch hyperkube apiserver
 Requires=network-online.target
 After=network-online.target
 
 [Service]
 Restart=always
 LimitNOFILE=infinity
-ExecStartPre=-/usr/bin/docker kill kube-master
-ExecStartPre=-/usr/bin/docker rm kube-master
-ExecStartPre=-/usr/bin/docker kill $(docker ps -a -q --filter="name=k8s-master")
-ExecStartPre=-/usr/bin/docker rm $(docker ps -a -q --filter="name=k8s-master")
+ExecStartPre=-/usr/bin/docker kill kube-apiserver
+ExecStartPre=-/usr/bin/docker rm kube-apiserver
+ExecStartPre=-/usr/bin/docker kill $(docker ps -a -q --filter="name=k8s-apiserver")
+ExecStartPre=-/usr/bin/docker rm $(docker ps -a -q --filter="name=k8s-apiserver")
 ExecStart=/usr/bin/docker run \
-  --name kube-master \
+  --name kube-apiserver \
   --net=host \
   --privileged \
   -v /opt/bin/manifests:/etc/kubernetes/manifests-override \

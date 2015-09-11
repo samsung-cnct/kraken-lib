@@ -1,6 +1,9 @@
 [master]
 master ansible_ssh_host=${master_public_ip}
 
+[apiservers]
+${apiservers_inventory_info}
+
 [specialnodes]
 ${nodes_inventory_info}
 
@@ -9,6 +12,7 @@ localhost
 
 [cluster:children]
 master
+apiservers
 specialnodes
 nodes
 

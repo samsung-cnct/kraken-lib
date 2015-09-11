@@ -10,7 +10,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   config.ssh.insert_key = false
-  config.ssh.private_key_path = File.expand_path(ENV['KRAKEN_VAGRANT_PRIVATE_KEY'])
+  #config.ssh.private_key_path = File.expand_path(ENV['KRAKEN_VAGRANT_PRIVATE_KEY'])
   config.ssh.forward_agent = true
   config.ssh.username = 'core'
 
@@ -24,10 +24,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     run "touch #{ENV['VAGRANT_CWD']}/rendered/ansible.inventory"
   end
 
-  # array of non master or etcd nodes for ansible inventory
+  # array of systems with multinodes for ansible inventory
+  apiserver_nginx_pool = ""
+  apiserver_host_data = ""
   node_host_data = ""
 
-  (1..(get_num_nodes.to_i + 2)).each do |i| # number of 'node' nodes + master and etcd nodes
+  (1..(get_num_vms)).each do |i| # number of nodes + number of apiservers + master and etcd nodes
 
     user_data = build_coreos_userdata(i)
 
@@ -56,7 +58,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       config2.vm.network :private_network, ip: ip_address
 
       # add non-etcd or master ip to the list
-      node_host_data += "#{"node-%03d" % (i - 2)} ansible_ssh_host=#{ip_address}\n" if i > 2
+      if i.between?(3, (get_num_apiservers + 2))
+        apiserver_nginx_pool += "server #{ip_address}:8080; "
+        apiserver_host_data += "#{"apiserver-%03d" % (i - 2)} ansible_ssh_host=#{ip_address}\n "
+      end
+      node_host_data += "#{"node-%03d" % (i - (2 + get_num_apiservers))} ansible_ssh_host=#{ip_address}\n" if i > (2 + get_num_apiservers)
+
 
       if File.exist?(user_data[:data])
         config2.vm.provision :file, :source => "#{user_data[:data]}", :destination => "/tmp/vagrantfile-user-data"
@@ -73,6 +80,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           dns_ip
           dockercfg_base64
           hyperkube_image
+          hyperkube_deployment_mode
           interface_name
           kraken_services_branch
           kraken_services_dirs
@@ -93,7 +101,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           :ansible_ssh_private_key_file => File.expand_path(ENV['KRAKEN_VAGRANT_PRIVATE_KEY']),
           :etcd_ip => base_ip_address + "#{1+100}",
           :master_ip => base_ip_address + "#{2+100}",
-          :node_01_ip => base_ip_address + "#{3+100}",
+          :node_001_ip => base_ip_address + "#{(2 + get_num_apiservers)+100}",
+          :apiserver_nginx_pool => apiserver_nginx_pool,
+          :apiservers_inventory_info => apiserver_host_data,
           :nodes_inventory_info => node_host_data
         }
 
@@ -107,6 +117,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           ansible.inventory_path = "#{ENV['VAGRANT_CWD']}/rendered/ansible.inventory"
           ansible.playbook = "../../ansible/vagrant_provision.yaml"
           ansible.raw_arguments = ["--forks=#{ansible_forks}"]
+          ansible.verbose = "v"
         end
       end
     end

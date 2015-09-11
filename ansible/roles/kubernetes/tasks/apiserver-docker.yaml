@@ -1,0 +1,21 @@
+---
+- name: Create /opt/bin/manifests for configs
+  sudo: yes
+  file: >
+    path=/opt/bin/manifests
+    state=directory
+    owner=core
+    group=core
+
+- name: copy apiserver manifest config
+  template: src=kubernetes-apiserver-pod.json.ansible
+            dest=/opt/bin/manifests/apiserver.json
+  sudo: yes
+
+- name: Create hyperkube apiserver
+  template: src=hyperkube-docker-apiserver.service.ansible
+            dest=/etc/systemd/system/hyperkube-docker-apiserver.service
+  sudo: yes
+  notify:
+    - reload systemd
+    - restart hyperkube-docker-master

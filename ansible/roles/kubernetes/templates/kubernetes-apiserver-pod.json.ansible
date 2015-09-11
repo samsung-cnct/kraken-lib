@@ -1,0 +1,38 @@
+{
+  "apiVersion": "v1",
+  "kind": "Pod",
+  "metadata": {
+    "name": "k8s-master"
+  },
+  "spec": {
+    "hostNetwork": true,
+    "containers": [
+      {
+        "name": "apiserver",
+        "image": "{{hyperkube_image}}",
+        "command": [
+          "/hyperkube",
+          "apiserver",
+          {% for k,v in kube_apiserver.iteritems() %}
+            "--{{k}}={{v}}",
+          {% endfor %}
+          "--etcd_servers=http://{{etcd_private_ip}}:4001",
+          "--public_address_override={{master_private_ip}}",
+          "--runtime_config=api/{{kubernetes_api_version}}"
+        ],
+        "ports": [
+          {
+            "name": "https",
+            "hostPort": 443,
+            "containerPort": 443
+          },
+          {
+            "name": "local",
+            "hostPort": 8080,
+            "containerPort": 8080
+          }
+        ]
+      }
+    ]
+  }
+}
