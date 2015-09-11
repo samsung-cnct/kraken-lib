@@ -129,6 +129,7 @@ coreos:
         [Service]
         Type=oneshot
         RemainAfterExit=yes
+        ExecStartPre=-/usr/bin/rm /home/core/.ssh/ansible_rsa*
         ExecStart=/usr/bin/bash -c "ssh-keygen -f /home/core/.ssh/ansible_rsa -N ''"
         ExecStart=/usr/bin/bash -c "cat /home/core/.ssh/ansible_rsa.pub >> /home/core/.ssh/authorized_keys"
     - name: kraken-git-pull.service
