@@ -1,6 +1,6 @@
 # Kraken
 
-> *Lightspeed  is too slow. We'll have to go right to [Ludicrus speed](#ludicrus-speed).*
+> *Lightspeed  is too slow. We'll have to go right to [Ludicrous speed](#Ludicrous-speed).*
 ## Overview
 Deploy a __Kubernetes__ cluster using __Terraform__  and __Ansible__ on top of __CoreOS__. You will also find tools here to build an __etcd__ cluster on __CoreOS__ and a __Docker__ playground all using __Vagrant__.
 
@@ -53,9 +53,9 @@ For better performance, you should consider adding and modifing the following co
     aws_etcd_type = "<aws instance type for etcd>"
     aws_storage_type_etcd = "<ephemeral>"
 
-#### Ludicrus speed
+#### Ludicrous speed
 
-Looking to create a **ludicrus** cluster? Use the following `terraform.tfvars`:
+Looking to create a **ludicrous** cluster? Use the following `terraform.tfvars`:
 
 ```
 aws_access_key="<your aws key id>"
