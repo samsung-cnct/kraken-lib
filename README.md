@@ -1,5 +1,6 @@
 # Kraken
 
+> *Lightspeed  is too slow. We'll have to go right to [Ludicrus speed](#ludicrus-speed).*
 ## Overview
 Deploy a __Kubernetes__ cluster using __Terraform__  and __Ansible__ on top of __CoreOS__. You will also find tools here to build an __etcd__ cluster on __CoreOS__ and a __Docker__ playground all using __Vagrant__.
 
@@ -30,7 +31,7 @@ Alternative/non-OSX setup:
 
 ## Variables setup
 
-Create a terraform.tfvars file under terraform/<cluster type> folder. For example, if you will be working with aws, use terraform/aws/terraform.tfvars
+Create a terraform.tfvars file under the `kraken` folder.
 
 File contents should be vairable pairs:
 
@@ -51,7 +52,22 @@ For better performance, you should consider adding and modifing the following co
     
     aws_etcd_type = "<aws instance type for etcd>"
     aws_storage_type_etcd = "<ephemeral>"
-    
+
+#### Ludicrus speed
+
+Looking to create a **ludicrus** cluster? Use the following `terraform.tfvars`:
+
+```
+aws_access_key="<your aws key id>"
+aws_secret_key="<your aws secret key>"
+aws_user_prefix="<prefix to use for named resources>"
+kubernetes_binaries_uri = "https://storage.googleapis.com/kubernetes-release/release/v1.0.4/bin/linux/amd64"
+apiserver_count = "10"
+node_count = "1010"
+aws_etcd_type = "i2.4xlarge"
+aws_storage_type_etcd = "ephemeral"
+aws_apiserver_type = "r3.2xlarge"
+```
 Alternatively, you can provide these variables as -var 'variable=value' switches to 'terraform' command. 
 
 All available variables to override and set are under 
