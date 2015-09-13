@@ -187,7 +187,6 @@ coreos:
         Description=Runs a prebaked ansible container
         [Service]
         Type=simple
-        RemainAfterExit=yes
         Restart=on-failure
         RestartSec=3
         ExecStartPre=-/usr/bin/docker rm -f ansible-docker

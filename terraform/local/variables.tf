@@ -114,7 +114,7 @@ variable "kraken_services_repo" {
   description = "Kraken services git repo"
 }
 variable "kraken_services_branch" {
-  default = "stable"
+  default = "master"
   description = "Kraken services repo branch"
 }
 variable "logentries_token" {

@@ -173,7 +173,7 @@ variable "kraken_repo" {
   description = "Kraken git repo"
 }
 variable "kraken_services_branch" {
-  default = "stable"
+  default = "master"
   description = "Kraken services repo branch"
 }
 variable "dns_domain" {
