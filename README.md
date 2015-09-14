@@ -64,9 +64,9 @@ aws_user_prefix="<prefix to use for named resources>"
 kubernetes_binaries_uri = "https://storage.googleapis.com/kubernetes-release/release/v1.0.4/bin/linux/amd64"
 apiserver_count = "10"
 node_count = "1010"
-aws_etcd_type = "i2.4xlarge"
+aws_etcd_type = "i2.8xlarge"
 aws_storage_type_etcd = "ephemeral"
-aws_apiserver_type = "r3.4xlarge"
+aws_apiserver_type = "m4.4xlarge"
 ```
 Alternatively, you can provide these variables as -var 'variable=value' switches to 'terraform' command. 
 
