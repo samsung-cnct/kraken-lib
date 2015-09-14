@@ -4,7 +4,6 @@ Requires=network-online.target
 After=network-online.target
 
 [Service]
-ExecStart=/usr/bin/wget -N -P /opt/bin {{kubernetes_binaries_uri}}/kubectl
-ExecStart=/usr/bin/chmod +x /opt/bin/kubectl
+ExecStart=/usr/bin/wget -N -O /opt/bin/kubectl.pending {{kubernetes_binaries_uri}}/kubectl
 Type=oneshot
 RemainAfterExit=true

@@ -10,11 +10,13 @@ Feature: Make sure we have the correct kubernetes services
     And the output should eventually match:
       """
       .*
+      framework.*
       grafana.*
-      heapster.*
       influxdb.*
       kube-dns.*
       kube-ui.*
       kubernetes.*
+      load-generator-master.*
+      podpincher.*
       prometheus.*
       """
