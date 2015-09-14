@@ -560,6 +560,7 @@ resource "template_file" "ansible_inventory" {
     format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type)}"
     coreos_update_channel = "${var.coreos_update_channel}"
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
+    apiserver_nginx_pool = "${join(" ", concat(formatlist("server %v:8080;", aws_instance.kubernetes_apiserver.*.private_ip)))}"
   }
 
   provisioner "local-exec" {
