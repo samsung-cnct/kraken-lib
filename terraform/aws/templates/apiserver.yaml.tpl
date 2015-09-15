@@ -113,19 +113,19 @@ coreos:
             Before=docker.service
 
             [Service]
-            ExecStartPre=-/usr/bin/etcdctl set /coreos.com/network/config '{"Network":"10.244.0.0/14", "Backend": {"Type": "vxlan"}}' 
+            ExecStartPre=-/usr/bin/etcdctl set /coreos.com/network/config '{"Network":"10.244.0.0/14", "Backend": {"Type": "vxlan"}}'
     - name: fleet.service
       command: start
     - name: systemd-journal-gatewayd.socket
       command: start
       enable: yes
       content: |
-        [Unit] 
+        [Unit]
         Description=Journal Gateway Service Socket
-        [Socket] 
+        [Socket]
         ListenStream=/var/run/journald.sock
         Service=systemd-journal-gatewayd.service
-        [Install] 
+        [Install]
         WantedBy=sockets.target
     - name: generate-ansible-keys.service
       command: start
@@ -160,7 +160,7 @@ coreos:
         [Service]
         Type=oneshot
         RemainAfterExit=yes
-        ExecStart=/usr/bin/echo ${kraken_commit} > /opt/kraken/commit.sha
+        ExecStart=/usr/bin/bash -c '/usr/bin/echo ${kraken_commit} > /opt/kraken/commit.sha'
     - name: fetch-kraken-commit.service
       command: start
       content: |
