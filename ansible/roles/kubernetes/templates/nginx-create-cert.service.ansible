@@ -1,7 +1,7 @@
 [Unit]
 Description=Create nginx cert
-Requires=network-online.target
-After=network-online.target
+Requires=nginx-docker.service
+Before=nginx-docker.service
 
 [Service]
 Restart=always

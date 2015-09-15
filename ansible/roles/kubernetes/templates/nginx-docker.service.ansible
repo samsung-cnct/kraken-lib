@@ -1,7 +1,7 @@
 [Unit]
 Description=Launch nginx proxy
-Requires=network-online.target
-After=network-online.target
+Requires=nginx-create-cert.service
+After=nginx-create-cert.service
 
 [Service]
 Restart=always
