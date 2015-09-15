@@ -153,7 +153,7 @@ coreos:
         Description=writes optional sha to a file
         [Service]
         Type=oneshot
-        ExecStart=/usr/bin/bash -c '/usr/bin/echo "${kraken_commit}" > /opt/kraken/commit.sha'
+        ExecStart=/usr/bin/bash -c '/usr/bin/awk " BEGIN { print \"${kraken_commit}\" } " > /opt/kraken/commit.sha'
     - name: fetch-kraken-commit.service
       command: start
       content: |
