@@ -12,7 +12,20 @@
             dest=/opt/nginx/nginx.conf
   sudo: yes
 
-- name: Create nginx load balancer
+- name: Create nginx ssl cert script
+  template: src=nginx-create-cert.sh.ansible
+            dest=/opt/nginx/nginx-create-cert.sh
+  sudo: yes
+
+- name: Create nginx ssl cert service
+  template: src=nginx-create-cert.service.ansible
+            dest=/etc/systemd/system/nginx-create-cert.service
+  sudo: yes
+  notify:
+    - reload systemd
+    - restart nginx-create-cert
+
+- name: Create nginx load balancer service
   template: src=nginx-docker.service.ansible
             dest=/etc/systemd/system/nginx-docker.service
   sudo: yes
