@@ -6,6 +6,6 @@ After=network-online.target
 [Service]
 ExecStart=/usr/bin/wget -N -O /opt/bin/kubectl.installing {{kubernetes_binaries_uri}}/kubectl
 ExecStart=/usr/bin/chmod +x /opt/bin/kubectl.installing
-ExecStart=/usr/bin/mv -v /opt/bin/kubectl.installing /opt/bin/kubectl.pending
+ExecStart=/usr/bin/mv -v /opt/bin/kubectl.installing /opt/bin/kubectl
 Type=oneshot
 RemainAfterExit=true

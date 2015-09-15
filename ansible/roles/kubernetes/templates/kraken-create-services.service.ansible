@@ -4,6 +4,7 @@ Requires=kraken-render.service
 
 [Service]
 Restart=always
-ExecStartPre=/usr/bin/chmod +x /opt/bin/kraken-create.sh
-ExecStartPre=/usr/bin/chmod +x /opt/bin/kraken-create-services.sh
+ExecStartPre=/usr/bin/test -x /opt/bin/kubectl
+ExecStartPre=-/usr/bin/chmod +x /opt/bin/kraken-create.sh
+ExecStartPre=-/usr/bin/chmod +x /opt/bin/kraken-create-services.sh
 ExecStart=/usr/bin/bash /opt/bin/kraken-create-services.sh
