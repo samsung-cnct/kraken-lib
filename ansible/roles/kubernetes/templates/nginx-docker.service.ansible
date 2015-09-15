@@ -11,4 +11,6 @@ ExecStart=/usr/bin/docker run \
   --net host \
   --name nginx \
   -v /opt/nginx/nginx.conf:/etc/nginx/nginx.conf \
+  -v /opt/nginx/nginx.crt:/etc/nginx/nginx.crt \
+  -v /opt/nginx/nginx.key:/etc/nginx/nginx.key \
   nginx
