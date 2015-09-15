@@ -8,6 +8,10 @@ variable "aws_secret_key" {
 variable "aws_user_prefix" {
   description = "AWS resource prefix - all resources with names will be identified as <aws_user_prefix>_<aws_cluster_prefix>_<name>"
 }
+variable "aws_kraken_s3_bucket" {
+  description = "AWS S3 Bucket for temporary key storage"
+  default = "kraken"
+}
 
 # variables with defaults
 variable "max_retries" {
