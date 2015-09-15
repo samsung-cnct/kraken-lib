@@ -1,0 +1,9 @@
+[Unit]
+Description=Create nginx cert
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+Restart=always
+ExecStartPre=/usr/bin/chmod +x /opt/nginx/nginx-create-cert.sh
+ExecStart=/bin/bash /opt/nginx/nginx-create-cert.sh
