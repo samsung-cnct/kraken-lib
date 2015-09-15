@@ -244,3 +244,11 @@ variable "asg_wait_total" {
   default = "720"
   description = "Repeat up to X waits"
 }
+variable "ansible_playbook_command" {
+  default = "ansible-playbook -i /etc/inventory.ansible"
+  description = "ansible-playbook invocation that will run inside ansible-docker container via cloudinit"
+}
+variable "ansible_playbook_file" {
+  default = "/opt/kraken/ansible/iaas_provision.yaml"
+  description = "location of playbook file run with ansible_playbook_command"
+}
