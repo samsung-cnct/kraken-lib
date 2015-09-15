@@ -163,7 +163,7 @@ coreos:
         [Service]
         Type=oneshot
         RemainAfterExit=yes
-        ExecStart=/usr/bin/echo ${kraken_commit} > /opt/kraken/commit.sha
+        ExecStart=/usr/bin/bash -c '/usr/bin/echo ${kraken_commit} > /opt/kraken/commit.sha'
     - name: fetch-kraken-commit.service
       command: start
       content: |
