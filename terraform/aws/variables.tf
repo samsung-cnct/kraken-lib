@@ -225,7 +225,7 @@ variable "kube_proxy_v" {
   description = "kubernetes proxy verbosity"
 }
 variable "kraken_services_dirs" {
-  default = "influxdb-grafana kube-ui loadtest/other podpincher/other skydns prometheus"
+  default = "influxdb-grafana kube-ui loadtest podpincher skydns prometheus"
   description = "Kraken services folders under kraken repo to deploy kubernetes services from."
 }
 variable "logentries_token" {
