@@ -3,9 +3,8 @@ Description=Try labeling ourselves
 Requires=install-kubectl.service
 
 [Service]
-Restart=always
-ExecStartPre=-/usr/bin/mv -v /opt/bin/kubectl.pending /opt/bin/kubectl
-ExecStartPre=-/usr/bin/chmod +x /opt/bin/kubectl
+Type=simple
+Restart=Always
+RestartSec=5
 ExecStartPre=-/usr/bin/chmod +x /opt/bin/kubernetes-label.sh
 ExecStart=/opt/bin/kubernetes-label.sh
-RemainAfterExit=true
