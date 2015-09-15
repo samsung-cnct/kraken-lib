@@ -210,6 +210,8 @@ resource "coreos_ami" "latest_ami" {
 resource "template_file" "etcd_cloudinit" {
   filename = "${path.module}/templates/etcd.yaml.tpl"
   vars {
+    ansible_playbook_command = "${var.ansible_playbook_command}"
+    ansible_playbook_file = "${var.ansible_playbook_file}"
     format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_etcd)}"
     coreos_update_channel = "${var.coreos_update_channel}"
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
@@ -249,6 +251,8 @@ resource "aws_instance" "kubernetes_etcd" {
 resource "template_file" "apiserver_cloudinit" {
   filename = "${path.module}/templates/apiserver.yaml.tpl"
   vars {
+    ansible_playbook_command = "${var.ansible_playbook_command}"
+    ansible_playbook_file = "${var.ansible_playbook_file}"
     cluster_name = "aws"
     dns_domain = "${var.dns_domain}"
     dns_ip = "${var.dns_ip}"
@@ -307,6 +311,8 @@ resource "aws_instance" "kubernetes_apiserver" {
 resource "template_file" "master_cloudinit" {
   filename = "${path.module}/templates/master.yaml.tpl"
   vars {
+    ansible_playbook_command = "${var.ansible_playbook_command}"
+    ansible_playbook_file = "${var.ansible_playbook_file}"
     cluster_master_record = "http://${var.aws_user_prefix}-master.${var.aws_cluster_domain}:8080"
     cluster_name = "aws"
     dns_domain = "${var.dns_domain}"
@@ -369,6 +375,8 @@ resource "template_file" "node_cloudinit_special" {
   filename = "${path.module}/templates/node.yaml.tpl"
   count = "${var.special_node_count}"
   vars {
+    ansible_playbook_command = "${var.ansible_playbook_command}"
+    ansible_playbook_file = "${var.ansible_playbook_file}"
     cluster_master_record = "http://${var.aws_user_prefix}-master.${var.aws_cluster_domain}:8080"
     cluster_name = "aws"
     dns_domain = "${var.dns_domain}"
@@ -431,6 +439,8 @@ resource "aws_instance" "kubernetes_node_special" {
 resource "template_file" "node_cloudinit" {
   filename = "${path.module}/templates/node.yaml.tpl"
   vars {
+    ansible_playbook_command = "${var.ansible_playbook_command}"
+    ansible_playbook_file = "${var.ansible_playbook_file}"
     cluster_master_record = "http://${var.aws_user_prefix}-master.${var.aws_cluster_domain}:8080"
     cluster_name = "aws"
     dns_domain = "${var.dns_domain}"
