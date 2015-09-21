@@ -13,12 +13,19 @@ kube_apiserver:
   insecure_port: 8080
   logtostderr: true
   service-cluster-ip-range: 10.100.0.0/16
+  secure_port: 443
+  tls-cert-file: /srv/kubernetes/server.cert
+  tls-private-key-file: /srv/kubernetes/server.key
+  client-ca-file: /srv/kubernetes/ca.crt
+  token-auth-file: /srv/kubernetes/known_tokens.csv
+  admission-control: NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota
   v: 1
 kube_controller_manager:
   port: 10252
   logtostderr: true
   pod_eviction_timeout: 1m
   resource_quota_sync_period: 20s
+  service-account-private-key-file: /srv/kubernetes/server.key
   v: 1
 kubelet:
   address: 0.0.0.0
@@ -29,10 +36,12 @@ kubelet:
   logtostderr: true
   port: 10250
   read_only_port: 10255
-  max_pods: 200
+  max-pods: 200
+  kubeconfig: /srv/kubernetes/kubelet/kubeconfig
   v: 1
 kube_proxy:
   logtostderr: true
+  kubeconfig: /srv/kubernetes/kube-proxy/kubeconfig
   v: 1
 kube_scheduler:
   logtostderr: true

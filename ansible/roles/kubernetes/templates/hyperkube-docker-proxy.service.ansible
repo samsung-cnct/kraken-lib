@@ -11,7 +11,9 @@ ExecStart=/usr/bin/docker run \
   --name kube-proxy \
   --net=host \
   --privileged \
+  -v /srv/kubernetes:/srv/kubernetes \
   {{hyperkube_image}} \
     /hyperkube proxy \
     --master=http://127.0.0.1:8080 \
+    --kubeconfig=/srv/kubernetes/kube-proxy/kubeconfig \
     --v={{kube_proxy_v}}
