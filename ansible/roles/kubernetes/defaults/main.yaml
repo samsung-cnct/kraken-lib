@@ -36,7 +36,7 @@ kubelet:
   logtostderr: true
   port: 10250
   read_only_port: 10255
-  max-pods: 2047
+  max-pods: 200
   kubeconfig: /srv/kubernetes/kubelet/kubeconfig
   v: 1
 kube_proxy:
