@@ -207,6 +207,32 @@ resource "coreos_ami" "latest_ami" {
   region = "${var.aws_region}"
 }
 
+resource "aws_s3_bucket" "b" {
+  bucket = "${var.aws_kraken_s3_bucket}-${var.aws_user_prefix}-${var.aws_cluster_prefix}"
+  acl = "public-read"
+  policy = "{\"Version\": \"2012-10-17\", \"Statement\": [ { \"Sid\": \"Stmt1442424671241\", \"Action\": [ \"s3:GetObject\" ], \"Effect\": \"Allow\", \"Resource\": \"arn:aws:s3:::${var.aws_kraken_s3_bucket}-${var.aws_user_prefix}-${var.aws_cluster_prefix}/*\", \"Principal\": \"*\" } ] }"
+}
+resource "execute_command" "kube-cert-gen" {
+  command = "${path.module}/../../generate-cert/make-cert-tokens.sh ${aws_instance.kubernetes_master.private_ip} ${path.module}/kube-cert"
+  destroy_command = "rm -rf ${path.module}/kube-cert"
+  # kube-certs.tgz
+  #
+  # ca.crt
+  # known_tokens.csv
+  # kube-proxy/kubeconfig
+  # kubecfg.crt - not used yet
+  # kubecfg.key - not used yet
+  # kubelet/kubeconfig
+  # server.cert
+  # server.key
+}
+resource "aws_s3_bucket_object" "kube-certs-archive" {
+  depends_on = ["aws_s3_bucket.b", "execute_command.kube-cert-gen"] # explicit dependency
+  bucket = "${var.aws_kraken_s3_bucket}-${var.aws_user_prefix}-${var.aws_cluster_prefix}"
+  key = "kube-certs.tgz"
+  source = "${path.module}/kube-cert/kube-certs.tgz"
+}
+
 resource "template_file" "etcd_cloudinit" {
   filename = "${path.module}/templates/etcd.yaml.tpl"
   vars {
@@ -250,6 +276,7 @@ resource "aws_instance" "kubernetes_etcd" {
 
 resource "template_file" "apiserver_cloudinit" {
   filename = "${path.module}/templates/apiserver.yaml.tpl"
+  depends_on = ["aws_s3_bucket.b"] # need the returned data
   vars {
     ansible_playbook_command = "${var.ansible_playbook_command}"
     ansible_playbook_file = "${var.ansible_playbook_file}"
@@ -280,6 +307,7 @@ resource "template_file" "apiserver_cloudinit" {
     kraken_repo = "${var.kraken_repo.repo}"
     kraken_branch = "${var.kraken_repo.branch}"
     kraken_commit = "${var.kraken_repo.commit_sha}"
+    kraken_kube_cert_base_url = "https://s3-${aws_s3_bucket.b.region}.amazonaws.com/${aws_s3_bucket.b.id}"
   }
 }
 resource "aws_instance" "kubernetes_apiserver" {
@@ -310,6 +338,7 @@ resource "aws_instance" "kubernetes_apiserver" {
 
 resource "template_file" "master_cloudinit" {
   filename = "${path.module}/templates/master.yaml.tpl"
+  depends_on = ["aws_s3_bucket.b"] # need the returned data
   vars {
     ansible_playbook_command = "${var.ansible_playbook_command}"
     ansible_playbook_file = "${var.ansible_playbook_file}"
@@ -344,6 +373,7 @@ resource "template_file" "master_cloudinit" {
     kraken_branch = "${var.kraken_repo.branch}"
     apiserver_nginx_pool = "${join(" ", concat(formatlist("server %v:8080;", aws_instance.kubernetes_apiserver.*.private_ip)))}"
     kraken_commit = "${var.kraken_repo.commit_sha}"
+    kraken_kube_cert_base_url = "https://s3-${aws_s3_bucket.b.region}.amazonaws.com/${aws_s3_bucket.b.id}"
   }
 }
 resource "aws_instance" "kubernetes_master" {
@@ -373,6 +403,7 @@ resource "aws_instance" "kubernetes_master" {
 
 resource "template_file" "node_cloudinit_special" {
   filename = "${path.module}/templates/node.yaml.tpl"
+  depends_on = ["aws_s3_bucket.b"] # need the returned data
   count = "${var.special_node_count}"
   vars {
     ansible_playbook_command = "${var.ansible_playbook_command}"
@@ -409,6 +440,7 @@ resource "template_file" "node_cloudinit_special" {
     kraken_repo = "${var.kraken_repo.repo}"
     kraken_branch = "${var.kraken_repo.branch}"
     kraken_commit = "${var.kraken_repo.commit_sha}"
+    kraken_kube_cert_base_url = "https://s3-${aws_s3_bucket.b.region}.amazonaws.com/${aws_s3_bucket.b.id}"
   }
 }
 resource "aws_instance" "kubernetes_node_special" {
@@ -438,6 +470,7 @@ resource "aws_instance" "kubernetes_node_special" {
 
 resource "template_file" "node_cloudinit" {
   filename = "${path.module}/templates/node.yaml.tpl"
+  depends_on = ["aws_s3_bucket.b"] # need the returned data
   vars {
     ansible_playbook_command = "${var.ansible_playbook_command}"
     ansible_playbook_file = "${var.ansible_playbook_file}"
@@ -473,6 +506,7 @@ resource "template_file" "node_cloudinit" {
     kraken_repo = "${var.kraken_repo.repo}"
     kraken_branch = "${var.kraken_repo.branch}"
     kraken_commit = "${var.kraken_repo.commit_sha}"
+    kraken_kube_cert_base_url = "https://s3-${aws_s3_bucket.b.region}.amazonaws.com/${aws_s3_bucket.b.id}"
   }
 }
 resource "aws_launch_configuration" "kubernetes_node" {
@@ -534,9 +568,12 @@ resource "aws_route53_record" "proxy_record" {
   records = ["${aws_instance.kubernetes_node_special.0.public_ip}"]
 }
 
+
 resource "template_file" "ansible_inventory" {
   filename = "${path.module}/templates/ansible.inventory.tpl"
+  depends_on = ["aws_s3_bucket.b"] # need the returned data
   vars {
+    kraken_kube_cert_base_url = "https://s3-${aws_s3_bucket.b.region}.amazonaws.com/${aws_s3_bucket.b.id}"
     ansible_ssh_private_key_file = "${var.aws_local_private_key}"
     etcd_public_ip = "${aws_instance.kubernetes_etcd.public_ip}"
     master_public_ip = "${aws_instance.kubernetes_master.public_ip}"

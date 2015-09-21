@@ -8,3 +8,4 @@ temp_*
 **/terraform.tfstate.backup
 **/.terraform
 **/terraform.tfvars
+**/kube-cert

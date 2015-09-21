@@ -127,6 +127,18 @@ coreos:
         Service=systemd-journal-gatewayd.service
         [Install]
         WantedBy=sockets.target
+    - name: pull-kubernetes-certs-tokens.service
+      command: start
+      content: |
+        [Unit]
+        Description=Pull cert key tokens from master
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStartPre=-/usr/bin/mkdir -p  /srv/kubernetes
+        ExecStart=/usr/bin/bash -c "wget ${kraken_kube_cert_base_url}/kube-certs.tgz -O /srv/kubernetes/kube-certs.tgz"
+        ExecStart=/usr/bin/bash -c "tar -C /srv/kubernetes -xvzf /srv/kubernetes/kube-certs.tgz"
+        ExecStart=/usr/bin/chown -R core:core /srv/kubernetes
     - name: generate-ansible-keys.service
       command: start
       content: |
