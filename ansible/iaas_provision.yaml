@@ -1,10 +1,10 @@
 ---
-- hosts: master:nodes:apiservers
+- hosts: etcd:master:nodes:apiservers
   gather_facts: False
   roles:
     - defunctzombie.coreos-bootstrap
 
-- hosts: master:nodes:apiservers
+- hosts: etcd:master:nodes:apiservers
   roles:
     - kubernetes
 
