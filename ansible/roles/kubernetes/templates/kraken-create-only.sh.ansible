@@ -1,0 +1,15 @@
+#! /usr/bin/bash
+#
+# special "no delete" version for items that take too long to delete
+# NOTE: for now, just assume NO change in this type of file... only additional entris in dir.  So 
+# NOTE: we shortcut and do NOT wait for delete to complete.
+#
+# the issue here is with namespace type of deletions.  The delete command only starts the delete.  The namespace 
+# will not be fully deleted before the command returns.
+#
+# TODO: future deletion complete check needed
+set -x
+cd /opt/bin/kraken-services-rendered
+for dir in $*; do
+  /opt/bin/kubectl --server=http://{{master_private_ip}}:8080 create -f ./$dir/
+done
