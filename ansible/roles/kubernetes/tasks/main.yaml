@@ -5,7 +5,7 @@
 - include: cadvisor.yaml
   when: "'master' in group_names or 'etcd' in group_names or 'apiserver' in group_names"
 
-- include: kubernetes-tools.yaml
+- include: kubectl.yaml
   when: "'master' in group_names or 'apiservers' in group_names or 'nodes' in group_names"
 
 # Kubernetes apiserver specific tasks

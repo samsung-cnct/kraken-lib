@@ -33,8 +33,6 @@ write_files:
       kubernetes_binaries_uri=${kubernetes_binaries_uri}
       logentries_token=${logentries_token}
       logentries_url=${logentries_url}
-      master_private_ip=$private_ipv4
-      master_public_ip=$public_ipv4
 coreos:
   etcd2:
     proxy: on

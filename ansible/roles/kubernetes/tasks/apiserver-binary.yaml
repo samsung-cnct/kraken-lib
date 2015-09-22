@@ -1,4 +1,14 @@
 ---
+- name: create install-hyperkube.service
+  template: src=install-hyperkube.service.ansible dest=/etc/systemd/system/install-hyperkube.service
+  sudo: yes
+  notify:
+    - reload systemd
+    - restart install-hyperkube
+    # XXX: since I haven't figured out how to get systemd to do this, nor figured out how to 
+    #      parameterize a list of handlers for the install-hyperkube handler to notify
+    - restart hyperkube-binary-apiserver
+
 - name: Create hyperkube-binary-apiserver
   template: src=hyperkube-binary-apiserver.service.ansible
             dest=/etc/systemd/system/hyperkube-binary-apiserver.service

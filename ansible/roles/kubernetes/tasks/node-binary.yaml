@@ -1,5 +1,4 @@
 ---
-
 - name: create install-hyperkube.service
   template: src=install-hyperkube.service.ansible dest=/etc/systemd/system/install-hyperkube.service
   sudo: yes
