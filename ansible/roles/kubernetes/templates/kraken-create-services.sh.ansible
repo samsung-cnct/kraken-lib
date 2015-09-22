@@ -4,7 +4,8 @@ set -x
 services_created=false
 while true; do
   if ! $services_created; then
-    /opt/bin/kraken-create.sh namespaces skydns {{kraken_services_dirs}} && services_created=true
+    /opt/bin/kraken-create-only.sh namespaces 
+    /opt/bin/kraken-create.sh skydns {{kraken_services_dirs}} && services_created=true
     sleep 5
   else
     sleep 900
