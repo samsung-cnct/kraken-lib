@@ -58,12 +58,12 @@ kube_node_count=$(kubectl --cluster=${CLUSTER} get nodes | tail -n +2 | wc -l)
 max_loops=$((TOTAL_WAITS-1))
 success=1
 
-while [ $kube_node_count -lt ${NODE_LIMIT} ]
+while [ ${kube_node_count} -lt ${NODE_LIMIT} ]
 do
-  if [ $max_loops -ge 0 ]; then
+  if [ ${max_loops} -ge 0 ]; then
     echo Current node count is ${kube_node_count}. Waiting for ${SLEEP_TIME} seconds.
     sleep ${SLEEP_TIME}
-    kube_node_count=$(kubectl --cluster=aws get nodes | tail -n +2 | wc -l)
+    kube_node_count=$(kubectl --cluster=${CLUSTER} get nodes | tail -n +2 | wc -l)
     max_loops=$((max_loops-1))
   else
     success=0
@@ -80,7 +80,7 @@ ec2_ips=$(aws --output text \
 current_node=$((NUMBERING_OFFSET+1))
 output="\n[nodes]\n"
 for ec2_ip in $ec2_ips; do
-  output="$output$(printf 'node-%03d' $current_node) ansible_ssh_host=$ec2_ip\n"
+  output="${output}$(printf 'node-%03d' ${current_node}) ansible_ssh_host=$ec2_ip\n"
   current_node=$((current_node+1))
 done 
 

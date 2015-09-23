@@ -533,6 +533,7 @@ resource "aws_autoscaling_group" "kubernetes_nodes" {
   desired_capacity = "${var.node_count}"
   force_delete = true
   wait_for_capacity_timeout = "0"
+  health_check_grace_period = "30"
   vpc_zone_identifier = ["${aws_subnet.vpc_subnet.id}"]
   launch_configuration = "${aws_launch_configuration.kubernetes_node.name}"
   health_check_type = "EC2"
