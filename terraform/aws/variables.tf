@@ -180,6 +180,10 @@ variable "kraken_services_branch" {
   default = "master"
   description = "Kraken services repo branch"
 }
+variable "ansible_docker_image" {
+  default = "quay.io/samsung_ag/kraken_ansible"
+  description = "Docker image to use for ansible-in-docker"
+}
 variable "dns_domain" {
   default = "kubernetes.local"
   description = "Kubenretes DNS domain"

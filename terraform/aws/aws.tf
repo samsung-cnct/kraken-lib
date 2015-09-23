@@ -247,10 +247,11 @@ resource "template_file" "etcd_cloudinit" {
     kraken_repo = "${var.kraken_repo.repo}"
     kraken_branch = "${var.kraken_repo.branch}"
     kraken_commit = "${var.kraken_repo.commit_sha}"
+    ansible_docker_image = ${var.ansible_docker_image}
   }
 }
 resource "aws_instance" "kubernetes_etcd" {
-  depends_on = ["aws_internet_gateway.vpc_gateway"] # explicit dependency 
+  depends_on = ["aws_internet_gateway.vpc_gateway"] # explicit dependency
   ami = "${coreos_ami.latest_ami.ami}"
   instance_type = "${var.aws_etcd_type}"
   key_name = "${aws_key_pair.keypair.key_name}"
@@ -308,6 +309,7 @@ resource "template_file" "apiserver_cloudinit" {
     kraken_branch = "${var.kraken_repo.branch}"
     kraken_commit = "${var.kraken_repo.commit_sha}"
     kraken_kube_cert_base_url = "https://s3-${aws_s3_bucket.b.region}.amazonaws.com/${aws_s3_bucket.b.id}"
+    ansible_docker_image = ${var.ansible_docker_image}
   }
 }
 resource "aws_instance" "kubernetes_apiserver" {
@@ -374,6 +376,7 @@ resource "template_file" "master_cloudinit" {
     apiserver_nginx_pool = "${join(" ", concat(formatlist("server %v:8080;", aws_instance.kubernetes_apiserver.*.private_ip)))}"
     kraken_commit = "${var.kraken_repo.commit_sha}"
     kraken_kube_cert_base_url = "https://s3-${aws_s3_bucket.b.region}.amazonaws.com/${aws_s3_bucket.b.id}"
+    ansible_docker_image = ${var.ansible_docker_image}
   }
 }
 resource "aws_instance" "kubernetes_master" {
@@ -441,6 +444,7 @@ resource "template_file" "node_cloudinit_special" {
     kraken_branch = "${var.kraken_repo.branch}"
     kraken_commit = "${var.kraken_repo.commit_sha}"
     kraken_kube_cert_base_url = "https://s3-${aws_s3_bucket.b.region}.amazonaws.com/${aws_s3_bucket.b.id}"
+    ansible_docker_image = ${var.ansible_docker_image}
   }
 }
 resource "aws_instance" "kubernetes_node_special" {
@@ -507,6 +511,7 @@ resource "template_file" "node_cloudinit" {
     kraken_branch = "${var.kraken_repo.branch}"
     kraken_commit = "${var.kraken_repo.commit_sha}"
     kraken_kube_cert_base_url = "https://s3-${aws_s3_bucket.b.region}.amazonaws.com/${aws_s3_bucket.b.id}"
+    ansible_docker_image = ${var.ansible_docker_image}
   }
 }
 resource "aws_launch_configuration" "kubernetes_node" {
