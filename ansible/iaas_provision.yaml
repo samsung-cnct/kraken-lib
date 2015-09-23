@@ -2,7 +2,7 @@
 - hosts: etcd:master:nodes:apiservers
   gather_facts: False
   roles:
-    - { role: sigma.coreos-bootstrap, coreos_pypy_version: '2.6.1' }
+    - { role: sigma.coreos-bootstrap, coreos_pypy_url: 'https://bitbucket.org/pypy/pypy/downloads', coreos_pypy_version: '2.6.1' }
 
 - hosts: etcd:master:nodes:apiservers
   roles:
