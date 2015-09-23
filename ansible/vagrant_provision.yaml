@@ -2,7 +2,7 @@
 - hosts: cluster
   gather_facts: False
   roles:
-    - defunctzombie.coreos-bootstrap
+    - sigma.coreos-bootstrap
 
 - hosts: cluster
   gather_facts: True

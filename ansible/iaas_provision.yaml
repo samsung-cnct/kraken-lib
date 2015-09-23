@@ -2,7 +2,7 @@
 - hosts: etcd:master:nodes:apiservers
   gather_facts: False
   roles:
-    - defunctzombie.coreos-bootstrap
+    - sigma.coreos-bootstrap
 
 - hosts: etcd:master:nodes:apiservers
   roles:
