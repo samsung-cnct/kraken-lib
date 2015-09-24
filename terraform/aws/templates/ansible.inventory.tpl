@@ -26,7 +26,7 @@ master_public_ip=${master_public_ip}
 
 [cluster:vars]
 ansible_connection=ssh
-ansible_python_interpreter="PATH=/home/core/pypy/bin:$PATH pypy"
+ansible_python_interpreter="PATH=/home/core/bin:$PATH python"
 ansible_ssh_user=core
 ansible_ssh_private_key_file=${ansible_ssh_private_key_file}
 cluster_master_record=${cluster_master_record}
