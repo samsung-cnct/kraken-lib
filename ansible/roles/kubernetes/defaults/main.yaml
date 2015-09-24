@@ -51,7 +51,7 @@ kubelet:
   address: 0.0.0.0
   # cadvisor-port: 4194
   cadvisor-port: 0
-  enable-debugging-handlers: false
+  enable-debugging-handlers: true
   # enable-server: false
   enable-server: true
   healthz-bind-address: 0.0.0.0
