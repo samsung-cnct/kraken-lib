@@ -1,0 +1,5 @@
+---
+- hosts: localhost
+  remote_user: root
+  roles:
+    - {role: "ansible-coreos-bootstrap", coreos_pkg_home: "/opt"}

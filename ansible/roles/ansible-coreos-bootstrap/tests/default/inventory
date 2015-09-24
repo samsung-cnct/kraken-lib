@@ -1,0 +1,4 @@
+localhost ansible_connection=local
+
+[all:vars]
+ansible_python_interpreter="PATH=/home/core/bin:$PATH python"
