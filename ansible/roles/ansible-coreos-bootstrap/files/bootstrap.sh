@@ -12,6 +12,6 @@ mkdir -p `dirname "$PYPY_HOME"`
 wget -O - "$PYPY_DOWNLOAD_URL/pypy-$PYPY_VERSION-linux_x86_64-portable.tar.bz2" |tar -xjf -
 mv -n "pypy-$PYPY_VERSION-linux_x86_64-portable" "$PYPY_HOME"
 
-"$PKG_HOME/bin/python" --version
+"$PYPY_HOME/bin/pypy" --version
 
 touch "$PKG_HOME/.bootstrapped"
