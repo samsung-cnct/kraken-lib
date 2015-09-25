@@ -5,6 +5,7 @@ After=network-online.target
 
 [Service]
 Restart=always
+RestartSec=5
 LimitNOFILE=infinity
 ExecStartPre=-/usr/bin/docker kill kube-apiserver
 ExecStartPre=-/usr/bin/docker rm kube-apiserver
