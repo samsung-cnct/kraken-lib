@@ -85,17 +85,16 @@ do
     fleet_array=($(fleetctl --endpoint=http://${ETCD_IP}:${ETCD_PORT} list-machines | grep node | awk '{ print $2 }'))
     kube_array=($(kubectl --cluster=${CLUSTER} get nodes | tail -n +2 | awk '{ print $1 }'))
     delta=(`echo ${fleet_array[@]} ${kube_array[@]} | tr ' ' '\n' | sort | uniq -u `)
+    private_ips=$( IFS=$','; echo "${delta[*]}" )
+    echo -e "Etcd nodes not yet present in kubernetes cluster:\n${private_ips}"
 
-    echo -e "Etcd nodes not yet present in kubernetes cluster:\n${delta[*]}"
-    for private_ip in ${delta[*]}; do
-      ec2_instance=$(aws --output text \
-        --query "Reservations[*].Instances[*].[InstanceId, PrivateIpAddress]" \
-        ec2 describe-instances --instance-ids \
+    ec2_instances=($(aws --output text \
+        --query "Reservations[*].Instances[*].[InstanceId]" \
+        ec2 describe-instances --filters "Name=private-ip-address,Values=${private_ips}" --instance-ids \
         `aws --output text --query "AutoScalingGroups[0].Instances[*].InstanceId" \
-        autoscaling describe-auto-scaling-groups --auto-scaling-group-names "${ASG_NAME}"` | grep ${private_ip} | awk '{ print $1 }')
-      echo Terminating instance ${ec2_instance}...
-      aws --output text ec2 terminate-instances --instance-ids ${ec2_instance}
-    done
+        autoscaling describe-auto-scaling-groups --auto-scaling-group-names "${ASG_NAME}"`))
+    echo -e "Instances to be terminated:\n$( IFS=$','; echo "${ec2_instances[*]}" )"
+    aws --output text ec2 terminate-instances --instance-ids $( IFS=$','; echo "${ec2_instances[*]}" )
 
     # reset max loops and decrement retries
     max_loops=$((TOTAL_WAITS-1))
