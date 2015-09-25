@@ -93,8 +93,8 @@ do
         ec2 describe-instances --filters "Name=private-ip-address,Values=${private_ips}" --instance-ids \
         `aws --output text --query "AutoScalingGroups[0].Instances[*].InstanceId" \
         autoscaling describe-auto-scaling-groups --auto-scaling-group-names "${ASG_NAME}"`))
-    echo -e "Instances to be terminated:\n$( IFS=$','; echo "${ec2_instances[*]}" )"
-    aws --output text ec2 terminate-instances --instance-ids $( IFS=$','; echo "${ec2_instances[*]}" )
+    echo -e "Instances to be terminated:\n${ec2_instances[*]}
+    aws --output text ec2 terminate-instances --instance-ids ${ec2_instances[*]}
 
     # reset max loops and decrement retries
     max_loops=$((TOTAL_WAITS-1))
