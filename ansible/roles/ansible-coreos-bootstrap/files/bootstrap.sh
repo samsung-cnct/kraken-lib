@@ -15,7 +15,6 @@ mv -n "pypy-$PYPY_VERSION-linux_x86_64-portable" "$PYPY_HOME"
 mkdir -p "$PKG_HOME/bin"
 
 ln -snf "$PYPY_HOME/bin/pypy" "$PKG_HOME/bin/python"
-ln -snf "$PYPY_HOME/bin/pip" "$PKG_HOME/bin/pip"
 
 "$PKG_HOME/bin/python" --version
 
