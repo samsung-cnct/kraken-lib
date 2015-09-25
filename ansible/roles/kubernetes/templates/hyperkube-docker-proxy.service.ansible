@@ -5,6 +5,7 @@ After=hyperkube-docker-master.service
 
 [Service]
 Restart=always
+RestartSec=5
 ExecStartPre=-/usr/bin/docker kill kube-proxy
 ExecStartPre=-/usr/bin/docker rm kube-proxy
 ExecStart=/usr/bin/docker run \
