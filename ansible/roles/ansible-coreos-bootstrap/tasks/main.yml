@@ -1,0 +1,16 @@
+---
+# tasks file for sigma.coreos-bootstrap
+
+- name: Run bootstrap.sh
+  script: bootstrap.sh creates={{coreos_pkg_home}}/.bootstrapped
+  environment:
+    PKG_HOME: "{{coreos_pkg_home}}"
+    PYPY_VERSION: "{{coreos_pypy_version}}"
+    PYPY_HOME: "{{coreos_pypy_home}}"
+    PYPY_DOWNLOAD_URL: "{{coreos_pypy_url}}"
+
+- name: Get get-pip.py
+  get_url: url={{coreos_pip_script}} dest={{coreos_pkg_home_bin}}/get-pip.py mode=0755 validate_certs=no
+
+- name: Install pip
+  shell: "{{coreos_python_interpreter}} {{coreos_pkg_home_bin}}/get-pip.py creates={{coreos_pypy_home}}/bin/pip"

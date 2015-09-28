@@ -180,6 +180,10 @@ variable "kraken_services_branch" {
   default = "master"
   description = "Kraken services repo branch"
 }
+variable "ansible_docker_image" {
+  default = "quay.io/samsung_ag/kraken_ansible"
+  description = "Docker image to use for ansible-in-docker"
+}
 variable "dns_domain" {
   default = "kubernetes.local"
   description = "Kubenretes DNS domain"
@@ -247,8 +251,12 @@ variable "asg_wait_single" {
   description = "Sleep for x seconds between each check of number of nodes up"
 }
 variable "asg_wait_total" {
-  default = "720"
+  default = "180"
   description = "Repeat up to X waits"
+}
+variable "asg_retries" {
+  default = "4"
+  description = "Retry X waits N times"
 }
 variable "ansible_playbook_command" {
   default = "ansible-playbook -i /etc/inventory.ansible"

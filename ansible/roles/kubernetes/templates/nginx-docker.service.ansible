@@ -5,6 +5,7 @@ After=network-online.target
 
 [Service]
 Restart=always
+RestartSec=5
 ExecStartPre=-/usr/bin/docker kill nginx
 ExecStartPre=-/usr/bin/docker rm nginx
 ExecStart=/usr/bin/docker run \

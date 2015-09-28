@@ -7,6 +7,7 @@ Before=kubernetes-label.service
 
 [Service]
 Restart=always
+RestartSec=5
 ExecStartPre=-/usr/bin/docker kill kube-node
 ExecStartPre=-/usr/bin/docker rm kube-node
 ExecStart=/usr/bin/docker run \

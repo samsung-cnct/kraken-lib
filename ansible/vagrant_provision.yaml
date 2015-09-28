@@ -2,7 +2,7 @@
 - hosts: cluster
   gather_facts: False
   roles:
-    - defunctzombie.coreos-bootstrap
+    - { role: ansible-coreos-bootstrap, coreos_pypy_url: 'https://bitbucket.org/squeaky/portable-pypy/downloads' }
 
 - hosts: cluster
   gather_facts: True
