@@ -22,7 +22,7 @@ Feature: Make sure we have the correct kubernetes services
       framework.*
       grafana.*
       influxdb.*
-      kube-ui.*
+      #kube-ui.*
       kubernetes.*
       load-generator-master.*
       podpincher.*
