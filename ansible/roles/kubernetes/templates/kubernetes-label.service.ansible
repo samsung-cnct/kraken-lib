@@ -4,7 +4,7 @@ Requires=install-kubectl.service
 
 [Service]
 Type=simple
-Restart=Always
+Restart=always
 RestartSec=5
 ExecStartPre=-/usr/bin/chmod +x /opt/bin/kubernetes-label.sh
 ExecStart=/opt/bin/kubernetes-label.sh

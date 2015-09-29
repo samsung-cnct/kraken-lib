@@ -8,36 +8,74 @@ hyperkube_deployment_mode: binary
 kubernetes_binaries_uri: https://storage.googleapis.com/kubernetes-release/release/v1.0.3/bin/linux/amd64
 kubernetes_api_version: v1
 kube_apiserver:
-  cors_allowed_origins: .*
-  insecure_bind_address: 0.0.0.0
-  insecure_port: 8080
+  # https://github.com/kubernetes/kubernetes/blob/release-1.0/docs/admin/admission-controllers.md#is-there-a-recommended-set-of-plug-ins-to-use
+  admission-control: NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota
+  bind-address: 0.0.0.0
+  client-ca-file: /srv/kubernetes/ca.crt
+  cors-allowed-origins: .*
+  event-ttl: 1h0m0s
+  insecure-bind-address: 0.0.0.0
+  insecure-port: 8080
+  kubelet-timeout: 5s
   logtostderr: true
+  # max-requests-inflight: 400
+  max-requests-inflight: 40000
+  profiling: true
+  secure-port: 0
+  secure_port: 443
   service-cluster-ip-range: 10.100.0.0/16
+  tls-cert-file: /srv/kubernetes/server.cert
+  tls-private-key-file: /srv/kubernetes/server.key
+  token-auth-file: /srv/kubernetes/known_tokens.csv
   v: 1
 kube_controller_manager:
-  port: 10252
+  concurrent-endpoint-syncs: 5
+  concurrent-rc-syncs: 5
+  deleting-pods-burst: 10
   logtostderr: true
-  pod_eviction_timeout: 1m
-  resource_quota_sync_period: 20s
+  namespace-sync-period: 5m0s
+  node-monitor-grace-period: 40s
+  node-monitor-period: 5s
+  node-startup-grace-period: 1m0s
+  node-sync-period: 10s
+  pod-eviction-timeout: 1m
+  port: 10252
+  profiling: true
+  pvclaimbinder-sync-period: 10s
+  register-retry-count: 10
+  resource-quota-sync-period: 20s
+  service-account-private-key-file: /srv/kubernetes/server.key
+  service-sync-period: 5m0s
   v: 1
 kubelet:
   address: 0.0.0.0
-  cadvisor_port: 0
-  enable_server: true
-  healthz_bind_address: 0.0.0.0
-  healthz_port: 10254
+  # cadvisor-port: 4194
+  cadvisor-port: 0
+  enable-debugging-handlers: true
+  # enable-server: false
+  enable-server: true
+  healthz-bind-address: 0.0.0.0
+  healthz-port: 10254
+  kubeconfig: /srv/kubernetes/kubelet/kubeconfig
   logtostderr: true
+  # max-pods: 40
+  max-pods: 200
+  node-status-update-frequency: 10s
   port: 10250
-  read_only_port: 10255
-  max_pods: 200
+  read-only-port: 10255
+  registry-burst: 0
+  registry-qps: 0
+  sync-frequency: 10s
   v: 1
 kube_proxy:
   logtostderr: true
+  kubeconfig: /srv/kubernetes/kube-proxy/kubeconfig
   v: 1
 kube_scheduler:
   logtostderr: true
   port: 10251
-  v: 1
+  profiling: true
+  v: 4
 kraken_services_dirs: 
 logentries_token:
 logentries_url:

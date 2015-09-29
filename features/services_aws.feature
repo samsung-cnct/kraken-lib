@@ -4,7 +4,16 @@ Feature: Make sure we have the correct kubernetes services
   As kraken developer 
   I should be able to run these scenario and see the correct exit code and services output
 
-  Scenario: Getting services
+  Scenario: Getting kube-system services
+    When I run `kubectl --cluster=aws get services --namespace=kube-system`
+    Then the exit status should eventually be 0
+    And the output should eventually match:
+      """
+      .*
+      kube-dns.*
+      """
+
+  Scenario: Getting default services
     When I run `kubectl --cluster=aws get services`
     Then the exit status should eventually be 0
     And the output should eventually match:
@@ -13,7 +22,6 @@ Feature: Make sure we have the correct kubernetes services
       framework.*
       grafana.*
       influxdb.*
-      kube-dns.*
       kube-ui.*
       kubernetes.*
       load-generator-master.*

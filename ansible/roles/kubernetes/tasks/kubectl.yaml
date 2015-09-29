@@ -1,0 +1,7 @@
+---
+- name: create install-kubectl.service
+  template: src=install-kubectl.service.ansible dest=/etc/systemd/system/install-kubectl.service
+  sudo: yes
+  notify:
+    - reload systemd
+    - restart install-kubectl

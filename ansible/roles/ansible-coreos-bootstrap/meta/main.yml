@@ -1,0 +1,10 @@
+---
+galaxy_info:
+  author: Yann Hodique
+  description: CoreOS bootstrap
+  company: VMware
+  license: MIT
+  min_ansible_version: 1.5
+  categories:
+    - system
+dependencies: []

@@ -20,7 +20,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.trigger.before :up, :vm => 'etcd'  do
     info "getting ansible roles"
-    run "ansible-galaxy install defunctzombie.coreos-bootstrap --ignore-errors"
+    run "ansible-galaxy install sigma.coreos-bootstrap --ignore-errors"
     run "touch #{ENV['VAGRANT_CWD']}/rendered/ansible.inventory"
   end
 

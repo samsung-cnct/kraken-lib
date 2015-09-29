@@ -5,12 +5,14 @@ After=hyperkube-docker-node.service
 
 [Service]
 Restart=always
+RestartSec=5
 ExecStartPre=-/usr/bin/docker kill kube-proxy
 ExecStartPre=-/usr/bin/docker rm kube-proxy
 ExecStart=/usr/bin/docker run \
   --name kube-proxy \
   --net=host \
   --privileged \
+  -v /srv/kubernetes:/srv/kubernetes \
   {{hyperkube_image}} \
     /hyperkube proxy \
     {% for k,v in kube_proxy.iteritems() %}

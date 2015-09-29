@@ -247,10 +247,11 @@ resource "template_file" "etcd_cloudinit" {
     kraken_repo = "${var.kraken_repo.repo}"
     kraken_branch = "${var.kraken_repo.branch}"
     kraken_commit = "${var.kraken_repo.commit_sha}"
+    ansible_docker_image = "${var.ansible_docker_image}"
   }
 }
 resource "aws_instance" "kubernetes_etcd" {
-  depends_on = ["aws_internet_gateway.vpc_gateway"] # explicit dependency 
+  depends_on = ["aws_internet_gateway.vpc_gateway"] # explicit dependency
   ami = "${coreos_ami.latest_ami.ami}"
   instance_type = "${var.aws_etcd_type}"
   key_name = "${aws_key_pair.keypair.key_name}"
@@ -308,6 +309,7 @@ resource "template_file" "apiserver_cloudinit" {
     kraken_branch = "${var.kraken_repo.branch}"
     kraken_commit = "${var.kraken_repo.commit_sha}"
     kraken_kube_cert_base_url = "https://s3-${aws_s3_bucket.b.region}.amazonaws.com/${aws_s3_bucket.b.id}"
+    ansible_docker_image = "${var.ansible_docker_image}"
   }
 }
 resource "aws_instance" "kubernetes_apiserver" {
@@ -374,6 +376,7 @@ resource "template_file" "master_cloudinit" {
     apiserver_nginx_pool = "${join(" ", concat(formatlist("server %v:8080;", aws_instance.kubernetes_apiserver.*.private_ip)))}"
     kraken_commit = "${var.kraken_repo.commit_sha}"
     kraken_kube_cert_base_url = "https://s3-${aws_s3_bucket.b.region}.amazonaws.com/${aws_s3_bucket.b.id}"
+    ansible_docker_image = "${var.ansible_docker_image}"
   }
 }
 resource "aws_instance" "kubernetes_master" {
@@ -441,6 +444,7 @@ resource "template_file" "node_cloudinit_special" {
     kraken_branch = "${var.kraken_repo.branch}"
     kraken_commit = "${var.kraken_repo.commit_sha}"
     kraken_kube_cert_base_url = "https://s3-${aws_s3_bucket.b.region}.amazonaws.com/${aws_s3_bucket.b.id}"
+    ansible_docker_image = "${var.ansible_docker_image}"
   }
 }
 resource "aws_instance" "kubernetes_node_special" {
@@ -507,6 +511,7 @@ resource "template_file" "node_cloudinit" {
     kraken_branch = "${var.kraken_repo.branch}"
     kraken_commit = "${var.kraken_repo.commit_sha}"
     kraken_kube_cert_base_url = "https://s3-${aws_s3_bucket.b.region}.amazonaws.com/${aws_s3_bucket.b.id}"
+    ansible_docker_image = "${var.ansible_docker_image}"
   }
 }
 resource "aws_launch_configuration" "kubernetes_node" {
@@ -533,6 +538,7 @@ resource "aws_autoscaling_group" "kubernetes_nodes" {
   desired_capacity = "${var.node_count}"
   force_delete = true
   wait_for_capacity_timeout = "0"
+  health_check_grace_period = "30"
   vpc_zone_identifier = ["${aws_subnet.vpc_subnet.id}"]
   launch_configuration = "${aws_launch_configuration.kubernetes_node.name}"
   health_check_type = "EC2"
@@ -620,7 +626,7 @@ resource "template_file" "ansible_inventory" {
   }
 
   provisioner "local-exec" {
-    command = "AWS_ACCESS_KEY_ID=${var.aws_access_key} AWS_SECRET_ACCESS_KEY=${var.aws_secret_key} AWS_DEFAULT_REGION=${var.aws_region} ${path.module}/kraken_asg_helper.sh --cluster aws --limit ${var.node_count + var.special_node_count} --name ${var.aws_user_prefix}_${var.aws_cluster_prefix}_nodes --output ${path.module}/rendered/ansible.inventory --singlewait ${var.asg_wait_single} --totalwaits ${var.asg_wait_total} --offset ${var.special_node_count}"
+    command = "AWS_ACCESS_KEY_ID=${var.aws_access_key} AWS_SECRET_ACCESS_KEY=${var.aws_secret_key} AWS_DEFAULT_REGION=${var.aws_region} ${path.module}/kraken_asg_helper.sh --cluster aws --limit ${var.node_count + var.special_node_count} --name ${var.aws_user_prefix}_${var.aws_cluster_prefix}_nodes --output ${path.module}/rendered/ansible.inventory --singlewait ${var.asg_wait_single} --totalwaits ${var.asg_wait_total} --offset ${var.special_node_count} --retries ${var.asg_retries} --etcd ${aws_instance.kubernetes_etcd.public_ip} --port 4001"
   }
 
   provisioner "local-exec" {

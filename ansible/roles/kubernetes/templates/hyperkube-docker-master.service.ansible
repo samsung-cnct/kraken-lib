@@ -5,6 +5,7 @@ After=network-online.target
 
 [Service]
 Restart=always
+RestartSec=5
 LimitNOFILE=infinity
 ExecStartPre=-/usr/bin/docker kill kube-master
 ExecStartPre=-/usr/bin/docker rm kube-master
@@ -16,6 +17,7 @@ ExecStart=/usr/bin/docker run \
   --privileged \
   -v /opt/bin/manifests:/etc/kubernetes/manifests-override \
   -v /var/run/docker.sock:/var/run/docker.sock \
+  -v /srv/kubernetes:/srv/kubernetes \
   {{hyperkube_image}} \
     /hyperkube \
     kubelet \
@@ -23,4 +25,5 @@ ExecStart=/usr/bin/docker run \
     --cluster_domain={{dns_domain}} \
     --config=/etc/kubernetes/manifests-override \
     --enable_server \
+    --kubeconfig=/srv/kubernetes/kubelet/kubeconfig \
     --hostname_override={{master_private_ip}}

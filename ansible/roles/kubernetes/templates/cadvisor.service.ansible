@@ -4,6 +4,7 @@ Requires=early-docker.service
 
 [Service]
 Restart=always
+RestartSec=5
 ExecStartPre=-/usr/bin/docker kill cadvisor
 ExecStartPre=-/usr/bin/docker rm cadvisor
 ExecStart=/usr/bin/bash -c \

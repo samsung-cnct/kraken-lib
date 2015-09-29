@@ -7,6 +7,7 @@ Before=kubernetes-label.service
 
 [Service]
 Restart=always
+RestartSec=5
 ExecStartPre=-/usr/bin/docker kill kube-node
 ExecStartPre=-/usr/bin/docker rm kube-node
 ExecStart=/usr/bin/docker run \
@@ -14,6 +15,7 @@ ExecStart=/usr/bin/docker run \
   --net=host \
   --privileged \
   -v /var/run/docker.sock:/var/run/docker.sock \
+  -v /srv/kubernetes:/srv/kubernetes \
   {{hyperkube_image}} \
     /hyperkube kubelet \
     {% for k,v in kubelet.iteritems() %}
@@ -22,4 +24,5 @@ ExecStart=/usr/bin/docker run \
     --api_servers=http://{{master_private_ip}}:8080 \
     --cluster_dns={{dns_ip}} \
     --cluster_domain={{dns_domain}} \
+    --kubeconfig=/srv/kubernetes/kubelet/kubeconfig \
     --hostname_override={{ansible_local.kubernetes_node_ip_fact.node_ip_address}}
