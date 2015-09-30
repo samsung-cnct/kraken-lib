@@ -1,0 +1,9 @@
+[Unit]
+Description=Create nginx cert
+Requires=nginx-docker.service
+Before=nginx-docker.service
+
+[Service]
+Type=oneshot
+ExecStartPre=/usr/bin/chmod +x /opt/nginx/nginx-create-cert.sh
+ExecStart=/bin/bash /opt/nginx/nginx-create-cert.sh

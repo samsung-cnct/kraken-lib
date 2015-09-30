@@ -3,39 +3,44 @@ worker_rlimit_nofile 21000;
 error_log /dev/null;
 
 events {
-    worker_connections 20000;
+  worker_connections 20000;
 }
 http {
-    upstream apiservers {
-        {{apiserver_nginx_pool}}
+  upstream apiservers {
+    {{apiserver_nginx_pool}}
+  }
+
+  server {
+    listen 8080;
+    listen 443 ssl;
+    server_name *.kubeme.io;
+    access_log /dev/null;
+
+
+    ssl_certificate           /etc/nginx/nginx.crt;
+    ssl_certificate_key       /etc/nginx/nginx.key;
+
+    gzip on;
+    gzip_proxied any;
+    gzip_types *;
+    gzip_min_length 200;
+
+    proxy_set_header HOST \$host;
+    proxy_set_header X-Forwarded-Proto \$scheme;
+    proxy_set_header X-Real-IP \$remote_addr;
+    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_read_timeout 1200;
+    proxy_buffering off;
+
+    location / {
+        proxy_pass http://apiservers;
     }
 
-    server {
-        listen 8080;
-        access_log /dev/null;
-
-        gzip on;
-        gzip_proxied any;
-        gzip_types *;
-        gzip_min_length 200;
-
-
-        proxy_set_header HOST \$host;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_read_timeout 1200;
-        proxy_buffering off;
-
-        location / {
-            proxy_pass http://apiservers;
-        }
-
-        location /nginx_status {
-            stub_status on;
-            access_log off;
-            allow 127.0.0.1;
-            deny all;
-        }
+    location /nginx_status {
+        stub_status on;
+        access_log off;
+        allow 127.0.0.1;
+        deny all;
     }
+  }
 }
