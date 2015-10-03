@@ -213,7 +213,7 @@ resource "aws_s3_bucket" "b" {
   policy = "{\"Version\": \"2012-10-17\", \"Statement\": [ { \"Sid\": \"Stmt1442424671241\", \"Action\": [ \"s3:GetObject\" ], \"Effect\": \"Allow\", \"Resource\": \"arn:aws:s3:::${var.aws_kraken_s3_bucket}-${var.aws_user_prefix}-${var.aws_cluster_prefix}/*\", \"Principal\": \"*\" } ] }"
 }
 resource "execute_command" "kube-cert-gen" {
-  command = "${path.module}/../../generate-cert/make-cert-tokens.sh ${aws_instance.kubernetes_master.private_ip} ${path.module}/kube-cert"
+  command = "${path.module}/../../generate-cert/make-cert-tokens.sh ${aws_instance.kubernetes_master.private_ip} ${var.dns_ip} ${path.module}/kube-cert"
   destroy_command = "rm -rf ${path.module}/kube-cert"
   # kube-certs.tgz
   #

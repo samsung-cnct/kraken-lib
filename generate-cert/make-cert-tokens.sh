@@ -19,8 +19,8 @@ my_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cur_dir=$( pwd )
 echo "CUR: ${cur_dir}"
 
-if [ $# -lt 1 -o  $# -gt 2 ]; then
-    echo "Usage $0 <Master IP> [Cert Directory]"
+if [ $# -lt 1 -o  $# -gt 3 ]; then
+    echo "Usage $0 <Master IP> <DNS IP> [Cert Directory]"
     exit 1
 fi
 #
@@ -28,17 +28,23 @@ fi
 master_ip=$1
 low_ip=${master_ip%.*}.1
 #
-if [ $# -eq 2 ]; then
-    tmp_cert_dir=$2
+#
+dns_ip=$2
+pod_low_ip=${dns_ip%.*}.1
+pod_high_ip=${dns_ip%.*}.255
+#
+#
+if [ $# -eq 3 ]; then
+    tmp_cert_dir=$3
 else
     tmp_cert_dir=$(mktemp -d ${cur_dir}/kube-certs)
 fi
 echo "tmp_cert_dir: ${tmp_cert_dir}"
 CERT_DIR=${CERT_DIR:-${tmp_cert_dir}}
 CERT_GROUP=${CERT_GROUP:-root}
-echo "my_dir: ${my_dir} master: ${master_ip} low: ${low_ip} cert_group: ${CERT_GROUP} cert_dir: ${CERT_DIR}"
+echo "my_dir: ${my_dir} master: ${master_ip} low: ${low_ip} pod: ${pod_low_ip}:${pod_high_ip} cert_group: ${CERT_GROUP} cert_dir: ${CERT_DIR}"
 #
-source ${my_dir}/make-ca-cert.sh ${master_ip} IP:${master_ip},IP:${low_ip},DNS:kubernetes,DNS:kubernetes.default,DNS:kubernetes.default.svc,DNS:kubernetes.default.svc.cluster.local
+source ${my_dir}/make-ca-cert.sh ${master_ip} IP:${master_ip},IP:${low_ip},IP:${pod_low_ip},IP:${pod_high_ip},DNS:kubernetes,DNS:kubernetes.default,DNS:kubernetes.default.svc,DNS:kubernetes.default.svc.cluster.local
 
 SRV_BASE_DIR=$CERT_DIR
 source "${my_dir}/make-token.sh"
