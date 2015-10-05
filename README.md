@@ -1,6 +1,4 @@
 # Kraken
-
-> *Lightspeed  is too slow. We'll have to go right to [Ludicrous speed](#Ludicrous-speed).*
 ## Overview
 Deploy a __Kubernetes__ cluster using __Terraform__  and __Ansible__ on top of __CoreOS__. You will also find tools here to build an __etcd__ cluster on __CoreOS__ and a __Docker__ playground all using __Vagrant__.
 
