@@ -44,6 +44,7 @@ kube_controller_manager:
   pvclaimbinder-sync-period: 10s
   register-retry-count: 10
   resource-quota-sync-period: 20s
+  root-ca-file: /srv/kubernetes/ca.crt
   service-account-private-key-file: /srv/kubernetes/server.key
   service-sync-period: 5m0s
   v: 1
