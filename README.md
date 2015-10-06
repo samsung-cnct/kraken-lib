@@ -127,4 +127,4 @@ And so on
 ### Helpful Links
 * kubectl user documentation can be found [here](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/kubectl.md)
 * kubectl [FAQ](https://github.com/GoogleCloudPlatform/kubernetes/wiki/User-FAQ)
-* Kubernetes conformance test logs run after a PR is merged to this repo located at http://e2e.kubeme.io/
+* Kubernetes conformance test logs run after a PR is merged to this repo located at http://e2e.kubeme.io
