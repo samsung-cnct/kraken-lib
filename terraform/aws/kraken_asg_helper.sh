@@ -85,16 +85,32 @@ do
     fleet_array=($(fleetctl --endpoint=http://${ETCD_IP}:${ETCD_PORT} list-machines | grep node | awk '{ print $2 }'))
     kube_array=($(kubectl --cluster=${CLUSTER} get nodes | tail -n +2 | awk '{ print $1 }'))
     delta=(`echo ${fleet_array[@]} ${kube_array[@]} | tr ' ' '\n' | sort | uniq -u `)
-    private_ips=$( IFS=$','; echo "${delta[*]}" )
-    echo -e "Etcd nodes not yet present in kubernetes cluster:\n${private_ips}"
+    
+    if [ ${#delta[@]} -eq 0 ]; then    
+        echo "Unexpected - kubectl not reporting all nodes and yet no nodes are in delta between fleet and kubectl."
+    else
+        ip_index=0
+        max_slice=200
 
-    ec2_instances=($(aws --output text \
-        --query "Reservations[*].Instances[*].[InstanceId]" \
-        ec2 describe-instances --filters "Name=private-ip-address,Values=${private_ips}" --instance-ids \
-        `aws --output text --query "AutoScalingGroups[0].Instances[*].InstanceId" \
-        autoscaling describe-auto-scaling-groups --auto-scaling-group-names "${ASG_NAME}"`))
-    echo -e "Instances to be terminated:\n${ec2_instances[*]}"
-    aws --output text ec2 terminate-instances --instance-ids ${ec2_instances[*]}
+        # describe/terminate instances in chunks of max 200 (aws limitation of 200 filter values)
+        while [ $ip_index -lt ${#delta[@]} ]
+        do
+            delta_slice=(${delta[@]:$index:$max_slice})
+            private_ips=$( IFS=$','; echo "${delta_slice[*]}" )
+            echo -e "Fleet nodes not yet present in kubernetes cluster:\n${private_ips}"
+
+            ec2_instances=($(aws --output text \
+                --query "Reservations[*].Instances[*].[InstanceId]" \
+                ec2 describe-instances --filters "Name=private-ip-address,Values=${private_ips}" --instance-ids \
+                `aws --output text --query "AutoScalingGroups[0].Instances[*].InstanceId" \
+                autoscaling describe-auto-scaling-groups --auto-scaling-group-names "${ASG_NAME}"`))
+
+            echo -e "Instances to be terminated:\n${ec2_instances[*]}"
+            aws --output text ec2 terminate-instances --instance-ids ${ec2_instances[*]}
+
+            ip_index=$(($ip_index + $max_slice))
+        done
+    fi
 
     # reset max loops and decrement retries
     max_loops=$((TOTAL_WAITS-1))
