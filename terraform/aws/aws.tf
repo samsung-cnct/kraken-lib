@@ -539,6 +539,7 @@ resource "aws_autoscaling_group" "kubernetes_nodes" {
   force_delete = true
   wait_for_capacity_timeout = "0"
   health_check_grace_period = "30"
+  default_cooldown = "10"
   vpc_zone_identifier = ["${aws_subnet.vpc_subnet.id}"]
   launch_configuration = "${aws_launch_configuration.kubernetes_node.name}"
   health_check_type = "EC2"
@@ -627,9 +628,5 @@ resource "template_file" "ansible_inventory" {
 
   provisioner "local-exec" {
     command = "AWS_ACCESS_KEY_ID=${var.aws_access_key} AWS_SECRET_ACCESS_KEY=${var.aws_secret_key} AWS_DEFAULT_REGION=${var.aws_region} ${path.module}/kraken_asg_helper.sh --cluster aws --limit ${var.node_count + var.special_node_count} --name ${var.aws_user_prefix}_${var.aws_cluster_prefix}_nodes --output ${path.module}/rendered/ansible.inventory --singlewait ${var.asg_wait_single} --totalwaits ${var.asg_wait_total} --offset ${var.special_node_count} --retries ${var.asg_retries} --etcd ${aws_instance.kubernetes_etcd.public_ip} --port 4001"
-  }
-
-  provisioner "local-exec" {
-    command = "ansible-playbook -i ${path.module}/rendered/ansible.inventory ${path.module}/../../ansible/localhost_post_provision.yaml"
   }
 }
