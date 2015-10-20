@@ -81,26 +81,6 @@ variable "kubernetes_api_version" {
   default = "v1"
   description = "Kubernetes api version"
 }
-variable "kube_apiserver_v" {
-  default = "2"
-  description = "kubernetes apiserver verbosity"
-}
-variable "kube_controller_manager_v" {
-  default = "2"
-  description = "kubernetes controller manager verbosity"
-}
-variable "kube_scheduler_v" {
-  default = "2"
-  description = "kubernetes scheduler verbosity"
-}
-variable "kubelet_v" {
-  default = "2"
-  description = "kubernetes kubelet verbosity"
-}
-variable "kube_proxy_v" {
-  default = "2"
-  description = "kubernetes proxy verbosity"
-}
 variable "ansible_forks" {
   default = "5"
   description = "number of parallel processes to use for ansible-playbook run"
