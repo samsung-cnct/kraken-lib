@@ -15,6 +15,8 @@ ExecStart=/usr/bin/docker run \
   -v /srv/kubernetes:/srv/kubernetes \
   {{hyperkube_image}} \
     /hyperkube proxy \
+    {% for k,v in kube_proxy.iteritems() %}
+      --{{k}}={{v}} \
+    {% endfor %}
     --master=http://127.0.0.1:8080 \
-    --kubeconfig=/srv/kubernetes/kube-proxy/kubeconfig \
-    --v={{kube_proxy_v}}
+    --kubeconfig=/srv/kubernetes/kube-proxy/kubeconfig
