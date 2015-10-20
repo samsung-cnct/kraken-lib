@@ -18,8 +18,7 @@ kube_apiserver:
   insecure-port: 8080
   kubelet-timeout: 5s
   logtostderr: true
-  # max-requests-inflight: 400
-  max-requests-inflight: 40000
+  max-requests-inflight: 400
   profiling: true
   secure-port: 0
   secure_port: 443
@@ -69,14 +68,14 @@ kubelet:
   sync-frequency: 10s
   v: 1
 kube_proxy:
-  logtostderr: true
   kubeconfig: /srv/kubernetes/kube-proxy/kubeconfig
+  logtostderr: true
   v: 1
 kube_scheduler:
   logtostderr: true
   port: 10251
   profiling: true
-  v: 4
+  v: 1
 kraken_services_dirs: 
 logentries_token:
 logentries_url:
