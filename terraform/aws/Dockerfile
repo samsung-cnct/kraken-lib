@@ -69,4 +69,5 @@ RUN pip install awscli
 RUN ssh-keygen -q -t rsa -N '' -f /root/.ssh/id_rsa
 
 COPY ansible /opt/kraken/ansible/
+COPY generate-cert /opt/kraken/generate-cert/
 COPY terraform/aws /opt/kraken/terraform/aws/
