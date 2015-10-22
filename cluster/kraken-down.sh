@@ -55,13 +55,22 @@ if docker-machine ls -q | grep --silent "${KRAKEN_DOCKER_MACHINE_NAME}"; then
   inf "Machine ${KRAKEN_DOCKER_MACHINE_NAME} exists."
 else
   error "Machine ${KRAKEN_DOCKER_MACHINE_NAME} does not exist."
+  exit 1
 fi
 
 eval "$(docker-machine env ${KRAKEN_DOCKER_MACHINE_NAME})"
 
 # shut down cluster
-inf "Building down kraken cluster:\n  'docker run --volumes-from kraken_data samsung_ag/kraken terraform destroy -force -input=false -state=/kraken_data/terraform.tfstate /opt/kraken/terraform/aws'"
-docker run --volumes-from kraken_data samsung_ag/kraken bash -c 'until terraform destroy -force -input=false -var-file=/opt/kraken/terraform/aws/terraform.tfvars -state=/kraken_data/terraform.tfstate /opt/kraken/terraform/aws; do echo "Retrying..."; sleep 5; done' 
+if docker inspect kraken_cluster &> /dev/null; then
+  inf "Removing old kraken_cluster container:\n   'docker rm -f kraken_cluster'"
+  docker rm -f kraken_cluster
+fi
+
+inf "Tearing down kraken cluster:\n  'docker run --volumes-from kraken_data samsung_ag/kraken terraform destroy -force -input=false -state=/kraken_data/terraform.tfstate /opt/kraken/terraform/aws'"
+docker run --name kraken_cluster --volumes-from kraken_data \
+  samsung_ag/kraken bash -c \
+  'until terraform destroy -force -input=false -var-file=/opt/kraken/terraform/aws/terraform.tfvars \
+    -state=/kraken_data/terraform.tfstate /opt/kraken/terraform/aws; do echo "Retrying..."; sleep 5; done' 
 
 
 

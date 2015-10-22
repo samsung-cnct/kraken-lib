@@ -86,14 +86,28 @@ else
 fi
 
 # now build the docker container
+if docker inspect kraken_cluster &> /dev/null; then
+  is_running=$(docker inspect -f '{{ .State.Running }}' kraken_cluster)
+  if [ ${is_running} == "true" ];  then
+    error "Cluster build already running:\n Run\n  'docker logs --follow kraken_cluster'\n to see logs."
+    exit 1
+  fi
+
+  inf "Removing old kraken_cluster container:\n   'docker rm -f kraken_cluster'"
+  docker rm -f kraken_cluster
+fi
+
 inf "Building kraken container:\n  'docker build -t samsung_ag/kraken -f \"${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/Dockerfile\" \"${KRAKEN_ROOT}\"'"
 docker build -t samsung_ag/kraken -f "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/Dockerfile" "${KRAKEN_ROOT}"
 
 # run cluster up
-inf "Building kraken cluster:\n  'docker run --volumes-from kraken_data samsung_ag/kraken terraform apply -input=false -state=/kraken_data/terraform.tfstate -var-file=/opt/kraken/terraform/aws/terraform.tfvars /opt/kraken/terraform/aws'"
-docker run -d --name kraken_cluster --volumes-from kraken_data samsung_ag/kraken terraform apply -input=false -state=/kraken_data/terraform.tfstate -var-file=/opt/kraken/terraform/aws/terraform.tfvars /opt/kraken/terraform/aws 
+inf "Building kraken cluster:\n  'docker run -d --volumes-from kraken_data samsung_ag/kraken terraform apply \
+  -input=false -state=/kraken_data/terraform.tfstate -var-file=/opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/terraform.tfvars /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}'"
+docker run -d --name kraken_cluster --volumes-from kraken_data samsung_ag/kraken bash -c "terraform apply -input=false -state=/kraken_data/terraform.tfstate \
+    -var-file=/opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/terraform.tfvars /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE} && \
+    cp /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/rendered/ansible.inventory  /kraken_data/ansible.inventory && \
+    cp /root/.ssh/config_${KRAKEN_CLUSTER_TYPE} /kraken_data/ssh_config"
+
 
 inf "Following docker logs now. Ctrl-C to cancel."
 docker logs --follow kraken_cluster
-
-
