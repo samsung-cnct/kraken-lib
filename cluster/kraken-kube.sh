@@ -1,6 +1,6 @@
 #!/bin/bash -
 #title           :kraken-kube.sh
-#description     :kubeconfig commands for remotely managed cluster
+#description     :get the remote kubectl config
 #author          :Samsung SDSRA
 #==============================================================================
 
@@ -47,4 +47,7 @@ else
 fi
 eval "$(docker-machine env ${KRAKEN_DOCKER_MACHINE_NAME})"
 
-docker run --volumes-from kraken_data samsung_ag/kraken bash -c "kubectl --kubeconfig=/kraken_data/kube_config $KUBEARGS$1"
+mkdir -p "clusters/${KRAKEN_DOCKER_MACHINE_NAME}"
+docker cp kraken_data:/kraken_data/kube_config "clusters/${KRAKEN_DOCKER_MACHINE_NAME}/kube_config"
+
+inf "To control your cluster use:\n  kubectl --kubeconfig=clusters/${KRAKEN_DOCKER_MACHINE_NAME}/kube_config --cluster=<cluster name> <kubectl commands>"

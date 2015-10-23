@@ -124,40 +124,6 @@ And so on
 4. Give your log a name of your choice, select Token TCP, and then click the Register new log button. A token will be displayed in green.
 5. Override logentries_token variable for your cluster type with the token value - either through a tfvars file or -var switch
 
-## Managing a cluster through a remote machine
-
-This lets you all the work in cluster creation to a docker container that has all of the required tools and can run remotely.
-This also lets you start kraken clusters on any OS that runs docker-machine (OSX, Windows, Linux)
-
-First, install docker-machine from https://www.docker.com/docker-toolbox
-Then create a terraform.tfvars file under terraform/aws
-Then, from cluster subfolder run:
-
-```
-./kraken-up.sh --dmname your_docker_machine_name --dmopts "docker machine options"
-```
-
-for example:
-
-```
-./kraken-up.sh --dmname ec2 --dmopts "--driver amazonec2 --amazonec2-vpc-id vpc-e9cd4a8c"
-```
-
-subsequently as long as your docker machine is up and running you can skip the '--dmopts' part
-This should leave you with a kraken aws cluster running, using vars from the terraform.tfvars file you just created.
-
-First, the script creates a docker-machine instance in the cloud provider of your choice.
-Then it builds a docker container on that instance, with all the tools required to build a kraken cluster.
-Then those tools are used to create an AWS Kraken cluster.
-
-Some of the other .sh and .cmd scripts in cluster subfolder let you:
-
-1. kraken-down - destroy remotely managed kraken
-2. kraken-up - create remotely managed kraken
-3. kraken-kube - run kubectl commands on remotely managed kraken
-4. kraken-ssh - ssh to remotely managed kraken nodes
-5. kraken-ansible-shell - open a shell to kraken setup with the correct ansible inventory for all cluster nodes.
-
 ### Helpful Links
 * kubectl user documentation can be found [here](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/kubectl.md)
 * kubectl [FAQ](https://github.com/GoogleCloudPlatform/kubernetes/wiki/User-FAQ)

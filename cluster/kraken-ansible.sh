@@ -1,6 +1,6 @@
 #!/bin/bash -
 #title           :kraken-ssh.sh
-#description     :run ansible with remotely managed kraken cluster
+#description     :get the remote ansible inventory and ssh keys
 #author          :Samsung SDSRA
 #==============================================================================
 
@@ -20,7 +20,7 @@ key="$1"
 case $key in
     --dmname)
     KRAKEN_DOCKER_MACHINE_NAME="$2"
-    shift 
+    shift
     ;;
     *)
       # unknown option
@@ -29,12 +29,12 @@ esac
 shift # past argument or value
 done
 
-if [ -z ${KRAKEN_DOCKER_MACHINE_NAME+x} ]; then 
+if [ -z ${KRAKEN_DOCKER_MACHINE_NAME+x} ]; then
   error "--dmname not specified. Docker Machine name is required."
   exit 1
 fi
 
-if docker-machine ls -q | grep --silent "${KRAKEN_DOCKER_MACHINE_NAME}"; then 
+if docker-machine ls -q | grep --silent "${KRAKEN_DOCKER_MACHINE_NAME}"; then
   inf "Machine ${KRAKEN_DOCKER_MACHINE_NAME} exists."
 else
   error "Machine ${KRAKEN_DOCKER_MACHINE_NAME} does not exist."
@@ -42,4 +42,9 @@ else
 fi
 eval "$(docker-machine env ${KRAKEN_DOCKER_MACHINE_NAME})"
 
-docker run -it --volumes-from kraken_data -v /var/run:/ansible samsung_ag/kraken bash -c 'cp /kraken_data/ansible.inventory /etc/ansible/hosts && cd /opt/kraken/ansible && bash'
+mkdir -p "clusters/${KRAKEN_DOCKER_MACHINE_NAME}"
+docker cp kraken_data:/kraken_data/ansible.inventory "clusters/${KRAKEN_DOCKER_MACHINE_NAME}/ansible.inventory"
+docker cp kraken_cluster:/root/.ssh/id_rsa "clusters/${KRAKEN_DOCKER_MACHINE_NAME}/id_rsa"
+docker cp kraken_cluster:/root/.ssh/id_rsa.pub "clusters/${KRAKEN_DOCKER_MACHINE_NAME}/id_rsa.pub"
+
+inf "Parameters for ansible:\n   --inventory-file clusters/${KRAKEN_DOCKER_MACHINE_NAME}/ansible.inventory\n   --private-key clusters/${KRAKEN_DOCKER_MACHINE_NAME}/id_rsa"
