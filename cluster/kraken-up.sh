@@ -27,15 +27,15 @@ key="$1"
 case $key in
     --clustertype)
     KRAKEN_CLUSTER_TYPE="$2"
-    shift 
+    shift
     ;;
     --dmopts)
     KRAKEN_DOCKER_MACHINE_OPTIONS="$2"
-    shift 
+    shift
     ;;
     --dmname)
     KRAKEN_DOCKER_MACHINE_NAME="$2"
-    shift 
+    shift
     ;;
     *)
       # unknown option
@@ -44,31 +44,30 @@ esac
 shift # past argument or value
 done
 
-
-if [ -z ${KRAKEN_DOCKER_MACHINE_NAME+x} ]; then 
+if [ -z ${KRAKEN_DOCKER_MACHINE_NAME+x} ]; then
   error "--dmname not specified. Docker Machine name is required."
   exit 1
 fi
 
-if [ -z ${KRAKEN_CLUSTER_TYPE+x} ]; then 
+if [ -z ${KRAKEN_CLUSTER_TYPE+x} ]; then
   warn "--clustertype not specified. Assuming 'aws'"
   KRAKEN_CLUSTER_TYPE="aws"
 fi
 
-if [ ! -f "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/terraform.tfvars" ]; then 
+if [ ! -f "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/terraform.tfvars" ]; then
   error "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/terraform.tfvars is not present."
   exit 1
 fi
 
-if [ ! -f "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/Dockerfile" ]; then 
+if [ ! -f "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/Dockerfile" ]; then
   error "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/Dockerfile is not present."
   exit 1
 fi
 
-if docker-machine ls -q | grep --silent "${KRAKEN_DOCKER_MACHINE_NAME}"; then 
+if docker-machine ls -q | grep --silent "${KRAKEN_DOCKER_MACHINE_NAME}"; then
   inf "Machine ${KRAKEN_DOCKER_MACHINE_NAME} already exists."
 else
-  if [ -z ${KRAKEN_DOCKER_MACHINE_OPTIONS+x} ]; then 
+  if [ -z ${KRAKEN_DOCKER_MACHINE_OPTIONS+x} ]; then
     error "--dmopts not specified. Docker Machine option string is required unless machine ${KRAKEN_DOCKER_MACHINE_NAME} already exists."
     exit 1
   fi
@@ -97,7 +96,8 @@ if docker inspect kraken_cluster &> /dev/null; then
   docker rm -f kraken_cluster
 fi
 
-inf "Building kraken container:\n  'docker build -t samsung_ag/kraken -f \"${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/Dockerfile\" \"${KRAKEN_ROOT}\"'"
+inf "Building kraken container:\n  'docker build -t samsung_ag/kraken -f \"${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/Dockerfile\" \
+  \"${KRAKEN_ROOT}\"' "
 docker build -t samsung_ag/kraken -f "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/Dockerfile" "${KRAKEN_ROOT}"
 
 # run cluster up
@@ -106,8 +106,8 @@ inf "Building kraken cluster:\n  'docker run -d --volumes-from kraken_data samsu
 docker run -d --name kraken_cluster --volumes-from kraken_data samsung_ag/kraken bash -c "terraform apply -input=false -state=/kraken_data/terraform.tfstate \
     -var-file=/opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/terraform.tfvars /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE} && \
     cp /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/rendered/ansible.inventory  /kraken_data/ansible.inventory && \
-    cp /root/.ssh/config_${KRAKEN_CLUSTER_TYPE} /kraken_data/ssh_config"
-
+    cp /root/.ssh/config_${KRAKEN_CLUSTER_TYPE} /kraken_data/ssh_config && \
+    cp /root/.kube/config /kraken_data/kube_config"
 
 inf "Following docker logs now. Ctrl-C to cancel."
 docker logs --follow kraken_cluster
