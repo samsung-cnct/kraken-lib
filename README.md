@@ -143,7 +143,7 @@ for example:
 ./kraken-up.sh --dmname ec2 --dmopts "--driver amazonec2 --amazonec2-vpc-id vpc-e9cd4a8c"
 ```
 
-subsequently as long as your docker machine is up and running you can skip the '--dmopts' part
+subsequently as long as your docker machine is up and running you can skip the '--dmopts' part.  
 This should leave you with a kraken aws cluster running, using vars from the terraform.tfvars file you just created.
 
 First, the script creates a docker-machine instance in the cloud provider of your choice.  
