@@ -13,12 +13,14 @@ Quick setup on OSX with [homewbrew](http://brew.sh/):
     brew tap Homebrew/bundle
     brew bundle
 
-This installs Ansible, Terraform, Vagrant, Virtualbox, kubectl, awscli and a custom terraform provider 'terraform-provider-execute'
+
+This installs Ansible, Terraform, Vagrant, Virtualbox, kubectl, awscli, fleetctl and custom terraform providers 'terraform-provider-execute', 'terraform-provider-coreosver' and 'terraform-provider-coreos'
 
 Alternative/non-OSX setup:
 
 * Install [Ansible](https://github.com/ansible/ansible/releases)
 * install awscli
+* install fleetctl
 * Install Terraform. Currently we are using a patched terraform version (PR is pending in terraform master). Get it [here](https://github.com/Samsung-AG/homebrew-terraform/releases)
 * Install [Vagrant](https://www.vagrantup.com/downloads.html) if you will be working with a local cluster
 * Install [Virtualbox](https://www.virtualbox.org/wiki/Downloads) if you will be working with a local cluster
@@ -59,7 +61,6 @@ Looking to create a **ludicrous** cluster? Use the following `terraform.tfvars`:
 aws_access_key="<your aws key id>"
 aws_secret_key="<your aws secret key>"
 aws_user_prefix="<prefix to use for named resources>"
-kubernetes_binaries_uri = "https://storage.googleapis.com/kubernetes-release/release/v1.0.4/bin/linux/amd64"
 apiserver_count = "10"
 node_count = "1000"
 aws_etcd_type = "i2.8xlarge"
