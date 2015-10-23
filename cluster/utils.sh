@@ -1,5 +1,5 @@
 #!/bin/bash -
-#title           :kraken-up.sh
+#title           :utils.sh
 #description     :utils
 #author          :Samsung SDSRA
 #==============================================================================

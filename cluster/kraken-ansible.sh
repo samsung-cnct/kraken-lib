@@ -1,5 +1,5 @@
 #!/bin/bash -
-#title           :kraken-ssh.sh
+#title           :kraken-ansible.sh
 #description     :get the remote ansible inventory and ssh keys
 #author          :Samsung SDSRA
 #==============================================================================
