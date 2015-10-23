@@ -42,6 +42,12 @@ else
 fi
 eval "$(docker-machine env ${KRAKEN_DOCKER_MACHINE_NAME})"
 
+is_running=$(docker inspect -f '{{ .State.Running }}' kraken_cluster)
+if [ ${is_running} == "true" ];  then
+  error "Cluster build is currently running:\n Run\n  'docker logs --follow kraken_cluster'\n to see logs."
+  exit 1
+fi
+
 mkdir -p "clusters/${KRAKEN_DOCKER_MACHINE_NAME}"
 docker cp kraken_data:/kraken_data/ansible.inventory "clusters/${KRAKEN_DOCKER_MACHINE_NAME}/ansible.inventory"
 docker cp kraken_cluster:/root/.ssh/id_rsa "clusters/${KRAKEN_DOCKER_MACHINE_NAME}/id_rsa"

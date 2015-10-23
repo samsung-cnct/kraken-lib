@@ -7,48 +7,14 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-
 # kraken root folder
 KRAKEN_ROOT=$(dirname "${BASH_SOURCE}")/..
 
 source "${KRAKEN_ROOT}/cluster/utils.sh"
 
-function setup_dockermachine {
-  local dm_command="docker-machine create ${KRAKEN_DOCKER_MACHINE_OPTIONS} ${KRAKEN_DOCKER_MACHINE_NAME}"
-  inf "Starting docker-machine with:\n  '${dm_command}'"
-
-  eval ${dm_command}
-}
-
-
-while [[ $# > 1 ]]
-do
-key="$1"
-
-case $key in
-    --clustertype)
-    KRAKEN_CLUSTER_TYPE="$2"
-    shift
-    ;;
-    --dmname)
-    KRAKEN_DOCKER_MACHINE_NAME="$2"
-    shift
-    ;;
-    *)
-      # unknown option
-    ;;
-esac
-shift # past argument or value
-done
-
 if [ -z ${KRAKEN_DOCKER_MACHINE_NAME+x} ]; then
   error "--dmname not specified. Docker Machine name is required."
   exit 1
-fi
-
-if [ -z ${KRAKEN_CLUSTER_TYPE+x} ]; then
-  warn "--clustertype not specified. Assuming 'aws'"
-  KRAKEN_CLUSTER_TYPE="aws"
 fi
 
 if docker-machine ls -q | grep --silent "${KRAKEN_DOCKER_MACHINE_NAME}"; then
@@ -66,6 +32,11 @@ if docker inspect kraken_cluster &> /dev/null; then
   docker rm -f kraken_cluster
 fi
 
+if ! docker inspect kraken_cluster &> /dev/null; then
+  warn "No terraform state available. Cluster is either not running, or kraken_data container has been removed."
+  exit 0;
+fi
+
 inf "Tearing down kraken cluster:\n  'docker run --volumes-from kraken_data samsung_ag/kraken terraform destroy -force -input=false -state=/kraken_data/terraform.tfstate /opt/kraken/terraform/aws'"
 docker run -d --name kraken_cluster --volumes-from kraken_data \
   samsung_ag/kraken bash -c \
@@ -74,4 +45,3 @@ docker run -d --name kraken_cluster --volumes-from kraken_data \
 
 inf "Following docker logs now. Ctrl-C to cancel."
 docker logs --follow kraken_cluster
-

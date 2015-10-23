@@ -10,8 +10,6 @@ set -o pipefail
 # kraken root folder
 KRAKEN_ROOT=$(dirname "${BASH_SOURCE}")/..
 
-source "${KRAKEN_ROOT}/cluster/utils.sh"
-
 function setup_dockermachine {
   local dm_command="docker-machine create ${KRAKEN_DOCKER_MACHINE_OPTIONS} ${KRAKEN_DOCKER_MACHINE_NAME}"
   inf "Starting docker-machine with:\n  '${dm_command}'"
@@ -19,30 +17,7 @@ function setup_dockermachine {
   eval ${dm_command}
 }
 
-
-while [[ $# > 1 ]]
-do
-key="$1"
-
-case $key in
-    --clustertype)
-    KRAKEN_CLUSTER_TYPE="$2"
-    shift
-    ;;
-    --dmopts)
-    KRAKEN_DOCKER_MACHINE_OPTIONS="$2"
-    shift
-    ;;
-    --dmname)
-    KRAKEN_DOCKER_MACHINE_NAME="$2"
-    shift
-    ;;
-    *)
-      # unknown option
-    ;;
-esac
-shift # past argument or value
-done
+source "${KRAKEN_ROOT}/cluster/utils.sh"
 
 if [ -z ${KRAKEN_DOCKER_MACHINE_NAME+x} ]; then
   error "--dmname not specified. Docker Machine name is required."
