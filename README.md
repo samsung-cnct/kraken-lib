@@ -13,6 +13,7 @@ Quick setup on OSX with [homewbrew](http://brew.sh/):
     brew tap Homebrew/bundle
     brew bundle
 
+
 This installs Ansible, Terraform, Vagrant, Virtualbox, kubectl, awscli, fleetctl and custom terraform providers 'terraform-provider-execute', 'terraform-provider-coreosver' and 'terraform-provider-coreos'
 
 Alternative/non-OSX setup:

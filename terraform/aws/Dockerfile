@@ -2,11 +2,12 @@ FROM buildpack-deps:jessie-scm
 MAINTAINER Marat Garafutdinov <marat.g@samsung.com>
 
 # versions
-ENV TERRAFORM_VERSION v0.6.3
+ENV TERRAFORM_VERSION v0.6.3.2
 ENV TERRAFORM_COREOS_VERSION v0.0.1
 ENV TERRAFORM_EXECUTE_VERSION v0.0.2
 ENV TERRAFORM_COREOSVER_VERSION v0.0.1
-ENV KUBERNETES_VERSION v1.0.3
+ENV KUBERNETES_VERSION v1.0.6
+ENV FLEET_VERSION v0.11.5
 
 # get terraform
 RUN wget https://github.com/Samsung-AG/homebrew-terraform/releases/download/${TERRAFORM_VERSION}/terraform-${TERRAFORM_VERSION}_linux64.tar.gz
@@ -43,6 +44,7 @@ RUN apt-get update \
       python-setuptools \
       python-pkg-resources \
       python-pip \
+      openssh-client \
       vim \
     && rm -rf /var/lib/apt/lists/*
 
@@ -55,8 +57,17 @@ RUN wget https://github.com/GoogleCloudPlatform/kubernetes/releases/download/${K
 RUN tar -xvf kubernetes.tar.gz
 RUN cp kubernetes/platforms/linux/amd64/kubectl /usr/bin && rm kubernetes.tar.gz
 
+# install fleetctl
+RUN wget https://github.com/coreos/fleet/releases/download/${FLEET_VERSION}/fleet-${FLEET_VERSION}-linux-amd64.tar.gz
+RUN tar -xvf fleet-${FLEET_VERSION}-linux-amd64.tar.gz
+RUN cp fleet-${FLEET_VERSION}-linux-amd64/fleetctl /usr/bin && rm fleet-${FLEET_VERSION}-linux-amd64.tar.gz
+
 # install awscli
 RUN pip install awscli
 
+# generate a keypair
+RUN ssh-keygen -q -t rsa -N '' -f /root/.ssh/id_rsa
+
 COPY ansible /opt/kraken/ansible/
-COPY terraform /opt/kraken/terraform/
+COPY generate-cert /opt/kraken/generate-cert/
+COPY terraform/aws /opt/kraken/terraform/aws/
