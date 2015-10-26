@@ -136,7 +136,7 @@ coreos:
       content: |
         [Unit]
         Requires=ansible-in-docker.service
-        After=ansible-in-docker
+        After=ansible-in-docker.service
         Description=Create kubernetes certs and tokens
         [Service]
         Restart=on-failure
