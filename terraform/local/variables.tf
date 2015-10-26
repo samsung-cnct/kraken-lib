@@ -130,6 +130,33 @@ variable "vagrant_private_key" {
   description = "Location of private key for vagrant to use"
 }
 
+variable "kraken_repo" {
+  default = {
+    "repo" = "https://github.com/Samsung-AG/kraken.git"
+    "branch" = "master"
+    "commit_sha" = ""
+  }
+  description = "Kraken git repo"
+}
+
+variable "kraken_services_branch" {
+  default = "master"
+  description = "Kraken services repo branch"
+}
+
+variable "ansible_docker_image" {
+  default = "quay.io/samsung_ag/kraken_ansible"
+  description = "Docker image to use for ansible-in-docker"
+}
+
+variable "ansible_playbook_command" {
+  default = "ansible-playbook -i /etc/inventory.ansible"
+  description = "ansible-playbook invocation that will run inside ansible-docker container via cloudinit"
+}
+variable "ansible_playbook_file" {
+  default = "/opt/kraken/ansible/iaas_provision_local.yaml"
+  description = "location of playbook file run with ansible_playbook_command"
+}
 
 
 

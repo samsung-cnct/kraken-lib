@@ -5,8 +5,14 @@ resource "coreosver_version" "coreos_version_info" {
 resource "template_file" "etcd_cloudinit" {
   filename = "${path.module}/templates/etcd.yaml.tpl"
   vars {
+    ansible_playbook_command = "${var.ansible_playbook_command}"
+    ansible_playbook_file = "${var.ansible_playbook_file}"
     coreos_update_channel = "${var.coreos_update_channel}"
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
+    kraken_repo = "${var.kraken_repo.repo}"
+    kraken_branch = "${var.kraken_repo.branch}"
+    kraken_commit = "${var.kraken_repo.commit_sha}"
+    ansible_docker_image = "${var.ansible_docker_image}"
   }
 
   provisioner "local-exec" {
@@ -17,9 +23,15 @@ resource "template_file" "etcd_cloudinit" {
 resource "template_file" "master_cloudinit" {
   filename = "${path.module}/templates/master.yaml.tpl"
   vars {
+    ansible_playbook_command = "${var.ansible_playbook_command}"
+    ansible_playbook_file = "${var.ansible_playbook_file}"
     etcd_private_ip = "${var.ip_base}.101"
     coreos_update_channel = "${var.coreos_update_channel}"
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
+    kraken_repo = "${var.kraken_repo.repo}"
+    kraken_branch = "${var.kraken_repo.branch}"
+    kraken_commit = "${var.kraken_repo.commit_sha}"
+    ansible_docker_image = "${var.ansible_docker_image}"
   }
 
   provisioner "local-exec" {
@@ -30,9 +42,15 @@ resource "template_file" "master_cloudinit" {
 resource "template_file" "apiserver_cloudinit" {
   filename = "${path.module}/templates/apiserver.yaml.tpl"
   vars {
+    ansible_playbook_command = "${var.ansible_playbook_command}"
+    ansible_playbook_file = "${var.ansible_playbook_file}"
     etcd_private_ip = "${var.ip_base}.101"
     coreos_update_channel = "${var.coreos_update_channel}"
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
+    kraken_repo = "${var.kraken_repo.repo}"
+    kraken_branch = "${var.kraken_repo.branch}"
+    kraken_commit = "${var.kraken_repo.commit_sha}"
+    ansible_docker_image = "${var.ansible_docker_image}"
   }
 
   provisioner "local-exec" {
@@ -43,9 +61,15 @@ resource "template_file" "apiserver_cloudinit" {
 resource "template_file" "node_cloudinit" {
   filename = "${path.module}/templates/node.yaml.tpl"
   vars {
+    ansible_playbook_command = "${var.ansible_playbook_command}"
+    ansible_playbook_file = "${var.ansible_playbook_file}"
     etcd_private_ip = "${var.ip_base}.101"
     coreos_update_channel = "${var.coreos_update_channel}"
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
+    kraken_repo = "${var.kraken_repo.repo}"
+    kraken_branch = "${var.kraken_repo.branch}"
+    kraken_commit = "${var.kraken_repo.commit_sha}"
+    ansible_docker_image = "${var.ansible_docker_image}"
   }
 
   provisioner "local-exec" {
@@ -63,6 +87,6 @@ resource "execute_command" "command" {
   }
 
   provisioner "local-exec" {
-    command = "ansible-playbook -i ${path.module}/rendered/ansible.inventory ${path.module}/../../ansible/localhost_provision.yaml"
+    command = "ansible-playbook -i ${path.module}/rendered/ansible.inventory ${path.module}/../../ansible/localhost_post_provision.yaml"
   }
 }

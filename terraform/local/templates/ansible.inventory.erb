@@ -7,6 +7,9 @@ etcd ansible_ssh_host=<%= etcd_ip %>
 [apiservers]
 <%= apiservers_inventory_info %>
 
+[specialnodes]
+<%= nodes_inventory_info %>
+
 [nodes]
 <%= nodes_inventory_info %>
 
@@ -14,6 +17,7 @@ etcd ansible_ssh_host=<%= etcd_ip %>
 master
 etcd
 apiservers
+specialnodes
 nodes
 
 [local]
@@ -25,6 +29,7 @@ ansible_python_interpreter="PATH=/home/core/bin:$PATH python"
 ansible_ssh_user=core
 ansible_ssh_private_key_file=<%= ansible_ssh_private_key_file %>
 cluster_master_record=http://<%= master_ip %>:8080
+cluster_proxy_record=<%= node_001_public_ip %>
 cluster_name=local
 dns_domain=<%= dns_domain %>
 dns_ip=<%= dns_ip %>
