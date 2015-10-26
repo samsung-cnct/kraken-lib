@@ -32,7 +32,7 @@ if docker inspect kraken_cluster &> /dev/null; then
   docker rm -f kraken_cluster
 fi
 
-if ! docker inspect kraken_cluster &> /dev/null; then
+if ! docker inspect kraken_data &> /dev/null; then
   warn "No terraform state available. Cluster is either not running, or kraken_data container has been removed."
   exit 0;
 fi
