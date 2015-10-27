@@ -94,6 +94,9 @@ generate_configs()
   echo Writing ${OUTPUT_FILE}
   echo -e $output >> ${OUTPUT_FILE}
 
+  # for the scenario of docker container buit from windows host:
+  chmod -x ${OUTPUT_FILE}
+
   # run ansible
   echo "Running ansible-playbook -i ${OUTPUT_FILE} ${script_dir}/../../ansible/localhost_post_provision.yaml ..."
   ansible-playbook -i ${OUTPUT_FILE} ${script_dir}/../../ansible/localhost_post_provision.yaml
