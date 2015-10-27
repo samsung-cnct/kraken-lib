@@ -26,22 +26,18 @@
   service: name=install-kubectl state=restarted enabled=yes args=--no-block
   sudo: yes
 
-# apiserver-binary
-
-- name: restart hyperkube-binary-apiserver 
-  service: name=hyperkube-binary-apiserver state=restarted enabled=yes
-  sudo: yes
-
 # master-common
 
 - name: restart nginx-docker
   service: name=nginx-docker state=restarted enabled=yes
   sudo: yes
 
-# apiserver-docker
+- name: restart generate-kube-cert
+  service: name=generate-kube-cert state=restarted enabled=yes
+  sudo: yes
 
-- name: restart hyperkube-docker-apiserver
-  service: name=hyperkube-docker-apiserver state=restarted enabled=yes
+- name: restart load-kube-cert
+  service: name=load-kube-cert state=restarted enabled=yes
   sudo: yes
 
 # master-binary
@@ -64,10 +60,32 @@
   service: name=hyperkube-docker-proxy state=restarted enabled=yes
   sudo: yes
 
+# apiserver-common
+
+- name: restart load-kube-cert
+  service: name=load-kube-cert state=restarted enabled=yes
+  sudo: yes
+
+# apiserver-binary
+
+- name: restart hyperkube-binary-apiserver 
+  service: name=hyperkube-binary-apiserver state=restarted enabled=yes
+  sudo: yes
+
+# apiserver-docker
+
+- name: restart hyperkube-docker-apiserver
+  service: name=hyperkube-docker-apiserver state=restarted enabled=yes
+  sudo: yes
+
 # node-common
 
 - name: restart kubernetes-label
   service: name=kubernetes-label state=restarted enabled=yes
+  sudo: yes
+
+- name: restart load-kube-cert
+  service: name=load-kube-cert state=restarted enabled=yes
   sudo: yes
 
 # node-binary

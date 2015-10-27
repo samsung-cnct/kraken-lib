@@ -8,9 +8,12 @@
 - include: kubectl.yaml
   when: "'master' in group_names or 'apiservers' in group_names or 'nodes' in group_names"
 
+- include: generate-kube-cert.yaml
+  when: "'master' in group_names"
+
 - include: load-kube-cert.yaml
-  when: "'master' in group_names or 'apiservers' in group_names or 'nodes' in group_names"
-  
+  when: "'master' in group_names or 'apiservers' in group_names or 'nodes' in group_names or 'specialnodes' in group_names"
+
 # Kubernetes apiserver specific tasks
 - include: apiserver-binary.yaml
   when: "'apiservers' in group_names and hyperkube_deployment_mode == 'binary'"

@@ -15,7 +15,7 @@ if [ ${check} == 200 ]
 	else
 		# Generate the certs and tokens and stuff them into etcd
 		${kraken_loc}/generate-cert/make-cert-tokens.sh {{master_private_ip}} /tmp/kube-cert
-	  /usr/bin/tar -zcvf /tmp/kube-cert.tgz /tmp/kube-cert
-	  /usr/bin/cat /tmp/kube-cert.tgz | base64 > /tmp/kube-cert.base64
-	  /usr/bin/etcdctl set ${key} < /tmp/kube-cert.base64
+		/usr/bin/tar -zcvf /tmp/kube-cert.tgz /tmp/kube-cert
+		/usr/bin/cat /tmp/kube-cert.tgz | base64 > /tmp/kube-cert.base64
+		/usr/bin/etcdctl set ${key} < /tmp/kube-cert.base64
 fi
