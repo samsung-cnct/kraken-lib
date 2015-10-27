@@ -87,6 +87,6 @@ resource "execute_command" "command" {
   }
 
   provisioner "local-exec" {
-    command = "ansible-playbook -i ${path.module}/rendered/ansible.inventory ${path.module}/../../ansible/localhost_post_provision.yaml"
+    command = "ansible-playbook -i ${path.module}/rendered/ansible.inventory ${path.module}/../../ansible/vagrant_provision.yaml"
   }
 }
