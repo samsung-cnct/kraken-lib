@@ -131,17 +131,6 @@ coreos:
         RestartSec=5
         ExecStartPre=-/usr/bin/docker rm -f ansible-docker
         ExecStart=/usr/bin/docker run --name ansible-docker -v /etc/inventory.ansible:/etc/inventory.ansible -v /opt/kraken:/opt/kraken -v /home/core/.ssh/ansible_rsa:/opt/ansible/private_key -v /var/run:/ansible -e ANSIBLE_HOST_KEY_CHECKING=False ${ansible_docker_image} /sbin/my_init --skip-startup-files --skip-runit -- ${ansible_playbook_command} ${ansible_playbook_file}
-    - name: generate-kube-cert.service
-      command: start
-      content: |
-        [Unit]
-        Requires=ansible-in-docker.service
-        After=ansible-in-docker.service
-        Description=Create kubernetes certs and tokens
-        [Service]
-        Restart=on-failure
-        RestartSec=5
-        ExecStart=/opt/kraken/generate-cert/make-cert-tokens.sh $private_ipv4 /tmp/kube-cert
   update:
     group: ${coreos_update_channel}
     reboot-strategy: ${coreos_reboot_strategy}

@@ -154,7 +154,7 @@ variable "ansible_playbook_command" {
   description = "ansible-playbook invocation that will run inside ansible-docker container via cloudinit"
 }
 variable "ansible_playbook_file" {
-  default = "/opt/kraken/ansible/iaas_provision_local.yaml"
+  default = "/opt/kraken/ansible/vagrant_provision.yaml"
   description = "location of playbook file run with ansible_playbook_command"
 }
 

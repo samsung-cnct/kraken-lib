@@ -2,6 +2,7 @@
 Description=Launch hyperkube proxy
 Requires=hyperkube-docker-master.service
 After=hyperkube-docker-master.service
+After=load-kube-cert.service
 
 [Service]
 Restart=always

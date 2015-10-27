@@ -2,6 +2,7 @@
 Description=Launch hyperkube apiserver
 Requires=network-online.target
 After=network-online.target
+After=load-kube-cert.service
 
 [Service]
 Restart=always

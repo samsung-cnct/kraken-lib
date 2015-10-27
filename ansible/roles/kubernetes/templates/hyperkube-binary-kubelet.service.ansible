@@ -2,6 +2,7 @@
 Description=Launch hyperkube kubelet
 Requires=install-hyperkube.service
 Before=kubernetes-label.service
+After=load-kube-cert.service
 
 [Service]
 Restart=always

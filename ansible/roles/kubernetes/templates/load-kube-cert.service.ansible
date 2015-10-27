@@ -1,0 +1,10 @@
+[Unit]
+Description=Load kubernetes cert and token from etcd
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+ExecStartPre=-/usr/bin/chmod +x /opt/bin/load-kube-cert.sh
+ExecStart=//opt/bin/load-kube-cert.sh
+RemainAfterExit=true
+Type=oneshot
