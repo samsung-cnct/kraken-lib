@@ -1,5 +1,5 @@
 [Unit]
-Description=Load kubernetes cert and token from etcd
+Description=Generate kubernetes cert and token from etcd
 Requires=network-online.target
 After=network-online.target
 Before=load-kube-cert.service
