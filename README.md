@@ -1,32 +1,32 @@
 # Kraken
-
-> *Lightspeed  is too slow. We'll have to go right to [Ludicrous speed](#Ludicrous-speed).*
 ## Overview
-Deploy a __Kubernetes__ cluster using __Terraform__  and __Ansible__ on top of __CoreOS__. You will also find tools here to build an __etcd__ cluster on __CoreOS__ and a __Docker__ playground all using __Vagrant__.
+Deploy a __Kubernetes__ cluster using __Terraform__  and __Ansible__ on top of __CoreOS__.
 
 ## Tools setup
- 
+
     git clone git@github.com:Samsung-AG/kraken.git
     cd kraken
- 
+
 Quick setup on OSX with [homewbrew](http://brew.sh/):
-    
+
     brew update
     brew tap Homebrew/bundle
     brew bundle
-    
-This installs Ansible, Terraform, Vagrant, Virtualbox, kubectl, awscli and a custom terraform provider 'terraform-provider-execute'
+
+
+This installs Ansible, Terraform, Vagrant, Virtualbox, kubectl, awscli, fleetctl and custom terraform providers 'terraform-provider-execute', 'terraform-provider-coreosver' and 'terraform-provider-coreos'
 
 Alternative/non-OSX setup:
 
 * Install [Ansible](https://github.com/ansible/ansible/releases)
 * install awscli
+* install fleetctl
 * Install Terraform. Currently we are using a patched terraform version (PR is pending in terraform master). Get it [here](https://github.com/Samsung-AG/homebrew-terraform/releases)
 * Install [Vagrant](https://www.vagrantup.com/downloads.html) if you will be working with a local cluster
 * Install [Virtualbox](https://www.virtualbox.org/wiki/Downloads) if you will be working with a local cluster
 * Download/Build terraform-provider-execute. OSX 64bit binary is available [here](https://github.com/Samsung-AG/terraform-provider-execute/releases). Copy the terraform-provider-execute binary to the the folder in which Terraform binary resides in.
-* Download/Build terraform-provider-coreos from https://github.com/bakins/terraform-provider-coreos. OSX 64bit binary is [here](https://github.com/Samsung-AG/homebrew-terraform-provider-coreos/releases/download/v0.0.1/terraform-provider-coreos.tar.gz) 
-* Download/Build terraform-provider-coreosver from https://github.com/Samsung-AG/terraform-provider-coreosver. OSX 64bit binary is [here](https://github.com/Samsung-AG/terraform-provider-coreosver/releases/download/v0.0.1/terraform-provider-coreosver_darwin_amd64.tar.gz) 
+* Download/Build terraform-provider-coreos from https://github.com/bakins/terraform-provider-coreos. OSX 64bit binary is [here](https://github.com/Samsung-AG/homebrew-terraform-provider-coreos/releases/download/v0.0.1/terraform-provider-coreos.tar.gz)
+* Download/Build terraform-provider-coreosver from https://github.com/Samsung-AG/terraform-provider-coreosver. OSX 64bit binary is [here](https://github.com/Samsung-AG/terraform-provider-coreosver/releases/download/v0.0.1/terraform-provider-coreosver_darwin_amd64.tar.gz)
 * Download and install the latest [kubectl](https://github.com/GoogleCloudPlatform/kubernetes/releases/latest). Make sure 'kubectl' is in your PATH
 
 ## Variables setup
@@ -36,20 +36,20 @@ Create a terraform.tfvars file under the `kraken` folder.
 File contents should be vairable pairs:
 
     vairable_name = variable_value
-    
+
 As described [here](https://www.terraform.io/intro/getting-started/variables.html). Local cluster has no required variables. For AWS cluster you __have__ to provide:
 
     aws_access_key="<your aws key id>"
     aws_secret_key="<your aws secret key>"
     aws_user_prefix="<prefix to use for named resources>"
 
-Optionally, you can customize the cluster to better suite your needs by adding: 
- 
+Optionally, you can customize the cluster to better suite your needs by adding:
+
     apiserver_count = "<apiserver pool size>"
     node_count = "<number of kubernetes nodes>"
 
 For better performance, you should consider adding and modifing the following configuration items:
-    
+
     aws_etcd_type = "<aws instance type for etcd>"
     aws_storage_type_etcd = "<ephemeral>"
 
@@ -61,42 +61,41 @@ Looking to create a **ludicrous** cluster? Use the following `terraform.tfvars`:
 aws_access_key="<your aws key id>"
 aws_secret_key="<your aws secret key>"
 aws_user_prefix="<prefix to use for named resources>"
-kubernetes_binaries_uri = "https://storage.googleapis.com/kubernetes-release/release/v1.0.4/bin/linux/amd64"
 apiserver_count = "10"
 node_count = "1000"
 aws_etcd_type = "i2.8xlarge"
 aws_storage_type_etcd = "ephemeral"
 aws_apiserver_type = "m4.4xlarge"
 ```
-Alternatively, you can provide these variables as -var 'variable=value' switches to 'terraform' command. 
+Alternatively, you can provide these variables as -var 'variable=value' switches to 'terraform' command.
 
-All available variables to override and set are under 
+All available variables to override and set are under
 
     terraform/<cluster type>/variables.tf
 
 ## Create cluster.
 
 Once you are done with tools setup and variable settings you should be able to create a cluster:
-    
+
     terraform apply -input=false -state=terraform/<cluster type>/terraform.tfstate terraform/<cluster type>
-    
+
 For example, to create an AWS cluster:
 
     terraform apply -input=false -state=terraform/aws/terraform.tfstate terraform/aws
-    
-or 
+
+or
 
     terraform apply -input=false -state=terraform/aws/terraform.tfstate -var 'node_count=10' terraform/aws
 
-If you don't specify the -state switch, terraform will write the current 'state' to pwd - which could be a problem if you are using multiple cluster types. 
-    
+If you don't specify the -state switch, terraform will write the current 'state' to pwd - which could be a problem if you are using multiple cluster types.
+
 Overriding the node_count variable.
 
 ### Interact with your kubernetes cluster
-Terraform will write a kubectl config file for you. To issue cluster commands just use 
+Terraform will write a kubectl config file for you. To issue cluster commands just use
 
     kubectl --cluster=<cluster type> <command>
-    
+
 for example
 
     kubectl --cluster=aws get pods
@@ -128,4 +127,5 @@ And so on
 
 ### Helpful Links
 * kubectl user documentation can be found [here](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/kubectl.md)
-*  kubectl [FAQ](https://github.com/GoogleCloudPlatform/kubernetes/wiki/User-FAQ)
+* kubectl [FAQ](https://github.com/GoogleCloudPlatform/kubernetes/wiki/User-FAQ)
+* Kubernetes conformance test logs run after a PR is merged to this repo located at http://e2e.kubeme.io

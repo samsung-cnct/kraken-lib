@@ -266,11 +266,6 @@ resource "template_file" "apiserver_cloudinit" {
     kraken_services_branch = "${var.kraken_services_branch}"
     kraken_services_dirs = "${var.kraken_services_dirs}"
     kraken_services_repo = "${var.kraken_services_repo}"
-    kube_apiserver_v = "${var.kube_apiserver_v}"
-    kube_controller_manager_v = "${var.kube_controller_manager_v}"
-    kube_proxy_v = "${var.kube_proxy_v}"
-    kube_scheduler_v = "${var.kube_scheduler_v}"
-    kubelet_v = "${var.kubelet_v}"
     kubernetes_api_version = "${var.kubernetes_api_version}"
     kubernetes_binaries_uri = "${var.kubernetes_binaries_uri}"
     logentries_token = "${var.logentries_token}"
@@ -328,11 +323,6 @@ resource "template_file" "master_cloudinit" {
     kraken_services_branch = "${var.kraken_services_branch}"
     kraken_services_dirs = "${var.kraken_services_dirs}"
     kraken_services_repo = "${var.kraken_services_repo}"
-    kube_apiserver_v = "${var.kube_apiserver_v}"
-    kube_controller_manager_v = "${var.kube_controller_manager_v}"
-    kube_proxy_v = "${var.kube_proxy_v}"
-    kube_scheduler_v = "${var.kube_scheduler_v}"
-    kubelet_v = "${var.kubelet_v}"
     kubernetes_api_version = "${var.kubernetes_api_version}"
     kubernetes_binaries_uri = "${var.kubernetes_binaries_uri}"
     logentries_token = "${var.logentries_token}"
@@ -393,11 +383,6 @@ resource "template_file" "node_cloudinit_special" {
     kraken_services_branch = "${var.kraken_services_branch}"
     kraken_services_dirs = "${var.kraken_services_dirs}"
     kraken_services_repo = "${var.kraken_services_repo}"
-    kube_apiserver_v = "${var.kube_apiserver_v}"
-    kube_controller_manager_v = "${var.kube_controller_manager_v}"
-    kube_proxy_v = "${var.kube_proxy_v}"
-    kube_scheduler_v = "${var.kube_scheduler_v}"
-    kubelet_v = "${var.kubelet_v}"
     kubernetes_api_version = "${var.kubernetes_api_version}"
     kubernetes_binaries_uri = "${var.kubernetes_binaries_uri}"
     logentries_token = "${var.logentries_token}"
@@ -458,11 +443,6 @@ resource "template_file" "node_cloudinit" {
     kraken_services_branch = "${var.kraken_services_branch}"
     kraken_services_dirs = "${var.kraken_services_dirs}"
     kraken_services_repo = "${var.kraken_services_repo}"
-    kube_apiserver_v = "${var.kube_apiserver_v}"
-    kube_controller_manager_v = "${var.kube_controller_manager_v}"
-    kube_proxy_v = "${var.kube_proxy_v}"
-    kube_scheduler_v = "${var.kube_scheduler_v}"
-    kubelet_v = "${var.kubelet_v}"
     kubernetes_api_version = "${var.kubernetes_api_version}"
     kubernetes_binaries_uri = "${var.kubernetes_binaries_uri}"
     logentries_token = "${var.logentries_token}"
@@ -505,6 +485,7 @@ resource "aws_autoscaling_group" "kubernetes_nodes" {
   force_delete = true
   wait_for_capacity_timeout = "0"
   health_check_grace_period = "30"
+  default_cooldown = "10"
   vpc_zone_identifier = ["${aws_subnet.vpc_subnet.id}"]
   launch_configuration = "${aws_launch_configuration.kubernetes_node.name}"
   health_check_type = "EC2"
@@ -561,11 +542,6 @@ resource "template_file" "ansible_inventory" {
     kraken_services_branch = "${var.kraken_services_branch}"
     kraken_services_dirs = "${var.kraken_services_dirs}"
     kraken_services_repo = "${var.kraken_services_repo}"
-    kube_apiserver_v = "${var.kube_apiserver_v}"
-    kube_controller_manager_v = "${var.kube_controller_manager_v}"
-    kube_proxy_v = "${var.kube_proxy_v}"
-    kube_scheduler_v = "${var.kube_scheduler_v}"
-    kubelet_v = "${var.kubelet_v}"
     kubernetes_api_version = "${var.kubernetes_api_version}"
     kubernetes_binaries_uri = "${var.kubernetes_binaries_uri}"
     logentries_token = "${var.logentries_token}"
@@ -591,9 +567,5 @@ resource "template_file" "ansible_inventory" {
 
   provisioner "local-exec" {
     command = "AWS_ACCESS_KEY_ID=${var.aws_access_key} AWS_SECRET_ACCESS_KEY=${var.aws_secret_key} AWS_DEFAULT_REGION=${var.aws_region} ${path.module}/kraken_asg_helper.sh --cluster aws --limit ${var.node_count + var.special_node_count} --name ${var.aws_user_prefix}_${var.aws_cluster_prefix}_nodes --output ${path.module}/rendered/ansible.inventory --singlewait ${var.asg_wait_single} --totalwaits ${var.asg_wait_total} --offset ${var.special_node_count} --retries ${var.asg_retries} --etcd ${aws_instance.kubernetes_etcd.public_ip} --port 4001"
-  }
-
-  provisioner "local-exec" {
-    command = "ansible-playbook -i ${path.module}/rendered/ansible.inventory ${path.module}/../../ansible/localhost_post_provision.yaml"
   }
 }

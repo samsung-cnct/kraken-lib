@@ -201,36 +201,16 @@ variable "hyperkube_deployment_mode" {
   description = "Run inside 'docker' or run on host as 'binary'"
 }
 variable "hyperkube_image" {
-  default = "gcr.io/google_containers/hyperkube:v1.0.3"
+  default = "gcr.io/google_containers/hyperkube:v1.0.6"
   description = "image to use when running with hyperkube_deploy_mode 'docker'"
 }
 variable "kubernetes_binaries_uri" {
-  default = "https://storage.googleapis.com/kubernetes-release/release/v1.0.3/bin/linux/amd64"
+  default = "https://storage.googleapis.com/kubernetes-release/release/v1.0.6/bin/linux/amd64"
   description = "url to fetch hyperkube, kubectl binaries from in hyperkube_deploy_mode 'binary'"
 }
 variable "kubernetes_api_version" {
   default = "v1"
   description = "Kubernetes api version"
-}
-variable "kube_apiserver_v" {
-  default = "2"
-  description = "kubernetes apiserver verbosity"
-}
-variable "kube_controller_manager_v" {
-  default = "2"
-  description = "kubernetes controller manager verbosity"
-}
-variable "kube_scheduler_v" {
-  default = "2"
-  description = "kubernetes scheduler verbosity"
-}
-variable "kubelet_v" {
-  default = "2"
-  description = "kubernetes kubelet verbosity"
-}
-variable "kube_proxy_v" {
-  default = "2"
-  description = "kubernetes proxy verbosity"
 }
 variable "kraken_services_dirs" {
   # NOTE: DO NOT INCLUDE namespaces here.  It is hard coded into the scripts
