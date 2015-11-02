@@ -21,6 +21,11 @@ variable "ip_base" {
   description = "IP addresses will be assigned from ip_base.103 to ip_base.102 + number of nodes"
 }
 
+variable "apiserver_ip_address" {
+  default = "172.16.1.3"
+  description = "IP addresses of the apiservers"
+}
+
 variable "etcd_cpus" {
   default = "1"
   description = "Number of cpus for etcd vm"
@@ -134,7 +139,7 @@ variable "ansible_playbook_command" {
   description = "ansible-playbook invocation that will run inside ansible-docker container via cloudinit"
 }
 variable "ansible_playbook_file" {
-  default = "/opt/kraken/ansible/vagrant_provision.yaml"
+  default = "/opt/kraken/ansible/iaas_provision.yaml"
   description = "location of playbook file run with ansible_playbook_command"
 }
 

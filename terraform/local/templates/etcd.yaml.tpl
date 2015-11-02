@@ -1,6 +1,20 @@
 #cloud-config
 
 ---
+write_files:
+  - path: /etc/inventory.ansible
+    content: |
+      [etcd]
+      etcd ansible_ssh_host=$private_ipv4
+
+      [etcd:vars]
+      ansible_connection=ssh
+      ansible_python_interpreter="PATH=/home/core/bin:$PATH python"
+      ansible_ssh_user=core
+      ansible_ssh_private_key_file=/opt/ansible/private_key
+      kubernetes_binaries_uri=${kubernetes_binaries_uri}
+      logentries_token=${logentries_token}
+      logentries_url=${logentries_url}
 coreos:
   etcd2:
     name: etcd
