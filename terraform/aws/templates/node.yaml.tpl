@@ -55,7 +55,9 @@ coreos:
         Type=oneshot
         RemainAfterExit=yes
         ExecStart=/usr/sbin/wipefs -f ${format_docker_storage_mnt}
+        ExecStart=/usr/sbin/wipefs -f ${format_kubelet_storage_mnt}
         ExecStart=/usr/sbin/mkfs.ext4 -F ${format_docker_storage_mnt}
+        ExecStart=/usr/sbin/mkfs.ext4 -F ${format_kubelet_storage_mnt}
     - name: var-lib-docker.mount
       command: start
       content: |
@@ -67,6 +69,18 @@ coreos:
         [Mount]
         What=${format_docker_storage_mnt}
         Where=/var/lib/docker
+        Type=ext4
+    - name: var-lib-kubelet.mount
+      command: start
+      content: |
+        [Unit]
+        Description=Mount to /var/lib/docker
+        Requires=format-storage.service
+        After=format-storage.service
+        Before=docker.service
+        [Mount]
+        What=${format_kubelet_storage_mnt}
+        Where=/var/lib/kubelet
         Type=ext4
     - name: docker-tcp.socket
       command: start
