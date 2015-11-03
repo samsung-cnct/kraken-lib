@@ -15,6 +15,12 @@ coreos:
     etcd-endpoints: http://${etcd_private_ip}:4001
     interface: $private_ipv4
   units:
+    - name: docker.service
+      drop-ins:
+        - name: 50-docker-opts.conf
+          content: |
+            [Service]
+            Environment="DOCKER_OPTS=--log-level=warn"
     - name: docker-tcp.socket
       command: start
       enable: true
