@@ -14,9 +14,9 @@ write_files:
       ansible_ssh_private_key_file=/opt/ansible/private_key
       dns_domain=${dns_domain}
       dns_ip=${dns_ip}
-      cluster_proxy_record=__NODE__
+      cluster_proxy_record=$NODE_001_IP
       dockercfg_base64=${dockercfg_base64}
-      etcd_private_ip=__ETCD_PRIVATE_IP__
+      etcd_private_ip=$ETCD_PRIVATE_IP
       hyperkube_deployment_mode=${hyperkube_deployment_mode}
       hyperkube_image=${hyperkube_image}
       interface_name=${interface_name}
@@ -29,19 +29,19 @@ write_files:
       logentries_url=${logentries_url}
       master_private_ip=$private_ipv4
       master_public_ip=$public_ipv4
-      apiserver_nginx_pool=__APISERVER_NGINX_POOL__
+      apiserver_nginx_pool=$APISERVER_NGINX_POOL
 coreos:
   etcd2:
     proxy: on
     listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
     advertise-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
-    initial-cluster: etcd=http://__ETCD_PRIVATE_IP__:2380
+    initial-cluster: etcd=http://$ETCD_PRIVATE_IP:2380
   fleet:
     etcd-servers: http://$private_ipv4:4001
     public-ip: $public_ipv4
     metadata: "role=master"
   flannel:
-    etcd-endpoints: http://__ETCD_PRIVATE_IP__:4001
+    etcd-endpoints: http://$ETCD_PRIVATE_IP:4001
     interface: $private_ipv4
   units:
     - name: docker-tcp.socket
