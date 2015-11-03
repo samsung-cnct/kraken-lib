@@ -33,6 +33,12 @@ coreos:
       command: start
     - name: etcd2.service
       command: start
+    - name: docker.service
+      drop-ins:
+        - name: 50-docker-opts.conf
+          content: |
+            [Service]
+            Environment="DOCKER_OPTS=--log-level=warn"
     - name: systemd-journal-gatewayd.socket
       command: start
       enable: yes
