@@ -1,11 +1,11 @@
-ssh #cloud-config
+#cloud-config
 
 ---
 write_files:
   - path: /etc/inventory.ansible
     content: |
       [nodes]
-      node ansible_ssh_host=$private_ipv4
+      ${short_name} ansible_ssh_host=$private_ipv4
 
       [nodes:vars]
       ansible_connection=ssh
