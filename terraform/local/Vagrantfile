@@ -25,9 +25,16 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   # array of systems with multinodes for ansible inventory
-  apiserver_nginx_pool = ""
   apiserver_host_data = ""
   node_host_data = ""
+
+  # apiserver nginx pool 
+  apiserver_nginx_pool = ""
+  get_num_apiservers.times do |n|
+    ip_addr = base_ip_address + "#{n+1+2+100}" #n+1(index starts at 0) + <etcd and master> + 100
+    apiserver_nginx_pool += "server #{ip_addr}:8080; "
+  end
+
 
   (1..(get_num_vms)).each do |i| # number of nodes + number of apiservers + master and etcd nodes
 
@@ -66,13 +73,36 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 
       if File.exist?(user_data[:data])
-        config2.vm.provision :file, :source => "#{user_data[:data]}", :destination => "/tmp/vagrantfile-user-data"
+        # take userdata and replace placeholders
+        tmp_user_data = "/tmp/#{vm_name}-vagrantfile-user-data"
+        replacements = {
+          '$ETCD_PRIVATE_IP' => base_ip_address + "#{1+100}",
+          '$MASTER_PRIVATE_IP' => base_ip_address + "#{2+100}",
+          '$NODE_001_IP' => base_ip_address + "#{(2 + get_num_apiservers)+100}",
+          '$APISERVER_NGINX_POOL' => apiserver_nginx_pool
+        }
+
+        regexp = Regexp.new replacements.keys.map {|k| Regexp.quote(k) }.join('|')
+        tmp_file = Tempfile.new("tmp_vagrantfile")
+
+        begin
+          File.foreach(user_data[:data], 'r') do |line|
+            tmp_file.write line.gsub regexp, replacements
+          end
+          tmp_file.close
+          FileUtils.mv(tmp_file.path, tmp_user_data)
+        ensure
+          tmp_file.close
+          tmp_file.unlink
+        end
+
+            
+        config2.vm.provision :file, :source => "#{tmp_user_data}", :destination => "/tmp/vagrantfile-user-data"
         config2.vm.provision :shell, :privileged => true,
         inline: <<-EOF
           mv /tmp/vagrantfile-user-data /var/lib/coreos-vagrant/
         EOF
       end
-
       # Only execute the ansible provisioner once, when all machines are up and ready
       if base_ip_address + "#{i+100}" == final_node_ip
         kraken_env_var_entries = %w(
@@ -105,15 +135,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         render_vars = other_vars.merge(kraken_env_vars)
 
         render("#{ENV['VAGRANT_CWD']}/templates/ansible.inventory.erb", "#{ENV['VAGRANT_CWD']}/rendered/ansible.inventory", render_vars)
-
-        ansible_forks = ENV['ANSIBLE_FORKS']
-        config2.vm.provision 'ansible' do |ansible|
-          ansible.limit = 'cluster'
-          ansible.inventory_path = "#{ENV['VAGRANT_CWD']}/rendered/ansible.inventory"
-          ansible.playbook = "../../ansible/vagrant_provision.yaml"
-          ansible.raw_arguments = ["--forks=#{ansible_forks}"]
-          ansible.verbose = "v"
-        end
       end
     end
   end

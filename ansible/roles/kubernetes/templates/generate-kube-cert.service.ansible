@@ -1,0 +1,11 @@
+[Unit]
+Description=Generate kubernetes cert and token from etcd
+Requires=network-online.target
+After=network-online.target
+Before=load-kube-cert.service
+
+[Service]
+ExecStartPre=-/usr/bin/chmod +x /opt/bin/generate-kube-cert.sh
+ExecStart=/opt/bin/generate-kube-cert.sh
+RemainAfterExit=true
+Type=oneshot

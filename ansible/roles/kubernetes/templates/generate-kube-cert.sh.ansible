@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Generate kubernetes certs and tokens and store the resulting file in etcd
+
+set -e
+
+key="kubernetes/kube-cert"
+check=`curl -so /dev/null -w "%{http_code}" http://{{etcd_private_ip}}:4001/v2/keys/${key}`
+kraken_loc="/opt/kraken"
+
+# Check to see if the kubernetes tokens or certs already exist, exit if it does
+if [ ${check} == 200 ]
+	then
+		echo "ERROR: Kubernetes certs and tokens already exists"; 	exit 0
+	else
+		# Generate the certs and tokens and stuff them into etcd
+		${kraken_loc}/generate-cert/make-cert-tokens.sh {{master_private_ip}} {{master_private_ip}} /srv/kubernetes
+		/usr/bin/tar -zcvf /tmp/kube-cert.tgz /srv/kubernetes
+		/usr/bin/cat /tmp/kube-cert.tgz | base64 > /tmp/kube-cert.base64
+		/usr/bin/etcdctl set ${key} < /tmp/kube-cert.base64
+fi

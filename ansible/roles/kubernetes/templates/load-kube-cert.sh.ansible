@@ -1,0 +1,15 @@
+#!/bin/bash
+# Load certs and tokens from etcd
+
+set -e
+
+key="kubernetes/kube-cert"
+
+# Wait for certs and tokens to exist in etcd
+until curl -o /dev/null -sIf http://{{etcd_private_ip}}:4001/v2/keys/${key}; do \
+  sleep 3;
+done;
+
+/usr/bin/etcdctl --peers=http://{{etcd_private_ip}}:4001 get ${key} > /tmp/kube-cert.tmp
+/usr/bin/base64 --decode /tmp/kube-cert.tmp | tar zxvf - --strip-components=1 -C /tmp
+mv /tmp/kubernetes /srv

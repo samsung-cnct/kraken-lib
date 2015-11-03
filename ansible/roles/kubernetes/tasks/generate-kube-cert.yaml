@@ -1,0 +1,22 @@
+---
+
+- name: Create /opt/bin for bin files
+  sudo: yes
+  file: >
+    path=/opt/bin
+    state=directory
+    owner=core
+    group=core
+
+- name: Create generate-kube-cert script
+  template: src=generate-kube-cert.sh.ansible
+            dest=/opt/bin/generate-kube-cert.sh
+  sudo: yes
+
+- name: Create generate-kube-cert service
+  template: src=generate-kube-cert.service.ansible
+            dest=/etc/systemd/system/generate-kube-cert.service
+  sudo: yes
+  notify:
+    - reload systemd
+    - restart generate-kube-cert

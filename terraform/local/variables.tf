@@ -21,6 +21,11 @@ variable "ip_base" {
   description = "IP addresses will be assigned from ip_base.103 to ip_base.102 + number of nodes"
 }
 
+variable "apiserver_ip_address" {
+  default = "172.16.1.3"
+  description = "IP addresses of the apiservers"
+}
+
 variable "etcd_cpus" {
   default = "1"
   description = "Number of cpus for etcd vm"
@@ -110,6 +115,33 @@ variable "vagrant_private_key" {
   description = "Location of private key for vagrant to use"
 }
 
+variable "kraken_repo" {
+  default = {
+    "repo" = "https://github.com/Samsung-AG/kraken.git"
+    "branch" = "master"
+    "commit_sha" = ""
+  }
+  description = "Kraken git repo"
+}
+
+variable "kraken_services_branch" {
+  default = "master"
+  description = "Kraken services repo branch"
+}
+
+variable "ansible_docker_image" {
+  default = "quay.io/samsung_ag/kraken_ansible"
+  description = "Docker image to use for ansible-in-docker"
+}
+
+variable "ansible_playbook_command" {
+  default = "ansible-playbook -i /etc/inventory.ansible"
+  description = "ansible-playbook invocation that will run inside ansible-docker container via cloudinit"
+}
+variable "ansible_playbook_file" {
+  default = "/opt/kraken/ansible/iaas_provision.yaml"
+  description = "location of playbook file run with ansible_playbook_command"
+}
 
 
 

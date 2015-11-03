@@ -23,7 +23,6 @@
   sudo: yes
   notify:
     - reload systemd
-    - restart nginx-create-cert
 
 - name: Create nginx load balancer service
   template: src=nginx-docker.service.ansible

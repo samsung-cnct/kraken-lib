@@ -1,6 +1,7 @@
 [Unit]
 Description=Launch hyperkube scheduler
 Requires=install-hyperkube.service
+After=load-kube-cert.service
 
 [Service]
 Restart=always
