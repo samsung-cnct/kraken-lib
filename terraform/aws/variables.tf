@@ -1,4 +1,7 @@
 # Listing required vairables first
+variable "cluster_name" {
+  description = "Name of the cluster, useed in kubernetes config as the --cluster"
+}
 variable "aws_access_key" {
   description = "AWS key id"
 }

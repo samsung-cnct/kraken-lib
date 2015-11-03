@@ -1,3 +1,6 @@
+variable "cluster_name" {
+  description = "Name of the cluster, useed in kubernetes config as the --cluster"
+}
 variable "apiserver_count" {
   default = "1"
   description = "How many apiservers to run in a pool"

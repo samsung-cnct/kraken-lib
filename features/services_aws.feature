@@ -5,7 +5,7 @@ Feature: Make sure we have the correct kubernetes services
   I should be able to run these scenario and see the correct exit code and services output
 
   Scenario: Getting kube-system services
-    When I run `kubectl --cluster=aws get services --namespace=kube-system`
+    When I kubectl system services
     Then the exit status should eventually be 0
     And the output should eventually match:
       """
@@ -14,7 +14,7 @@ Feature: Make sure we have the correct kubernetes services
       """
 
   Scenario: Getting default services
-    When I run `kubectl --cluster=aws get services`
+    When I kubectl services
     Then the exit status should eventually be 0
     And the output should eventually match:
       """
