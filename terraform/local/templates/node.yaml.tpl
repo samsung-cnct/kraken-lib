@@ -18,7 +18,7 @@ write_files:
       etcd_private_ip=$ETCD_PRIVATE_IP
       hyperkube_deployment_mode=${hyperkube_deployment_mode}
       hyperkube_image=${hyperkube_image}
-      interface_name=${eth1}
+      interface_name=${interface_name}
       kubernetes_api_version=${kubernetes_api_version}
       kubernetes_binaries_uri=${kubernetes_binaries_uri}
       logentries_token=${logentries_token}
