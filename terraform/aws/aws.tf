@@ -452,11 +452,11 @@ resource "aws_instance" "kubernetes_node_special" {
     volume_type = "${element(split(",", var.aws_volume_type_special), count.index)}"
   }
   ephemeral_block_device {
-    device_name = "/dev/xvdb"
+    device_name = "/dev/sdb"
     virtual_name = "ephemeral0"
   }
   ephemeral_block_device {
-    device_name = "/dev/xvdc"
+    device_name = "/dev/sdc"
     virtual_name = "ephemeral1"
   }
   user_data = "${element(template_file.node_cloudinit_special.*.rendered, count.index)}"
