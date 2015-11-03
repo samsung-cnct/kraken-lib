@@ -134,7 +134,14 @@ variable "format_docker_storage_mnt" {
     "ebs" = "/dev/xvdf"
     "ephemeral" = "/dev/xvdb"
   }
-  description = "Mount point for EBS drive to move /var/docker to"
+  description = "Mount point for EBS drive to move /var/lib/docker to"
+}
+variable "format_kubelet_storage_mnt" {
+  default =  {
+    "ebs" = "/dev/xvdg"
+    "ephemeral" = "/dev/xvdc"
+  }
+  description = "Mount point for EBS drive to move /var/lib/kubelet to"
 }
 variable "kraken_port_low" {
   default = "30000"

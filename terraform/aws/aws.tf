@@ -391,6 +391,7 @@ resource "template_file" "node_cloudinit_special" {
     master_public_ip = "${aws_instance.kubernetes_master.public_ip}"
     cluster_proxy_record = "${var.aws_user_prefix}-proxy.${var.aws_cluster_domain}"
     format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, element(split(",", var.aws_storage_type_special), count.index))}"
+    format_kubelet_storage_mnt = "${lookup(var.format_kubelet_storage_mnt, element(split(",", var.aws_storage_type_special), count.index))}"
     coreos_update_channel = "${var.coreos_update_channel}"
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
     short_name = "node-${format("%03d", count.index+1)}"
@@ -409,13 +410,22 @@ resource "aws_instance" "kubernetes_node_special" {
   subnet_id = "${aws_subnet.vpc_subnet.id}"
   associate_public_ip_address = true
   ebs_block_device {
-    device_name = "${var.aws_storage_path.ebs}"
+    device_name = "/dev/sdf"
+    volume_size = "${element(split(",", var.aws_volume_size_special), count.index)}"
+    volume_type = "${element(split(",", var.aws_volume_type_special), count.index)}"
+  }
+  ebs_block_device {
+    device_name = "/dev/sdg"
     volume_size = "${element(split(",", var.aws_volume_size_special), count.index)}"
     volume_type = "${element(split(",", var.aws_volume_type_special), count.index)}"
   }
   ephemeral_block_device {
-    device_name = "${var.aws_storage_path.ephemeral}"
+    device_name = "/dev/sdb"
     virtual_name = "ephemeral0"
+  }
+  ephemeral_block_device {
+    device_name = "/dev/sdc"
+    virtual_name = "ephemeral1"
   }
   user_data = "${element(template_file.node_cloudinit_special.*.rendered, count.index)}"
   tags {
@@ -451,6 +461,7 @@ resource "template_file" "node_cloudinit" {
     master_public_ip = "${aws_instance.kubernetes_master.public_ip}"
     cluster_proxy_record = "${var.aws_user_prefix}-proxy.${var.aws_cluster_domain}"
     format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type)}"
+    format_kubelet_storage_mnt = "${lookup(var.format_kubelet_storage_mnt, var.aws_storage_type)}"
     coreos_update_channel = "${var.coreos_update_channel}"
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
     short_name = "autoscaled"
@@ -468,13 +479,22 @@ resource "aws_launch_configuration" "kubernetes_node" {
   associate_public_ip_address = true
   user_data = "${template_file.node_cloudinit.rendered}"
   ebs_block_device {
-    device_name = "${var.aws_storage_path.ebs}"
+    device_name = "/dev/sdf"
+    volume_size = "${var.aws_volume_size}"
+    volume_type = "${var.aws_volume_type}"
+  }
+  ebs_block_device {
+    device_name = "/dev/sdg"
     volume_size = "${var.aws_volume_size}"
     volume_type = "${var.aws_volume_type}"
   }
   ephemeral_block_device {
-    device_name = "${var.aws_storage_path.ephemeral}"
+    device_name = "/dev/sdb"
     virtual_name = "ephemeral0"
+  }
+  ephemeral_block_device {
+    device_name = "/dev/sdc"
+    virtual_name = "ephemeral1"
   }
 }
 resource "aws_autoscaling_group" "kubernetes_nodes" {
