@@ -94,11 +94,11 @@ Overriding the node_count variable.
 ### Interact with your kubernetes cluster
 Terraform will write a kubectl config file for you. To issue cluster commands just use
 
-    kubectl --cluster=<cluster type> <command>
+    kubectl --cluster=<aws_user_prefix>_<cluster type> <command>
 
 for example
 
-    kubectl --cluster=aws get pods
+    kubectl --cluster=samsung_aws get pods
 
 ## Destroy Cluster
 Destroy a running cluster by running:
