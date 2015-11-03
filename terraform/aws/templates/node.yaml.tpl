@@ -58,6 +58,12 @@ coreos:
         ExecStart=/usr/sbin/wipefs -f ${format_kubelet_storage_mnt}
         ExecStart=/usr/sbin/mkfs.ext4 -F ${format_docker_storage_mnt}
         ExecStart=/usr/sbin/mkfs.ext4 -F ${format_kubelet_storage_mnt}
+    - name: docker.service
+      drop-ins:
+        - name: 50-docker-opts.conf
+          content: |
+            [Service]
+            Environment="DOCKER_OPTS=--log-level=warn"
     - name: var-lib-docker.mount
       command: start
       content: |
