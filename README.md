@@ -37,8 +37,13 @@ File contents should be vairable pairs:
 
     vairable_name = variable_value
 
-As described [here](https://www.terraform.io/intro/getting-started/variables.html). Local cluster has no required variables. For AWS cluster you __have__ to provide:
+As described [here](https://www.terraform.io/intro/getting-started/variables.html). For local cluster you have to provide:
 
+    cluster_name=<name of your cluster> 
+
+For AWS cluster you __have__ to provide:
+
+    cluster_name=<name of your cluster>
     aws_access_key="<your aws key id>"
     aws_secret_key="<your aws secret key>"
     aws_user_prefix="<prefix to use for named resources>"
@@ -58,6 +63,7 @@ For better performance, you should consider adding and modifing the following co
 Looking to create a **ludicrous** cluster? Use the following `terraform.tfvars`:
 
 ```
+cluster_name="<your cluster name>"
 aws_access_key="<your aws key id>"
 aws_secret_key="<your aws secret key>"
 aws_user_prefix="<prefix to use for named resources>"
@@ -94,11 +100,11 @@ Overriding the node_count variable.
 ### Interact with your kubernetes cluster
 Terraform will write a kubectl config file for you. To issue cluster commands just use
 
-    kubectl --cluster=<aws_user_prefix>_<cluster type> <command>
+    kubectl --cluster=<cluster_name> <command>
 
 for example
 
-    kubectl --cluster=samsung_aws get pods
+    kubectl --cluster=my_aws_cluster get pods
 
 ## Destroy Cluster
 Destroy a running cluster by running:
