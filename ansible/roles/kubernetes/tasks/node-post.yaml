@@ -4,6 +4,9 @@
   template: src=kubernetes-label.sh.ansible
             dest=/opt/bin/kubernetes-label.sh
   sudo: yes
+  notify:
+    - reload systemd
+    - restart kubernetes-label
 
 - name: Create kubernetes-label
   template: src=kubernetes-label.service.ansible
