@@ -90,7 +90,7 @@ variable "aws_volume_size_master" {
   description = "Size of EBS volume attached to master instance in gigabytes."
 }
 variable "aws_volume_size_apiserver" {
-  default = "30"
+  default = "10"
   description = "Size of EBS volume attached to master instance in gigabytes."
 }
 variable "aws_volume_size_etcd" {
@@ -102,7 +102,7 @@ variable "aws_volume_size_special" {
   description = "Sizes of EBS volume attached to special nodes. Comma-sperated list. Count must = special_node_count."
 }
 variable "aws_volume_size" {
-  default = "30"
+  default = "10"
   description = "Size of EBS volume attached to all other nodes in gigabytes."
 }
 variable "aws_volume_type_master" {
