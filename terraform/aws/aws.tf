@@ -390,8 +390,8 @@ resource "template_file" "node_cloudinit_special" {
     master_private_ip = "${aws_instance.kubernetes_master.private_ip}"
     master_public_ip = "${aws_instance.kubernetes_master.public_ip}"
     cluster_proxy_record = "${var.aws_user_prefix}-proxy.${var.aws_cluster_domain}"
-    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, element(split(",", var.aws_storage_type_special), count.index))}"
-    format_kubelet_storage_mnt = "${lookup(var.format_kubelet_storage_mnt, element(split(",", var.aws_storage_type_special), count.index))}"
+    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, element(split(",", var.aws_storage_type_special_docker), count.index))}"
+    format_kubelet_storage_mnt = "${lookup(var.format_kubelet_storage_mnt, element(split(",", var.aws_storage_type_special_kubelet), count.index))}"
     coreos_update_channel = "${var.coreos_update_channel}"
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
     short_name = "node-${format("%03d", count.index+1)}"
@@ -431,7 +431,7 @@ resource "aws_instance" "kubernetes_node_special" {
   tags {
     Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_node-${format("%03d", count.index+1)}"
     ShortName = "${format("node-%03d", count.index+1)}"
-    StorageType = "${element(split(",", var.aws_storage_type_special), count.index)}"
+    StorageType = "${element(split(",", var.aws_storage_type_special_docker), count.index)}"
   }
 }
 
@@ -460,8 +460,8 @@ resource "template_file" "node_cloudinit" {
     master_private_ip = "${aws_instance.kubernetes_master.private_ip}"
     master_public_ip = "${aws_instance.kubernetes_master.public_ip}"
     cluster_proxy_record = "${var.aws_user_prefix}-proxy.${var.aws_cluster_domain}"
-    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type)}"
-    format_kubelet_storage_mnt = "${lookup(var.format_kubelet_storage_mnt, var.aws_storage_type)}"
+    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_docker)}"
+    format_kubelet_storage_mnt = "${lookup(var.format_kubelet_storage_mnt, var.aws_storage_type_kubelet)}"
     coreos_update_channel = "${var.coreos_update_channel}"
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
     short_name = "autoscaled"
@@ -511,7 +511,7 @@ resource "aws_autoscaling_group" "kubernetes_nodes" {
   health_check_type = "EC2"
   tag {
     key = "StorageType"
-    value = "${var.aws_storage_type}"
+    value = "${var.aws_storage_type_docker}"
     propagate_at_launch = true
   }
   tag {
@@ -570,7 +570,8 @@ resource "template_file" "ansible_inventory" {
     master_public_ip = "${aws_instance.kubernetes_master.public_ip}"
     apiservers_inventory_info = "${join("\n", concat(formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_apiserver.*.tags.ShortName, aws_instance.kubernetes_apiserver.*.public_ip)))}"
     cluster_proxy_record = "${var.aws_user_prefix}-proxy.${var.aws_cluster_domain}"
-    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type)}"
+    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_docker)}"
+    format_kubelet_storage_mnt = "${lookup(var.format_kubelet_storage_mnt, var.aws_storage_type_kubelet)}"
     coreos_update_channel = "${var.coreos_update_channel}"
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
     apiserver_nginx_pool = "${join(" ", concat(formatlist("server %v:8080;", aws_instance.kubernetes_apiserver.*.private_ip)))}"

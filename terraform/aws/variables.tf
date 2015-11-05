@@ -77,12 +77,28 @@ variable "aws_storage_type_etcd" {
   description = "Primary volume type for master"
   default = "ebs"
 }
+variable "aws_storage_type_special_docker" {
+  description = "Primary volume type for special nodes for /var/lib/docker. Comma-sperated list. Count must = special_node_count"
+  default = "ebs"
+}
+variable "aws_storage_type_special_kubelet" {
+  description = "Primary volume type for special nodes for /var/lib/kubelet. Comma-sperated list. Count must = special_node_count"
+  default = "ebs"
+}
 variable "aws_storage_type_special" {
-  description = "Primary volume type for sepcial nodes. Comma-sperated list. Count must = special_node_count"
+  description = "[DEPRECATED] Primary volume type for special nodes. Comma-sperated list. Count must = special_node_count"
+  default = "ebs"
+}
+variable "aws_storage_type_node_docker" {
+  description = "Primary volume type for nodes for /var/lib/docker"
+  default = "ebs"
+}
+variable "aws_storage_type_node_kubelet" {
+  description = "Primary volume type for nodes for /var/lib/kubelet"
   default = "ebs"
 }
 variable "aws_storage_type" {
-  description = "Primary volume type for all other nodes"
+  description = "[DEPRECATED] Primary volume type for all other nodes"
   default = "ebs"
 }
 variable "aws_volume_size_master" {
@@ -97,9 +113,25 @@ variable "aws_volume_size_etcd" {
   default = "10"
   description = "Size of EBS volume attached to etcd instance in gigabytes."
 }
+variable "aws_volume_size_special_docker" {
+  default = "10"
+  description = "Sizes of EBS volume attached to special nodes for /var/lib/docker. Comma-sperated list. Count must = special_node_count."
+}
+variable "aws_volume_size_special_kubelet" {
+  default = "10"
+  description = "Sizes of EBS volume attached to special nodes for /var/lib/kubelet. Comma-sperated list. Count must = special_node_count."
+}
 variable "aws_volume_size_special" {
   default = "10"
-  description = "Sizes of EBS volume attached to special nodes. Comma-sperated list. Count must = special_node_count."
+  description = "[DEPRECATED] Sizes of EBS volume attached to special nodes. Comma-sperated list. Count must = special_node_count."
+}
+variable "aws_volume_size_node_docker" {
+  default = "10"
+  description = "Size of EBS volume attached to nodes for /var/lib/docker in gigabytes."
+}
+variable "aws_volume_size_node_kubelet" {
+  default = "10"
+  description = "Size of EBS volume attached to nodes for /var/lib/kubelet in gigabytes"
 }
 variable "aws_volume_size" {
   default = "10"
@@ -117,13 +149,29 @@ variable "aws_volume_type_etcd" {
   default = "gp2"
   description = "Type of EBS volume attached to etcd AWS instance. "
 }
+variable "aws_volume_type_special_docker" {
+  default = "gp2"
+  description = "Type of EBS volume attached special nodes for /var/lib/docker. Comma-sperated list. Count must = special_node_count."
+}
+variable "aws_volume_type_special_kubelet" {
+  default = "gp2"
+  description = "Type of EBS volume attached special nodes for /var/lib/kubelet. Comma-sperated list. Count must = special_node_count."
+}
 variable "aws_volume_type_special" {
   default = "gp2"
-  description = "Type of EBS volume attached special nodes. Comma-sperated list. Count must = special_node_count."
+  description = "[DEPRECATED] Type of EBS volume attached special nodes. Comma-sperated list. Count must = special_node_count."
+}
+variable "aws_volume_type_node_docker" {
+  default = "gp2"
+  description = "Type of EBS volume attached to node for /var/lib/docker"
+}
+variable "aws_volume_type_node_kubelet" {
+  default = "gp2"
+  description = "Type of EBS volume attached to nodes for /var/lib/kubelet"
 }
 variable "aws_volume_type" {
   default = "gp2"
-  description = "Type of EBS volume attached to all other nodes."
+  description = "[DEPRECATED] Type of EBS volume attached to all other nodes."
 }
 variable "aws_storage_path" {
   default =  {
