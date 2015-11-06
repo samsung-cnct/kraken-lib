@@ -29,6 +29,13 @@ variable "aws_region" {
   default = "us-west-2"
   description = "AWS region"
 }
+variable "aws_region_azs" {
+  default = {
+    "us-west-2" = "us-west-2a,us-west-2b,us-west-2c"
+    "us-east-1" = "us-east-1b,us-east-1c,us-east-1d"
+  }
+  description = "Availability zones by region"
+}
 variable "aws_zone_id" {
   default = "ZX7O08V47RE60"
   description = "Route53 hosted zone id"
