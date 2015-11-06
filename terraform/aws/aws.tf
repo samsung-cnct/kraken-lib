@@ -76,22 +76,62 @@ resource "aws_key_pair" "keypair" {
   public_key = "${file(var.aws_local_public_key)}"
 }
 
-resource "aws_subnet" "vpc_subnet" {
+resource "aws_subnet" "vpc_subnet_main" {
   vpc_id = "${aws_vpc.vpc.id}"
-  cidr_block = "10.0.0.0/16"
+  cidr_block = "10.0.0.0/22"
   map_public_ip_on_launch = true
   tags {
       Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_subnet"
   }
 }
 
-resource "aws_route_table_association" "vpc_rt_association" {
-    subnet_id = "${aws_subnet.vpc_subnet.id}"
+resource "aws_subnet" "vpc_subnet_1_asg" {
+  availability_zone = "${element(split(",", lookup(var.aws_region_azs, var.aws_region)), 0)}"
+  vpc_id = "${aws_vpc.vpc.id}"
+  cidr_block = "10.0.4.0/22"
+  map_public_ip_on_launch = true
+  tags {
+      Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_subnet_asg_1"
+  }
+}
+
+resource "aws_subnet" "vpc_subnet_2_asg" {
+  availability_zone = "${element(split(",", lookup(var.aws_region_azs, var.aws_region)), 1)}"
+  vpc_id = "${aws_vpc.vpc.id}"
+  cidr_block = "10.0.8.0/22"
+  map_public_ip_on_launch = true
+  tags {
+      Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_subnet_asg_2"
+  }
+}
+
+resource "aws_subnet" "vpc_subnet_3_asg" {
+  availability_zone = "${element(split(",", lookup(var.aws_region_azs, var.aws_region)), 2)}"
+  vpc_id = "${aws_vpc.vpc.id}"
+  cidr_block = "10.0.12.0/22"
+  map_public_ip_on_launch = true
+  tags {
+      Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_subnet_asg_3"
+  }
+}
+
+resource "aws_route_table_association" "vpc_subnet_main_rt_association" {
+    subnet_id = "${aws_subnet.vpc_subnet_main.id}"
     route_table_id = "${aws_route_table.vpc_rt.id}"
 }
 
-resource "aws_main_route_table_association" "a" {
-    vpc_id = "${aws_vpc.vpc.id}"
+resource "aws_route_table_association" "vpc_subnet_1_asg_rt_association" {
+    subnet_id = "${aws_subnet.vpc_subnet_1_asg.id}"
+    route_table_id = "${aws_route_table.vpc_rt.id}"
+}
+
+resource "aws_route_table_association" "vpc_subnet_2_asg_rt_association" {
+    subnet_id = "${aws_subnet.vpc_subnet_2_asg.id}"
+    route_table_id = "${aws_route_table.vpc_rt.id}"
+}
+
+resource "aws_route_table_association" "vpc_subnet_3_asg_rt_association" {
+    subnet_id = "${aws_subnet.vpc_subnet_3_asg.id}"
     route_table_id = "${aws_route_table.vpc_rt.id}"
 }
 
@@ -230,7 +270,7 @@ resource "aws_instance" "kubernetes_etcd" {
   instance_type = "${var.aws_etcd_type}"
   key_name = "${aws_key_pair.keypair.key_name}"
   vpc_security_group_ids = [ "${aws_security_group.vpc_secgroup.id}" ]
-  subnet_id = "${aws_subnet.vpc_subnet.id}"
+  subnet_id = "${aws_subnet.vpc_subnet_main.id}"
   associate_public_ip_address = true
   ebs_block_device {
     device_name = "${var.aws_storage_path.ebs}"
@@ -286,7 +326,7 @@ resource "aws_instance" "kubernetes_apiserver" {
   instance_type = "${var.aws_apiserver_type}"
   key_name = "${aws_key_pair.keypair.key_name}"
   vpc_security_group_ids = [ "${aws_security_group.vpc_secgroup.id}" ]
-  subnet_id = "${aws_subnet.vpc_subnet.id}"
+  subnet_id = "${aws_subnet.vpc_subnet_main.id}"
   associate_public_ip_address = true
   ebs_block_device {
     device_name = "${var.aws_storage_path.ebs}"
@@ -345,7 +385,7 @@ resource "aws_instance" "kubernetes_master" {
   instance_type = "${var.aws_master_type}"
   key_name = "${aws_key_pair.keypair.key_name}"
   vpc_security_group_ids = [ "${aws_security_group.vpc_secgroup.id}" ]
-  subnet_id = "${aws_subnet.vpc_subnet.id}"
+  subnet_id = "${aws_subnet.vpc_subnet_main.id}"
   associate_public_ip_address = true
   ebs_block_device {
     device_name = "${var.aws_storage_path.ebs}"
@@ -407,7 +447,7 @@ resource "aws_instance" "kubernetes_node_special" {
   instance_type = "${element(split(",", var.aws_special_node_type), count.index)}"
   key_name = "${aws_key_pair.keypair.key_name}"
   vpc_security_group_ids = [ "${aws_security_group.vpc_secgroup.id}" ]
-  subnet_id = "${aws_subnet.vpc_subnet.id}"
+  subnet_id = "${aws_subnet.vpc_subnet_main.id}"
   associate_public_ip_address = true
   ebs_block_device {
     device_name = "/dev/sdf"
@@ -499,6 +539,7 @@ resource "aws_launch_configuration" "kubernetes_node" {
 }
 resource "aws_autoscaling_group" "kubernetes_nodes" {
   name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_nodes"
+  vpc_zone_identifier = ["$1_{awsubnet.vpc_subnet_asg_1.id}", "${aws_subnet.vpc_subnet_2_asg.id}", "${aws_subnet.vpc_subnet_3_asg.id}"]
   max_size = "${var.node_count}"
   min_size = "${var.node_count}"
   desired_capacity = "${var.node_count}"
@@ -506,7 +547,7 @@ resource "aws_autoscaling_group" "kubernetes_nodes" {
   wait_for_capacity_timeout = "0"
   health_check_grace_period = "30"
   default_cooldown = "10"
-  vpc_zone_identifier = ["${aws_subnet.vpc_subnet.id}"]
+  vpc_zone_identifier = ["${aws_subnet.vpc_subnet_main.id}"]
   launch_configuration = "${aws_launch_configuration.kubernetes_node.name}"
   health_check_type = "EC2"
   tag {
