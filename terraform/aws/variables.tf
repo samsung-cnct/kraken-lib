@@ -86,7 +86,7 @@ variable "aws_storage_type_special_kubelet" {
   default = "ebs"
 }
 variable "aws_storage_type_special" {
-  description = "[DEPRECATED] Primary volume type for special nodes. Comma-sperated list. Count must = special_node_count"
+  description = "[DEPRECATED] use aws_storage_type_special_docker and aws_storage_type_special_kubelet instead"
   default = "ebs"
 }
 variable "aws_storage_type_node_docker" {
@@ -98,7 +98,7 @@ variable "aws_storage_type_node_kubelet" {
   default = "ebs"
 }
 variable "aws_storage_type" {
-  description = "[DEPRECATED] Primary volume type for all other nodes"
+  description = "[DEPRECATED] use aws_storage_type_node_docker an aws_storage_type_node_kubelet instead"
   default = "ebs"
 }
 variable "aws_volume_size_master" {
@@ -123,7 +123,7 @@ variable "aws_volume_size_special_kubelet" {
 }
 variable "aws_volume_size_special" {
   default = "10"
-  description = "[DEPRECATED] Sizes of EBS volume attached to special nodes. Comma-sperated list. Count must = special_node_count."
+  description = "[DEPRECATED] use aws_volume_size_specal_docker and aws_volume_size_special_kubelet instead"
 }
 variable "aws_volume_size_node_docker" {
   default = "10"
@@ -159,7 +159,7 @@ variable "aws_volume_type_special_kubelet" {
 }
 variable "aws_volume_type_special" {
   default = "gp2"
-  description = "[DEPRECATED] Type of EBS volume attached special nodes. Comma-sperated list. Count must = special_node_count."
+  description = "[DEPRECATED] use aws_volume_type_special_docker and aws_volume_type_special_kubelet instead"
 }
 variable "aws_volume_type_node_docker" {
   default = "gp2"
