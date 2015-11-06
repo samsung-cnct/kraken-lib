@@ -245,7 +245,6 @@ resource "aws_instance" "kubernetes_etcd" {
   tags {
     Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_etcd"
     ShortName = "etcd"
-    StorageType = "${var.aws_storage_type_etcd}"
   }
 }
 
@@ -301,7 +300,6 @@ resource "aws_instance" "kubernetes_apiserver" {
   tags {
     Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_apiserver-${format("%03d", count.index+1)}"
     ShortName = "${format("apiserver-%03d", count.index+1)}"
-    StorageType = "${var.aws_storage_type_apiserver}"
   }
 }
 
@@ -360,7 +358,6 @@ resource "aws_instance" "kubernetes_master" {
   tags {
     Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_master"
     ShortName = "master"
-    StorageType = "${var.aws_storage_type_master}"
   }
 }
 
@@ -431,7 +428,6 @@ resource "aws_instance" "kubernetes_node_special" {
   tags {
     Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_node-${format("%03d", count.index+1)}"
     ShortName = "${format("node-%03d", count.index+1)}"
-    StorageType = "${element(split(",", var.aws_storage_type_special_docker), count.index)}"
   }
 }
 
@@ -509,11 +505,6 @@ resource "aws_autoscaling_group" "kubernetes_nodes" {
   vpc_zone_identifier = ["${aws_subnet.vpc_subnet.id}"]
   launch_configuration = "${aws_launch_configuration.kubernetes_node.name}"
   health_check_type = "EC2"
-  tag {
-    key = "StorageType"
-    value = "${var.aws_storage_type_node_docker}"
-    propagate_at_launch = true
-  }
   tag {
     key = "Name"
     value = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_node-autoscaled"
