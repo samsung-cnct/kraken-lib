@@ -539,7 +539,7 @@ resource "aws_launch_configuration" "kubernetes_node" {
 }
 resource "aws_autoscaling_group" "kubernetes_nodes" {
   name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_nodes"
-  vpc_zone_identifier = ["${awsubnet.vpc_subnet_asg_1.id}", "${aws_subnet.vpc_subnet_2_asg.id}", "${aws_subnet.vpc_subnet_3_asg.id}"]
+  vpc_zone_identifier = ["${aws_subnet.vpc_subnet_1_asg.id}", "${aws_subnet.vpc_subnet_2_asg.id}", "${aws_subnet.vpc_subnet_3_asg.id}"]
   max_size = "${var.node_count}"
   min_size = "${var.node_count}"
   desired_capacity = "${var.node_count}"
