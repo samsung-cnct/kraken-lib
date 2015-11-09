@@ -117,9 +117,9 @@ You could setup [remote state](https://www.terraform.io/intro/getting-started/re
 ## SSH to cluster nodes
 Ansible provisioning creates a ssh config file for each cluster type in you .ssh folder. You can ssh to node names using this file:
 
-    ssh -F ~/.ssh/config_aws node-001
-    ssh -F ~/.ssh/config_aws master
-    ssh -F ~/.ssh/config_local etcd
+    ssh -F ~/.ssh/config_<cluster_name> node-001
+    ssh -F ~/.ssh/config_<cluster_name> master
+    ssh -F ~/.ssh/config_<cluster_name> etcd
 
 And so on
 
