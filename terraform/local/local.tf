@@ -28,7 +28,7 @@ resource "template_file" "master_cloudinit" {
   vars {
     ansible_playbook_command = "${var.ansible_playbook_command}"
     ansible_playbook_file = "${var.ansible_playbook_file}"
-    cluster_name = "aws"
+    cluster_name = "local"
     dns_domain = "${var.dns_domain}"
     dns_ip = "${var.dns_ip}"
     dockercfg_base64 = "${var.dockercfg_base64}"
