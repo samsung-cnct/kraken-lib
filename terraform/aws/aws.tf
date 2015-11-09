@@ -76,22 +76,62 @@ resource "aws_key_pair" "keypair" {
   public_key = "${file(var.aws_local_public_key)}"
 }
 
-resource "aws_subnet" "vpc_subnet" {
+resource "aws_subnet" "vpc_subnet_main" {
   vpc_id = "${aws_vpc.vpc.id}"
-  cidr_block = "10.0.0.0/16"
+  cidr_block = "10.0.0.0/22"
   map_public_ip_on_launch = true
   tags {
       Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_subnet"
   }
 }
 
-resource "aws_route_table_association" "vpc_rt_association" {
-    subnet_id = "${aws_subnet.vpc_subnet.id}"
+resource "aws_subnet" "vpc_subnet_1_asg" {
+  availability_zone = "${element(split(",", lookup(var.aws_region_azs, var.aws_region)), 0)}"
+  vpc_id = "${aws_vpc.vpc.id}"
+  cidr_block = "10.0.4.0/22"
+  map_public_ip_on_launch = true
+  tags {
+      Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_subnet_asg_1"
+  }
+}
+
+resource "aws_subnet" "vpc_subnet_2_asg" {
+  availability_zone = "${element(split(",", lookup(var.aws_region_azs, var.aws_region)), 1)}"
+  vpc_id = "${aws_vpc.vpc.id}"
+  cidr_block = "10.0.8.0/22"
+  map_public_ip_on_launch = true
+  tags {
+      Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_subnet_asg_2"
+  }
+}
+
+resource "aws_subnet" "vpc_subnet_3_asg" {
+  availability_zone = "${element(split(",", lookup(var.aws_region_azs, var.aws_region)), 2)}"
+  vpc_id = "${aws_vpc.vpc.id}"
+  cidr_block = "10.0.12.0/22"
+  map_public_ip_on_launch = true
+  tags {
+      Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_subnet_asg_3"
+  }
+}
+
+resource "aws_route_table_association" "vpc_subnet_main_rt_association" {
+    subnet_id = "${aws_subnet.vpc_subnet_main.id}"
     route_table_id = "${aws_route_table.vpc_rt.id}"
 }
 
-resource "aws_main_route_table_association" "a" {
-    vpc_id = "${aws_vpc.vpc.id}"
+resource "aws_route_table_association" "vpc_subnet_1_asg_rt_association" {
+    subnet_id = "${aws_subnet.vpc_subnet_1_asg.id}"
+    route_table_id = "${aws_route_table.vpc_rt.id}"
+}
+
+resource "aws_route_table_association" "vpc_subnet_2_asg_rt_association" {
+    subnet_id = "${aws_subnet.vpc_subnet_2_asg.id}"
+    route_table_id = "${aws_route_table.vpc_rt.id}"
+}
+
+resource "aws_route_table_association" "vpc_subnet_3_asg_rt_association" {
+    subnet_id = "${aws_subnet.vpc_subnet_3_asg.id}"
     route_table_id = "${aws_route_table.vpc_rt.id}"
 }
 
@@ -230,7 +270,7 @@ resource "aws_instance" "kubernetes_etcd" {
   instance_type = "${var.aws_etcd_type}"
   key_name = "${aws_key_pair.keypair.key_name}"
   vpc_security_group_ids = [ "${aws_security_group.vpc_secgroup.id}" ]
-  subnet_id = "${aws_subnet.vpc_subnet.id}"
+  subnet_id = "${aws_subnet.vpc_subnet_main.id}"
   associate_public_ip_address = true
   ebs_block_device {
     device_name = "${var.aws_storage_path.ebs}"
@@ -245,7 +285,6 @@ resource "aws_instance" "kubernetes_etcd" {
   tags {
     Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_etcd"
     ShortName = "etcd"
-    StorageType = "${var.aws_storage_type_etcd}"
   }
 }
 
@@ -286,7 +325,7 @@ resource "aws_instance" "kubernetes_apiserver" {
   instance_type = "${var.aws_apiserver_type}"
   key_name = "${aws_key_pair.keypair.key_name}"
   vpc_security_group_ids = [ "${aws_security_group.vpc_secgroup.id}" ]
-  subnet_id = "${aws_subnet.vpc_subnet.id}"
+  subnet_id = "${aws_subnet.vpc_subnet_main.id}"
   associate_public_ip_address = true
   ebs_block_device {
     device_name = "${var.aws_storage_path.ebs}"
@@ -301,7 +340,6 @@ resource "aws_instance" "kubernetes_apiserver" {
   tags {
     Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_apiserver-${format("%03d", count.index+1)}"
     ShortName = "${format("apiserver-%03d", count.index+1)}"
-    StorageType = "${var.aws_storage_type_apiserver}"
   }
 }
 
@@ -345,7 +383,7 @@ resource "aws_instance" "kubernetes_master" {
   instance_type = "${var.aws_master_type}"
   key_name = "${aws_key_pair.keypair.key_name}"
   vpc_security_group_ids = [ "${aws_security_group.vpc_secgroup.id}" ]
-  subnet_id = "${aws_subnet.vpc_subnet.id}"
+  subnet_id = "${aws_subnet.vpc_subnet_main.id}"
   associate_public_ip_address = true
   ebs_block_device {
     device_name = "${var.aws_storage_path.ebs}"
@@ -360,7 +398,6 @@ resource "aws_instance" "kubernetes_master" {
   tags {
     Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_master"
     ShortName = "master"
-    StorageType = "${var.aws_storage_type_master}"
   }
 }
 
@@ -390,8 +427,8 @@ resource "template_file" "node_cloudinit_special" {
     master_private_ip = "${aws_instance.kubernetes_master.private_ip}"
     master_public_ip = "${aws_instance.kubernetes_master.public_ip}"
     cluster_proxy_record = "${var.aws_user_prefix}-proxy.${var.aws_cluster_domain}"
-    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, element(split(",", var.aws_storage_type_special), count.index))}"
-    format_kubelet_storage_mnt = "${lookup(var.format_kubelet_storage_mnt, element(split(",", var.aws_storage_type_special), count.index))}"
+    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, element(split(",", var.aws_storage_type_special_docker), count.index))}"
+    format_kubelet_storage_mnt = "${lookup(var.format_kubelet_storage_mnt, element(split(",", var.aws_storage_type_special_kubelet), count.index))}"
     coreos_update_channel = "${var.coreos_update_channel}"
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
     short_name = "node-${format("%03d", count.index+1)}"
@@ -407,7 +444,7 @@ resource "aws_instance" "kubernetes_node_special" {
   instance_type = "${element(split(",", var.aws_special_node_type), count.index)}"
   key_name = "${aws_key_pair.keypair.key_name}"
   vpc_security_group_ids = [ "${aws_security_group.vpc_secgroup.id}" ]
-  subnet_id = "${aws_subnet.vpc_subnet.id}"
+  subnet_id = "${aws_subnet.vpc_subnet_main.id}"
   associate_public_ip_address = true
   ebs_block_device {
     device_name = "/dev/sdf"
@@ -431,7 +468,6 @@ resource "aws_instance" "kubernetes_node_special" {
   tags {
     Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_node-${format("%03d", count.index+1)}"
     ShortName = "${format("node-%03d", count.index+1)}"
-    StorageType = "${element(split(",", var.aws_storage_type_special), count.index)}"
   }
 }
 
@@ -460,8 +496,8 @@ resource "template_file" "node_cloudinit" {
     master_private_ip = "${aws_instance.kubernetes_master.private_ip}"
     master_public_ip = "${aws_instance.kubernetes_master.public_ip}"
     cluster_proxy_record = "${var.aws_user_prefix}-proxy.${var.aws_cluster_domain}"
-    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type)}"
-    format_kubelet_storage_mnt = "${lookup(var.format_kubelet_storage_mnt, var.aws_storage_type)}"
+    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_node_docker)}"
+    format_kubelet_storage_mnt = "${lookup(var.format_kubelet_storage_mnt, var.aws_storage_type_node_kubelet)}"
     coreos_update_channel = "${var.coreos_update_channel}"
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
     short_name = "autoscaled"
@@ -499,6 +535,7 @@ resource "aws_launch_configuration" "kubernetes_node" {
 }
 resource "aws_autoscaling_group" "kubernetes_nodes" {
   name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_nodes"
+  vpc_zone_identifier = ["${aws_subnet.vpc_subnet_1_asg.id}", "${aws_subnet.vpc_subnet_2_asg.id}", "${aws_subnet.vpc_subnet_3_asg.id}"]
   max_size = "${var.node_count}"
   min_size = "${var.node_count}"
   desired_capacity = "${var.node_count}"
@@ -506,14 +543,9 @@ resource "aws_autoscaling_group" "kubernetes_nodes" {
   wait_for_capacity_timeout = "0"
   health_check_grace_period = "30"
   default_cooldown = "10"
-  vpc_zone_identifier = ["${aws_subnet.vpc_subnet.id}"]
+  vpc_zone_identifier = ["${aws_subnet.vpc_subnet_main.id}"]
   launch_configuration = "${aws_launch_configuration.kubernetes_node.name}"
   health_check_type = "EC2"
-  tag {
-    key = "StorageType"
-    value = "${var.aws_storage_type}"
-    propagate_at_launch = true
-  }
   tag {
     key = "Name"
     value = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_node-autoscaled"
@@ -570,7 +602,8 @@ resource "template_file" "ansible_inventory" {
     master_public_ip = "${aws_instance.kubernetes_master.public_ip}"
     apiservers_inventory_info = "${join("\n", concat(formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_apiserver.*.tags.ShortName, aws_instance.kubernetes_apiserver.*.public_ip)))}"
     cluster_proxy_record = "${var.aws_user_prefix}-proxy.${var.aws_cluster_domain}"
-    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type)}"
+    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_node_docker)}"
+    format_kubelet_storage_mnt = "${lookup(var.format_kubelet_storage_mnt, var.aws_storage_type_node_kubelet)}"
     coreos_update_channel = "${var.coreos_update_channel}"
     coreos_reboot_strategy = "${var.coreos_reboot_strategy}"
     apiserver_nginx_pool = "${join(" ", concat(formatlist("server %v:8080;", aws_instance.kubernetes_apiserver.*.private_ip)))}"
