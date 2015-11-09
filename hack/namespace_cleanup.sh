@@ -41,7 +41,7 @@ namespaces=( $(ssh core@$ETCD_IP etcdctl ls /registry/namespaces) )
 for i in "${namespaces[@]}"
 do
   if [[ "$i" == *"$NAMESPACE_PREFIX"* ]]; then
-    ssh core@52.33.220.26 etcdctl rm "$i"
+    ssh core@"$ETCD_IP" etcdctl rm "$i"
     echo "Removed namespace $i"
   else
     echo "Skipping namespace $i"
