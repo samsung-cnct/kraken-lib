@@ -10,17 +10,19 @@ if [[ $# < 1 ]]; then
   exit 
 fi
 
+kubeconfig=${KUBECONFIG:-"${HOME}/.kube/config"}
 regex="$1"
+
 poll_delay_secs=5
 
 # Delete all Active namespaces that match the regex
-for ns in $(kubectl get namespaces | grep ${regex} | grep Active | awk '{print $1}'); do
-  kubectl delete namespace $ns;
+for ns in $(kubectl --kubeconfig=${kubeconfig} get namespaces | grep ${regex} | grep Active | awk '{print $1}'); do
+  kubectl --kubeconfig=${kubeconfig} delete namespace $ns;
 done
 
 # The namepace is going to sit around in Terminating state until k8s has removed all resources
 # therein, including pods, rcs, events, etc.
-while (kubectl get namespaces | grep ${regex}); do
+while (kubectl --kubeconfig=${kubeconfig} get namespaces | grep ${regex}); do
   sleep ${poll_delay_secs};
   date -u
 done
