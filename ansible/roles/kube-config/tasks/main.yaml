@@ -1,3 +1,8 @@
 ---
 - name: write kube config
-  shell: kubectl config set-cluster {{cluster_name}} --server={{cluster_master_record}}
+  command: "{{item}}"
+  with_items:
+    - kubectl config set-cluster {{cluster_name}} --server={{cluster_master_record}}
+    - kubectl config set-context {{cluster_name}} --cluster={{cluster_name}} --user={{cluster_name}}
+    - kubectl config use-context {{cluster_name}}
+  sudo: no
