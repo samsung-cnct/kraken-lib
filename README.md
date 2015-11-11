@@ -106,6 +106,14 @@ for example
 
     kubectl get pods
 
+To reach specific clusters, issue the follow command
+
+    kubectl --cluster=<cluster_name> <command>
+
+for example
+    
+    kubectl --cluster=aws_kubernetes get nodes
+    
 ## Destroy Cluster
 Destroy a running cluster by running:
 
