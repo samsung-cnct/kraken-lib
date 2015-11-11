@@ -17,6 +17,10 @@ case $key in
     NAMESPACE_PREFIX="$2"
     shift # past argument
     ;;
+    -c|--config)
+    SSH_CONFIG_PATH="$2"
+    shift # past argument
+    ;;
     *)
             # unknown option
     ;;
@@ -25,8 +29,14 @@ shift # past argument or value
 done
 
 if [ -z ${ETCD_IP+x} ]; then
-  error "--etcd not specified. Etcd ip address is required."
+  echo "--etcd not specified. Etcd ip address or host name is required."
   exit 1
+fi
+
+if [ -z ${SSH_CONFIG_PATH+x} ]; then
+  echo "--config not specified. Assuming $ETCD_IP to be an ip address or host name."
+else
+  echo "--config specified. Assuming $ETCD_IP to be a host name configured in $SSH_CONFIG_PATH."
 fi
 
 if [ -z ${NAMESPACE_PREFIX+x} ]; then
@@ -36,12 +46,19 @@ fi
 
 echo "Removing all namespaces containing '$NAMESPACE_PREFIX' on etcd server $ETCD_IP..."
 
-namespaces=( $(ssh core@$ETCD_IP etcdctl ls /registry/namespaces) )
+ssh_command=
+if [ -z ${SSH_CONFIG_PATH+x} ]; then
+  ssh_command="ssh core@$ETCD_IP"
+else
+  ssh_command="ssh -F $SSH_CONFIG_PATH $ETCD_IP"
+fi
+
+namespaces=( $($ssh_command etcdctl ls /registry/namespaces) )
 
 for i in "${namespaces[@]}"
 do
   if [[ "$i" == *"$NAMESPACE_PREFIX"* ]]; then
-    ssh core@"$ETCD_IP" etcdctl rm "$i"
+    eval "$ssh_command etcdctl rm $i"
     echo "Removed namespace $i"
   else
     echo "Skipping namespace $i"
