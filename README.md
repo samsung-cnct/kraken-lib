@@ -139,6 +139,10 @@ And so on
 4. Give your log a name of your choice, select Token TCP, and then click the Register new log button. A token will be displayed in green.
 5. Override logentries_token variable for your cluster type with the token value - either through a tfvars file or -var switch
 
+## Create cluster from remote docker container
+
+Instructions are in the [cluster](cluster) subfolder
+
 ### Helpful Links
 * kubectl user documentation can be found [here](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/kubectl.md)
 * kubectl [FAQ](https://github.com/GoogleCloudPlatform/kubernetes/wiki/User-FAQ)
