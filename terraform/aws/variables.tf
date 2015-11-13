@@ -266,11 +266,11 @@ variable "hyperkube_deployment_mode" {
   description = "Run inside 'docker' or run on host as 'binary'"
 }
 variable "hyperkube_image" {
-  default = "gcr.io/google_containers/hyperkube:v1.0.6"
+  default = "gcr.io/google_containers/hyperkube:v1.1.1"
   description = "image to use when running with hyperkube_deploy_mode 'docker'"
 }
 variable "kubernetes_binaries_uri" {
-  default = "https://storage.googleapis.com/kubernetes-release/release/v1.0.6/bin/linux/amd64"
+  default = "https://storage.googleapis.com/kubernetes-release/release/v1.1.1/bin/linux/amd64"
   description = "url to fetch hyperkube, kubectl binaries from in hyperkube_deploy_mode 'binary'"
 }
 variable "kubernetes_api_version" {
