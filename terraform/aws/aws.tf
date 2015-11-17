@@ -150,8 +150,8 @@ resource "aws_security_group" "vpc_secgroup" {
 
   # http
   ingress {
-    from_port = 80
-    to_port = 80
+    from_port = 8080
+    to_port = 8080
     protocol = "TCP"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -164,34 +164,10 @@ resource "aws_security_group" "vpc_secgroup" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # cadvisor (TODO: does this have to be world open)
-  ingress {
-    from_port = 4194
-    to_port = 4194
-    protocol = "TCP"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # cadvisor (TODO: does this have to be world open)
+  # non-embedded cadvisor
   ingress {
     from_port = 8094
     to_port = 8094
-    protocol = "TCP"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # ???
-  ingress {
-    from_port = 6443
-    to_port = 6443
-    protocol = "TCP"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # ???
-  ingress {
-    from_port = 8000
-    to_port = 8999
     protocol = "TCP"
     cidr_blocks = ["0.0.0.0/0"]
   }
