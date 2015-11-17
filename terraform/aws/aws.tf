@@ -164,14 +164,6 @@ resource "aws_security_group" "vpc_secgroup" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # etcd
-  ingress {
-    from_port = 4001
-    to_port = 4001
-    protocol = "TCP"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   # cadvisor (TODO: does this have to be world open)
   ingress {
     from_port = 4194
