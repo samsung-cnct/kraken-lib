@@ -49,8 +49,7 @@ kube_controller_manager:
   v: 1
 kubelet:
   address: 0.0.0.0
-  # cadvisor-port: 4194
-  cadvisor-port: 0
+  cadvisor-port: 4194
   enable-debugging-handlers: true
   # enable-server: false
   enable-server: true
