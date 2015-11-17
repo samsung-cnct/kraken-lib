@@ -6,11 +6,12 @@ hyperkube_deployment_mode: binary
 hyperkube_image: gcr.io/google_containers/hyperkube:v1.1.1
 kraken_services_branch: master
 kraken_services_repo: git://github.com/samsung-ag/kraken-services
-kraken_services_dirs: 
+# TODO: can we avoid the skydns hardcode and just specify it here?
+kraken_services_dirs: "heapster kube-ui prometheus"
 kubernetes_api_version: v1
 kubernetes_binaries_uri: https://storage.googleapis.com/kubernetes-release/release/v1.1.1/bin/linux/amd64
 kube_apiserver:
-  # https://github.com/kubernetes/kubernetes/blob/release-1.0/docs/admin/admission-controllers.md#is-there-a-recommended-set-of-plug-ins-to-use
+  # https://github.com/kubernetes/kubernetes/blob/release-1.1/docs/admin/admission-controllers.md#is-there-a-recommended-set-of-plug-ins-to-use
   admission-control: NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota
   bind-address: 0.0.0.0
   client-ca-file: /srv/kubernetes/ca.crt
