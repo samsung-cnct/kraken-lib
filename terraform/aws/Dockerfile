@@ -7,7 +7,6 @@ ENV TERRAFORM_COREOS_VERSION v0.0.1
 ENV TERRAFORM_EXECUTE_VERSION v0.0.2
 ENV TERRAFORM_COREOSVER_VERSION v0.0.1
 ENV KUBERNETES_VERSION v1.1.1
-ENV FLEET_VERSION v0.11.5
 
 # get terraform
 RUN wget https://github.com/Samsung-AG/homebrew-terraform/releases/download/${TERRAFORM_VERSION}/terraform-${TERRAFORM_VERSION}_linux64.tar.gz
@@ -56,11 +55,6 @@ COPY ansible/ansible.cfg /etc/ansible/ansible.cfg
 RUN wget https://github.com/GoogleCloudPlatform/kubernetes/releases/download/${KUBERNETES_VERSION}/kubernetes.tar.gz
 RUN tar -xvf kubernetes.tar.gz
 RUN cp kubernetes/platforms/linux/amd64/kubectl /usr/bin && rm kubernetes.tar.gz
-
-# install fleetctl
-RUN wget https://github.com/coreos/fleet/releases/download/${FLEET_VERSION}/fleet-${FLEET_VERSION}-linux-amd64.tar.gz
-RUN tar -xvf fleet-${FLEET_VERSION}-linux-amd64.tar.gz
-RUN cp fleet-${FLEET_VERSION}-linux-amd64/fleetctl /usr/bin && rm fleet-${FLEET_VERSION}-linux-amd64.tar.gz
 
 # install awscli
 RUN pip install awscli
