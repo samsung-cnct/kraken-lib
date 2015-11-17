@@ -1,6 +1,7 @@
 dns_domain: kubernetes.local
 dns_ip: 10.100.0.10
 dockercfg_base64:
+etcd_private_ip: 127.0.0.1
 hyperkube_deployment_mode: binary
 hyperkube_image: gcr.io/google_containers/hyperkube:v1.1.1
 kraken_services_branch: master
@@ -15,12 +16,16 @@ kube_apiserver:
   client-ca-file: /srv/kubernetes/ca.crt
   cors-allowed-origins: .*
   event-ttl: 1h0m0s
+  etcd-servers: "http://{{etcd_private_ip}}:4001"
+  # TODO: enable this once we've got a separate etcd instance
+  # etcd-servers-overrides: "/events#http://{{etcd_private_ip}}:4001"
   insecure-bind-address: 0.0.0.0
   insecure-port: 8080
   kubelet-timeout: 5s
   logtostderr: true
   max-requests-inflight: 400
   profiling: true
+  runtime_config: "api/{{kubernetes_api_version}}"
   secure-port: 0
   secure_port: 443
   service-cluster-ip-range: 10.100.0.0/16
@@ -29,10 +34,12 @@ kube_apiserver:
   token-auth-file: /srv/kubernetes/known_tokens.csv
   v: 1
 kube_controller_manager:
+  address: "{{ master_private_ip }}"
   concurrent-endpoint-syncs: 5
   concurrent-rc-syncs: 5
   deleting-pods-burst: 10
   logtostderr: true
+  master: "{{ master_private_ip }}:8080"
   namespace-sync-period: 5m0s
   node-monitor-grace-period: 40s
   node-monitor-period: 5s
@@ -51,20 +58,28 @@ kube_controller_manager:
 kube_proxy:
   kubeconfig: /srv/kubernetes/kube-proxy/kubeconfig
   logtostderr: true
+  master: "{{ master_private_ip }}:8080"
   v: 1
 kube_scheduler:
+  address: "{{ master_private_ip }}"
   logtostderr: true
+  master: "{{ master_private_ip }}:8080"
   port: 10251
   profiling: true
   v: 1
 kubelet:
   address: 0.0.0.0
+  api-servers: "http://{{ master_private_ip }}:8080"
   cadvisor-port: 4194
+  cluster-dns: "{{ dns_ip }}"
+  cluster-domain: "{{ dns_domain }}"
   enable-debugging-handlers: true
   # enable-server: false
   enable-server: true
   healthz-bind-address: 0.0.0.0
   healthz-port: 10254
+  # TODO: do we have access to ansible_local here?
+  # hostname_override: "{{ ansible_local.kubernetes_node_ip_fact.node_ip_address }}"
   kubeconfig: /srv/kubernetes/kubelet/kubeconfig
   logtostderr: true
   # max-pods: 40
@@ -78,3 +93,4 @@ kubelet:
   v: 1
 logentries_token:
 logentries_url:
+master_private_ip: 127.0.0.1

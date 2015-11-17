@@ -19,4 +19,3 @@ ExecStart=/usr/bin/docker run \
     {% for k,v in kube_proxy.iteritems() %}
       --{{k}}={{v}} \
     {% endfor %}
-    --master=http://{{master_private_ip}}:8080

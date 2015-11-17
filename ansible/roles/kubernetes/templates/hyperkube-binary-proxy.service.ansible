@@ -13,4 +13,3 @@ ExecStart=/opt/bin/hyperkube proxy \
   {% for k,v in kube_proxy.iteritems() %}
     --{{k}}={{v}} \
   {% endfor %}
-  --master={{master_private_ip}}:8080

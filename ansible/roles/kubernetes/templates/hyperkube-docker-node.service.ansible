@@ -22,8 +22,4 @@ ExecStart=/usr/bin/docker run \
     {% for k,v in kubelet.iteritems() %}
       --{{k}}={{v}} \
     {% endfor %}
-    --api_servers=http://{{master_private_ip}}:8080 \
-    --cluster_dns={{dns_ip}} \
-    --cluster_domain={{dns_domain}} \
-    --kubeconfig=/srv/kubernetes/kubelet/kubeconfig \
     --hostname_override={{ansible_local.kubernetes_node_ip_fact.node_ip_address}}
