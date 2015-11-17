@@ -14,13 +14,12 @@ Quick setup on OSX with [homewbrew](http://brew.sh/):
     brew bundle
 
 
-This installs Ansible, Terraform, Vagrant, Virtualbox, kubectl, awscli, fleetctl and custom terraform providers 'terraform-provider-execute', 'terraform-provider-coreosver' and 'terraform-provider-coreos'
+This installs Ansible, Terraform, Vagrant, Virtualbox, kubectl, awscli and custom terraform providers 'terraform-provider-execute', 'terraform-provider-coreosver' and 'terraform-provider-coreos'
 
 Alternative/non-OSX setup:
 
 * Install [Ansible](https://github.com/ansible/ansible/releases)
 * install awscli
-* install fleetctl
 * Install Terraform. Currently we are using a patched terraform version (PR is pending in terraform master). Get it [here](https://github.com/Samsung-AG/homebrew-terraform/releases)
 * Install [Vagrant](https://www.vagrantup.com/downloads.html) if you will be working with a local cluster
 * Install [Virtualbox](https://www.virtualbox.org/wiki/Downloads) if you will be working with a local cluster

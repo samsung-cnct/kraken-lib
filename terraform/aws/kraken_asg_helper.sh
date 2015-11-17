@@ -38,14 +38,6 @@ case $key in
     RETRIES="$2"
     shift # past argument
     ;;
-    -e|--etcd)
-    ETCD_IP="$2"
-    shift # past argument
-    ;;
-    -p|--port)
-    ETCD_PORT="$2"
-    shift # past argument
-    ;;
     -o|--offset)
     NUMBERING_OFFSET="$2"
     shift # past argument
@@ -65,8 +57,6 @@ echo "Waiting for ${SLEEP_TIME} between each check"
 echo "$((SLEEP_TIME*TOTAL_WAITS)) seconds total single wait on kubectl health"
 echo "$((SLEEP_TIME*TOTAL_WAITS*RETRIES)) seconds total wait time on kubectl health"
 echo "Host numbering offset is ${NUMBERING_OFFSET}"
-echo "ETCD ip address is ${ETCD_IP}"
-echo "ETCD ip port number is ${ETCD_PORT}"
 
 control_c()
 {
@@ -80,7 +70,7 @@ generate_configs()
   ec2_ips=$(aws --output text \
     --query "Reservations[*].Instances[*].PublicIpAddress" \
     ec2 describe-instances --instance-ids \
-    $(aws --output text --query "AutoScalingGroups[0].Instances[*].InstanceId" autoscaling describe-auto-scaling-groups --auto-scaling-group-names "${ASG_NAME}"))
+    $(aws --output text --query "AutoScalingGroups[0].Instances[?LifecycleState=='InService'].InstanceId" autoscaling describe-auto-scaling-groups --auto-scaling-group-names "${ASG_NAME}"))
 
   current_node=$((NUMBERING_OFFSET+1))
   output="\n[nodes]\n"
@@ -104,18 +94,32 @@ generate_configs()
 
 wait_for_asg()
 {
-  local asg_instance_limit=($(aws --output text --query "AutoScalingGroups[0].DesiredCapacity" \
-          autoscaling describe-auto-scaling-groups --auto-scaling-group-name "${ASG_NAME}"))
+  local asg_instance_limit=$(aws --output text --query "AutoScalingGroups[0].DesiredCapacity" \
+          autoscaling describe-auto-scaling-groups --auto-scaling-group-name "${ASG_NAME}")
   local asg_instances=($(aws --output text --query "AutoScalingGroups[0].Instances[?LifecycleState=='InService'].InstanceId" \
           autoscaling describe-auto-scaling-groups --auto-scaling-group-name "${ASG_NAME}"))
   local autoscaling_wait=60
+  
+  local healthy=
+  if [[ " ${asg_instances[*]} " == *" None "* ]]; then
+    healthy=false
+  else
+    healthy=true
+  fi
 
-  while [ ${#asg_instances[@]} -lt ${asg_instance_limit} ]
+  while [ ${#asg_instances[@]} -lt ${asg_instance_limit} ] || [ "${healthy}" = false ]
   do
     echo "${#asg_instances[@]} instances out of ${asg_instance_limit}"
     sleep ${autoscaling_wait}
-    asg_instances=($(aws --output text --query "AutoScalingGroups[0].Instances[*].InstanceId" \
+    asg_instances=($(aws --output text --query "AutoScalingGroups[0].Instances[?LifecycleState=='InService'].InstanceId" \
       autoscaling describe-auto-scaling-groups --auto-scaling-group-name "${ASG_NAME}"))
+    
+    if [[ " ${asg_instances[*]} " == *" None "* ]]; then
+      echo "${ASG_NAME} still has some nodes without an assigned ip"
+      healthy=false
+    else
+      healthy=true
+    fi
   done
 
   echo "Reached ${asg_instance_limit} nodes in ${ASG_NAME}."
@@ -126,43 +130,51 @@ nudge_asg_nodes()
   local proceed_terminate=true
   local ip_index=0
   local max_slice=200
+  local private_ips=
 
-  local fleet_array=($(fleetctl --endpoint=http://${ETCD_IP}:${ETCD_PORT} list-machines | grep node | awk '{ print $2 }'))
-  if [ ${#fleet_array[@]} -eq 0 ]; then
-    echo "Unexpected - No fleet nodes returned. Fleetctl error?"
+  local asg_array=($(aws --output text \
+        --query "Reservations[*].Instances[*].[PrivateIpAddress]" \
+        ec2 describe-instances --instance-ids $(aws --output text --query "AutoScalingGroups[0].Instances[?LifecycleState=='InService'].InstanceId" \
+            autoscaling describe-auto-scaling-groups --auto-scaling-group-names "${ASG_NAME}")))
+  if [ ${#asg_array[@]} -eq 0 ]; then
+    echo "Unexpected - No autoscaling group instances returned. Awscli error?"
     proceed_terminate=false
   fi
 
   local kube_array=($(kubectl --cluster=${CLUSTER} get nodes | tail -n +2 | awk '{ print $1 }'))
-  if [ ${#fleet_array[@]} -eq 0 ]; then
-    echo "Unexpected - No kubectl nodes returned. Fleetctl error?"
+  if [ ${#kube_array[@]} -eq 0 ]; then
+    echo "Unexpected - No kubectl nodes returned. Kubectl error?"
     proceed_terminate=false
   fi
 
-  local delta=($(echo ${fleet_array[@]} ${kube_array[@]} | tr ' ' '\n' | sort | uniq -u))
+  local delta=($(echo ${asg_array[@]} ${kube_array[@]} | tr ' ' '\n' | sort | uniq -u))
   if [ ${#delta[@]} -eq 0 ]; then
-      echo "Unexpected - kubectl not reporting all nodes and yet no nodes are in delta between fleet and kubectl."
+      echo "Unexpected - kubectl not reporting all nodes and yet no nodes are in delta between autoscaling group and kubectl."
       proceed_terminate=false
   fi
 
   # describe/terminate instances in chunks of max 200 (aws limitation of 200 filter values)
   while [ ${ip_index} -lt ${#delta[@]} ] && [ "${proceed_terminate}" = true ]
   do
-    delta_slice=(${delta[@]:$index:$max_slice})
+    delta_slice=(${delta[@]:$ip_index:$max_slice})
     private_ips=$( IFS=$','; echo "${delta_slice[*]}" )
-    echo -e "Fleet nodes not yet present in kubernetes cluster:\n${private_ips}"
 
     ec2_instances=($(aws --output text \
         --query "Reservations[*].Instances[*].[InstanceId]" \
         ec2 describe-instances --filters "Name=private-ip-address,Values=${private_ips}" --instance-ids \
-        $(aws --output text --query "AutoScalingGroups[0].Instances[*].InstanceId" \
+        $(aws --output text --query "AutoScalingGroups[0].Instances[?LifecycleState=='InService'].InstanceId" \
             autoscaling describe-auto-scaling-groups --auto-scaling-group-names "${ASG_NAME}")))
 
-    echo -e "Instances to be terminated:\n${ec2_instances[*]}"
-    aws --output text ec2 terminate-instances --instance-ids ${ec2_instances[*]}
+    if [ ${#ec2_instances[@]} -ne 0 ]; then
+      echo -e "Instances to be terminated:\n${ec2_instances[*]}"
+      aws --output text ec2 terminate-instances --instance-ids ${ec2_instances[*]}
+    fi
 
     ip_index=$(($ip_index + $max_slice))
   done
+
+  # wait 30 seconds for node termination to take
+  sleep 30 
 }
 
 # setup a sigint trap
@@ -191,9 +203,6 @@ do
   elif [ ${max_retries} -ge 0 ]; then
     echo "Waited for $((SLEEP_TIME*TOTAL_WAITS)). Will attempt to detect and restart failed autoscaling group nodes."
     nudge_asg_nodes
-
-    # give the nudge a chance to work
-    sleep 10
 
     echo "Starting wait on ${ASG_NAME} autoscaling group to become healthy again."
     wait_for_asg
