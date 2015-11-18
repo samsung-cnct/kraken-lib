@@ -4,17 +4,23 @@ Feature: Make sure we have the correct kubernetes services
   As kraken developer 
   I should be able to run these scenario and see the correct exit code and services output
 
-  Scenario: Getting services
-    When I run `kubectl --cluster=local get services`
+  Scenario: Getting kube-system services
+    When I kubectl system services
     Then the exit status should eventually be 0
     And the output should eventually match:
       """
       .*
-      grafana.*
-      heapster.*
-      influxdb.*
       kube-dns.*
       kube-ui.*
+      """
+
+  Scenario: Getting default services
+    When I kubectl services
+    Then the exit status should eventually be 0
+    And the output should eventually match:
+      """
+      .*
+      heapster.*
       kubernetes.*
       prometheus.*
       """
