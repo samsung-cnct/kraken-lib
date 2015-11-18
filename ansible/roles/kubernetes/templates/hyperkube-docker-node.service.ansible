@@ -7,6 +7,8 @@ After=load-kube-cert.service
 Before=kubernetes-label.service
 
 [Service]
+StandardOuptut={{ kubernetes_systemd_stdout }}
+StandardError={{ kubernetes_systemd_stderr }}
 Restart=always
 RestartSec=5
 ExecStartPre=-/usr/bin/docker kill kube-node

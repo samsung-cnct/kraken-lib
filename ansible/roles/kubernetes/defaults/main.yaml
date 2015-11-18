@@ -10,6 +10,8 @@ kraken_services_repo: git://github.com/samsung-ag/kraken-services
 kraken_services_dirs: "heapster kube-ui prometheus"
 kubernetes_api_version: v1
 kubernetes_binaries_uri: https://storage.googleapis.com/kubernetes-release/release/v1.1.1/bin/linux/amd64
+kubernetes_systemd_stderr: "journal"
+kubernetes_systemd_stdout: "journal"
 kube_apiserver:
   # https://github.com/kubernetes/kubernetes/blob/release-1.1/docs/admin/admission-controllers.md#is-there-a-recommended-set-of-plug-ins-to-use
   admission-control: NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota
