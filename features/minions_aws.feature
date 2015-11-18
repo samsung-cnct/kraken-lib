@@ -13,4 +13,5 @@ Feature: Make sure we have the correct number of kubernetes nodes
       .*Ready
       .*Ready
       .*Ready
+      .*Ready
       """
