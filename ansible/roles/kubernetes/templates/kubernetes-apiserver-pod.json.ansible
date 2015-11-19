@@ -16,9 +16,6 @@
           {% for k,v in kube_apiserver.iteritems() %}
             "--{{k}}={{v}}",
           {% endfor %}
-          "--etcd_servers=http://{{etcd_private_ip}}:4001",
-          "--public_address_override={{master_private_ip}}",
-          "--runtime_config=api/{{kubernetes_api_version}}"
         ],
         "ports": [
           {

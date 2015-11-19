@@ -4,6 +4,8 @@ Requires=install-hyperkube.service
 After=load-kube-cert.service
 
 [Service]
+StandardOuptut={{ kubernetes_systemd_stdout }}
+StandardError={{ kubernetes_systemd_stderr }}
 Restart=always
 RestartSec=5
 LimitNOFILE=infinity
@@ -12,5 +14,3 @@ ExecStart=/opt/bin/hyperkube apiserver \
   {% for k,v in kube_apiserver.iteritems() %}
     --{{k}}={{v}} \
   {% endfor %}
-  --etcd_servers=http://{{etcd_private_ip}}:4001 \
-  --runtime_config=api/{{kubernetes_api_version}}

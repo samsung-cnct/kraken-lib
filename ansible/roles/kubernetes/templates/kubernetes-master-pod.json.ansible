@@ -16,8 +16,7 @@
           {% for k,v in kube_controller_manager.iteritems() %}
             "--{{k}}={{v}}",
           {% endfor %}
-          "--address={{master_private_ip}}",
-          "--master={{master_private_ip}}:8080"
+          ""
         ]
       },
       {
@@ -29,8 +28,7 @@
           {% for k,v in kube_scheduler.iteritems() %}
             "--{{k}}={{v}}",
           {% endfor %}
-          "--address={{master_private_ip}}",
-          "--master={{master_private_ip}}:8080"
+          ""
         ]
       }
     ]

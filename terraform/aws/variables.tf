@@ -229,10 +229,6 @@ variable "coreos_reboot_strategy" {
   default = "off"
   description = "Core OS reboot strategy"
 }
-variable "kraken_services_repo" {
-  default = "https://github.com/samsung-ag/kraken-services"
-  description = "Kraken services git repo"
-}
 variable "kraken_repo" {
   default = {
     "repo" = "https://github.com/Samsung-AG/kraken.git"
@@ -241,9 +237,18 @@ variable "kraken_repo" {
   }
   description = "Kraken git repo"
 }
+variable "kraken_services_repo" {
+  default = "https://github.com/samsung-ag/kraken-services"
+  description = "Kraken services git repo"
+}
 variable "kraken_services_branch" {
   default = "master"
   description = "Kraken services repo branch"
+}
+variable "kraken_services_dirs" {
+  # TODO: skydns is also hardcoded into the scripts, can we just extract that here?
+  default = "heapster kube-ui prometheus"
+  description = "Kraken services folders under kraken repo to deploy kubernetes services from."
 }
 variable "ansible_docker_image" {
   default = "quay.io/samsung_ag/kraken_ansible"
@@ -276,12 +281,6 @@ variable "kubernetes_binaries_uri" {
 variable "kubernetes_api_version" {
   default = "v1"
   description = "Kubernetes api version"
-}
-variable "kraken_services_dirs" {
-  # NOTE: DO NOT INCLUDE namespaces here.  It is hard coded into the scripts
-  # NOTE: skydns is also hardcoded into the scripts
-  default = "influxdb-grafana kube-ui loadtest podpincher prometheus"
-  description = "Kraken services folders under kraken repo to deploy kubernetes services from."
 }
 variable "logentries_token" {
   default = ""

@@ -11,6 +11,7 @@ Feature: Make sure we have the correct kubernetes services
       """
       .*
       kube-dns.*
+      kube-ui.*
       """
 
   Scenario: Getting default services
@@ -19,11 +20,7 @@ Feature: Make sure we have the correct kubernetes services
     And the output should eventually match:
       """
       .*
-      framework.*
-      grafana.*
-      influxdb.*
+      heapster.*
       kubernetes.*
-      load-generator-master.*
-      podpincher.*
       prometheus.*
       """
