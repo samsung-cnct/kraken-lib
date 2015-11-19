@@ -79,7 +79,8 @@ docker build -t samsung_ag/kraken -f "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_
 inf "Building kraken cluster:\n  'docker run -d --volumes-from kraken_data samsung_ag/kraken terraform apply \
   -input=false -state=/kraken_data/terraform.tfstate -var-file=/opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/terraform.tfvars /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}'"
 docker run -d --name kraken_cluster --volumes-from kraken_data samsung_ag/kraken bash -c "terraform apply -input=false -state=/kraken_data/terraform.tfstate \
-    -var-file=/opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/terraform.tfvars /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE} && \
+    -var-file=/opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/terraform.tfvars \
+    -var 'cluster_name=${KRAKEN_CLUSTER_TYPE}' /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE} && \
     cp /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/rendered/ansible.inventory  /kraken_data/ansible.inventory && \
     cp /root/.ssh/config_${KRAKEN_CLUSTER_TYPE} /kraken_data/ssh_config && \
     cp /root/.kube/config /kraken_data/kube_config"

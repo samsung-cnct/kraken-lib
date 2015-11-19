@@ -209,10 +209,11 @@ resource "aws_security_group" "vpc_secgroup" {
   }
 }
 
-resource "coreos_ami" "latest_ami" {
+resource "coreosbox_ami" "latest_ami" {
   channel = "${var.coreos_update_channel}"
-  type = "hvm"
+  virtualization = "hvm"
   region = "${var.aws_region}"
+  version = "${var.coreos_version}"
 }
 
 resource "template_file" "etcd_cloudinit" {
@@ -234,7 +235,7 @@ resource "template_file" "etcd_cloudinit" {
 }
 resource "aws_instance" "kubernetes_etcd" {
   depends_on = ["aws_internet_gateway.vpc_gateway"] # explicit dependency
-  ami = "${coreos_ami.latest_ami.ami}"
+  ami = "${coreosbox_ami.latest_ami.box_string}"
   instance_type = "${var.aws_etcd_type}"
   key_name = "${aws_key_pair.keypair.key_name}"
   vpc_security_group_ids = [ "${aws_security_group.vpc_secgroup.id}" ]
@@ -289,7 +290,7 @@ resource "template_file" "apiserver_cloudinit" {
 resource "aws_instance" "kubernetes_apiserver" {
   depends_on = ["aws_instance.kubernetes_etcd"]
   count = "${var.apiserver_count}"
-  ami = "${coreos_ami.latest_ami.ami}"
+  ami = "${coreosbox_ami.latest_ami.box_string}"
   instance_type = "${var.aws_apiserver_type}"
   key_name = "${aws_key_pair.keypair.key_name}"
   vpc_security_group_ids = [ "${aws_security_group.vpc_secgroup.id}" ]
@@ -347,7 +348,7 @@ resource "template_file" "master_cloudinit" {
 }
 resource "aws_instance" "kubernetes_master" {
   depends_on = ["aws_instance.kubernetes_apiserver"]
-  ami = "${coreos_ami.latest_ami.ami}"
+  ami = "${coreosbox_ami.latest_ami.box_string}"
   instance_type = "${var.aws_master_type}"
   key_name = "${aws_key_pair.keypair.key_name}"
   vpc_security_group_ids = [ "${aws_security_group.vpc_secgroup.id}" ]
@@ -408,7 +409,7 @@ resource "template_file" "node_cloudinit_special" {
 }
 resource "aws_instance" "kubernetes_node_special" {
   count = "${var.special_node_count}"
-  ami = "${coreos_ami.latest_ami.ami}"
+  ami = "${coreosbox_ami.latest_ami.box_string}"
   instance_type = "${element(split(",", var.aws_special_node_type), count.index)}"
   key_name = "${aws_key_pair.keypair.key_name}"
   vpc_security_group_ids = [ "${aws_security_group.vpc_secgroup.id}" ]
@@ -476,7 +477,7 @@ resource "template_file" "node_cloudinit" {
   }
 }
 resource "aws_launch_configuration" "kubernetes_node" {
-  image_id = "${coreos_ami.latest_ami.ami}"
+  image_id = "${coreosbox_ami.latest_ami.box_string}"
   instance_type = "${var.aws_node_type}"
   key_name = "${aws_key_pair.keypair.key_name}"
   security_groups  = [ "${aws_security_group.vpc_secgroup.id}" ]

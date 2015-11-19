@@ -14,6 +14,11 @@ variable "coreos_update_channel" {
   description = "Core OS update channel. Alpha, beta, stable or some custom value"
 }
 
+variable "coreos_version" {
+  default = "current"
+  description = "Core OS version. current or version number."
+}
+
 variable "coreos_reboot_strategy" {
   default = "off"
   description = "Core OS reboot strategy."
