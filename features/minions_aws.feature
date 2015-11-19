@@ -10,7 +10,8 @@ Feature: Make sure we have the correct number of kubernetes nodes
     And the output should eventually match:
       """
       .*
-      .*Ready
-      .*Ready
-      .*Ready
+      .*Ready.*
+      .*Ready.*
+      .*Ready.*
+      .*Ready.*
       """

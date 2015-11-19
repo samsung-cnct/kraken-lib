@@ -98,9 +98,13 @@ variable "ansible_forks" {
   default = "5"
   description = "number of parallel processes to use for ansible-playbook run"
 }
-variable "kraken_services_dirs" {
-  default = "heapster influxdb-grafana kube-ui loadtest prometheus"
-  description = "Kraken services folders under kraken repo to deploy kubernetes services from."
+variable "kraken_repo" {
+  default = {
+    "repo" = "https://github.com/Samsung-AG/kraken.git"
+    "branch" = "master"
+    "commit_sha" = ""
+  }
+  description = "Kraken git repo"
 }
 variable "kraken_services_repo" {
   default = "git://github.com/samsung-ag/kraken-services"
@@ -109,6 +113,11 @@ variable "kraken_services_repo" {
 variable "kraken_services_branch" {
   default = "master"
   description = "Kraken services repo branch"
+}
+variable "kraken_services_dirs" {
+  # TODO: skydns is also hardcoded into the scripts, can we just extract that here?
+  default = "heapster kube-ui prometheus"
+  description = "Kraken services folders under kraken repo to deploy kubernetes services from."
 }
 variable "logentries_token" {
   default = ""
@@ -122,21 +131,6 @@ variable "vagrant_private_key" {
   default = "~/.vagrant.d/insecure_private_key"
   description = "Location of private key for vagrant to use"
 }
-
-variable "kraken_repo" {
-  default = {
-    "repo" = "https://github.com/Samsung-AG/kraken.git"
-    "branch" = "master"
-    "commit_sha" = ""
-  }
-  description = "Kraken git repo"
-}
-
-variable "kraken_services_branch" {
-  default = "master"
-  description = "Kraken services repo branch"
-}
-
 variable "ansible_docker_image" {
   default = "quay.io/samsung_ag/kraken_ansible"
   description = "Docker image to use for ansible-in-docker"

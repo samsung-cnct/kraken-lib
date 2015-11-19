@@ -5,6 +5,8 @@ After=load-kube-cert.service
 
 
 [Service]
+StandardOuptut={{ kubernetes_systemd_stdout }}
+StandardError={{ kubernetes_systemd_stderr }}
 Restart=always
 RestartSec=5
 LimitNOFILE=infinity
@@ -13,4 +15,3 @@ ExecStart=/opt/bin/hyperkube proxy \
   {% for k,v in kube_proxy.iteritems() %}
     --{{k}}={{v}} \
   {% endfor %}
-  --master={{master_private_ip}}:8080
