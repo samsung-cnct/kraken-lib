@@ -20,6 +20,8 @@ Another benefit that these tools offer is allowing you to create a kraken cluste
 
 This should leave you with a kraken aws cluster running, using variables from the terraform.tfvars file you just created.
 
+__NOTE THAT WHATEVER CLUSTER_NAME YOU MIGHT HAVE IN YOUR .TFVARS FILE, IT WILL BE OVERRIDEN TO MATCH CLUSTER TYPE__
+
 First, the script creates a docker-machine instance in the cloud provider of your choice.
 Then it builds a docker container on that instance, with all the tools required to build a kraken cluster.
 Then the docker container is used to create an AWS Kraken cluster.

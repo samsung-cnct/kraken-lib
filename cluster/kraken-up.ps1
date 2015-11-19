@@ -77,7 +77,8 @@ Invoke-Expression "docker build -t samsung_ag/kraken -f '$krakenRoot/terraform/$
 # run cluster up
 $command =  "docker run -d --name kraken_cluster --volumes-from kraken_data samsung_ag/kraken bash -c " + 
             "`"terraform apply -input=false -state=/kraken_data/terraform.tfstate " +
-            "-var-file=/opt/kraken/terraform/$clustertype/terraform.tfvars /opt/kraken/terraform/$clustertype && " +
+            "-var-file=/opt/kraken/terraform/$clustertype/terraform.tfvars " +
+            "-var 'cluster_name=$clustertype' /opt/kraken/terraform/$clustertype && " +
             "cp /opt/kraken/terraform/$clustertype/rendered/ansible.inventory /kraken_data/ansible.inventory && " +
             "cp /root/.ssh/config_$clustertype /kraken_data/ssh_config && " +
             "cp /root/.kube/config /kraken_data/kube_config`""
