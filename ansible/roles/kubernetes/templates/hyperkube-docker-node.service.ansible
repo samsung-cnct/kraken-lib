@@ -11,6 +11,7 @@ StandardOuptut={{ kubernetes_systemd_stdout }}
 StandardError={{ kubernetes_systemd_stderr }}
 Restart=always
 RestartSec=5
+ExecStartPre=-/usr/bin/mkdir -p {{kubelet.log_dir}}
 ExecStartPre=-/usr/bin/docker kill kube-node
 ExecStartPre=-/usr/bin/docker rm kube-node
 ExecStart=/usr/bin/docker run \
@@ -19,6 +20,7 @@ ExecStart=/usr/bin/docker run \
   --privileged \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v /srv/kubernetes:/srv/kubernetes \
+  -v {{kubelet.log_dir}}:{{kubelet.log_dir}}
   {{hyperkube_image}} \
     /hyperkube kubelet \
     {% for k,v in kubelet.iteritems() %}

@@ -9,6 +9,7 @@ StandardError={{ kubernetes_systemd_stderr }}
 Restart=always
 RestartSec=5
 LimitNOFILE=infinity
+ExecStartPre=-/usr/bin/mkdir -p {{kube_apiserver.log_dir}}
 ExecStartPre=-/usr/bin/mv -v /opt/bin/hyperkube.pending /opt/bin/hyperkube
 ExecStart=/opt/bin/hyperkube apiserver \
   {% for k,v in kube_apiserver.iteritems() %}

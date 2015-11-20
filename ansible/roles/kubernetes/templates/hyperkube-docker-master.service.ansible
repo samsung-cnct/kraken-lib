@@ -10,6 +10,8 @@ StandardError={{ kubernetes_systemd_stderr }}
 Restart=always
 RestartSec=5
 LimitNOFILE=infinity
+ExecStartPre=-/usr/bin/mkdir -p {{kube_controller_manager.log_dir}}
+ExecStartPre=-/usr/bin/mkdir -p {{kube_scheduler.log_dir}}
 ExecStartPre=-/usr/bin/docker kill kube-master
 ExecStartPre=-/usr/bin/docker rm kube-master
 ExecStartPre=-/usr/bin/docker kill $(docker ps -a -q --filter="name=k8s-master")
@@ -21,6 +23,8 @@ ExecStart=/usr/bin/docker run \
   -v /opt/bin/manifests:/etc/kubernetes/manifests-override \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v /srv/kubernetes:/srv/kubernetes \
+  -v {{kube_scheduler.log_dir}}:{{kube_scheduler.log_dir}} \ 
+  -v {{kube_controller_manager.log_dir}}:{{kube_controller_manager.log_dir}} \
   {{hyperkube_image}} \
     /hyperkube \
     kubelet \

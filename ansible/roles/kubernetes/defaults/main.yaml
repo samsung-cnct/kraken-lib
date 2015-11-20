@@ -10,11 +10,13 @@ kraken_services_repo: git://github.com/samsung-ag/kraken-services
 kraken_services_dirs: "heapster kube-ui prometheus"
 kubernetes_api_version: v1
 kubernetes_binaries_uri: https://storage.googleapis.com/kubernetes-release/release/v1.1.1/bin/linux/amd64
+kubernetes_log_dir: /var/log/k8s
 kubernetes_systemd_stderr: "journal"
 kubernetes_systemd_stdout: "journal"
 kube_apiserver:
   # https://github.com/kubernetes/kubernetes/blob/release-1.1/docs/admin/admission-controllers.md#is-there-a-recommended-set-of-plug-ins-to-use
   admission-control: NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota
+  alsologtostderr: false
   bind-address: 0.0.0.0
   client-ca-file: /srv/kubernetes/ca.crt
   cors-allowed-origins: .*
@@ -25,7 +27,8 @@ kube_apiserver:
   insecure-bind-address: 0.0.0.0
   insecure-port: 8080
   kubelet-timeout: 5s
-  logtostderr: true
+  log_dir: "{{ kubernetes_log_dir }}/apiserver"
+  logtostderr: false
   max-requests-inflight: 400
   profiling: true
   runtime_config: "api/{{kubernetes_api_version}}"
@@ -38,10 +41,12 @@ kube_apiserver:
   v: 1
 kube_controller_manager:
   address: "{{ master_private_ip }}"
+  alsologtostderr: false
   concurrent-endpoint-syncs: 5
   concurrent-rc-syncs: 5
   deleting-pods-burst: 10
-  logtostderr: true
+  log_dir: "{{ kubernetes_log_dir }}/controller-manager"
+  logtostderr: false
   master: "{{ master_private_ip }}:8080"
   namespace-sync-period: 5m0s
   node-monitor-grace-period: 40s
@@ -59,13 +64,17 @@ kube_controller_manager:
   service-sync-period: 5m0s
   v: 1
 kube_proxy:
+  alsologtostderr: false
   kubeconfig: /srv/kubernetes/kube-proxy/kubeconfig
-  logtostderr: true
+  log_dir: "{{ kubernetes_log_dir }}/proxy"
+  logtostderr: false
   master: "{{ master_private_ip }}:8080"
   v: 1
 kube_scheduler:
   address: "{{ master_private_ip }}"
-  logtostderr: true
+  alsologtostderr: false
+  log_dir: "{{ kubernetes_log_dir }}/scheduler"
+  logtostderr: false
   master: "{{ master_private_ip }}:8080"
   port: 10251
   profiling: true
@@ -73,6 +82,7 @@ kube_scheduler:
 kubelet:
   address: 0.0.0.0
   api-servers: "http://{{ master_private_ip }}:8080"
+  alsologtostderr: false
   cadvisor-port: 4194
   cluster-dns: "{{ dns_ip }}"
   cluster-domain: "{{ dns_domain }}"
@@ -84,7 +94,8 @@ kubelet:
   # TODO: do we have access to ansible_local here?
   # hostname_override: "{{ ansible_local.kubernetes_node_ip_fact.node_ip_address }}"
   kubeconfig: /srv/kubernetes/kubelet/kubeconfig
-  logtostderr: true
+  log_dir: "{{ kubernetes_log_dir }}/kubelet"
+  logtostderr: false
   # max-pods: 40
   max-pods: 200
   node-status-update-frequency: 10s
