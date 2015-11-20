@@ -10,6 +10,7 @@ StandardError={{ kubernetes_systemd_stderr }}
 Restart=always
 RestartSec=5
 LimitNOFILE=infinity
+ExecStartPre=-/usr/bin/mkdir -p {{kube_apiserver.log_dir}}
 ExecStartPre=-/usr/bin/docker kill kube-apiserver
 ExecStartPre=-/usr/bin/docker rm kube-apiserver
 ExecStartPre=-/usr/bin/docker kill $(docker ps -a -q --filter="name=k8s-apiserver")
@@ -21,6 +22,7 @@ ExecStart=/usr/bin/docker run \
   -v /opt/bin/manifests:/etc/kubernetes/manifests-override \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v /srv/kubernetes:/srv/kubernetes \
+  -v {{kube_apiserver.log_dir}}:{{kube_apiserver.log_dir}}
   {{hyperkube_image}} \
     /hyperkube \
     kubelet \
