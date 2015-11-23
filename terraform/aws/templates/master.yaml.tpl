@@ -75,20 +75,6 @@ coreos:
         What=${format_docker_storage_mnt}
         Where=/var/lib/docker
         Type=ext4
-    - name: docker-tcp.socket
-      command: start
-      enable: true
-      content: |
-        [Unit]
-        Description=Docker TCP Socket for the API
-
-        [Socket]
-        ListenStream=0.0.0.0:4243
-        BindIPv6Only=both
-        Service=docker.service
-
-        [Install]
-        WantedBy=sockets.target
     - name: etcd2.service
       command: start
     - name: setup-network-environment.service

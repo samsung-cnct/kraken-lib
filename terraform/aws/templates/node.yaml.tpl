@@ -88,20 +88,6 @@ coreos:
         What=${format_kubelet_storage_mnt}
         Where=/var/lib/kubelet
         Type=ext4
-    - name: docker-tcp.socket
-      command: start
-      enable: true
-      content: |
-        [Unit]
-        Description=Docker Socket for the API
-
-        [Socket]
-        ListenStream=0.0.0.0:4243
-        BindIPv6Only=both
-        Service=docker.service
-
-        [Install]
-        WantedBy=sockets.target
     - name: setup-network-environment.service
       command: start
       content: |
