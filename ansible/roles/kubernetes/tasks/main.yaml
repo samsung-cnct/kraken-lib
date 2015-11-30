@@ -3,7 +3,7 @@
 - include: common.yaml
 
 - include: cadvisor.yaml
-  when: "'master' in group_names or 'etcd' in group_names or 'apiserver' in group_names"
+  when: "'master' in group_names or 'etcd' in group_names or 'apiservers' in group_names"
 
 - include: kubectl.yaml
   when: "'master' in group_names or 'apiservers' in group_names or 'nodes' in group_names"
