@@ -1,5 +1,6 @@
 #! /usr/bin/bash
 set -x
+rm -rf /opt/bin/kraken-services-rendered
 cp -vr /opt/bin/kraken-services /opt/bin/kraken-services-rendered
 cd /opt/bin/kraken-services-rendered
 sed -e 's,$CLUSTER_DOMAIN,{{dns_domain}},g' \
