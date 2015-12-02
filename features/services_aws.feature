@@ -10,8 +10,11 @@ Feature: Make sure we have the correct kubernetes services
     And the output should eventually match:
       """
       .*
+      heapster.*
       kube-dns.*
       kube-ui.*
+      monitoring-grafana.*
+      monitoring-influxdb.*
       """
 
   Scenario: Getting default services
@@ -20,7 +23,6 @@ Feature: Make sure we have the correct kubernetes services
     And the output should eventually match:
       """
       .*
-      heapster.*
       kubernetes.*
       prometheus.*
       """
