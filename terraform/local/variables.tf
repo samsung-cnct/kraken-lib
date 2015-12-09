@@ -1,6 +1,11 @@
 variable "cluster_name" {
   description = "Name of the cluster, useed in kubernetes config as the --cluster"
 }
+variable "kubeconfig" {
+  description = "Location of kubeconfig file used during kubectl invocations"
+  default = "~/.kube/config"
+}
+
 variable "apiserver_count" {
   default = "1"
   description = "How many apiservers to run in a pool"
