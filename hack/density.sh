@@ -51,10 +51,10 @@ function hack_ginkgo_e2e() {
 
   e2e_test_args=()
   # standard args
-  e2e_test_args+=("--repo-root='${KUBE_ROOT}'")
-  e2e_test_args+=("--kubeconfig='${KUBE_DENSITY_KUBECONFIG}'")
-  e2e_test_args+=("--e2e-output-dir='${KUBE_DENSITY_OUTPUT_DIR}'")
-  e2e_test_args+=("--prefix='e2e'")
+  e2e_test_args+=("--repo-root=${KUBE_ROOT}")
+  e2e_test_args+=("--kubeconfig=${KUBE_DENSITY_KUBECONFIG}")
+  e2e_test_args+=("--e2e-output-dir=${KUBE_DENSITY_OUTPUT_DIR}")
+  e2e_test_args+=("--prefix=e2e")
 
   # TODO: (for which branches) are these necessary?
   e2e_test_args+=("--num-nodes=${KUBE_DENSITY_NUM_NODES}")
@@ -73,7 +73,7 @@ function hack_ginkgo_e2e() {
   export PATH=$(dirname "${e2e_test}"):"${PATH}"
 
   "${ginkgo}" "${e2e_test}" -- \
-    {${e2e_test_args[@]:+${e2e_test_args[@]}} \
+    ${e2e_test_args[@]:+${e2e_test_args[@]}} \
     "${@:-}"
 }
 

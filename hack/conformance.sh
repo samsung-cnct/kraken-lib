@@ -52,14 +52,14 @@ function hack_ginkgo_e2e() {
 
   e2e_test_args=()
   # standard args
-  e2e_test_args+=("--repo-root='${KUBE_ROOT}'")
-  e2e_test_args+=("--kubeconfig='${KUBE_CONFORMANCE_KUBECONFIG}'")
-  e2e_test_args+=("--e2e-output-dir='${KUBE_CONFORMANCE_OUTPUT_DIR}'")
-  e2e_test_args+=("--prefix='e2e'")
+  e2e_test_args+=("--repo-root=${KUBE_ROOT}")
+  e2e_test_args+=("--kubeconfig=${KUBE_CONFORMANCE_KUBECONFIG}")
+  e2e_test_args+=("--e2e-output-dir=${KUBE_CONFORMANCE_OUTPUT_DIR}")
+  e2e_test_args+=("--prefix=e2e")
 
   # TODO: (for which branches) are these necessary?
-  e2e_test_args+=("--host='${KUBE_MASTER_URL}'")
-  e2e_test_args+=("--kube-master='${KUBE_MASTER}'")
+  e2e_test_args+=("--host=${KUBE_MASTER_URL}")
+  e2e_test_args+=("--kube-master=${KUBE_MASTER}")
   e2e_test_args+=("--num-nodes=${KUBE_CONFORMANCE_NUM_NODES}")
 
   # ginkgo args
@@ -77,7 +77,7 @@ function hack_ginkgo_e2e() {
   export PATH=$(dirname "${e2e_test}"):"${PATH}"
 
   "${ginkgo}" "${e2e_test}" -- \
-    {${e2e_test_args[@]:+${e2e_test_args[@]}} \
+    ${e2e_test_args[@]:+${e2e_test_args[@]}} \
     "${@:-}"
   
 }
