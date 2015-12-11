@@ -14,6 +14,10 @@ case $key in
     CLUSTER="$2"
     shift # past argument
     ;;
+    -k|--kubeconfig)
+    KUBECONFIG="$2"
+    shift # past argument
+    ;;
     -l|--limit)
     NODE_LIMIT="$2"
     shift # past argument
@@ -49,6 +53,7 @@ esac
 shift # past argument or value
 done
 
+echo "Using kubeconfig: ${KUBECONFIG}"
 echo "Cluster type is ${CLUSTER}"
 echo "Waiting for ${NODE_LIMIT} kubectl nodes"
 echo "Autoscaling group name is ${ASG_NAME}"
@@ -141,7 +146,7 @@ nudge_asg_nodes()
     proceed_terminate=false
   fi
 
-  local kube_array=($(kubectl --cluster=${CLUSTER} get nodes | tail -n +2 | awk '{ print $1 }'))
+  local kube_array=($(kubectl --kubeconfig=${KUBECONFIG} --cluster=${CLUSTER} get nodes | tail -n +2 | awk '{ print $1 }'))
   if [ ${#kube_array[@]} -eq 0 ]; then
     echo "Unexpected - No kubectl nodes returned. Kubectl error?"
     proceed_terminate=false
@@ -186,7 +191,7 @@ wait_for_asg
 
 # get a count of nodes from kubectl
 echo "Starting wait on ${NODE_LIMIT} provisioned kubernetes nodes."
-kube_node_count=$(kubectl --cluster=${CLUSTER} get nodes | tail -n +2 | wc -l | xargs)
+kube_node_count=$(kubectl --kubeconfig=${KUBECONFIG} --cluster=${CLUSTER} get nodes | tail -n +2 | wc -l | xargs)
 max_loops=$((TOTAL_WAITS-1))
 max_retries=$((RETRIES-1))
 
@@ -198,7 +203,7 @@ do
   if [ ${max_loops} -ge 0 ]; then
     echo "${kube_node_count} kubernetes nodes out of ${NODE_LIMIT}"
     sleep ${SLEEP_TIME}
-    kube_node_count=$(kubectl --cluster=${CLUSTER} get nodes | tail -n +2 | wc -l | xargs)
+    kube_node_count=$(kubectl --kubeconfig=${KUBECONFIG} --cluster=${CLUSTER} get nodes | tail -n +2 | wc -l | xargs)
     max_loops=$((max_loops-1))
   elif [ ${max_retries} -ge 0 ]; then
     echo "Waited for $((SLEEP_TIME*TOTAL_WAITS)). Will attempt to detect and restart failed autoscaling group nodes."

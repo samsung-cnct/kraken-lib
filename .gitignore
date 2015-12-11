@@ -10,3 +10,4 @@ temp_*
 **/terraform.tfvars
 **/kube-cert
 gh-pages/
+output/*

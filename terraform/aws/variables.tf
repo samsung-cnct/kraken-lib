@@ -2,6 +2,10 @@
 variable "cluster_name" {
   description = "Name of the cluster, useed in kubernetes config as the --cluster"
 }
+variable "kubeconfig" {
+  description = "Location of kubeconfig file used during kubectl invocations"
+  default = "~/.kube/config"
+}
 variable "aws_access_key" {
   description = "AWS key id"
 }
