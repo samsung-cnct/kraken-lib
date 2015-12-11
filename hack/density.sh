@@ -6,7 +6,8 @@ KUBE_ROOT=${KUBE_ROOT:-"$GOPATH/src/k8s.io/kubernetes"}
 KUBE_DENSITY_NUM_NODES=${KUBE_DENSITY_NUM_NODES:-"10"} # TODO: needed? autodetect?
 KUBE_DENSITY_OUTPUT_DIR=${KUBE_DENSITY_OUTPUT_DIR:-"$(pwd)/output/density"}
 
-REBUILD_TESTS=${REBUILD_TESTS:-true}
+# TODO: external build-or-download script instead
+REBUILD_TESTS=${REBUILD_TESTS:-false}
 
 if [[ $# < 2 ]]; then
   echo "Usage: $0 density_branch pods_per_node"
@@ -31,9 +32,8 @@ echo "Density test SHA: ${KUBE_DENSITY_SHA}"
 echo "Density test cluster size: ${KUBE_DENSITY_NUM_NODES}"
 echo "Density test kubeconfig: ${KUBE_DENSITY_KUBECONFIG}"
 
-if $REBUILD_TESTS; then
+if ${REBUILD_TESTS}; then
   echo
-  # TODO: build just the density tests for our platform instead of a whole release?
   echo "Building density tests..."
   build/make-clean.sh
   build/run.sh hack/build-cross.sh

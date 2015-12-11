@@ -7,7 +7,8 @@ KUBE_CONFORMANCE_NUM_NODES=${KUBE_CONFORMANCE_NUM_NODES:-"10"} # TODO: lock to 4
 KUBE_CONFORMANCE_OUTPUT_DIR=${KUBE_CONFORMANCE_OUTPUT_DIR:-"$(pwd)/output/conformance"}
 KUBE_CONFORMANCE_SEED="1436380640"
 
-REBUILD_TESTS=${REBUILD_TESTS:-true}
+# TODO: external build-or-download script instead
+REBUILD_TESTS=${REBUILD_TESTS:-false}
 
 if [[ $# < 1 ]]; then
   echo "Usage: $0 conformance_branch"
@@ -30,7 +31,7 @@ echo "Conformance test SHA: ${KUBE_CONFORMANCE_SHA}"
 echo "Conformance test cluster size: ${KUBE_CONFORMANCE_NUM_NODES}"
 echo "Conformance test kubeconfig: ${KUBE_CONFORMANCE_KUBECONFIG}"
 
-if $REBUILD_TESTS; then
+if ${REBUILD_TESTS}; then
   echo
   # TODO: build just the conformance tests for our platform instead of a cross-platform release?
   echo "Building conformance tests..."
