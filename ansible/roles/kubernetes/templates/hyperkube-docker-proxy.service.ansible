@@ -5,7 +5,7 @@ After=hyperkube-docker-master.service
 After=load-kube-cert.service
 
 [Service]
-StandardOuptut={{ kubernetes_systemd_stdout }}
+StandardOutput={{ kubernetes_systemd_stdout }}
 StandardError={{ kubernetes_systemd_stderr }}
 Restart=always
 RestartSec=5
