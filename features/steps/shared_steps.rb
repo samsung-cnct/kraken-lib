@@ -7,13 +7,13 @@ Then(/^the exit status should eventually be (\d+)$/) do |exit_status|
 end
 
 When(/^I kubectl system services/) do 
-  run_simple("kubectl --cluster=#{ENV['CUKE_CLUSTER']} get services --namespace=kube-system")
+  run_simple("kubectl --kubeconfig=#{ENV['KUBECONFIG']} --cluster=#{ENV['CUKE_CLUSTER']} get services --namespace=kube-system")
 end
 
 When(/^I kubectl services/) do 
-  run_simple("kubectl --cluster=#{ENV['CUKE_CLUSTER']} get services")
+  run_simple("kubectl --kubeconfig=#{ENV['KUBECONFIG']} --cluster=#{ENV['CUKE_CLUSTER']} get services")
 end
 
 When(/^I kubectl nodes/) do 
-  run_simple("kubectl --cluster=#{ENV['CUKE_CLUSTER']} get nodes")
+  run_simple("kubectl --kubeconfig=#{ENV['KUBECONFIG']} --cluster=#{ENV['CUKE_CLUSTER']} get nodes")
 end
