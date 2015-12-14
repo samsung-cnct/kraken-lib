@@ -5,6 +5,8 @@ KUBE_DENSITY_KUBECONFIG=${KUBE_DENSITY_KUBECONFIG:-"$HOME/.kube/config"}
 KUBE_ROOT=${KUBE_ROOT:-"$GOPATH/src/k8s.io/kubernetes"}
 KUBE_DENSITY_NUM_NODES=${KUBE_DENSITY_NUM_NODES:-"10"} # TODO: needed? autodetect?
 KUBE_DENSITY_OUTPUT_DIR=${KUBE_DENSITY_OUTPUT_DIR:-"$(pwd)/output/density"}
+KUBE_DENSITY_PROM_PUSH_GATEWAY=""
+KUBE_DENSITY_DELETE_NAMESPACE=${KUBE_DENSITY_DELETE_NAMEPACE:-true}
 
 # TODO: external build-or-download script instead
 REBUILD_TESTS=${REBUILD_TESTS:-false}
@@ -58,8 +60,12 @@ function hack_ginkgo_e2e() {
 
   # TODO: (for which branches) are these necessary?
   e2e_test_args+=("--num-nodes=${KUBE_DENSITY_NUM_NODES}")
-  # TODO: conditionally add --prom-push-gateway
-  # TODO: conditionally add --delete-namespace=false
+
+  # TODO: these flags may not work for earlier versions of e2e.test
+  if [[ -n "${KUBE_DENSITY_PROM_PUSH_GATEWAY}" ]];
+    e2e_test_args+=("--prom-push-gateway=${KUBE_DENSITY_PROM_PUSH_GATEWAY}")
+  fi
+  e2e_test_args+=("--delete-namespace=${KUBE_DENSITY_DELETE_NAMESPACE}")
 
   # ginkgo args
   e2e_test_args+=("--ginkgo.noColor=true")
