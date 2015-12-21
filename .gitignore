@@ -11,3 +11,4 @@ temp_*
 **/kube-cert
 gh-pages/
 output/*
+_site/*
