@@ -8,7 +8,7 @@ Restart=always
 RestartSec=5
 ExecStartPre=-/usr/bin/docker kill cadvisor
 ExecStartPre=-/usr/bin/docker rm -f cadvisor
-ExecStartPre=-/usr/bin/docker pull cadvisor
+ExecStartPre=-/usr/bin/docker pull google/cadvisor:latest
 ExecStart=/usr/bin/bash -c \
   "/usr/bin/docker run \
   --name=cadvisor \
