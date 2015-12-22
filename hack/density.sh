@@ -7,9 +7,8 @@ KUBE_DENSITY_NUM_NODES=${KUBE_DENSITY_NUM_NODES:-"10"} # TODO: needed? autodetec
 KUBE_DENSITY_OUTPUT_DIR=${KUBE_DENSITY_OUTPUT_DIR:-"$(pwd)/output/density"}
 KUBE_DENSITY_PROM_PUSH_GATEWAY=""
 KUBE_DENSITY_DELETE_NAMESPACE=${KUBE_DENSITY_DELETE_NAMEPACE:-true}
-
 # TODO: external build-or-download script instead
-REBUILD_TESTS=${REBUILD_TESTS:-false}
+KUBE_DENSITY_REBUILD_TESTS=${KUBE_DENSITY_REBUILD_TESTS:-false}
 
 if [[ $# < 2 ]]; then
   echo "Usage: $0 density_branch pods_per_node"
@@ -34,7 +33,7 @@ echo "Density test SHA: ${KUBE_DENSITY_SHA}"
 echo "Density test cluster size: ${KUBE_DENSITY_NUM_NODES}"
 echo "Density test kubeconfig: ${KUBE_DENSITY_KUBECONFIG}"
 
-if ${REBUILD_TESTS}; then
+if ${KUBE_DENSITY_REBUILD_TESTS}; then
   echo
   echo "Building density tests..."
   build/make-clean.sh
@@ -55,31 +54,41 @@ function hack_ginkgo_e2e() {
   # standard args
   e2e_test_args+=("--repo-root=${KUBE_ROOT}")
   e2e_test_args+=("--kubeconfig=${KUBE_DENSITY_KUBECONFIG}")
+  e2e_test_args+=("--report-dir=${KUBE_DENSITY_OUTPUT_DIR}")
   e2e_test_args+=("--e2e-output-dir=${KUBE_DENSITY_OUTPUT_DIR}")
   e2e_test_args+=("--prefix=e2e")
 
   # TODO: (for which branches) are these necessary?
   e2e_test_args+=("--num-nodes=${KUBE_DENSITY_NUM_NODES}")
 
-  # TODO: these flags may not work for earlier versions of e2e.test
-  if [[ -n "${KUBE_DENSITY_PROM_PUSH_GATEWAY}" ]];
+  if [[ ${KUBE_DENSITY_BRANCH} == "conformance-test-v1" ]]; then
+    echo "additional e2e test args for ${KUBE_DENSITY_BRANCH} branch"
+  elif [[ ${KUBE_DENSITY_BRANCH} == "release-1.0" ]]; then
+    echo "additional e2e test args for ${KUBE_DENSITY_BRANCH} branch"
+  elif [[ ${KUBE_DENSITY_BRANCH} == "release-1.1" ]]; then
+    echo "additional e2e test args for ${KUBE_DENSITY_BRANCH} branch"
+  elif [[ ${KUBE_DENSITY_BRANCH} == "master" ]]; then
+    echo "additional e2e test args for ${KUBE_DENSITY_BRANCH} branch"
+    e2e_test_args+=("--delete-namespace=${KUBE_DENSITY_DELETE_NAMESPACE}")
+  fi
+
+  if [[ -n "${KUBE_DENSITY_PROM_PUSH_GATEWAY}" ]]; then
     e2e_test_args+=("--prom-push-gateway=${KUBE_DENSITY_PROM_PUSH_GATEWAY}")
   fi
-  e2e_test_args+=("--delete-namespace=${KUBE_DENSITY_DELETE_NAMESPACE}")
 
   # ginkgo args
   e2e_test_args+=("--ginkgo.noColor=true")
   e2e_test_args+=("--ginkgo.v=true")
 
   # ginkgo args for density
-  e2e_test_args+=("--ginkgo.focus='should allow starting ${KUBE_DENSITY_PODS_PER_NODE} pods per node'")
-  e2e_test_args+=("--ginkgo.skip='(^Density)'")
+  e2e_test_args+=("--ginkgo.focus=should allow starting ${KUBE_DENSITY_PODS_PER_NODE} pods per node")
+  e2e_test_args+=("--ginkgo.skip=(^Density)")
 
   # Add path for things like running kubectl binary.
   export PATH=$(dirname "${e2e_test}"):"${PATH}"
 
   "${ginkgo}" "${e2e_test}" -- \
-    ${e2e_test_args[@]:+${e2e_test_args[@]}} \
+    "${e2e_test_args[@]:+${e2e_test_args[@]}}" \
     "${@:-}"
 }
 

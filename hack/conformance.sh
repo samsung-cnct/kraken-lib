@@ -6,9 +6,8 @@ KUBE_ROOT=${KUBE_ROOT:-"$GOPATH/src/k8s.io/kubernetes"}
 KUBE_CONFORMANCE_NUM_NODES=${KUBE_CONFORMANCE_NUM_NODES:-"10"} # TODO: lock to 4? auto-detect?
 KUBE_CONFORMANCE_OUTPUT_DIR=${KUBE_CONFORMANCE_OUTPUT_DIR:-"$(pwd)/output/conformance"}
 KUBE_CONFORMANCE_SEED="1436380640"
-
 # TODO: external build-or-download script instead
-REBUILD_TESTS=${REBUILD_TESTS:-false}
+KUBE_CONFORMANCE_REBUILD_TESTS=${KUBE_CONFORMANCE_REBUILD_TESTS:-false}
 
 if [[ $# < 1 ]]; then
   echo "Usage: $0 conformance_branch"
@@ -31,7 +30,7 @@ echo "Conformance test SHA: ${KUBE_CONFORMANCE_SHA}"
 echo "Conformance test cluster size: ${KUBE_CONFORMANCE_NUM_NODES}"
 echo "Conformance test kubeconfig: ${KUBE_CONFORMANCE_KUBECONFIG}"
 
-if ${REBUILD_TESTS}; then
+if ${KUBE_CONFORMANCE_REBUILD_TESTS}; then
   echo
   # TODO: build just the conformance tests for our platform instead of a cross-platform release?
   echo "Building conformance tests..."
@@ -49,19 +48,34 @@ function hack_ginkgo_e2e() {
   e2e_test=$(kube::util::find-binary "e2e.test")
   echo "Conformance test: not doing test setup."
   KUBERNETES_PROVIDER=""
-  detect-master-from-kubeconfig
+  KUBECONFIG="${KUBE_CONFORMANCE_KUBECONFIG}"
+  # detect-master-from-kubeconfig
 
   e2e_test_args=()
   # standard args
   e2e_test_args+=("--repo-root=${KUBE_ROOT}")
   e2e_test_args+=("--kubeconfig=${KUBE_CONFORMANCE_KUBECONFIG}")
   e2e_test_args+=("--e2e-output-dir=${KUBE_CONFORMANCE_OUTPUT_DIR}")
+  e2e_test_args+=("--report-dir=${KUBE_CONFORMANCE_OUTPUT_DIR}")
   e2e_test_args+=("--prefix=e2e")
 
   # TODO: (for which branches) are these necessary?
-  e2e_test_args+=("--host=${KUBE_MASTER_URL}")
-  e2e_test_args+=("--kube-master=${KUBE_MASTER}")
   e2e_test_args+=("--num-nodes=${KUBE_CONFORMANCE_NUM_NODES}")
+  if [[ ${KUBE_CONFORMANCE_BRANCH} == "conformance-test-v1" ]]; then
+    echo "additional e2e test args for ${KUBE_CONFORMANCE_BRANCH} branch"
+    # TODO: backport [Conformance] tags to conformance-test-v1?
+    export CONFORMANCE_TEST_SKIP_REGEX="Cadvisor|MasterCerts|Density|Cluster\slevel\slogging.*|Etcd\sfailure.*|Load\sCapacity|Monitoring|Namespaces.*seconds|Pod\sdisks|Reboot|Restart|Nodes|Scale|Services.*load\sbalancer|Services.*NodePort|Shell|SSH|Volumes"
+  elif [[ ${KUBE_CONFORMANCE_BRANCH} == "release-1.0" ]]; then
+    echo "additional e2e test args for ${KUBE_CONFORMANCE_BRANCH} branch"
+    # TODO: backport [Conformance] tags to release-1.0
+    export CONFORMANCE_TEST_SKIP_REGEX="Cadvisor|MasterCerts|Density|Cluster\slevel\slogging.*|Etcd\sfailure.*|Load\sCapacity|Monitoring|Namespaces.*seconds|Pod\sdisks|Reboot|Restart|Nodes|Scale|Services.*load\sbalancer|Services.*NodePort|Shell|SSH|Volumes"
+  elif [[ ${KUBE_CONFORMANCE_BRANCH} == "release-1.1" ]]; then
+    echo "additional e2e test args for ${KUBE_CONFORMANCE_BRANCH} branch"
+    e2e_test_args+=("--ginkgo.focus=\[Conformance\]")
+  elif [[ ${KUBE_CONFORMANCE_BRANCH} == "master" ]]; then
+    echo "additional e2e test args for ${KUBE_CONFORMANCE_BRANCH} branch"
+    e2e_test_args+=("--ginkgo.focus=\[Conformance\]")
+  fi
 
   # ginkgo args
   e2e_test_args+=("--ginkgo.noColor=true")
@@ -69,9 +83,8 @@ function hack_ginkgo_e2e() {
 
   # ginkgo args for conformance
   e2e_test_args+=("--ginkgo.seed=${KUBE_CONFORMANCE_SEED}")
-  e2e_test_args+=("--ginkgo.focus='\[Conformance]\]'")
   if [[ -n "${CONFORMANCE_TEST_SKIP_REGEX:-}" ]]; then
-    e2e_test_args+=("--ginkgo.skip='${CONFORMANCE_TEST_SKIP_REGEX}'")
+    e2e_test_args+=("--ginkgo.skip=${CONFORMANCE_TEST_SKIP_REGEX}")
   fi
 
   # Add path for things like running kubectl binary.
@@ -80,7 +93,7 @@ function hack_ginkgo_e2e() {
   "${ginkgo}" "${e2e_test}" -- \
     ${e2e_test_args[@]:+${e2e_test_args[@]}} \
     "${@:-}"
-  
+
 }
 
 echo
