@@ -217,7 +217,7 @@ resource "coreosbox_ami" "latest_ami" {
 }
 
 resource "template_file" "etcd_cloudinit" {
-  filename = "${path.module}/templates/etcd.yaml.tpl"
+  template = "${path.module}/templates/etcd.yaml.tpl"
   vars {
     ansible_playbook_command = "${var.ansible_playbook_command}"
     ansible_playbook_file = "${var.ansible_playbook_file}"
@@ -258,7 +258,7 @@ resource "aws_instance" "kubernetes_etcd" {
 }
 
 resource "template_file" "apiserver_cloudinit" {
-  filename = "${path.module}/templates/apiserver.yaml.tpl"
+  template = "${path.module}/templates/apiserver.yaml.tpl"
   vars {
     ansible_playbook_command = "${var.ansible_playbook_command}"
     ansible_playbook_file = "${var.ansible_playbook_file}"
@@ -313,7 +313,7 @@ resource "aws_instance" "kubernetes_apiserver" {
 }
 
 resource "template_file" "master_cloudinit" {
-  filename = "${path.module}/templates/master.yaml.tpl"
+  template = "${path.module}/templates/master.yaml.tpl"
   vars {
     ansible_playbook_command = "${var.ansible_playbook_command}"
     ansible_playbook_file = "${var.ansible_playbook_file}"
@@ -371,7 +371,7 @@ resource "aws_instance" "kubernetes_master" {
 }
 
 resource "template_file" "node_cloudinit_special" {
-  filename = "${path.module}/templates/node.yaml.tpl"
+  template = "${path.module}/templates/node.yaml.tpl"
   count = "${var.special_node_count}"
   vars {
     ansible_playbook_command = "${var.ansible_playbook_command}"
@@ -441,7 +441,7 @@ resource "aws_instance" "kubernetes_node_special" {
 }
 
 resource "template_file" "node_cloudinit" {
-  filename = "${path.module}/templates/node.yaml.tpl"
+  template = "${path.module}/templates/node.yaml.tpl"
   vars {
     ansible_playbook_command = "${var.ansible_playbook_command}"
     ansible_playbook_file = "${var.ansible_playbook_file}"
@@ -544,7 +544,7 @@ resource "aws_route53_record" "proxy_record" {
 
 
 resource "template_file" "ansible_inventory" {
-  filename = "${path.module}/templates/ansible.inventory.tpl"
+  template = "${path.module}/templates/ansible.inventory.tpl"
   vars {
     ansible_ssh_private_key_file = "${var.aws_local_private_key}"
     etcd_public_ip = "${aws_instance.kubernetes_etcd.public_ip}"
