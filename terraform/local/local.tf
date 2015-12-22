@@ -5,7 +5,7 @@ resource "coreosbox_vagrant" "coreos_version_info" {
 }
 
 resource "template_file" "etcd_cloudinit" {
-  filename = "${path.module}/templates/etcd.yaml.tpl"
+  template = "${path.module}/templates/etcd.yaml.tpl"
   vars {
     ansible_playbook_command = "${var.ansible_playbook_command}"
     ansible_playbook_file = "${var.ansible_playbook_file}"
@@ -26,7 +26,7 @@ resource "template_file" "etcd_cloudinit" {
 }
 
 resource "template_file" "master_cloudinit" {
-  filename = "${path.module}/templates/master.yaml.tpl"
+  template = "${path.module}/templates/master.yaml.tpl"
   vars {
     ansible_playbook_command = "${var.ansible_playbook_command}"
     ansible_playbook_file = "${var.ansible_playbook_file}"
@@ -60,7 +60,7 @@ resource "template_file" "master_cloudinit" {
 }
 
 resource "template_file" "apiserver_cloudinit" {
-  filename = "${path.module}/templates/apiserver.yaml.tpl"
+  template = "${path.module}/templates/apiserver.yaml.tpl"
   vars {
     ansible_playbook_command = "${var.ansible_playbook_command}"
     ansible_playbook_file = "${var.ansible_playbook_file}"
@@ -92,7 +92,7 @@ resource "template_file" "apiserver_cloudinit" {
 }
 
 resource "template_file" "node_cloudinit" {
-  filename = "${path.module}/templates/node.yaml.tpl"
+  template = "${path.module}/templates/node.yaml.tpl"
   vars {    
     ansible_playbook_command = "${var.ansible_playbook_command}"
     ansible_playbook_file = "${var.ansible_playbook_file}"
