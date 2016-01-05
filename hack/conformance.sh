@@ -58,6 +58,7 @@ function hack_ginkgo_e2e() {
   e2e_test_args+=("--e2e-output-dir=${KUBE_CONFORMANCE_OUTPUT_DIR}")
   e2e_test_args+=("--report-dir=${KUBE_CONFORMANCE_OUTPUT_DIR}")
   e2e_test_args+=("--prefix=e2e")
+  e2e_test_args+=("--ginkgo.dryRun=true")
 
   # TODO: (for which branches) are these necessary?
   e2e_test_args+=("--num-nodes=${KUBE_CONFORMANCE_NUM_NODES}")
@@ -79,7 +80,7 @@ function hack_ginkgo_e2e() {
 
   # ginkgo args
   e2e_test_args+=("--ginkgo.noColor=true")
-  e2e_test_args+=("--ginkgo.v=true")
+  #e2e_test_args+=("--ginkgo.v=true")
 
   # ginkgo args for conformance
   e2e_test_args+=("--ginkgo.seed=${KUBE_CONFORMANCE_SEED}")
