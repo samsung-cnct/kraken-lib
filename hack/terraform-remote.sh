@@ -1,5 +1,7 @@
 #!/bin/bash
 
+AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-"us-west-2"}
+
 if [[ $# < 3 ]]; then
   echo "Usage: $0 cloud cluster_name verb [args...]"
   echo "  eg: $0 aws kubernetes_conformance apply" 
@@ -26,7 +28,7 @@ case $verb in
   apply)
     # terraform doesn't provide a first-class way to represent rendered template contents 
     # as a resource (see https://github.com/hashicorp/terraform/issues/2342), so we explicitly
-    # taint before running apply
+    # taint before running apply so terraform will re-render the template
     terraform taint template_file.ansible_inventory
     time terraform apply -input=false $@
     ;;
