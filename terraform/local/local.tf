@@ -132,4 +132,7 @@ resource "execute_command" "command" {
   provisioner "local-exec" {
     command = "ansible-playbook -i 'localhost,' --connection=local ${path.module}/../../ansible/localhost_pre_provision.yaml --extra-vars 'kubeconfig=${var.kubeconfig} cluster_name=${var.cluster_name} cluster_master_record=http://${var.ip_base}.102:8080'"
   }
+  provisioner "local-exec" {
+    command = "ansible-playbook -i '${path.module}/rendered/ansible.inventory' --connection=local ${path.module}/../../ansible/localhost_post_provision.yaml"
+  }
 }
