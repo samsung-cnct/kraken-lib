@@ -2,10 +2,10 @@ FROM buildpack-deps:jessie-scm
 MAINTAINER Marat Garafutdinov <marat.g@samsung.com>
 
 # versions
-ENV TERRAFORM_VERSION 0.6.6
+ENV TERRAFORM_VERSION 0.6.8
 ENV TERRAFORM_EXECUTE_VERSION v0.0.2
 ENV TERRAFORM_COREOSBOX_VERSION v0.0.1
-ENV KUBERNETES_VERSION v1.1.1
+ENV KUBERNETES_VERSION v1.1.3
 
 # python and ansible
 RUN apt-get update \
