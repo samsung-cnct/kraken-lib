@@ -34,6 +34,11 @@ if [ -z ${KRAKEN_DOCKER_MACHINE_NAME+x} ]; then
   exit 1
 fi
 
+if [ -z ${KRAKEN_CLUSTER_NAME+x} ]; then
+  error "--clustername not specified. Cluster name is required."
+  exit 1
+fi
+
 if docker-machine ls -q | grep --silent "${KRAKEN_DOCKER_MACHINE_NAME}"; then
   inf "Machine ${KRAKEN_DOCKER_MACHINE_NAME} exists."
 else
@@ -48,9 +53,9 @@ if [ ${is_running} == "true" ];  then
   exit 1
 fi
 
-mkdir -p "clusters/${KRAKEN_DOCKER_MACHINE_NAME}"
-docker cp kraken_data:/kraken_data/ansible.inventory "clusters/${KRAKEN_DOCKER_MACHINE_NAME}/ansible.inventory"
+mkdir -p "clusters/${KRAKEN_DOCKER_MACHINE_NAME}/${KRAKEN_CLUSTER_NAME}"
+docker cp kraken_data:/kraken_data/${KRAKEN_CLUSTER_NAME}/ansible.inventory "clusters/${KRAKEN_DOCKER_MACHINE_NAME}/${KRAKEN_CLUSTER_NAME}/ansible.inventory"
 docker cp kraken_cluster:/root/.ssh/id_rsa "clusters/${KRAKEN_DOCKER_MACHINE_NAME}/id_rsa"
 docker cp kraken_cluster:/root/.ssh/id_rsa.pub "clusters/${KRAKEN_DOCKER_MACHINE_NAME}/id_rsa.pub"
 
-inf "Parameters for ansible:\n   --inventory-file clusters/${KRAKEN_DOCKER_MACHINE_NAME}/ansible.inventory\n   --private-key clusters/${KRAKEN_DOCKER_MACHINE_NAME}/id_rsa"
+inf "Parameters for ansible:\n   --inventory-file clusters/${KRAKEN_DOCKER_MACHINE_NAME}/${KRAKEN_CLUSTER_NAME}/ansible.inventory\n   --private-key clusters/${KRAKEN_DOCKER_MACHINE_NAME}/id_rsa"

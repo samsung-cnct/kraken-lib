@@ -7,6 +7,8 @@
 Param(
   [Parameter(Mandatory=$true)] 
   [string]$dmname = ""
+  [Parameter(Mandatory=$true)]
+  [string]$clustername = ""
 )
 
 # kraken root folder
@@ -30,8 +32,8 @@ If ( $is_running -eq "true" ) {
 }
 
 New-Item -ItemType Directory -Force -Path "$krakenRoot\cluster\clusters\$dmname"
-Invoke-Expression "docker cp kraken_data:/kraken_data/ansible.inventory `"clusters/$dmname/ansible.inventory`""
+Invoke-Expression "docker cp kraken_data:/kraken_data/$clustername/ansible.inventory `"clusters/$dmname/$clustername/ansible.inventory`""
 Invoke-Expression "docker cp kraken_cluster:/root/.ssh/id_rsa `"clusters/$dmname/id_rsa`""
 Invoke-Expression "docker cp kraken_cluster:/root/.ssh/id_rsa.pub `"clusters/$dmname/id_rsa.pub`""
 
-inf "Parameters for ansible:`n   --inventory-file $krakenRoot\clusters\$dmname\ansible.inventory`n   --private-key $krakenRoot\clusters\$dmname\id_rsa"
+inf "Parameters for ansible:`n   --inventory-file $krakenRoot\clusters\$dmname\$clustername\ansible.inventory`n   --private-key $krakenRoot\clusters\$dmname\id_rsa"

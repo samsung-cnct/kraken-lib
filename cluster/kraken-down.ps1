@@ -8,6 +8,7 @@ Param(
   [string]$clustertype = "aws", 
   [Parameter(Mandatory=$true)] 
   [string]$dmname = ""
+  [string]$clustername = "$clustertype"
 )
 
 # kraken root folder
@@ -41,7 +42,7 @@ If (!($success)) {
 
 $command = 	"docker run -d --name kraken_cluster --volumes-from kraken_data " +  
 			"samsung_ag/kraken bash -c `"until terraform destroy -force -input=false -var-file=/opt/kraken/terraform/$clustertype/terraform.tfvars " +
-			"-state=/kraken_data/terraform.tfstate /opt/kraken/terraform/$clustertype; do echo 'Retrying...'; sleep 5; done`""
+			"-state=/kraken_data/$clustername/terraform.tfstate /opt/kraken/terraform/$clustertype; do echo 'Retrying...'; sleep 5; done`""
 
 inf "Tearing down kraken cluster:`n  '$command'"
 Invoke-Expression $command

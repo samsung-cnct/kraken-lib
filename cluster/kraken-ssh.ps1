@@ -7,6 +7,8 @@
 Param(
   [Parameter(Mandatory=$true)] 
   [string]$dmname = "",
+  [Parameter(Mandatory=$true)]
+  [string]$clustername = ""
   [Parameter(Mandatory=$true)] 
   [string]$node = ""
 )
@@ -25,4 +27,4 @@ If ($success) {
 
 Invoke-Expression "docker-machine.exe env --shell=powershell $dmname | Invoke-Expression"
 
-Invoke-Expression "docker run -it --volumes-from kraken_data samsung_ag/kraken ssh -F /kraken_data/ssh_config $node"
+Invoke-Expression "docker run -it --volumes-from kraken_data samsung_ag/kraken ssh -F /kraken_data/$clustername/ssh_config $node"
