@@ -3,37 +3,11 @@
 Deploy a __Kubernetes__ cluster using __Terraform__  and __Ansible__ on top of __CoreOS__.
 
 ## Tools setup
+Install [docker toolbox](https://www.docker.com/docker-toolbox), or just docker-machine and docker client separately.  
+Then:
 
     git clone git@github.com:Samsung-AG/kraken.git
     cd kraken
-
-Quick setup on OSX with [homebrew](http://brew.sh/) Ensure that you are in the Kraken file (cd kraken):
-
-    brew update
-    brew tap Homebrew/bundle
-    brew bundle
-
-
-This installs Ansible, Terraform, Vagrant, Virtualbox, kubectl, awscli and custom terraform providers 'terraform-provider-execute', 'terraform-provider-coreosbox'.
-
-*NOTE* if terraform is having trouble finding the custom providers, try explicitly uninstalling them and re-installing them, eg:
-
-    for formula in $(grep 'brew.*terraform-provider' Brewfile | awk '{print $2}' | tr -d "'"); do
-      brew uninstall $formula
-    done
-    brew bundle
-
-Alternative/non-OSX setup:
-
-* Install [Ansible](https://github.com/ansible/ansible/releases)
-* install awscli
-* Install Terraform. Currently we are using a patched terraform version (PR is pending in terraform master). Get it [here](https://github.com/Samsung-AG/homebrew-terraform/releases)
-* Install [Vagrant](https://www.vagrantup.com/downloads.html) if you will be working with a local cluster
-* Install [Virtualbox](https://www.virtualbox.org/wiki/Downloads) if you will be working with a local cluster
-* Download/Build terraform-provider-execute. OSX 64bit binary is available [here](https://github.com/Samsung-AG/terraform-provider-execute/releases). Copy the terraform-provider-execute binary to the the folder in which Terraform binary resides in.
-* Download/Build terraform-provider-coreos from https://github.com/bakins/terraform-provider-coreos. OSX 64bit binary is [here](https://github.com/Samsung-AG/homebrew-terraform-provider-coreos/releases/download/v0.0.1/terraform-provider-coreos.tar.gz)
-* Download/Build terraform-provider-coreosver from https://github.com/Samsung-AG/terraform-provider-coreosver. OSX 64bit binary is [here](https://github.com/Samsung-AG/terraform-provider-coreosver/releases/download/v0.0.1/terraform-provider-coreosver_darwin_amd64.tar.gz)
-* Download and install the latest [kubectl](https://github.com/GoogleCloudPlatform/kubernetes/releases/latest). Make sure 'kubectl' is in your PATH
 
 ## Variables setup
 
@@ -64,92 +38,107 @@ For better performance, you should consider adding and modifing the following co
     aws_etcd_type = "<aws instance type for etcd>"
     aws_storage_type_etcd = "<ephemeral>"
 
-#### Ludicrous speed
+### Ludicrous speed
 
 Looking to create a **ludicrous** cluster? Use the following `terraform.tfvars`:
 
-```
-cluster_name="<your cluster name>"
-aws_access_key="<your aws key id>"
-aws_secret_key="<your aws secret key>"
-aws_user_prefix="<prefix to use for named resources>"
-apiserver_count = "10"
-node_count = "1000"
-aws_etcd_type = "i2.8xlarge"
-aws_storage_type_etcd = "ephemeral"
-aws_apiserver_type = "m4.4xlarge"
-```
+    cluster_name="<your cluster name>"
+    aws_access_key="<your aws key id>"
+    aws_secret_key="<your aws secret key>"
+    aws_user_prefix="<prefix to use for named resources>"
+    apiserver_count = "10"
+    node_count = "1000"
+    aws_etcd_type = "i2.8xlarge"
+    aws_storage_type_etcd = "ephemeral"
+    aws_apiserver_type = "m4.4xlarge"
+
 Alternatively, you can provide these variables as -var 'variable=value' switches to 'terraform' command.
 
 All available variables to override and set are under
 
     terraform/<cluster type>/variables.tf
-
-## Create cluster.
-
-Once you are done with tools setup and variable settings you should be able to create a cluster:
-
-    terraform apply -input=false -state=terraform/<cluster type>/terraform.tfstate terraform/<cluster type>
-
-For example, to create an AWS cluster:
-
-    terraform apply -input=false -state=terraform/aws/terraform.tfstate terraform/aws
-
-or
-
-    terraform apply -input=false -state=terraform/aws/terraform.tfstate -var 'node_count=10' terraform/aws
-
-If you don't specify the -state switch, terraform will write the current 'state' to pwd - which could be a problem if you are using multiple cluster types.
-
-Overriding the node_count variable.
-
-### Interact with your kubernetes cluster
-Terraform will write a kubectl config file for you. To issue cluster commands just use
-
-    kubectl <command>
-
-for example
-
-    kubectl get pods
-
-To reach specific clusters, issue the follow command
-
-    kubectl --cluster=<cluster_name> <command>
-
-for example
     
-    kubectl --cluster=aws_kubernetes get nodes
+## Create cluster
+
+Easiest way to create a non-local kraken cluster is to use /bin scripts that let you create a kraken cluster from a remote docker container.
+Another benefit that these tools offer is allowing you to create a kraken cluster from any OS that is capable of running docker-machine (OSX, Windows, Linux)  
+
+First, the script creates a docker-machine instance in the cloud provider of your choice.  
+Then it builds a docker container on that instance, with all the tools required to build a kraken cluster.  
+Then the docker container is used to create a Kraken cluster.
+
+    cd bin
+    
+On a system with a Bash shell:
+
+    ./kraken-up.sh --dmname DOCKER_MACHINE_NAME --clustertype aws --clustername KUBERNETES_CLUSTER_NAME --dmopts "--driver amazonec2 --amazonec2-vpc-id ID_OF_VPC --amazonec2-region EC2_REGION --amazonec2-access-key AWS_KEY_ID --amazonec2-secret-key AWS_SECRET_KEY"
+    
+On a system with powershell:
+
+    ./kraken-up.ps1 -dmname DOCKER_MACHINE_NAME -clustertype aws -clustername KUBERNETES_CLUSTER_NAME -dmopts "--driver amazonec2 --amazonec2-vpc-id ID_OF_VPC --amazonec2-region EC2_REGION --amazonec2-access-key AWS_KEY_ID --amazonec2-secret-key AWS_SECRET_KEY"
+    
+The '--dmopts/-dmopts' parameter is a string of driver parameters for docker-machine. You can use any driver you want - info on supported drivers is available in docker-machine help. Also, '--dmopts/-dmopts' is only required the first time you start up a cluster, after that as long as docker-machine is running you don't need to provide the option string again.  
+
+Running kraken-up with '--clustertype/-clustertype aws' should leave you with a kraken aws cluster running, using variables from the terraform.tfvars file you just created.  
+
+## Interact with your kubernetes cluster
+On a system with a Bash shell:
+
+    $ ./kraken-kube.sh --dmname DOCKER_MACHINE_NAME
+    Machine DOCKER_MACHINE_NAME exists.
+        To control your cluster use:
+        kubectl --kubeconfig=clusters/ec2/kube_config --cluster=<cluster name> <kubectl commands>
+    $ kubectl --kubeconfig=clusters/ec2/kube_config --cluster=KUBERNETES_CLUSTER_NAME get nodes
+
+On a system with powershell:
+
+    PS> ./kraken-kube.ps1 -dmname DOCKER_MACHINE_NAME
+    Machine DOCKER_MACHINE_NAME exists.
+        To control your cluster use:
+        kubectl --kubeconfig=clusters/ec2/kube_config --cluster=<cluster name> <kubectl commands>
+    PS> kubectl --kubeconfig=clusters/ec2/kube_config --cluster=KUBERNETES_CLUSTER_NAME get nodes
     
 ## Destroy Cluster
-Destroy a running cluster by running:
+On a system with a Bash shell:
 
-    terraform destroy -input=false -state=terraform/<cluster type>/terraform.tfstate terraform/<cluster type>
+    $ ./kraken-down.sh --dmname DOCKER_MACHINE_NAME --clustername KUBERNETES_CLUSTER_NAME
+    
+On a system with powershell:
 
-## Optional remote setup for Terraform
-You could setup [remote state](https://www.terraform.io/intro/getting-started/remote.html) for Terraform, if you want to be able to control your cluster lifecycle from multiple machines (only applies to non-local clusters)
+    PS> ./kraken-down.ps1 -dmname DOCKER_MACHINE_NAME -clustername KUBERNETES_CLUSTER_NAME
 
 ## SSH to cluster nodes
-Ansible provisioning creates a ssh config file for each cluster type in you .ssh folder. You can ssh to node names using this file:
+On a system with a Bash shell:
 
-    ssh -F ~/.ssh/config_<cluster_name> node-001
-    ssh -F ~/.ssh/config_<cluster_name> master
-    ssh -F ~/.ssh/config_<cluster_name> etcd
+    $ ./kraken-ssh.sh --dmname DOCKER_MACHINE_NAME --clustername KUBERNETES_CLUSTER_NAME NODE_NAME
+    
+On a system with powershell:
 
-And so on
+    PS> ./kraken-ssh.ps1 -dmname DOCKER_MACHINE_NAME -clustername KUBERNETES_CLUSTER_NAME -node NODE_NAME
+
+For example:
+
+    $ ./kraken-ssh.sh --dmname ec2home --clustername homecluster etcd
+    $ ./kraken-ssh.sh --dmname ec2home --clustername homecluster node-005
+    $ ./kraken-ssh.sh --dmname ec2 --clustername work master
+    PS> ./kraken-ssh.ps1 -dmname ec2home -clustername homecluster -node master
+    PS> ./kraken-ssh.ps1 -dmname ec2home -clustername homecluster -node node-001
+    PS> ./kraken-ssh.ps1 -dmname ec2 -clustername work -node node-009
+    
+Other .sh and .ps1 scripts in cluster subfolder let you:
+* kraken-ansible - get the remote ansible inventory and ssh keys
 
 ## Using LogEntries.com
-
 1. First, create an account on logentries.com.
 2. Create a new log in your Logentries account by clicking + Add New Log.
 3. Next, select Manual Configuration.
 4. Give your log a name of your choice, select Token TCP, and then click the Register new log button. A token will be displayed in green.
-5. Override logentries_token variable for your cluster type with the token value - either through a tfvars file or -var switch
-
-## Create cluster from remote docker container
-
-Instructions are in the [cluster](cluster) subfolder
+5. Override logentries_token variable for your cluster type with the token value - either through a tfvars file or -var switch    
 
 ### Helpful Links
 * kubectl user documentation can be found [here](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/kubectl.md)
 * kubectl [FAQ](https://github.com/GoogleCloudPlatform/kubernetes/wiki/User-FAQ)
 * Kubernetes conformance test logs run after a PR is merged to this repo located at http://e2e.kubeme.io
+
+### Setting up without docker machine / setting up local cluster
+Alternative setup readme is [here](README-NO-DOCKERMACHINE.md)
