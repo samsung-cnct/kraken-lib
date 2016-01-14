@@ -1,0 +1,63 @@
+Addon update should propagate add-on file changes
+Clean up pods on node kubelet should be able to delete 10 pods per node in 1m0s.
+DNS should provide DNS for services
+DNS should provide DNS for the cluster
+Docker Containers should be able to override the image's default arguments (docker cmd)
+Docker Containers should be able to override the image's default command and arguments
+Docker Containers should be able to override the image's default commmand (docker entrypoint)
+Docker Containers should use the image defaults if command and args are blank
+Downward API should provide pod name and namespace as env vars
+EmptyDir volumes should have the correct mode
+EmptyDir volumes should support r/w
+Events should be sent by kubelets and the scheduler about pods scheduling and running
+Examples e2e [Skipped][Example]Celery-RabbitMQ should create and stop celery+rabbitmq servers
+Examples e2e [Skipped][Example]Redis should create and stop redis servers
+Kibana Logging Instances Is Alive should check that the Kibana logging instance is alive
+Kubectl client Guestbook application should create and stop a working application
+Kubectl client Kubectl label should update the label on a resource
+Kubectl client Simple pod should support exec
+Kubectl client Simple pod should support port-forward
+Kubectl client Update Demo should create and stop a replication controller
+Kubectl client Update Demo should do a rolling update of a replication controller
+Kubectl client Update Demo should scale a replication controller
+Load capacity [Skipped] [Performance suite] should be able to handle 3 pods per node
+Load capacity [Skipped] [Performance suite] should be able to handle 30 pods per node
+MaxPods Validates MaxPods limit number of pods that are allowed to run.
+Networking should function for intra-pod communication
+Networking should provide Internet connection for containers
+Networking should provide unchanging, static URL paths for kubernetes api services.
+Pod Disks should schedule a pod w/ a RW PD shared between multiple containers, write to PD, delete pod, verify contents, and repeat in rapid succession
+Pod Disks should schedule a pod w/ a RW PD, remove it, then schedule it on another host
+Pod Disks should schedule a pod w/ a readonly PD on two hosts, then remove both.
+Pods should *not* be restarted with a docker exec &quot;cat /tmp/health&quot; liveness probe
+Pods should be restarted with a /healthz http liveness probe
+Pods should be restarted with a docker exec &quot;cat /tmp/health&quot; liveness probe
+Pods should be schedule with cpu and memory limits
+Pods should be submitted and removed
+Pods should be updated
+Pods should contain environment variables for services
+PreStop should call prestop when killing a pod
+Probing container with readiness probe should not be ready before initial delay and never restart
+Probing container with readiness probe that fails should never be ready and never restart
+Proxy version v1 should proxy logs on node
+Proxy version v1 should proxy logs on node with explicit kubelet port
+Proxy version v1 should proxy through a service and a pod
+Proxy version v1 should proxy to cadvisor
+ReplicationController should serve a basic image on each replica with a private image
+ReplicationController should serve a basic image on each replica with a public image
+Secrets should be consumable from pods
+Service endpoints latency should not be very high
+ServiceAccounts should mount an API token into pods
+Services should be able to change the type and nodeport settings of a service
+Services should correctly serve identically named services in different namespaces on different external IP addresses
+Services should provide secure master service
+Services should serve a basic endpoint from pods
+Services should serve multiport endpoints from pods
+Skipped Cluster upgrade kube-push of master should maintain responsive services
+Skipped Cluster upgrade upgrade-cluster should maintain a functioning cluster
+Skipped Cluster upgrade upgrade-master should maintain responsive services
+Variable Expansion should allow composing env vars into new env vars
+Variable Expansion should allow substituting values in a container's args
+Variable Expansion should allow substituting values in a container's command
+hostDir should give a volume the correct mode
+hostDir should support r/w on tmpfs

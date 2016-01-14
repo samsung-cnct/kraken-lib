@@ -1,0 +1,59 @@
+Addon update should propagate add-on file changes
+Clean up pods on node kubelet should be able to delete 10 pods per node in 1m0s.
+DNS should provide DNS for services
+DNS should provide DNS for the cluster
+Docker Containers should be able to override the image's default arguments (docker cmd) [Conformance]
+Docker Containers should be able to override the image's default command and arguments [Conformance]
+Docker Containers should be able to override the image's default commmand (docker entrypoint) [Conformance]
+Docker Containers should use the image defaults if command and args are blank [Conformance]
+Downward API should provide pod name and namespace as env vars [Conformance]
+EmptyDir volumes should have the correct mode
+EmptyDir volumes should support r/w [Conformance]
+Events should be sent by kubelets and the scheduler about pods scheduling and running [Conformance]
+Examples e2e [Skipped][Example]Celery-RabbitMQ should create and stop celery+rabbitmq servers
+Examples e2e [Skipped][Example]Redis should create and stop redis servers
+Kubectl client Guestbook application should create and stop a working application [Conformance]
+Kubectl client Simple pod should support exec
+Kubectl client Simple pod should support port-forward
+Kubectl client Update Demo should create and stop a replication controller [Conformance]
+Kubectl client Update Demo should do a rolling update of a replication controller [Conformance]
+Kubectl client Update Demo should scale a replication controller [Conformance]
+Load capacity [Skipped] should be able to handle 30 pods per node
+MaxPods Validates MaxPods limit number of pods that are allowed to run.
+Networking should function for intra-pod communication [Conformance]
+Networking should provide Internet connection for containers [Conformance]
+Networking should provide unchanging, static URL paths for kubernetes api services. [Conformance]
+Pod Disks should schedule a pod w/ a RW PD, remove it, then schedule it on another host
+Pod Disks should schedule a pod w/ a readonly PD on two hosts, then remove both.
+Pods should *not* be restarted with a docker exec &quot;cat /tmp/health&quot; liveness probe [Conformance]
+Pods should be restarted with a /healthz http liveness probe [Conformance]
+Pods should be restarted with a docker exec &quot;cat /tmp/health&quot; liveness probe [Conformance]
+Pods should be schedule with cpu and memory limits [Conformance]
+Pods should be submitted and removed [Conformance]
+Pods should be updated [Conformance]
+Pods should contain environment variables for services [Conformance]
+PreStop should call prestop when killing a pod [Conformance]
+Probing container with readiness probe should not be ready before initial delay and never restart [Conformance]
+Probing container with readiness probe that fails should never be ready and never restart [Conformance]
+Proxy version v1 should proxy logs on node [Conformance]
+Proxy version v1 should proxy logs on node with explicit kubelet port [Conformance]
+Proxy version v1 should proxy through a service and a pod [Conformance]
+Proxy version v1 should proxy to cadvisor [Conformance]
+ReplicationController should serve a basic image on each replica with a private image
+ReplicationController should serve a basic image on each replica with a public image [Conformance]
+Secrets should be consumable from pods [Conformance]
+Service endpoints latency should not be very high [Conformance]
+ServiceAccounts should mount an API token into pods [Conformance]
+Services should be able to change the type and nodeport settings of a service
+Services should correctly serve identically named services in different namespaces on different external IP addresses
+Services should provide secure master service [Conformance]
+Services should serve a basic endpoint from pods [Conformance]
+Services should serve multiport endpoints from pods [Conformance]
+Skipped Cluster upgrade kube-push of master should maintain responsive services
+Skipped Cluster upgrade upgrade-cluster should maintain a functioning cluster
+Skipped Cluster upgrade upgrade-master should maintain responsive services
+Variable Expansion should allow composing env vars into new env vars [Conformance]
+Variable Expansion should allow substituting values in a container's args [Conformance]
+Variable Expansion should allow substituting values in a container's command [Conformance]
+hostDir should give a volume the correct mode [Conformance]
+hostDir should support r/w on tmpfs
