@@ -21,3 +21,7 @@ function inf
   param( [string]$Message )
   write-host "$Message" -foregroundcolor "green"
 }
+
+function grep {
+  $input | out-string -stream | select-string $args
+}

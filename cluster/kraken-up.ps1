@@ -5,11 +5,12 @@
 #>
 
 Param(
-  [string]$clustertype = "aws", 
+  [string]$clustertype = "aws",
+  [Parameter(Mandatory=$true)] 
+  [string]$clustername = "", 
   [string]$dmopts = "",
   [Parameter(Mandatory=$true)] 
   [string]$dmname = ""
-  [string]$clustername = "$clustertype"
 )
 
 # kraken root folder
@@ -35,9 +36,8 @@ If (!(Test-Path "$krakenRoot/terraform/$clustertype/Dockerfile")) {
 
 
 # look for the docker machine specified 
-$success = Invoke-Expression "docker-machine ls -q | grep $dmname;$?"
-
-If ($success) {
+Invoke-Expression "docker-machine ls -q | findstr -s '$dmname'"
+If ($LASTEXITCODE -eq 0) {
   inf "Machine $dmname already exists."
 } Else {
   If (!($dmopts)) {
@@ -51,8 +51,8 @@ If ($success) {
 Invoke-Expression "docker-machine.exe env --shell=powershell $dmname | Invoke-Expression"
 
 # create the data volume container for state 
-$success = Invoke-Expression "docker inspect kraken_data;$?"
-If ($success) {
+Invoke-Expression "docker inspect kraken_data" 
+If ($LASTEXITCODE -eq 0) {
   inf "Data volume container kraken_data already exists."
 } Else {
   inf "Creating data volume:`n  'docker create -v /kraken_data --name kraken_data busybox /bin/sh'"
@@ -60,8 +60,8 @@ If ($success) {
 }
 
 # now build the docker container
-$success = Invoke-Expression "docker inspect kraken_cluster;$?"
-If ($success) {
+Invoke-Expression "docker inspect kraken_cluster"
+If ($LASTEXITCODE -eq 0) {
   $is_running = Invoke-Expression "docker inspect -f '{{ .State.Running }}' kraken_cluster"
   If ( $is_running -eq "true" ) {
     error "Cluster build already running:`n Run`n  'docker logs --follow kraken_cluster'`n to see logs."
@@ -81,7 +81,7 @@ $command =  "docker run -d --name kraken_cluster --volumes-from kraken_data sams
             "terraform apply -input=false -state=/kraken_data/$clustername/terraform.tfstate " +
             "-var-file=/opt/kraken/terraform/$clustertype/terraform.tfvars " +
             "-var 'cluster_name=$clustername' /opt/kraken/terraform/$clustertype && " +
-            "cp /opt/kraken/terraform/$clustertype/rendered/ansible.inventory /kraken_data/ansible.inventory && " +
+            "cp /opt/kraken/terraform/$clustertype/rendered/ansible.inventory /kraken_data/$clustername/ansible.inventory && " +
             "cp /root/.ssh/config_$clustername /kraken_data/$clustername/ssh_config && " +
             "cp /root/.kube/config /kraken_data/kube_config`""
 

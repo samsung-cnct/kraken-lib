@@ -7,8 +7,9 @@
 Param(
   [string]$clustertype = "aws", 
   [Parameter(Mandatory=$true)] 
-  [string]$dmname = ""
-  [string]$clustername = "$clustertype"
+  [string]$dmname = "",
+  [Parameter(Mandatory=$true)] 
+  [string]$clustername = ""
 )
 
 # kraken root folder
@@ -16,9 +17,9 @@ $krakenRoot = "$(split-path -parent $MyInvocation.MyCommand.Definition)\.."
 . "$krakenRoot\cluster\utils.ps1"
 
 # look for the docker machine specified 
-$success = Invoke-Expression "docker-machine ls -q | grep $dmname;$?"
+Invoke-Expression "docker-machine ls -q | out-string -stream | findstr -s '$dmname'"
 
-If ($success) {
+If ($LASTEXITCODE -eq 0) {
   inf "Machine $dmname already exists."
 } Else {
   error "Docker Machine $dmname does not exist."
@@ -28,14 +29,14 @@ If ($success) {
 Invoke-Expression "docker-machine.exe env --shell=powershell $dmname | Invoke-Expression"
 
 # shut down cluster
-$success = Invoke-Expression "docker inspect kraken_cluster;$?"
-If ($success) {
+Invoke-Expression "docker inspect kraken_cluster"
+If ($LASTEXITCODE -eq 0) {
   inf "Removing old kraken_cluster container:`n   'docker rm -f kraken_cluster'"
   Invoke-Expression "docker rm -f kraken_cluster"
 }
 
-$success = Invoke-Expression "docker inspect kraken_data;$?"
-If (!($success)) {
+$success = Invoke-Expression "docker inspect kraken_data"
+If ($LASTEXITCODE -ne 0) {
    warn "No terraform state available. Cluster is either not running, or kraken_data container has been removed."
    exit 0
 }
