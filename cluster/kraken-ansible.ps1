@@ -31,7 +31,7 @@ If ( $is_running -eq "true" ) {
   exit 1
 }
 
-New-Item -ItemType Directory -Force -Path "$krakenRoot\cluster\clusters\$dmname"
+New-Item -ItemType Directory -Force -Path "$krakenRoot\cluster\clusters\$dmname\$clustername"
 Invoke-Expression "docker cp kraken_data:/kraken_data/$clustername/ansible.inventory `"clusters/$dmname/$clustername/ansible.inventory`""
 Invoke-Expression "docker cp kraken_cluster:/root/.ssh/id_rsa `"clusters/$dmname/id_rsa`""
 Invoke-Expression "docker cp kraken_cluster:/root/.ssh/id_rsa.pub `"clusters/$dmname/id_rsa.pub`""
