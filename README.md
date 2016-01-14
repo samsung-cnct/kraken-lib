@@ -7,7 +7,7 @@ Deploy a __Kubernetes__ cluster using __Terraform__  and __Ansible__ on top of _
     git clone git@github.com:Samsung-AG/kraken.git
     cd kraken
 
-Quick setup on OSX with [homebrew](http://brew.sh/)Ensure that you are in the Kraken file (cd kraken):
+Quick setup on OSX with [homebrew](http://brew.sh/) Ensure that you are in the Kraken file (cd kraken):
 
     brew update
     brew tap Homebrew/bundle
