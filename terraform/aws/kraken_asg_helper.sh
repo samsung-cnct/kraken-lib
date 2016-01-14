@@ -54,7 +54,7 @@ shift # past argument or value
 done
 
 echo "Using kubeconfig: ${KUBECONFIG}"
-echo "Cluster type is ${CLUSTER}"
+echo "Cluster name is ${CLUSTER}"
 echo "Waiting for ${NODE_LIMIT} kubectl nodes"
 echo "Autoscaling group name is ${ASG_NAME}"
 echo "Will append public IPs to ${OUTPUT_FILE}"

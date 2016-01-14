@@ -13,8 +13,8 @@ Param(
 $krakenRoot = "$(split-path -parent $MyInvocation.MyCommand.Definition)\.."
 . "$krakenRoot\cluster\utils.ps1"
 
-$success = Invoke-Expression "docker-machine ls -q | grep $dmname;$?"
-If ($success) {
+$success = Invoke-Expression "docker-machine ls -q | out-string -stream | findstr -s '$dmname'"
+If ($LASTEXITCODE -eq 0) {
   inf "Machine $dmname already exists."
 } Else {
   error "Docker Machine $dmname does not exist."

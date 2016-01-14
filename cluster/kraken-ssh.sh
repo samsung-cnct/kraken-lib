@@ -18,6 +18,11 @@ if [ -z ${KRAKEN_DOCKER_MACHINE_NAME+x} ]; then
   exit 1
 fi
 
+if [ -z ${KRAKEN_CLUSTER_NAME+x} ]; then
+  error "--clustername not specified. Cluster name is required."
+  exit 1
+fi
+
 if [ -z ${1+x} ]; then
   error "SSH target required. I.e. master, etcd, node-001, etc."
   exit 1
@@ -31,4 +36,4 @@ else
 fi
 eval "$(docker-machine env ${KRAKEN_DOCKER_MACHINE_NAME})"
 
-docker run -it --volumes-from kraken_data samsung_ag/kraken ssh -F /kraken_data/ssh_config $1
+docker run -it --volumes-from kraken_data samsung_ag/kraken ssh -F /kraken_data/${KRAKEN_CLUSTER_NAME}/ssh_config $1

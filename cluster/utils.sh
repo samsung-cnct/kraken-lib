@@ -25,6 +25,10 @@ case $key in
     KRAKEN_CLUSTER_TYPE="$2"
     shift
     ;;
+    --clustername)
+    KRAKEN_CLUSTER_NAME="$2"
+    shift
+    ;;
     --dmopts)
     KRAKEN_DOCKER_MACHINE_OPTIONS="$2"
     shift
