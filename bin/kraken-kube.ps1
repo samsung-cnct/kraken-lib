@@ -11,7 +11,7 @@ Param(
 
 # kraken root folder
 $krakenRoot = "$(split-path -parent $MyInvocation.MyCommand.Definition)\.."
-. "$krakenRoot\cluster\utils.ps1"
+. "$krakenRoot\bin\utils.ps1"
 
 $success = Invoke-Expression "docker-machine ls -q | out-string -stream | findstr -s '$dmname'"
 If ($LASTEXITCODE -eq 0) {
@@ -29,7 +29,7 @@ If ( $is_running -eq "true" ) {
   exit 1
 }
 
-New-Item -ItemType Directory -Force -Path "$krakenRoot\cluster\clusters\$dmname"
+New-Item -ItemType Directory -Force -Path "$krakenRoot\bin\clusters\$dmname"
 Invoke-Expression "docker cp kraken_data:/kraken_data/kube_config `"clusters/$dmname/kube_config`""
 
 inf "To control your cluster use:'n  kubectl --kubeconfig=clusters/$dmname/kube_config --cluster=<cluster name> <kubectl commands>"

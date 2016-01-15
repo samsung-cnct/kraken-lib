@@ -11,7 +11,7 @@ set -o pipefail
 # kraken root folder
 KRAKEN_ROOT=$(dirname "${BASH_SOURCE}")/..
 
-source "${KRAKEN_ROOT}/cluster/utils.sh"
+source "${KRAKEN_ROOT}/bin/utils.sh"
 
 while [[ $# > 1 ]]
 do
