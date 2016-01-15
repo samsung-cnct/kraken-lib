@@ -83,13 +83,17 @@ docker build -t samsung_ag/kraken -f "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_
 # run cluster up
 inf "Building kraken cluster:\n  'docker run -d --volumes-from kraken_data samsung_ag/kraken terraform apply \
   -input=false -state=/kraken_data/${KRAKEN_CLUSTER_NAME}/terraform.tfstate -var-file=/opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/terraform.tfvars /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}'"
-docker run -d --name kraken_cluster --volumes-from kraken_data samsung_ag/kraken bash -c "mkdir -p /kraken_data/${KRAKEN_CLUSTER_NAME} && \
-    terraform apply -input=false -state=/kraken_data/${KRAKEN_CLUSTER_NAME}/terraform.tfstate \
+docker run -d --name kraken_cluster --volumes-from kraken_data samsung_ag/kraken bash -c "\
+  mkdir -p /kraken_data/${KRAKEN_CLUSTER_NAME} && \
+  terraform apply \
+    -input=false \
+    -state=/kraken_data/${KRAKEN_CLUSTER_NAME}/terraform.tfstate \
     -var-file=/opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/terraform.tfvars \
-    -var 'cluster_name=${KRAKEN_CLUSTER_NAME}' /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE} && \
-    cp /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/rendered/ansible.inventory  /kraken_data/${KRAKEN_CLUSTER_NAME}/ansible.inventory && \
-    cp /root/.ssh/config_${KRAKEN_CLUSTER_NAME} /kraken_data/${KRAKEN_CLUSTER_NAME}/ssh_config && \
-    cp /root/.kube/config /kraken_data/kube_config"
+    -var 'cluster_name=${KRAKEN_CLUSTER_NAME}' \
+    /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE} && \
+  cp /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/rendered/ansible.inventory /kraken_data/${KRAKEN_CLUSTER_NAME}/ansible.inventory && \
+  cp /root/.ssh/config_${KRAKEN_CLUSTER_NAME} /kraken_data/${KRAKEN_CLUSTER_NAME}/ssh_config && \
+  cp /root/.kube/config /kraken_data/kube_config"
 
 inf "Following docker logs now. Ctrl-C to cancel."
 docker logs --follow kraken_cluster
