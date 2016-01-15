@@ -14,7 +14,7 @@ Param(
 
 # kraken root folder
 $krakenRoot = "$(split-path -parent $MyInvocation.MyCommand.Definition)\.."
-. "$krakenRoot\cluster\utils.ps1"
+. "$krakenRoot\bin\utils.ps1"
 
 # look for the docker machine specified 
 Invoke-Expression "docker-machine ls -q | out-string -stream | findstr -s '$dmname'"

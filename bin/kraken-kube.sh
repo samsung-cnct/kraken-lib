@@ -10,7 +10,7 @@ set -o pipefail
 
 # kraken root folder
 KRAKEN_ROOT=$(dirname "${BASH_SOURCE}")/..
-source "${KRAKEN_ROOT}/cluster/utils.sh"
+source "${KRAKEN_ROOT}/bin/utils.sh"
 
 if [ -z ${KRAKEN_DOCKER_MACHINE_NAME+x} ]; then
   error "--dmname not specified. Docker Machine name is required."

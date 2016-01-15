@@ -17,7 +17,7 @@ function setup_dockermachine {
   eval ${dm_command}
 }
 
-source "${KRAKEN_ROOT}/cluster/utils.sh"
+source "${KRAKEN_ROOT}/bin/utils.sh"
 
 if [ -z ${KRAKEN_DOCKER_MACHINE_NAME+x} ]; then
   error "--dmname not specified. Docker Machine name is required."
