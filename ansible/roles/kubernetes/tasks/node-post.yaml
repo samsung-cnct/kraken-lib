@@ -15,3 +15,8 @@
   notify:
     - reload systemd
     - restart kubernetes-label
+
+- name: Ensure kubernetes-label.service started
+  service: name=kubernetes-label state=started enabled=yes args=--no-block
+  sudo: yes
+

@@ -11,6 +11,10 @@
     - restart hyperkube-binary-controller-manager
     - restart hyperkube-binary-scheduler
 
+- name: Ensure install-hyperkube.service started
+  service: name=install-hyperkube state=started enabled=yes args=--no-block
+  sudo: yes
+
 - name: Create hyperkube-binary-controller-manager
   template: src=hyperkube-binary-controller-manager.service.ansible
             dest=/etc/systemd/system/hyperkube-binary-controller-manager.service
@@ -19,6 +23,10 @@
     - reload systemd
     - restart hyperkube-binary-controller-manager
 
+- name: Ensure hyperkube-binary-controller-manager.service started
+  service: name=hyperkube-binary-controller-manager state=started enabled=yes args=--no-block
+  sudo: yes
+
 - name: Create hyperkube-binary-scheduler
   template: src=hyperkube-binary-scheduler.service.ansible
             dest=/etc/systemd/system/hyperkube-binary-scheduler.service
@@ -26,3 +34,7 @@
   notify:
     - reload systemd
     - restart hyperkube-binary-scheduler
+
+- name: Ensure hyperkube-binary-scheduler.service started
+  service: name=hyperkube-binary-scheduler state=started enabled=yes args=--no-block
+  sudo: yes

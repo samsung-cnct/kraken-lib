@@ -6,3 +6,8 @@
   notify:
     - reload systemd
     - restart cadvisor
+
+- name: Ensure cadvisor.service started
+  service: name=cadvisor state=started enabled=yes args=--no-block
+  sudo: yes
+

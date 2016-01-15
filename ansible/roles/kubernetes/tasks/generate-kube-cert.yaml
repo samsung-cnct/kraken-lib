@@ -20,3 +20,8 @@
   notify:
     - reload systemd
     - restart generate-kube-cert
+
+- name: Ensure generate-kube-cert.service started
+  service: name=generate-kube-cert state=started enabled=yes args=--no-block
+  sudo: yes
+      

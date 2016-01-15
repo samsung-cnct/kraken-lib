@@ -8,6 +8,10 @@
     - reload systemd
     - restart hyperkube-docker-node
 
+- name: Ensure hyperkube-docker-node.service started
+  service: name=hyperkube-docker-node state=started enabled=yes args=--no-block
+  sudo: yes
+
 - name: Create hyperkube-docker-node-proxy
   template: src=hyperkube-docker-proxy-node.service.ansible
             dest=/etc/systemd/system/hyperkube-docker-proxy-node.service
@@ -15,3 +19,7 @@
   notify:
     - reload systemd
     - restart hyperkube-docker-proxy-node
+
+- name: Ensure hyperkube-docker-proxy-node.service started
+  service: name=hyperkube-docker-proxy-node state=started enabled=yes args=--no-block
+  sudo: yes
