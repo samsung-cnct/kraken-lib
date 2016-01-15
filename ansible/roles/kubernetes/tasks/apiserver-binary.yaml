@@ -9,6 +9,10 @@
     #      parameterize a list of handlers for the install-hyperkube handler to notify
     - restart hyperkube-binary-apiserver
 
+- name: Ensure install-hyperkube.service started
+  service: name=install-hyperkube state=started enabled=yes args=--no-block
+  sudo: yes
+
 - name: Create hyperkube-binary-apiserver
   template: src=hyperkube-binary-apiserver.service.ansible
             dest=/etc/systemd/system/hyperkube-binary-apiserver.service
@@ -16,3 +20,7 @@
   notify:
     - reload systemd
     - restart hyperkube-binary-apiserver
+
+- name: Ensure hyperkube-binary-apiserver.service started
+  service: name=hyperkube-binary-apiserver state=started enabled=yes args=--no-block
+  sudo: yes

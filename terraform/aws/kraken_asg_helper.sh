@@ -5,6 +5,8 @@
 #author          :Samsung SDSRA
 #==============================================================================
 
+set -x
+
 while [[ $# > 1 ]]
 do
 key="$1"
@@ -46,12 +48,17 @@ case $key in
     NUMBERING_OFFSET="$2"
     shift # past argument
     ;;
+    -X|--xdebug)
+    terminate_unregistered_instances=false
+    ;;
     *)
             # unknown option
     ;;
 esac
 shift # past argument or value
 done
+
+: ${terminate_unregistered_instances:=true}
 
 echo "Using kubeconfig: ${KUBECONFIG}"
 echo "Cluster name is ${CLUSTER}"
@@ -63,15 +70,13 @@ echo "$((SLEEP_TIME*TOTAL_WAITS)) seconds total single wait on kubectl health"
 echo "$((SLEEP_TIME*TOTAL_WAITS*RETRIES)) seconds total wait time on kubectl health"
 echo "Host numbering offset is ${NUMBERING_OFFSET}"
 
-control_c()
-{
+function control_c() {
   echo "Interrupted. Will try to generate local ansible inventory anyway."
   generate_configs
   exit 1
 }
 
-generate_configs()
-{
+function generate_configs() {
   ec2_ips=$(aws --output text \
     --query "Reservations[*].Instances[*].PublicIpAddress" \
     ec2 describe-instances --instance-ids \
@@ -97,13 +102,12 @@ generate_configs()
   ansible-playbook -i ${OUTPUT_FILE} ${script_dir}/../../ansible/localhost_post_provision.yaml
 }
 
-wait_for_asg()
-{
+function  wait_for_asg() {
   local asg_instance_limit=$(aws --output text --query "AutoScalingGroups[0].DesiredCapacity" \
           autoscaling describe-auto-scaling-groups --auto-scaling-group-name "${ASG_NAME}")
   local asg_instances=($(aws --output text --query "AutoScalingGroups[0].Instances[?LifecycleState=='InService'].InstanceId" \
           autoscaling describe-auto-scaling-groups --auto-scaling-group-name "${ASG_NAME}"))
-  local autoscaling_wait=60
+  local autoscaling_wait=${SLEEP_TIME}
   
   local healthy=
   if [[ " ${asg_instances[*]} " == *" None "* ]]; then
@@ -130,8 +134,7 @@ wait_for_asg()
   echo "Reached ${asg_instance_limit} nodes in ${ASG_NAME}."
 }
 
-nudge_asg_nodes()
-{
+function nudge_asg_nodes() {
   local proceed_terminate=true
   local ip_index=0
   local max_slice=200
@@ -171,8 +174,11 @@ nudge_asg_nodes()
             autoscaling describe-auto-scaling-groups --auto-scaling-group-names "${ASG_NAME}")))
 
     if [ ${#ec2_instances[@]} -ne 0 ]; then
-      echo -e "Instances to be terminated:\n${ec2_instances[*]}"
-      aws --output text ec2 terminate-instances --instance-ids ${ec2_instances[*]}
+      echo -e "Instances not yet registered as kubernetes nodes:\n${ec2_instances[*]}"
+      if ${terminate_unregistered_instances}; then
+        echo "Terminating unregistered instances..."
+        aws --output text ec2 terminate-instances --instance-ids ${ec2_instances[*]}
+      fi
     fi
 
     ip_index=$(($ip_index + $max_slice))

@@ -18,4 +18,9 @@
   sudo: yes
   notify:
     - reload systemd
-    - restart hyperkube-docker-master
+    - restart hyperkube-docker-apiserver
+
+- name: Ensure hyperkube-docker-apiserver.service started
+  service: name=hyperkube-docker-apiserver state=started enabled=yes args=--no-block
+  sudo: yes
+

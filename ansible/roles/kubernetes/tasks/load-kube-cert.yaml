@@ -19,3 +19,8 @@
   notify:
     - reload systemd
     - restart load-kube-cert
+
+- name: Ensure load-kube-cert.service started
+  service: name=load-kube-cert state=started enabled=yes args=--no-block
+  sudo: yes
+

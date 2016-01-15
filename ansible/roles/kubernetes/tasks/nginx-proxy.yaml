@@ -31,3 +31,8 @@
   notify:
     - reload systemd
     - restart nginx-docker
+
+- name: Ensure nginx-docker.service started
+  service: name=nginx-docker state=started enabled=yes args=--no-block
+  sudo: yes
+

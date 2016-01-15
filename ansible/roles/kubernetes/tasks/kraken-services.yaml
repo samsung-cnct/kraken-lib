@@ -48,6 +48,10 @@
     - reload systemd
     - restart kraken-render
 
+- name: Ensure kraken-render.service started
+  service: name=kraken-render state=started enabled=yes args=--no-block
+  sudo: yes
+
 - name: Create kraken-create-services
   template: src=kraken-create-services.service.ansible
             dest=/etc/systemd/system/kraken-create-services.service
@@ -55,3 +59,8 @@
   notify:
     - reload systemd
     - restart kraken-create-services
+
+- name: Ensure kraken-create-services.service started
+  service: name=kraken-create-services state=started enabled=yes args=--no-block
+  sudo: yes
+
