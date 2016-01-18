@@ -295,7 +295,7 @@ resource "template_file" "apiserver_cloudinit" {
     kubernetes_binaries_uri   = "${var.kubernetes_binaries_uri}"
     logentries_token          = "${var.logentries_token}"
     logentries_url            = "${var.logentries_url}"
-    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_master)}"
+    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_apiserver)}"
     coreos_update_channel     = "${var.coreos_update_channel}"
     coreos_reboot_strategy    = "${var.coreos_reboot_strategy}"
     kraken_repo               = "${var.kraken_repo.repo}"
