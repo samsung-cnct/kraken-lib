@@ -295,7 +295,7 @@ resource "template_file" "apiserver_cloudinit" {
     kubernetes_binaries_uri   = "${var.kubernetes_binaries_uri}"
     logentries_token          = "${var.logentries_token}"
     logentries_url            = "${var.logentries_url}"
-    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_master)}"
+    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_apiserver)}"
     coreos_update_channel     = "${var.coreos_update_channel}"
     coreos_reboot_strategy    = "${var.coreos_reboot_strategy}"
     kraken_repo               = "${var.kraken_repo.repo}"
@@ -448,14 +448,14 @@ resource "aws_instance" "kubernetes_node_special" {
 
   ebs_block_device {
     device_name = "/dev/sdf"
-    volume_size = "${element(split(",", var.aws_volume_size_special), count.index)}"
-    volume_type = "${element(split(",", var.aws_volume_type_special), count.index)}"
+    volume_size = "${element(split(",", var.aws_volume_size_special_docker), count.index)}"
+    volume_type = "${element(split(",", var.aws_volume_type_special_docker), count.index)}"
   }
 
   ebs_block_device {
     device_name = "/dev/sdg"
-    volume_size = "${element(split(",", var.aws_volume_size_special), count.index)}"
-    volume_type = "${element(split(",", var.aws_volume_type_special), count.index)}"
+    volume_size = "${element(split(",", var.aws_volume_size_special_kubelet), count.index)}"
+    volume_type = "${element(split(",", var.aws_volume_type_special_kubelet), count.index)}"
   }
 
   ephemeral_block_device {
@@ -524,14 +524,14 @@ resource "aws_launch_configuration" "kubernetes_node" {
 
   ebs_block_device {
     device_name = "/dev/sdf"
-    volume_size = "${var.aws_volume_size}"
-    volume_type = "${var.aws_volume_type}"
+    volume_size = "${var.aws_volume_size_node_docker}"
+    volume_type = "${var.aws_volume_type_node_docker}"
   }
 
   ebs_block_device {
     device_name = "/dev/sdg"
-    volume_size = "${var.aws_volume_size}"
-    volume_type = "${var.aws_volume_type}"
+    volume_size = "${var.aws_volume_size_node_kubelet}"
+    volume_type = "${var.aws_volume_type_node_kubelet}"
   }
 
   ephemeral_block_device {

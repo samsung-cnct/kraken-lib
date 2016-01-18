@@ -115,11 +115,6 @@ variable "aws_storage_type_special_kubelet" {
   default     = "ebs"
 }
 
-variable "aws_storage_type_special" {
-  description = "[DEPRECATED] use aws_storage_type_special_docker and aws_storage_type_special_kubelet instead"
-  default     = "ebs"
-}
-
 variable "aws_storage_type_node_docker" {
   description = "Primary volume type for nodes for /var/lib/docker"
   default     = "ebs"
@@ -127,11 +122,6 @@ variable "aws_storage_type_node_docker" {
 
 variable "aws_storage_type_node_kubelet" {
   description = "Primary volume type for nodes for /var/lib/kubelet"
-  default     = "ebs"
-}
-
-variable "aws_storage_type" {
-  description = "[DEPRECATED] use aws_storage_type_node_docker an aws_storage_type_node_kubelet instead"
   default     = "ebs"
 }
 
@@ -160,11 +150,6 @@ variable "aws_volume_size_special_kubelet" {
   description = "Sizes of EBS volume attached to special nodes for /var/lib/kubelet. Comma-sperated list. Count must = special_node_count."
 }
 
-variable "aws_volume_size_special" {
-  default     = "10"
-  description = "[DEPRECATED] use aws_volume_size_specal_docker and aws_volume_size_special_kubelet instead"
-}
-
 variable "aws_volume_size_node_docker" {
   default     = "10"
   description = "Size of EBS volume attached to nodes for /var/lib/docker in gigabytes."
@@ -173,11 +158,6 @@ variable "aws_volume_size_node_docker" {
 variable "aws_volume_size_node_kubelet" {
   default     = "10"
   description = "Size of EBS volume attached to nodes for /var/lib/kubelet in gigabytes"
-}
-
-variable "aws_volume_size" {
-  default     = "10"
-  description = "Size of EBS volume attached to all other nodes in gigabytes."
 }
 
 variable "aws_volume_type_master" {
@@ -205,11 +185,6 @@ variable "aws_volume_type_special_kubelet" {
   description = "Type of EBS volume attached special nodes for /var/lib/kubelet. Comma-sperated list. Count must = special_node_count."
 }
 
-variable "aws_volume_type_special" {
-  default     = "gp2"
-  description = "[DEPRECATED] use aws_volume_type_special_docker and aws_volume_type_special_kubelet instead"
-}
-
 variable "aws_volume_type_node_docker" {
   default     = "gp2"
   description = "Type of EBS volume attached to node for /var/lib/docker"
@@ -218,11 +193,6 @@ variable "aws_volume_type_node_docker" {
 variable "aws_volume_type_node_kubelet" {
   default     = "gp2"
   description = "Type of EBS volume attached to nodes for /var/lib/kubelet"
-}
-
-variable "aws_volume_type" {
-  default     = "gp2"
-  description = "[DEPRECATED] Type of EBS volume attached to all other nodes."
 }
 
 variable "aws_storage_path" {
