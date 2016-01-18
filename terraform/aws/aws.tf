@@ -448,14 +448,14 @@ resource "aws_instance" "kubernetes_node_special" {
 
   ebs_block_device {
     device_name = "/dev/sdf"
-    volume_size = "${element(split(",", var.aws_volume_size_special), count.index)}"
-    volume_type = "${element(split(",", var.aws_volume_type_special), count.index)}"
+    volume_size = "${element(split(",", var.aws_volume_size_special_docker), count.index)}"
+    volume_type = "${element(split(",", var.aws_volume_type_special_docker), count.index)}"
   }
 
   ebs_block_device {
     device_name = "/dev/sdg"
-    volume_size = "${element(split(",", var.aws_volume_size_special), count.index)}"
-    volume_type = "${element(split(",", var.aws_volume_type_special), count.index)}"
+    volume_size = "${element(split(",", var.aws_volume_size_special_kubelet), count.index)}"
+    volume_type = "${element(split(",", var.aws_volume_type_special_kubelet), count.index)}"
   }
 
   ephemeral_block_device {
@@ -524,14 +524,14 @@ resource "aws_launch_configuration" "kubernetes_node" {
 
   ebs_block_device {
     device_name = "/dev/sdf"
-    volume_size = "${var.aws_volume_size}"
-    volume_type = "${var.aws_volume_type}"
+    volume_size = "${var.aws_volume_size_node_docker}"
+    volume_type = "${var.aws_volume_type_node_docker}"
   }
 
   ebs_block_device {
     device_name = "/dev/sdg"
-    volume_size = "${var.aws_volume_size}"
-    volume_type = "${var.aws_volume_type}"
+    volume_size = "${var.aws_volume_size_node_kubelet}"
+    volume_type = "${var.aws_volume_type_node_kubelet}"
   }
 
   ephemeral_block_device {
