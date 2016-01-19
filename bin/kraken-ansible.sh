@@ -13,25 +13,11 @@ KRAKEN_ROOT=$(dirname "${BASH_SOURCE}")/..
 
 source "${KRAKEN_ROOT}/bin/utils.sh"
 
-while [[ $# > 1 ]]
-do
-key="$1"
-
-case $key in
-    --dmname)
-    KRAKEN_DOCKER_MACHINE_NAME="$2"
-    shift
-    ;;
-    *)
-      # unknown option
-    ;;
-esac
-shift # past argument or value
-done
-
-if [ -z ${KRAKEN_DOCKER_MACHINE_NAME+x} ]; then
-  error "--dmname not specified. Docker Machine name is required."
-  exit 1
+if [ "${KRAKEN_NATIVE_DOCKER}" = false ]; then 
+  if [ -z ${KRAKEN_DOCKER_MACHINE_NAME+x} ]; then
+    error "--dmname not specified. Docker Machine name is required."
+    exit 1
+  fi
 fi
 
 if [ -z ${KRAKEN_CLUSTER_NAME+x} ]; then
@@ -39,23 +25,26 @@ if [ -z ${KRAKEN_CLUSTER_NAME+x} ]; then
   exit 1
 fi
 
-if docker-machine ls -q | grep --silent "${KRAKEN_DOCKER_MACHINE_NAME}"; then
-  inf "Machine ${KRAKEN_DOCKER_MACHINE_NAME} exists."
-else
-  error "Machine ${KRAKEN_DOCKER_MACHINE_NAME} does not exist."
-  exit 1
+if [ "${KRAKEN_NATIVE_DOCKER}" = false ]; then 
+  if docker-machine ls -q | grep --silent "${KRAKEN_DOCKER_MACHINE_NAME}"; then
+    inf "Machine ${KRAKEN_DOCKER_MACHINE_NAME} exists."
+  else
+    error "Machine ${KRAKEN_DOCKER_MACHINE_NAME} does not exist."
+    exit 1
+  fi
+  eval "$(docker-machine env ${KRAKEN_DOCKER_MACHINE_NAME})"
 fi
-eval "$(docker-machine env ${KRAKEN_DOCKER_MACHINE_NAME})"
 
-is_running=$(docker inspect -f '{{ .State.Running }}' kraken_cluster)
+kraken_container_name="kraken_cluster_${KRAKEN_CLUSTER_NAME}"
+is_running=$(docker inspect -f '{{ .State.Running }}' ${kraken_container_name})
 if [ ${is_running} == "true" ];  then
-  error "Cluster build is currently running:\n Run\n  'docker logs --follow kraken_cluster'\n to see logs."
+  error "Cluster build is currently running:\n Run\n  'docker logs --follow ${kraken_container_name}'\n to see logs."
   exit 1
 fi
 
 mkdir -p "clusters/${KRAKEN_DOCKER_MACHINE_NAME}/${KRAKEN_CLUSTER_NAME}"
 docker cp kraken_data:/kraken_data/${KRAKEN_CLUSTER_NAME}/ansible.inventory "clusters/${KRAKEN_DOCKER_MACHINE_NAME}/${KRAKEN_CLUSTER_NAME}/ansible.inventory"
-docker cp kraken_cluster:/root/.ssh/id_rsa "clusters/${KRAKEN_DOCKER_MACHINE_NAME}/id_rsa"
-docker cp kraken_cluster:/root/.ssh/id_rsa.pub "clusters/${KRAKEN_DOCKER_MACHINE_NAME}/id_rsa.pub"
+docker cp ${kraken_container_name}:/root/.ssh/id_rsa "clusters/${KRAKEN_DOCKER_MACHINE_NAME}/id_rsa"
+docker cp ${kraken_container_name}:/root/.ssh/id_rsa.pub "clusters/${KRAKEN_DOCKER_MACHINE_NAME}/id_rsa.pub"
 
 inf "Parameters for ansible:\n   --inventory-file clusters/${KRAKEN_DOCKER_MACHINE_NAME}/${KRAKEN_CLUSTER_NAME}/ansible.inventory\n   --private-key clusters/${KRAKEN_DOCKER_MACHINE_NAME}/id_rsa"

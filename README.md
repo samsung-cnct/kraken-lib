@@ -11,11 +11,14 @@ Then:
 
 ## Variables setup
 
-Create a terraform.tfvars file under the `kraken` folder.
+Create a terraform.tfvars file under the `kraken/terraform/cluster_type/cluster_name` folder.  
+For example, for aws cluster named "my_neato_cluster", the file will be:
+
+    kraken/terraform/aws/my_neato_cluster/terraform.tfvars
 
 File contents should be vairable pairs:
 
-    vairable_name = variable_value
+    variable_name = variable_value
 
 As described [here](https://www.terraform.io/intro/getting-started/variables.html). For local cluster you have to provide:
 
@@ -84,7 +87,7 @@ Running kraken-up with '--clustertype/-clustertype aws' should leave you with a 
 ## Interact with your kubernetes cluster
 On a system with a Bash shell:
 
-    $ ./kraken-kube.sh --dmname DOCKER_MACHINE_NAME
+    $ ./kraken-kube.sh --dmname DOCKER_MACHINE_NAME --clustername KUBERNETES_CLUSTER_NAME
     Machine DOCKER_MACHINE_NAME exists.
         To control your cluster use:
         kubectl --kubeconfig=clusters/ec2/kube_config --cluster=<cluster name> <kubectl commands>
@@ -92,7 +95,7 @@ On a system with a Bash shell:
 
 On a system with powershell:
 
-    PS> ./kraken-kube.ps1 -dmname DOCKER_MACHINE_NAME
+    PS> ./kraken-kube.ps1 -dmname DOCKER_MACHINE_NAME -clustername KUBERNETES_CLUSTER_NAME
     Machine DOCKER_MACHINE_NAME exists.
         To control your cluster use:
         kubectl --kubeconfig=clusters/ec2/kube_config --cluster=<cluster name> <kubectl commands>

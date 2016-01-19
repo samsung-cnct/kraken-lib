@@ -24,8 +24,8 @@ function setup_dockermachine {
   Invoke-Expression $dockermachineCommand
 }
 
-If (!(Test-Path "$krakenRoot/terraform/$clustertype/terraform.tfvars")) {
-  error "$krakenRoot/terraform/$clustertype/terraform.tfvars is not present."
+If (!(Test-Path "$krakenRoot/terraform/$clustertype/$clustername/terraform.tfvars")) {
+  error "$krakenRoot/terraform/$clustertype/$clustername/terraform.tfvars is not present."
   exit 1
 }
 
@@ -60,26 +60,27 @@ If ($LASTEXITCODE -eq 0) {
 }
 
 # now build the docker container
-Invoke-Expression "docker inspect kraken_cluster"
+$kraken_container_name = "kraken_cluster_$clustername"
+Invoke-Expression "docker inspect $kraken_container_name"
 If ($LASTEXITCODE -eq 0) {
-  $is_running = Invoke-Expression "docker inspect -f '{{ .State.Running }}' kraken_cluster"
+  $is_running = Invoke-Expression "docker inspect -f '{{ .State.Running }}' $kraken_container_name"
   If ( $is_running -eq "true" ) {
-    error "Cluster build already running:`n Run`n  'docker logs --follow kraken_cluster'`n to see logs."
+    error "Cluster build already running:`n Run`n  'docker logs --follow $kraken_container_name'`n to see logs."
     exit 1
   }
 
-  inf "Removing old kraken_cluster container:`n   'docker rm -f kraken_cluster'"
-  Invoke-Expression "docker rm -f kraken_cluster"
+  inf "Removing old kraken_cluster container:`n   'docker rm -f $kraken_container_name'"
+  Invoke-Expression "docker rm -f $kraken_container_name"
 }
 
 inf "Building kraken container:`n  'docker build -t samsung_ag/kraken -f '$krakenRoot/terraform/$clustertype/Dockerfile' '$krakenRoot' '"
 Invoke-Expression "docker build -t samsung_ag/kraken -f '$krakenRoot/terraform/$clustertype/Dockerfile' '$krakenRoot'"
 
 # run cluster up
-$command =  "docker run -d --name kraken_cluster --volumes-from kraken_data samsung_ag/kraken bash -c " + 
+$command =  "docker run -d --name $kraken_container_name --volumes-from kraken_data samsung_ag/kraken bash -c " + 
             "`"mkdir -p /kraken_data/$clustername && " +
             "terraform apply -input=false -state=/kraken_data/$clustername/terraform.tfstate " +
-            "-var-file=/opt/kraken/terraform/$clustertype/terraform.tfvars " +
+            "-var-file=/opt/kraken/terraform/$clustertype/$clustername/terraform.tfvars " +
             "-var 'cluster_name=$clustername' /opt/kraken/terraform/$clustertype && " +
             "cp /opt/kraken/terraform/$clustertype/rendered/ansible.inventory /kraken_data/$clustername/ansible.inventory && " +
             "cp /root/.ssh/config_$clustername /kraken_data/$clustername/ssh_config && " +
@@ -89,4 +90,4 @@ inf "Building kraken cluster:`n  '$command'"
 Invoke-Expression $command
 
 inf "Following docker logs now. Ctrl-C to cancel."
-Invoke-Expression "docker logs --follow kraken_cluster"
+Invoke-Expression "docker logs --follow $kraken_container_name"

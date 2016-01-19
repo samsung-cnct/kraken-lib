@@ -21,25 +21,34 @@ do
 key="$1"
 
 case $key in
-    --clustertype)
-    KRAKEN_CLUSTER_TYPE="$2"
-    shift
-    ;;
-    --clustername)
-    KRAKEN_CLUSTER_NAME="$2"
-    shift
-    ;;
-    --dmopts)
-    KRAKEN_DOCKER_MACHINE_OPTIONS="$2"
-    shift
-    ;;
-    --dmname)
-    KRAKEN_DOCKER_MACHINE_NAME="$2"
-    shift
-    ;;
-    *)
-      # unknown option
-    ;;
+  --clustertype)
+  KRAKEN_CLUSTER_TYPE="$2"
+  shift
+  ;;
+  --clustername)
+  KRAKEN_CLUSTER_NAME="$2"
+  shift
+  ;;
+  --dmopts)
+  KRAKEN_DOCKER_MACHINE_OPTIONS="$2"
+  shift
+  ;;
+  --dmname)
+  KRAKEN_DOCKER_MACHINE_NAME="$2"
+  shift
+  ;;
+  *)
+    # unknown option
+  ;;
 esac
 shift # past argument or value
 done
+
+KRAKEN_NATIVE_DOCKER=false
+if docker ps &> /dev/null; then
+  if [ -z ${KRAKEN_DOCKER_MACHINE_NAME+x} ]; then
+    inf "Using docker natively"
+    KRAKEN_NATIVE_DOCKER=true
+    KRAKEN_DOCKER_MACHINE_NAME="localhost"
+  fi
+fi

@@ -6,7 +6,9 @@
 
 Param(
   [Parameter(Mandatory=$true)] 
-  [string]$dmname = ""
+  [string]$dmname = "",
+  [Parameter(Mandatory=$true)]
+  [string]$clustername = ""
 )
 
 # kraken root folder
@@ -23,13 +25,15 @@ If ($LASTEXITCODE -eq 0) {
 
 Invoke-Expression "docker-machine.exe env --shell=powershell $dmname | Invoke-Expression"
 
-$is_running = Invoke-Expression "docker inspect -f '{{ .State.Running }}' kraken_cluster"
+$kraken_container_name = "kraken_cluster_$clustername"
+
+$is_running = Invoke-Expression "docker inspect -f '{{ .State.Running }}' $kraken_container_name"
 If ( $is_running -eq "true" ) {
-  error "Cluster build already running:`n Run`n  'docker logs --follow kraken_cluster'`n to see logs."
+  error "Cluster build already running:`n Run`n  'docker logs --follow $kraken_container_name'`n to see logs."
   exit 1
 }
 
 New-Item -ItemType Directory -Force -Path "$krakenRoot\bin\clusters\$dmname"
 Invoke-Expression "docker cp kraken_data:/kraken_data/kube_config `"clusters/$dmname/kube_config`""
 
-inf "To control your cluster use:'n  kubectl --kubeconfig=clusters/$dmname/kube_config --cluster=<cluster name> <kubectl commands>"
+inf "To control your cluster use:'n  kubectl --kubeconfig=clusters/$dmname/kube_config --cluster=$clustername <kubectl commands>"
