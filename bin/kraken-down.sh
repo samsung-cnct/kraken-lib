@@ -52,11 +52,15 @@ if ! docker inspect kraken_data &> /dev/null; then
   exit 0;
 fi
 
-inf "Tearing down kraken cluster:\n  'docker run -d --name ${kraken_container_name} --volumes-from kraken_data samsung_ag/kraken terraform destroy -force -input=false -state=/kraken_data/${KRAKEN_CLUSTER_NAME}/terraform.tfstate /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}'"
+inf "Tearing down kraken cluster:\n  'docker run -d --name ${kraken_container_name} --volumes-from kraken_data samsung_ag/kraken \
+  terraform destroy -force -input=false -state=/kraken_data/${KRAKEN_CLUSTER_NAME}/terraform.tfstate \
+  -var 'cluster_name=${KRAKEN_CLUSTER_NAME}' /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}'"
+
 docker run -d --name ${kraken_container_name} --volumes-from kraken_data \
   samsung_ag/kraken bash -c \
   "until terraform destroy -force -input=false -var-file=/opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/${KRAKEN_CLUSTER_NAME}/terraform.tfvars \
-    -state=/kraken_data/${KRAKEN_CLUSTER_NAME}/terraform.tfstate /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}; do echo 'Retrying...'; sleep 5; done;"
+    -state=/kraken_data/${KRAKEN_CLUSTER_NAME}/terraform.tfstate -var 'cluster_name=${KRAKEN_CLUSTER_NAME}' /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}; do echo 'Retrying...'; sleep 5; done; \
+    rm -rf /kraken_data/${KRAKEN_CLUSTER_NAME}"
 
 inf "Following docker logs now. Ctrl-C to cancel."
 docker logs --follow ${kraken_container_name}

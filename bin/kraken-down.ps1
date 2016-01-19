@@ -44,7 +44,7 @@ If ($LASTEXITCODE -ne 0) {
 
 $command = 	"docker run -d --name $kraken_container_name --volumes-from kraken_data " +  
 			"samsung_ag/kraken bash -c `"until terraform destroy -force -input=false -var-file=/opt/kraken/terraform/$clustertype/$clustername/terraform.tfvars " +
-			"-state=/kraken_data/$clustername/terraform.tfstate /opt/kraken/terraform/$clustertype; do echo 'Retrying...'; sleep 5; done`""
+			"-state=/kraken_data/$clustername/terraform.tfstate -var 'cluster_name=$clustername' /opt/kraken/terraform/$clustertype; do echo 'Retrying...'; sleep 5; done; rm -rf /kraken_data/$clustername`""
 
 inf "Tearing down kraken cluster:`n  '$command'"
 Invoke-Expression $command

@@ -45,7 +45,6 @@ For better performance, you should consider adding and modifing the following co
 
 Looking to create a **ludicrous** cluster? Use the following `terraform.tfvars`:
 
-    cluster_name="<your cluster name>"
     aws_access_key="<your aws key id>"
     aws_secret_key="<your aws secret key>"
     aws_user_prefix="<prefix to use for named resources>"
@@ -55,7 +54,6 @@ Looking to create a **ludicrous** cluster? Use the following `terraform.tfvars`:
     aws_storage_type_etcd = "ephemeral"
     aws_apiserver_type = "m4.4xlarge"
 
-Alternatively, you can provide these variables as -var 'variable=value' switches to 'terraform' command.
 
 All available variables to override and set are under
 
@@ -84,10 +82,10 @@ The '--dmopts/-dmopts' parameter is a string of driver parameters for docker-mac
 
 Running kraken-up with '--clustertype/-clustertype aws' should leave you with a kraken aws cluster running, using variables from the terraform.tfvars file you just created.  
 
-## Interact with your kubernetes cluster
+## Connecting to your cluster with various tools
 On a system with a Bash shell:
 
-    $ ./kraken-kube.sh --dmname DOCKER_MACHINE_NAME --clustername KUBERNETES_CLUSTER_NAME
+    $ ./kraken-connect.sh --dmname DOCKER_MACHINE_NAME --clustername KUBERNETES_CLUSTER_NAME
     Machine DOCKER_MACHINE_NAME exists.
         To control your cluster use:
         kubectl --kubeconfig=clusters/ec2/kube_config --cluster=<cluster name> <kubectl commands>
@@ -95,11 +93,13 @@ On a system with a Bash shell:
 
 On a system with powershell:
 
-    PS> ./kraken-kube.ps1 -dmname DOCKER_MACHINE_NAME -clustername KUBERNETES_CLUSTER_NAME
+    PS> ./kraken-connect.ps1 -dmname DOCKER_MACHINE_NAME -clustername KUBERNETES_CLUSTER_NAME
     Machine DOCKER_MACHINE_NAME exists.
         To control your cluster use:
         kubectl --kubeconfig=clusters/ec2/kube_config --cluster=<cluster name> <kubectl commands>
     PS> kubectl --kubeconfig=clusters/ec2/kube_config --cluster=KUBERNETES_CLUSTER_NAME get nodes
+
+Follow the instructions in script output.
     
 ## Destroy Cluster
 On a system with a Bash shell:
@@ -110,26 +110,6 @@ On a system with powershell:
 
     PS> ./kraken-down.ps1 -dmname DOCKER_MACHINE_NAME -clustername KUBERNETES_CLUSTER_NAME
 
-## SSH to cluster nodes
-On a system with a Bash shell:
-
-    $ ./kraken-ssh.sh --dmname DOCKER_MACHINE_NAME --clustername KUBERNETES_CLUSTER_NAME NODE_NAME
-    
-On a system with powershell:
-
-    PS> ./kraken-ssh.ps1 -dmname DOCKER_MACHINE_NAME -clustername KUBERNETES_CLUSTER_NAME -node NODE_NAME
-
-For example:
-
-    $ ./kraken-ssh.sh --dmname ec2home --clustername homecluster etcd
-    $ ./kraken-ssh.sh --dmname ec2home --clustername homecluster node-005
-    $ ./kraken-ssh.sh --dmname ec2 --clustername work master
-    PS> ./kraken-ssh.ps1 -dmname ec2home -clustername homecluster -node master
-    PS> ./kraken-ssh.ps1 -dmname ec2home -clustername homecluster -node node-001
-    PS> ./kraken-ssh.ps1 -dmname ec2 -clustername work -node node-009
-    
-Other .sh and .ps1 scripts in cluster subfolder let you:
-* kraken-ansible - get the remote ansible inventory and ssh keys
 
 ## Using LogEntries.com
 1. First, create an account on logentries.com.
