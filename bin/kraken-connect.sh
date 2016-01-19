@@ -47,21 +47,21 @@ if [ ${is_running} == "true" ];  then
   exit 1
 fi
 
-mkdir -p "clusters/${KRAKEN_DOCKER_MACHINE_NAME}/${KRAKEN_CLUSTER_NAME}"
-docker cp kraken_data:/kraken_data/${KRAKEN_CLUSTER_NAME}/ssh_config "clusters/${KRAKEN_DOCKER_MACHINE_NAME}/${KRAKEN_CLUSTER_NAME}/ssh_config"
-docker cp kraken_data:/kraken_data/${KRAKEN_CLUSTER_NAME}/ansible.inventory "clusters/${KRAKEN_DOCKER_MACHINE_NAME}/${KRAKEN_CLUSTER_NAME}/ansible.inventory"
-docker cp kraken_data:/kraken_data/${KRAKEN_CLUSTER_NAME}/terraform.tfstate "clusters/${KRAKEN_DOCKER_MACHINE_NAME}/${KRAKEN_CLUSTER_NAME}/terraform.tfstate"
-docker cp ${kraken_container_name}:/opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/${KRAKEN_CLUSTER_NAME}/terraform.tfvars "clusters/${KRAKEN_DOCKER_MACHINE_NAME}/${KRAKEN_CLUSTER_NAME}/terraform.tfvars"
-docker cp kraken_data:/kraken_data/kube_config "clusters/${KRAKEN_DOCKER_MACHINE_NAME}/${KRAKEN_CLUSTER_NAME}/kube_config"
-docker cp ${kraken_container_name}:/root/.ssh/id_rsa "clusters/${KRAKEN_DOCKER_MACHINE_NAME}/${KRAKEN_CLUSTER_NAME}/id_rsa"
-docker cp ${kraken_container_name}:/root/.ssh/id_rsa.pub "clusters/${KRAKEN_DOCKER_MACHINE_NAME}/${KRAKEN_CLUSTER_NAME}/id_rsa.pub"
+mkdir -p "${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}"
+docker cp kraken_data:/kraken_data/${KRAKEN_CLUSTER_NAME}/ssh_config "${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/ssh_config"
+docker cp kraken_data:/kraken_data/${KRAKEN_CLUSTER_NAME}/ansible.inventory "${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/ansible.inventory"
+docker cp kraken_data:/kraken_data/${KRAKEN_CLUSTER_NAME}/terraform.tfstate "${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/terraform.tfstate"
+docker cp ${kraken_container_name}:/opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/${KRAKEN_CLUSTER_NAME}/terraform.tfvars "${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/terraform.tfvars"
+docker cp kraken_data:/kraken_data/kube_config "${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/kube_config"
+docker cp ${kraken_container_name}:/root/.ssh/id_rsa "${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/id_rsa"
+docker cp ${kraken_container_name}:/root/.ssh/id_rsa.pub "${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/id_rsa.pub"
 
-inf "Parameters for ssh:\n   ssh -F clusters/${KRAKEN_DOCKER_MACHINE_NAME}/${KRAKEN_CLUSTER_NAME}/ssh_config -i clusters/${KRAKEN_DOCKER_MACHINE_NAME}/${KRAKEN_CLUSTER_NAME}/id_rsa <node-name>\n"
+inf "Parameters for ssh:\n   ssh -F ${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/ssh_config -i ${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/id_rsa <node-name>\n"
 inf "Alternatively: \n"
 inf "   eval \$(docker-machine env ${KRAKEN_DOCKER_MACHINE_NAME})\n   docker run -it --volumes-from kraken_data samsung_ag/kraken ssh -F /kraken_data/${KRAKEN_CLUSTER_NAME}/ssh_config <other ssh options> <node-name>"
 
-inf "\n\nParameters for ansible:\n   --inventory-file clusters/${KRAKEN_DOCKER_MACHINE_NAME}/${KRAKEN_CLUSTER_NAME}/ansible.inventory\n   --private-key clusters/${KRAKEN_DOCKER_MACHINE_NAME}/${KRAKEN_CLUSTER_NAME}/id_rsa"
+inf "\n\nParameters for ansible:\n   --inventory-file ${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/ansible.inventory\n   --private-key ${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/id_rsa"
 
-inf "\n\nParameters for terraform:\n   -state=clusters/${KRAKEN_DOCKER_MACHINE_NAME}/${KRAKEN_CLUSTER_NAME}/terraform.tfstate\n   -var-file=clusters/${KRAKEN_DOCKER_MACHINE_NAME}/${KRAKEN_CLUSTER_NAME}/terraform.tfvars\n   -var 'cluster_name=${KRAKEN_CLUSTER_NAME}'"
+inf "\n\nParameters for terraform:\n   -state=${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/terraform.tfstate\n   -var-file=${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/terraform.tfvars\n   -var 'cluster_name=${KRAKEN_CLUSTER_NAME}'"
 
-inf "\n\nTo control your cluster use:\n  kubectl --kubeconfig=clusters/${KRAKEN_DOCKER_MACHINE_NAME}/${KRAKEN_CLUSTER_NAME}/kube_config --cluster=${KRAKEN_CLUSTER_NAME} <kubectl commands>"
+inf "\n\nTo control your cluster use:\n  kubectl --kubeconfig=${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/kube_config --cluster=${KRAKEN_CLUSTER_NAME} <kubectl commands>"
