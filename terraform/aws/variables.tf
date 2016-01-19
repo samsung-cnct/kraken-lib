@@ -3,11 +3,6 @@ variable "cluster_name" {
   description = "Name of the cluster, useed in kubernetes config as the --cluster"
 }
 
-variable "kubeconfig" {
-  description = "Location of kubeconfig file used during kubectl invocations"
-  default     = "~/.kube/config"
-}
-
 variable "aws_access_key" {
   description = "AWS key id"
 }
@@ -21,6 +16,11 @@ variable "aws_user_prefix" {
 }
 
 # variables with defaults
+variable "kubeconfig" {
+  description = "Location of kubeconfig file used during kubectl invocations"
+  default     = "~/.kube/config"
+}
+
 variable "max_retries" {
   default     = "100"
   description = "Max number of API call retries before failure"

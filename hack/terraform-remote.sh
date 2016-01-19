@@ -33,7 +33,7 @@ case $verb in
     time terraform apply -input=false $@
     ;;
   destroy)
-    time terraform destroy -force=true $@
+    time terraform destroy -input=false -force=true $@
     ;;
   *)
     echo "unrecognized verb: $verb" >2
