@@ -34,27 +34,24 @@ if [ -z ${KRAKEN_CLUSTER_NAME+x} ]; then
   KRAKEN_CLUSTER_NAME=$KRAKEN_CLUSTER_TYPE
 fi
 
-if [ ! -f "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/terraform.tfvars" ]; then
-  error "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/terraform.tfvars is not present."
+if [ ! -f "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/${KRAKEN_CLUSTER_NAME}/terraform.tfvars" ]; then
+  error "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/${KRAKEN_CLUSTER_NAME}/terraform.tfvars is not present."
   exit 1
 fi
 
-if [ ! -f "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/Dockerfile" ]; then
-  error "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/Dockerfile is not present."
-  exit 1
-fi
-
-if docker-machine ls -q | grep --silent "${KRAKEN_DOCKER_MACHINE_NAME}"; then
-  inf "Machine ${KRAKEN_DOCKER_MACHINE_NAME} already exists."
-else
-  if [ -z ${KRAKEN_DOCKER_MACHINE_OPTIONS+x} ]; then
-    error "--dmopts not specified. Docker Machine option string is required unless machine ${KRAKEN_DOCKER_MACHINE_NAME} already exists."
-    exit 1
+if [ "${KRAKEN_NATIVE_DOCKER}" = false ]; then 
+  if docker-machine ls -q | grep --silent "${KRAKEN_DOCKER_MACHINE_NAME}"; then
+    inf "Machine ${KRAKEN_DOCKER_MACHINE_NAME} already exists."
+  else
+    if [ -z ${KRAKEN_DOCKER_MACHINE_OPTIONS+x} ]; then
+      error "--dmopts not specified. Docker Machine option string is required unless machine ${KRAKEN_DOCKER_MACHINE_NAME} already exists."
+      exit 1
+    fi
+    setup_dockermachine
   fi
-  setup_dockermachine
-fi
 
-eval "$(docker-machine env ${KRAKEN_DOCKER_MACHINE_NAME})"
+  eval "$(docker-machine env ${KRAKEN_DOCKER_MACHINE_NAME})"
+fi 
 
 # create the data volume container for state
 if docker inspect kraken_data &> /dev/null; then
@@ -65,35 +62,34 @@ else
 fi
 
 # now build the docker container
-if docker inspect kraken_cluster &> /dev/null; then
-  is_running=$(docker inspect -f '{{ .State.Running }}' kraken_cluster)
+kraken_container_name="kraken_cluster_${KRAKEN_CLUSTER_NAME}"
+if docker inspect ${kraken_container_name} &> /dev/null; then
+  is_running=$(docker inspect -f '{{ .State.Running }}' ${kraken_container_name})
   if [ ${is_running} == "true" ];  then
-    error "Cluster build already running:\n Run\n  'docker logs --follow kraken_cluster'\n to see logs."
+    error "Cluster build already running:\n Run\n  'docker logs --follow ${kraken_container_name}'\n to see logs."
     exit 1
   fi
 
-  inf "Removing old kraken_cluster container:\n   'docker rm -f kraken_cluster'"
-  docker rm -f kraken_cluster
+  inf "Removing old kraken_cluster container:\n   'docker rm -f ${kraken_container_name}'"
+  docker rm -f ${kraken_container_name} &> /dev/null
 fi
 
-inf "Building kraken container:\n  'docker build -t samsung_ag/kraken -f \"${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/Dockerfile\" \
+inf "Building kraken container:\n  'docker build -t samsung_ag/kraken -f \"${KRAKEN_ROOT}/bin/build/Dockerfile\" \
   \"${KRAKEN_ROOT}\"' "
-docker build -t samsung_ag/kraken -f "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/Dockerfile" "${KRAKEN_ROOT}"
+docker build -t samsung_ag/kraken -f "${KRAKEN_ROOT}/bin/build/Dockerfile" "${KRAKEN_ROOT}"
 
 # run cluster up
-inf "Building kraken cluster:\n  'docker run -d --volumes-from kraken_data samsung_ag/kraken terraform apply \
-  -input=false -state=/kraken_data/${KRAKEN_CLUSTER_NAME}/terraform.tfstate -var-file=/opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/terraform.tfvars /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}'"
-docker run -d --name kraken_cluster --volumes-from kraken_data samsung_ag/kraken bash -c "\
-  mkdir -p /kraken_data/${KRAKEN_CLUSTER_NAME} && \
-  terraform apply \
-    -input=false \
-    -state=/kraken_data/${KRAKEN_CLUSTER_NAME}/terraform.tfstate \
-    -var-file=/opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/terraform.tfvars \
-    -var 'cluster_name=${KRAKEN_CLUSTER_NAME}' \
-    /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE} && \
-  cp /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/rendered/ansible.inventory /kraken_data/${KRAKEN_CLUSTER_NAME}/ansible.inventory && \
-  cp /root/.ssh/config_${KRAKEN_CLUSTER_NAME} /kraken_data/${KRAKEN_CLUSTER_NAME}/ssh_config && \
-  cp /root/.kube/config /kraken_data/kube_config"
+inf "Building kraken cluster:\n  'docker run -d --name ${kraken_container_name} --volumes-from kraken_data samsung_ag/kraken /opt/kraken/terraform-up.sh --clustertype ${KRAKEN_CLUSTER_TYPE} --clustername ${KRAKEN_CLUSTER_NAME}'"
+docker run -d --name ${kraken_container_name} --volumes-from kraken_data samsung_ag/kraken bash -c "/opt/kraken/terraform-up.sh --clustertype ${KRAKEN_CLUSTER_TYPE} --clustername ${KRAKEN_CLUSTER_NAME}"
 
 inf "Following docker logs now. Ctrl-C to cancel."
-docker logs --follow kraken_cluster
+docker logs --follow ${kraken_container_name}
+
+kraken_error_code=$(docker inspect -f {{.State.ExitCode}} ${kraken_container_name})
+if [ ${kraken_error_code} -eq 0 ]; then
+  inf "Exiting with ${kraken_error_code}"
+else
+  error "Exiting with ${kraken_error_code}"
+fi
+
+exit ${kraken_error_code}

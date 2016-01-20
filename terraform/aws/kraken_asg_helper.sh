@@ -4,9 +4,6 @@
 #                 And append the public ips of all nodes in the group into a file
 #author          :Samsung SDSRA
 #==============================================================================
-
-set -x
-
 while [[ $# > 1 ]]
 do
 key="$1"
