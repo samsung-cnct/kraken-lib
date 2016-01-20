@@ -515,6 +515,7 @@ resource "template_file" "node_cloudinit" {
 }
 
 resource "aws_launch_configuration" "kubernetes_node" {
+  name                        = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_launch_configuration"
   image_id                    = "${coreosbox_ami.latest_ami.box_string}"
   instance_type               = "${var.aws_node_type}"
   key_name                    = "${aws_key_pair.keypair.key_name}"
