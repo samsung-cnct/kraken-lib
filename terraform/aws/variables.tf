@@ -12,7 +12,7 @@ variable "aws_secret_key" {
 }
 
 variable "aws_user_prefix" {
-  description = "AWS resource prefix - all resources with names will be identified as <aws_user_prefix>_<aws_cluster_prefix>_<name>"
+  description = "AWS resource prefix - all resources with names will be identified as <aws_user_prefix>_<cluster_name>_resource"
 }
 
 # variables with defaults
@@ -24,11 +24,6 @@ variable "kubeconfig" {
 variable "max_retries" {
   default     = "100"
   description = "Max number of API call retries before failure"
-}
-
-variable "aws_cluster_prefix" {
-  default     = "kubernetes"
-  description = "AWS cluster prefix - all resources with names will be identified as <aws_user_prefix>_<aws_cluster_prefix>_<name>"
 }
 
 variable "aws_region" {
@@ -234,7 +229,7 @@ variable "kraken_port_high" {
 
 variable "aws_local_public_key" {
   default     = "~/.ssh/id_rsa.pub"
-  description = "Location of public key material to import into the <aws_user_prefix>_<aws_cluster_prefix>_keypair"
+  description = "Location of public key material to import into the <aws_user_prefix>_<cluster_name>_keypair"
 }
 
 variable "aws_local_private_key" {
@@ -244,7 +239,7 @@ variable "aws_local_private_key" {
 
 variable "aws_cluster_domain" {
   default     = "kubeme.io"
-  description = "Location of public key material to import into the <aws_user_prefix>_<aws_cluster_prefix>_keypair"
+  description = "Domain to use for route53 records <aws_user_prefix>-<cluster_name>-master.<aws_cluster_domain>"
 }
 
 variable "coreos_update_channel" {
