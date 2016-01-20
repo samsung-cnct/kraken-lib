@@ -21,21 +21,13 @@ if docker inspect ${kraken_container_name} &> /dev/null; then
     exit 1
   fi
 
-  inf "Removing old kraken_cluster container:\n   \
-    'docker rm -f ${kraken_container_name}'"
-  docker rm -f ${kraken_container_name} &> /dev/null
+  run_command "docker rm -f ${kraken_container_name}"
 fi
 
-inf "Building kraken container:\n  \
-  'docker build -t samsung_ag/kraken -f \"${KRAKEN_ROOT}/bin/build/Dockerfile\" \"${KRAKEN_ROOT}\"' "
-docker build -t samsung_ag/kraken -f "${KRAKEN_ROOT}/bin/build/Dockerfile" "${KRAKEN_ROOT}"
-
 # run cluster up
-inf "Building kraken cluster:\n  'docker run -d --name ${kraken_container_name} \
-  --volumes-from kraken_data samsung_ag/kraken /opt/kraken/terraform-up.sh --clustertype \
-  ${KRAKEN_CLUSTER_TYPE} --clustername ${KRAKEN_CLUSTER_NAME}'"
-docker run -d --name ${kraken_container_name} --volumes-from kraken_data samsung_ag/kraken \
-  bash -c "/opt/kraken/terraform-up.sh --clustertype ${KRAKEN_CLUSTER_TYPE} --clustername ${KRAKEN_CLUSTER_NAME}"
+run_command "docker build -t samsung_ag/kraken -f '${KRAKEN_ROOT}/bin/build/Dockerfile' '${KRAKEN_ROOT}'"
+run_command "docker run -d --name ${kraken_container_name} --volumes-from kraken_data samsung_ag/kraken \
+  bash -c \"/opt/kraken/terraform-up.sh --clustertype ${KRAKEN_CLUSTER_TYPE} --clustername ${KRAKEN_CLUSTER_NAME}\""
 
 follow ${kraken_container_name}
 

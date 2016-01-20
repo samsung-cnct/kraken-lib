@@ -58,7 +58,7 @@ inf "\n\nParameters for ansible:\n   \
 
 inf "\n\nParameters for terraform:\n   \
   -state=${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/terraform.tfstate\n   \
-  -var-file=${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/terraform.tfvars\n  \
+  -var-file=${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/terraform.tfvars\n   \
   -var 'cluster_name=${KRAKEN_CLUSTER_NAME}'"
 
 inf "\n\nTo control your cluster use:\n  \

@@ -21,6 +21,11 @@ function follow {
   docker logs --follow $1
 }
 
+function run_command {
+  inf "Running:\n $1"
+  eval $1 &> /dev/null
+}
+
 function setup_dockermachine {
   local dm_command="docker-machine create ${KRAKEN_DOCKER_MACHINE_OPTIONS} ${KRAKEN_DOCKER_MACHINE_NAME}"
   inf "Starting docker-machine with:\n  '${dm_command}'"
@@ -109,6 +114,5 @@ fi
 if docker inspect kraken_data &> /dev/null; then
   inf "Data volume container kraken_data already exists."
 else
-  inf "Creating data volume:\n  'docker create -v /kraken_data --name kraken_data busybox /bin/sh'"
-  docker create -v /kraken_data --name kraken_data busybox /bin/sh
+  run_command "docker create -v /kraken_data --name kraken_data busybox /bin/sh"
 fi

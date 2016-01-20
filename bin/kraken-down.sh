@@ -15,9 +15,7 @@ source "${KRAKEN_ROOT}/bin/utils.sh"
 # shut down cluster
 kraken_container_name="kraken_cluster_${KRAKEN_CLUSTER_NAME}"
 if docker inspect ${kraken_container_name} &> /dev/null; then
-  inf "Removing old kraken_cluster container:\n   \
-    'docker rm -f ${kraken_container_name}'"
-  docker rm -f ${kraken_container_name} &> /dev/null
+  run_command "docker rm -f ${kraken_container_name}"
 fi
 
 if ! docker inspect kraken_data &> /dev/null; then
@@ -26,13 +24,9 @@ if ! docker inspect kraken_data &> /dev/null; then
   exit 0;
 fi
 
-inf "Tearing down kraken cluster:\n  'docker run -d --name ${kraken_container_name} \
-  --volumes-from kraken_data samsung_ag/kraken /opt/kraken/terraform-down.sh --clustertype \
-  ${KRAKEN_CLUSTER_TYPE} --clustername ${KRAKEN_CLUSTER_NAME}'"
-
-docker run -d --name ${kraken_container_name} --volumes-from kraken_data \
-  samsung_ag/kraken bash -c "/opt/kraken/terraform-down.sh --clustertype ${KRAKEN_CLUSTER_TYPE} \
-  --clustername ${KRAKEN_CLUSTER_NAME}"
+run_command "docker run -d --name ${kraken_container_name} --volumes-from kraken_data \
+  samsung_ag/kraken bash -c \"/opt/kraken/terraform-down.sh --clustertype ${KRAKEN_CLUSTER_TYPE} \
+  --clustername ${KRAKEN_CLUSTER_NAME}\""
 
 follow ${kraken_container_name}
 
