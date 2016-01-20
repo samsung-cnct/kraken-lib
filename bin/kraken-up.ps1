@@ -24,16 +24,15 @@ function setup_dockermachine {
   Invoke-Expression $dockermachineCommand
 }
 
+If ($clustertype -eq "local") {
+  error "local -clustertype is not supported"
+  exit 1
+}
+
 If (!(Test-Path "$krakenRoot/terraform/$clustertype/$clustername/terraform.tfvars")) {
   error "$krakenRoot/terraform/$clustertype/$clustername/terraform.tfvars is not present."
   exit 1
 }
-
-If (!(Test-Path "$krakenRoot/terraform/$clustertype/Dockerfile")) {
-  error "$krakenRoot/terraform/$clustertype/Dockerfile is not present."
-  exit 1
-}
-
 
 # look for the docker machine specified 
 Invoke-Expression "docker-machine ls -q | findstr -s '$dmname'"
@@ -73,18 +72,12 @@ If ($LASTEXITCODE -eq 0) {
   Invoke-Expression "docker rm -f $kraken_container_name"
 }
 
-inf "Building kraken container:`n  'docker build -t samsung_ag/kraken -f '$krakenRoot/terraform/$clustertype/Dockerfile' '$krakenRoot' '"
-Invoke-Expression "docker build -t samsung_ag/kraken -f '$krakenRoot/terraform/$clustertype/Dockerfile' '$krakenRoot'"
+inf "Building kraken container:`n  'docker build -t samsung_ag/kraken -f '$krakenRoot/bin/build/Dockerfile' '$krakenRoot' '"
+Invoke-Expression "docker build -t samsung_ag/kraken -f '$krakenRoot/bin/build/Dockerfile' '$krakenRoot'"
 
 # run cluster up
 $command =  "docker run -d --name $kraken_container_name --volumes-from kraken_data samsung_ag/kraken bash -c " + 
-            "`"mkdir -p /kraken_data/$clustername && " +
-            "terraform apply -input=false -state=/kraken_data/$clustername/terraform.tfstate " +
-            "-var-file=/opt/kraken/terraform/$clustertype/$clustername/terraform.tfvars " +
-            "-var 'cluster_name=$clustername' /opt/kraken/terraform/$clustertype && " +
-            "cp /opt/kraken/terraform/$clustertype/rendered/ansible.inventory /kraken_data/$clustername/ansible.inventory && " +
-            "cp /root/.ssh/config_$clustername /kraken_data/$clustername/ssh_config && " +
-            "cp /root/.kube/config /kraken_data/kube_config`""
+            "`"/opt/kraken/terraform-up.sh --clustertype $clustertype --clustername $clustername`""
 
 inf "Building kraken cluster:`n  '$command'"
 Invoke-Expression $command

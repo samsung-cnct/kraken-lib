@@ -16,6 +16,11 @@ Param(
 $krakenRoot = "$(split-path -parent $MyInvocation.MyCommand.Definition)\.."
 . "$krakenRoot\bin\utils.ps1"
 
+If ($clustertype -eq "local") {
+  error "local -clustertype is not supported"
+  exit 1
+}
+
 $success = Invoke-Expression "docker-machine ls -q | out-string -stream | findstr -s '$dmname'"
 If ($LASTEXITCODE -eq 0) {
   inf "Machine $dmname already exists."

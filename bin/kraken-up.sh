@@ -39,11 +39,6 @@ if [ ! -f "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/${KRAKEN_CLUSTER_NAME
   exit 1
 fi
 
-if [ ! -f "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/Dockerfile" ]; then
-  error "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/Dockerfile is not present."
-  exit 1
-fi
-
 if [ "${KRAKEN_NATIVE_DOCKER}" = false ]; then 
   if docker-machine ls -q | grep --silent "${KRAKEN_DOCKER_MACHINE_NAME}"; then
     inf "Machine ${KRAKEN_DOCKER_MACHINE_NAME} already exists."
@@ -79,24 +74,13 @@ if docker inspect ${kraken_container_name} &> /dev/null; then
   docker rm -f ${kraken_container_name} &> /dev/null
 fi
 
-inf "Building kraken container:\n  'docker build -t samsung_ag/kraken -f \"${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/Dockerfile\" \
+inf "Building kraken container:\n  'docker build -t samsung_ag/kraken -f \"${KRAKEN_ROOT}/bin/build/Dockerfile\" \
   \"${KRAKEN_ROOT}\"' "
-docker build -t samsung_ag/kraken -f "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/Dockerfile" "${KRAKEN_ROOT}"
+docker build -t samsung_ag/kraken -f "${KRAKEN_ROOT}/bin/build/Dockerfile" "${KRAKEN_ROOT}"
 
 # run cluster up
-inf "Building kraken cluster:\n  'docker run -d --name ${kraken_container_name} --volumes-from kraken_data samsung_ag/kraken terraform apply \
-  -input=false -state=/kraken_data/${KRAKEN_CLUSTER_NAME}/terraform.tfstate -var-file=/opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/${KRAKEN_CLUSTER_NAME}/terraform.tfvars /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}'"
-docker run -d --name ${kraken_container_name} --volumes-from kraken_data samsung_ag/kraken bash -c "\
-  mkdir -p /kraken_data/${KRAKEN_CLUSTER_NAME} && \
-  terraform apply \
-    -input=false \
-    -state=/kraken_data/${KRAKEN_CLUSTER_NAME}/terraform.tfstate \
-    -var-file=/opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/${KRAKEN_CLUSTER_NAME}/terraform.tfvars \
-    -var 'cluster_name=${KRAKEN_CLUSTER_NAME}' \
-    /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE} && \
-  cp /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/rendered/ansible.inventory /kraken_data/${KRAKEN_CLUSTER_NAME}/ansible.inventory && \
-  cp /root/.ssh/config_${KRAKEN_CLUSTER_NAME} /kraken_data/${KRAKEN_CLUSTER_NAME}/ssh_config && \
-  cp /root/.kube/config /kraken_data/kube_config"
+inf "Building kraken cluster:\n  'docker run -d --name ${kraken_container_name} --volumes-from kraken_data samsung_ag/kraken /opt/kraken/terraform-up.sh --clustertype ${KRAKEN_CLUSTER_TYPE} --clustername ${KRAKEN_CLUSTER_NAME}'"
+docker run -d --name ${kraken_container_name} --volumes-from kraken_data samsung_ag/kraken bash -c "/opt/kraken/terraform-up.sh --clustertype ${KRAKEN_CLUSTER_TYPE} --clustername ${KRAKEN_CLUSTER_NAME}"
 
 inf "Following docker logs now. Ctrl-C to cancel."
 docker logs --follow ${kraken_container_name}
