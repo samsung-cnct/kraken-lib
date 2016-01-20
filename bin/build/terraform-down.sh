@@ -1,5 +1,5 @@
 #!/bin/bash -
-#title           :docker-terraform.sh
+#title           :terraform-down.sh
 #description     :run terraform with parameters. This is intended to be executed inside a docker container.
 #author          :Samsung SDSRA
 #==============================================================================
