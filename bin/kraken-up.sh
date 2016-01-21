@@ -26,7 +26,7 @@ fi
 
 # run cluster up
 run_command "docker build -t samsung_ag/kraken -f '${KRAKEN_ROOT}/bin/build/Dockerfile' '${KRAKEN_ROOT}'"
-run_command "docker run -d --name ${kraken_container_name} --volumes-from kraken_data samsung_ag/kraken \
+run_command "docker run -d --name ${kraken_container_name} -v /var/run:/ansible --volumes-from kraken_data samsung_ag/kraken \
   bash -c \"/opt/kraken/terraform-up.sh --clustertype ${KRAKEN_CLUSTER_TYPE} --clustername ${KRAKEN_CLUSTER_NAME}\""
 
 follow ${kraken_container_name}
