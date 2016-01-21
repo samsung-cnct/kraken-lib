@@ -12,7 +12,7 @@ resource "aws_vpc" "vpc" {
   enable_dns_hostnames = false
 
   tags {
-    Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_vpc"
+    Name = "${var.aws_user_prefix}_${var.cluster_name}_vpc"
   }
 }
 
@@ -21,7 +21,7 @@ resource "aws_vpc_dhcp_options" "vpc_dhcp" {
   domain_name_servers = ["AmazonProvidedDNS"]
 
   tags {
-    Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_dhcp"
+    Name = "${var.aws_user_prefix}_${var.cluster_name}_dhcp"
   }
 }
 
@@ -34,7 +34,7 @@ resource "aws_internet_gateway" "vpc_gateway" {
   vpc_id = "${aws_vpc.vpc.id}"
 
   tags {
-    Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_gateway"
+    Name = "${var.aws_user_prefix}_${var.cluster_name}_gateway"
   }
 }
 
@@ -47,7 +47,7 @@ resource "aws_route_table" "vpc_rt" {
   }
 
   tags {
-    Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_rt"
+    Name = "${var.aws_user_prefix}_${var.cluster_name}_rt"
   }
 }
 
@@ -73,12 +73,12 @@ resource "aws_network_acl" "vpc_acl" {
   }
 
   tags {
-    Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_acl"
+    Name = "${var.aws_user_prefix}_${var.cluster_name}_acl"
   }
 }
 
 resource "aws_key_pair" "keypair" {
-  key_name   = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_key"
+  key_name   = "${var.aws_user_prefix}_${var.cluster_name}_key"
   public_key = "${file(var.aws_local_public_key)}"
 }
 
@@ -88,7 +88,7 @@ resource "aws_subnet" "vpc_subnet_main" {
   map_public_ip_on_launch = true
 
   tags {
-    Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_subnet"
+    Name = "${var.aws_user_prefix}_${var.cluster_name}_subnet"
   }
 }
 
@@ -99,7 +99,7 @@ resource "aws_subnet" "vpc_subnet_1_asg" {
   map_public_ip_on_launch = true
 
   tags {
-    Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_subnet_asg_1"
+    Name = "${var.aws_user_prefix}_${var.cluster_name}_subnet_asg_1"
   }
 }
 
@@ -110,7 +110,7 @@ resource "aws_subnet" "vpc_subnet_2_asg" {
   map_public_ip_on_launch = true
 
   tags {
-    Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_subnet_asg_2"
+    Name = "${var.aws_user_prefix}_${var.cluster_name}_subnet_asg_2"
   }
 }
 
@@ -121,7 +121,7 @@ resource "aws_subnet" "vpc_subnet_3_asg" {
   map_public_ip_on_launch = true
 
   tags {
-    Name = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_subnet_asg_3"
+    Name = "${var.aws_user_prefix}_${var.cluster_name}_subnet_asg_3"
   }
 }
 
@@ -146,8 +146,8 @@ resource "aws_route_table_association" "vpc_subnet_3_asg_rt_association" {
 }
 
 resource "aws_security_group" "vpc_secgroup" {
-  name        = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_secgroup"
-  description = "Security group for ${var.aws_user_prefix} ${var.aws_cluster_prefix} cluster"
+  name        = "${var.aws_user_prefix}_${var.cluster_name}_secgroup"
+  description = "Security group for ${var.aws_user_prefix}_${var.cluster_name} cluster"
   vpc_id      = "${aws_vpc.vpc.id}"
 
   # ssh
@@ -215,7 +215,7 @@ resource "aws_security_group" "vpc_secgroup" {
   }
 
   tags {
-    Name = "Security group for ${var.aws_user_prefix} ${var.aws_cluster_prefix} cluster"
+    Name = "${var.aws_user_prefix}_${var.cluster_name}_secgroup"
   }
 }
 
@@ -268,7 +268,7 @@ resource "aws_instance" "kubernetes_etcd" {
   user_data = "${template_file.etcd_cloudinit.rendered}"
 
   tags {
-    Name      = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_etcd"
+    Name      = "${var.aws_user_prefix}_${var.cluster_name}_etcd"
     ShortName = "etcd"
   }
 }
@@ -329,7 +329,7 @@ resource "aws_instance" "kubernetes_apiserver" {
   user_data = "${template_file.apiserver_cloudinit.rendered}"
 
   tags {
-    Name      = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_apiserver-${format("%03d", count.index+1)}"
+    Name      = "${var.aws_user_prefix}_${var.cluster_name}_apiserver-${format("%03d", count.index+1)}"
     ShortName = "${format("apiserver-%03d", count.index+1)}"
   }
 }
@@ -340,7 +340,7 @@ resource "template_file" "master_cloudinit" {
   vars {
     ansible_playbook_command  = "${var.ansible_playbook_command}"
     ansible_playbook_file     = "${var.ansible_playbook_file}"
-    cluster_master_record     = "http://${var.aws_user_prefix}-master.${var.aws_cluster_domain}:8080"
+    cluster_master_record     = "http://${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-master.${var.aws_cluster_domain}:8080"
     cluster_name              = "${var.cluster_name}"
     dns_domain                = "${var.dns_domain}"
     dns_ip                    = "${var.dns_ip}"
@@ -358,7 +358,7 @@ resource "template_file" "master_cloudinit" {
     logentries_token          = "${var.logentries_token}"
     logentries_url            = "${var.logentries_url}"
     short_name                = "master"
-    cluster_proxy_record      = "${var.aws_user_prefix}-proxy.${var.aws_cluster_domain}"
+    cluster_proxy_record      = "${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-proxy.${var.aws_cluster_domain}"
     format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_master)}"
     coreos_update_channel     = "${var.coreos_update_channel}"
     coreos_reboot_strategy    = "${var.coreos_reboot_strategy}"
@@ -393,7 +393,7 @@ resource "aws_instance" "kubernetes_master" {
   user_data = "${template_file.master_cloudinit.rendered}"
 
   tags {
-    Name      = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_master"
+    Name      = "${var.aws_user_prefix}_${var.cluster_name}_master"
     ShortName = "master"
   }
 }
@@ -405,7 +405,7 @@ resource "template_file" "node_cloudinit_special" {
   vars {
     ansible_playbook_command   = "${var.ansible_playbook_command}"
     ansible_playbook_file      = "${var.ansible_playbook_file}"
-    cluster_master_record      = "http://${var.aws_user_prefix}-master.${var.aws_cluster_domain}:8080"
+    cluster_master_record      = "http://${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-master.${var.aws_cluster_domain}:8080"
     cluster_name               = "${var.cluster_name}"
     dns_domain                 = "${var.dns_domain}"
     dns_ip                     = "${var.dns_ip}"
@@ -424,7 +424,7 @@ resource "template_file" "node_cloudinit_special" {
     logentries_url             = "${var.logentries_url}"
     master_private_ip          = "${aws_instance.kubernetes_master.private_ip}"
     master_public_ip           = "${aws_instance.kubernetes_master.public_ip}"
-    cluster_proxy_record       = "${var.aws_user_prefix}-proxy.${var.aws_cluster_domain}"
+    cluster_proxy_record       = "${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-proxy.${var.aws_cluster_domain}"
     format_docker_storage_mnt  = "${lookup(var.format_docker_storage_mnt, element(split(",", var.aws_storage_type_special_docker), count.index))}"
     format_kubelet_storage_mnt = "${lookup(var.format_kubelet_storage_mnt, element(split(",", var.aws_storage_type_special_kubelet), count.index))}"
     coreos_update_channel      = "${var.coreos_update_channel}"
@@ -471,7 +471,7 @@ resource "aws_instance" "kubernetes_node_special" {
   user_data = "${element(template_file.node_cloudinit_special.*.rendered, count.index)}"
 
   tags {
-    Name      = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_node-${format("%03d", count.index+1)}"
+    Name      = "${var.aws_user_prefix}_${var.cluster_name}_node-${format("%03d", count.index+1)}"
     ShortName = "${format("node-%03d", count.index+1)}"
   }
 }
@@ -482,7 +482,7 @@ resource "template_file" "node_cloudinit" {
   vars {
     ansible_playbook_command   = "${var.ansible_playbook_command}"
     ansible_playbook_file      = "${var.ansible_playbook_file}"
-    cluster_master_record      = "http://${var.aws_user_prefix}-master.${var.aws_cluster_domain}:8080"
+    cluster_master_record      = "http://${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-master.${var.aws_cluster_domain}:8080"
     cluster_name               = "${var.cluster_name}"
     dns_domain                 = "${var.dns_domain}"
     dns_ip                     = "${var.dns_ip}"
@@ -501,7 +501,7 @@ resource "template_file" "node_cloudinit" {
     logentries_url             = "${var.logentries_url}"
     master_private_ip          = "${aws_instance.kubernetes_master.private_ip}"
     master_public_ip           = "${aws_instance.kubernetes_master.public_ip}"
-    cluster_proxy_record       = "${var.aws_user_prefix}-proxy.${var.aws_cluster_domain}"
+    cluster_proxy_record       = "${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-proxy.${var.aws_cluster_domain}"
     format_docker_storage_mnt  = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_node_docker)}"
     format_kubelet_storage_mnt = "${lookup(var.format_kubelet_storage_mnt, var.aws_storage_type_node_kubelet)}"
     coreos_update_channel      = "${var.coreos_update_channel}"
@@ -515,7 +515,7 @@ resource "template_file" "node_cloudinit" {
 }
 
 resource "aws_launch_configuration" "kubernetes_node" {
-  name                        = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_launch_configuration"
+  name                        = "${var.aws_user_prefix}_${var.cluster_name}_launch_configuration"
   image_id                    = "${coreosbox_ami.latest_ami.box_string}"
   instance_type               = "${var.aws_node_type}"
   key_name                    = "${aws_key_pair.keypair.key_name}"
@@ -547,7 +547,7 @@ resource "aws_launch_configuration" "kubernetes_node" {
 }
 
 resource "aws_autoscaling_group" "kubernetes_nodes" {
-  name                      = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_nodes"
+  name                      = "${var.aws_user_prefix}_${var.cluster_name}_node_asg"
   vpc_zone_identifier       = ["${aws_subnet.vpc_subnet_1_asg.id}", "${aws_subnet.vpc_subnet_2_asg.id}", "${aws_subnet.vpc_subnet_3_asg.id}"]
   max_size                  = "${var.node_count}"
   min_size                  = "${var.node_count}"
@@ -562,7 +562,7 @@ resource "aws_autoscaling_group" "kubernetes_nodes" {
 
   tag {
     key                 = "Name"
-    value               = "${var.aws_user_prefix}_${var.aws_cluster_prefix}_node-autoscaled"
+    value               = "${var.aws_user_prefix}_${var.cluster_name}_node-autoscaled"
     propagate_at_launch = true
   }
 
@@ -575,7 +575,7 @@ resource "aws_autoscaling_group" "kubernetes_nodes" {
 
 resource "aws_route53_record" "master_record" {
   zone_id = "${var.aws_zone_id}"
-  name    = "${var.aws_user_prefix}-master.${var.aws_cluster_domain}"
+  name    = "${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-master.${var.aws_cluster_domain}"
   type    = "A"
   ttl     = "30"
   records = ["${aws_instance.kubernetes_master.public_ip}"]
@@ -583,7 +583,7 @@ resource "aws_route53_record" "master_record" {
 
 resource "aws_route53_record" "proxy_record" {
   zone_id = "${var.aws_zone_id}"
-  name    = "${var.aws_user_prefix}-proxy.${var.aws_cluster_domain}"
+  name    = "${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-proxy.${var.aws_cluster_domain}"
   type    = "A"
   ttl     = "30"
   records = ["${aws_instance.kubernetes_node_special.0.public_ip}"]
@@ -597,7 +597,7 @@ resource "template_file" "ansible_inventory" {
     etcd_public_ip               = "${aws_instance.kubernetes_etcd.public_ip}"
     master_public_ip             = "${aws_instance.kubernetes_master.public_ip}"
     cluster_name                 = "${var.cluster_name}"
-    cluster_master_record        = "http://${var.aws_user_prefix}-master.${var.aws_cluster_domain}:8080"
+    cluster_master_record        = "http://${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-master.${var.aws_cluster_domain}:8080"
     nodes_inventory_info         = "${join("\n", formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_node_special.*.tags.ShortName, aws_instance.kubernetes_node_special.*.public_ip))}"
     dns_domain                   = "${var.dns_domain}"
     dns_ip                       = "${var.dns_ip}"
@@ -617,7 +617,7 @@ resource "template_file" "ansible_inventory" {
     master_private_ip            = "${aws_instance.kubernetes_master.private_ip}"
     master_public_ip             = "${aws_instance.kubernetes_master.public_ip}"
     apiservers_inventory_info    = "${join("\n", concat(formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_apiserver.*.tags.ShortName, aws_instance.kubernetes_apiserver.*.public_ip)))}"
-    cluster_proxy_record         = "${var.aws_user_prefix}-proxy.${var.aws_cluster_domain}"
+    cluster_proxy_record         = "${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-proxy.${var.aws_cluster_domain}"
     format_docker_storage_mnt    = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_node_docker)}"
     format_kubelet_storage_mnt   = "${lookup(var.format_kubelet_storage_mnt, var.aws_storage_type_node_kubelet)}"
     coreos_update_channel        = "${var.coreos_update_channel}"
@@ -631,10 +631,10 @@ resource "template_file" "ansible_inventory" {
 
   # a special trick to run against localhost without using inventory
   provisioner "local-exec" {
-    command = "ansible-playbook -i 'localhost,' --connection=local ${path.module}/../../ansible/localhost_pre_provision.yaml --extra-vars 'kubeconfig=${var.kubeconfig} cluster_name=${var.cluster_name} cluster_master_record=http://${var.aws_user_prefix}-master.${var.aws_cluster_domain}:8080'"
+    command = "ansible-playbook -i 'localhost,' --connection=local ${path.module}/../../ansible/localhost_pre_provision.yaml --extra-vars 'kubeconfig=${var.kubeconfig} cluster_name=${var.cluster_name} cluster_master_record=http://${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-master.${var.aws_cluster_domain}:8080'"
   }
 
   provisioner "local-exec" {
-    command = "AWS_ACCESS_KEY_ID=${var.aws_access_key} AWS_SECRET_ACCESS_KEY=${var.aws_secret_key} AWS_DEFAULT_REGION=${var.aws_region} ${path.module}/kraken_asg_helper.sh --kubeconfig ${var.kubeconfig} --cluster ${var.cluster_name} --limit ${var.node_count + var.special_node_count} --name ${var.aws_user_prefix}_${var.aws_cluster_prefix}_nodes --output ${path.module}/rendered/ansible.inventory --singlewait ${var.asg_wait_single} --totalwaits ${var.asg_wait_total} --offset ${var.special_node_count} --retries ${var.asg_retries}"
+    command = "AWS_ACCESS_KEY_ID=${var.aws_access_key} AWS_SECRET_ACCESS_KEY=${var.aws_secret_key} AWS_DEFAULT_REGION=${var.aws_region} ${path.module}/kraken_asg_helper.sh --kubeconfig ${var.kubeconfig} --cluster ${var.cluster_name} --limit ${var.node_count + var.special_node_count} --name ${var.aws_user_prefix}_${var.cluster_name}_node_asg --output ${path.module}/rendered/ansible.inventory --singlewait ${var.asg_wait_single} --totalwaits ${var.asg_wait_total} --offset ${var.special_node_count} --retries ${var.asg_retries}"
   }
 }
