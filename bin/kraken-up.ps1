@@ -35,7 +35,7 @@ inf "Building kraken container:`n  'docker build -t samsung_ag/kraken -f '$krake
 Invoke-Expression "docker build -t samsung_ag/kraken -f '$krakenRoot/bin/build/Dockerfile' '$krakenRoot'"
 
 # run cluster up
-$command =  "docker run -d --name $kraken_container_name --volumes-from kraken_data samsung_ag/kraken bash -c " + 
+$command =  "docker run -d --name $kraken_container_name -v /var/run:/ansible --volumes-from kraken_data samsung_ag/kraken bash -c " + 
             "`"/opt/kraken/terraform-up.sh --clustertype $clustertype --clustername $clustername`""
 
 inf "Building kraken cluster:`n  '$command'"
