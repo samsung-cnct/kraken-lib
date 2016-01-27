@@ -32,6 +32,7 @@ write_files:
       logentries_url=${logentries_url}
       master_port="${master_port}"
       master_scheme=${master_scheme}
+      sysdigcloud_access_key=${sysdigcloud_access_key}
 coreos:
   etcd2:
     proxy: on

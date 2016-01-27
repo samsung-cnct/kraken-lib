@@ -2,6 +2,8 @@
 # Common tasks for every node
 - include: common.yaml
 
+- include: sysdig-cloud-agent.yaml
+
 - include: cadvisor.yaml
   when: "'master' in group_names or 'etcd' in group_names or 'apiservers' in group_names"
 

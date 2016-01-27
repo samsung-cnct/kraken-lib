@@ -15,6 +15,11 @@ variable "aws_user_prefix" {
   description = "AWS resource prefix - all resources with names will be identified as <aws_user_prefix>_<cluster_name>_resource. Also used in kubectl --user"
 }
 
+variable "sysdigcloud_access_key" {
+  description = "Sysdig Cloud Access Key"
+  default = "DISABLED"
+}
+
 # variables with defaults
 variable "kubeconfig" {
   description = "Location of kubeconfig file used during kubectl invocations"

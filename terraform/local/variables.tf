@@ -7,6 +7,11 @@ variable "local_user_prefix" {
   default     = "vagrant"
 }
 
+variable "sysdigcloud_access_key" {
+  description = "Sysdig Cloud Access Key"
+  default = "DISABLED"
+}
+
 variable "kubeconfig" {
   description = "Location of kubeconfig file used during kubectl invocations"
   default     = "~/.kube/config"

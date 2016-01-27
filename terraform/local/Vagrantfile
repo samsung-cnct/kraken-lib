@@ -144,6 +144,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           cluster_name
           master_scheme
           master_port
+	  sysdigcloud_access_key
         ).map { |s| [s.to_sym, ENV["KRAKEN_#{s.upcase}"]] }
         kraken_env_vars = Hash[kraken_env_var_entries]
 
