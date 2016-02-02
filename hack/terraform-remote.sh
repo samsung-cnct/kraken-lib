@@ -25,12 +25,12 @@ terraform remote config \
   -pull=true
 
 case $verb in
-  apply)
+  apply|plan)
     # terraform doesn't provide a first-class way to represent rendered template contents 
     # as a resource (see https://github.com/hashicorp/terraform/issues/2342), so we explicitly
     # taint before running apply so terraform will re-render the template
     terraform taint template_file.ansible_inventory
-    time terraform apply -input=false $@
+    time terraform $verb -input=false $@
     ;;
   destroy)
     time terraform destroy -input=false -force=true $@
