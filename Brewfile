@@ -1,7 +1,6 @@
 brew 'ansible'
 cask 'vagrant'
 brew 'kubernetes-cli'
-brew 'caskroom/cask/brew-cask'
 brew 'awscli'
 cask 'virtualbox'
 tap 'Samsung-AG/terraform-provider-execute'

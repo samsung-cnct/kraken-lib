@@ -12,7 +12,7 @@ variable "aws_secret_key" {
 }
 
 variable "aws_user_prefix" {
-  description = "AWS resource prefix - all resources with names will be identified as <aws_user_prefix>_<cluster_name>_resource"
+  description = "AWS resource prefix - all resources with names will be identified as <aws_user_prefix>_<cluster_name>_resource. Also used in kubectl --user"
 }
 
 # variables with defaults
@@ -257,6 +257,11 @@ variable "coreos_reboot_strategy" {
   description = "Core OS reboot strategy"
 }
 
+variable "kraken_local_dir" {
+  default = "/opt/kraken"
+  description = "location of kraken files"
+}
+
 variable "kraken_repo" {
   default = {
     "repo"       = "https://github.com/Samsung-AG/kraken.git"
@@ -323,6 +328,11 @@ variable "kubernetes_api_version" {
   description = "Kubernetes api version"
 }
 
+variable "kubernetes_cert_dir" {
+  default = "/srv/kubernetes"
+  description = "Location of kubernetes cert, keys, and tokens"
+}
+
 variable "logentries_token" {
   default     = ""
   description = "Logentries.com token"
@@ -354,6 +364,16 @@ variable "ansible_playbook_command" {
 }
 
 variable "ansible_playbook_file" {
-  default     = "/opt/kraken/ansible/iaas_provision.yaml"
+  default     = "/opt/kraken/ansible/ansible_in_docker.yaml"
   description = "location of playbook file run with ansible_playbook_command"
+}
+
+variable "apiserver_protocol_to_use" {
+  default     = "https"
+  description = "http or https"
+}
+
+variable "apiserver_port_to_use" {
+  default     = "443"
+  description = "443, 8080 etc"
 }

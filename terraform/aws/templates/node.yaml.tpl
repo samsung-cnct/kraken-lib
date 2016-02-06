@@ -15,6 +15,7 @@ write_files:
       cluster_master_record=${cluster_master_record}
       cluster_proxy_record=${cluster_proxy_record}
       cluster_name=${cluster_name}
+      cluster_user=${cluster_user}
       dns_domain=${dns_domain}
       dns_ip=${dns_ip}
       dockercfg_base64=${dockercfg_base64}
@@ -23,15 +24,19 @@ write_files:
       hyperkube_deployment_mode=${hyperkube_deployment_mode}
       hyperkube_image=${hyperkube_image}
       interface_name=${interface_name}
+      kraken_local_dir=${kraken_local_dir}
       kraken_services_branch=${kraken_services_branch}
       kraken_services_dirs=${kraken_services_dirs}
       kraken_services_repo=${kraken_services_repo}
+      kubernetes_cert_dir=${kubernetes_cert_dir}
       kubernetes_api_version=${kubernetes_api_version}
       kubernetes_binaries_uri=${kubernetes_binaries_uri}
       logentries_token=${logentries_token}
       logentries_url=${logentries_url}
       master_private_ip=${master_private_ip}
       master_public_ip=${master_public_ip}
+      apiserver_protocol_to_use=${apiserver_protocol_to_use}
+      apiserver_port_to_use="${apiserver_port_to_use}"
 coreos:
   etcd2:
     proxy: on
@@ -54,8 +59,8 @@ coreos:
         [Service]
         Type=oneshot
         RemainAfterExit=yes
-        ExecStart=/usr/sbin/wipefs -f ${format_docker_storage_mnt}
-        ExecStart=/usr/sbin/wipefs -f ${format_kubelet_storage_mnt}
+        ExecStartPre=/usr/sbin/wipefs -f ${format_docker_storage_mnt}
+        ExecStartPre=/usr/sbin/wipefs -f ${format_kubelet_storage_mnt}
         ExecStart=/usr/sbin/mkfs.ext4 -F ${format_docker_storage_mnt}
         ExecStart=/usr/sbin/mkfs.ext4 -F ${format_kubelet_storage_mnt}
     - name: docker.service
@@ -131,7 +136,7 @@ coreos:
         Type=oneshot
         RemainAfterExit=yes
         ExecStartPre=-/usr/bin/rm /home/core/.ssh/ansible_rsa*
-        ExecStart=/usr/bin/bash -c "ssh-keygen -f /home/core/.ssh/ansible_rsa -N ''"
+        ExecStartPre=/usr/bin/bash -c "ssh-keygen -f /home/core/.ssh/ansible_rsa -N ''"
         ExecStart=/usr/bin/bash -c "cat /home/core/.ssh/ansible_rsa.pub >> /home/core/.ssh/authorized_keys"
     - name: kraken-git-pull.service
       command: start
@@ -143,7 +148,7 @@ coreos:
         [Service]
         Type=oneshot
         RemainAfterExit=yes
-        ExecStart=/usr/bin/rm -rf /opt/kraken
+        ExecStartPre=/usr/bin/rm -rf /opt/kraken
         ExecStart=/usr/bin/git clone -b ${kraken_branch} ${kraken_repo} /opt/kraken
     - name: write-sha-file.service
       command: start
@@ -167,7 +172,7 @@ coreos:
         Type=oneshot
         RemainAfterExit=yes
         WorkingDirectory=/opt/kraken
-        ExecStart=/usr/bin/git fetch ${kraken_repo} +refs/pull/*:refs/remotes/origin/pr/*
+        ExecStartPre=/usr/bin/git fetch ${kraken_repo} +refs/pull/*:refs/remotes/origin/pr/*
         ExecStart=/usr/bin/git checkout -f ${kraken_commit}
     - name: ansible-in-docker.service
       command: start

@@ -70,11 +70,6 @@ if docker ps &> /dev/null; then
   fi
 fi
 
-if [ ${KRAKEN_CLUSTER_TYPE} == "local" ]; then
-  error "local --clustertype is not supported"
-  exit 1
-fi
-
 if [ -z ${KRAKEN_DOCKER_MACHINE_NAME+x} ]; then
   error "--dmname not specified. Docker Machine name is required."
   exit 1
@@ -90,13 +85,18 @@ if [ -z ${KRAKEN_CLUSTER_NAME+x} ]; then
   exit 1
 fi
 
+if [ ${KRAKEN_CLUSTER_TYPE} == "local" ]; then
+  error "local --clustertype is not supported"
+  exit 1
+fi
+
 KRAKEN_ROOT=$(dirname "${BASH_SOURCE}")/..
 if [ ! -f "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/${KRAKEN_CLUSTER_NAME}/terraform.tfvars" ]; then
   error "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/${KRAKEN_CLUSTER_NAME}/terraform.tfvars is not present."
   exit 1
 fi
 
-if [ "${KRAKEN_NATIVE_DOCKER}" = false ]; then 
+if [ "${KRAKEN_NATIVE_DOCKER}" = false ]; then
   if docker-machine ls -q | grep --silent "${KRAKEN_DOCKER_MACHINE_NAME}"; then
     inf "Machine ${KRAKEN_DOCKER_MACHINE_NAME} already exists."
   else
@@ -108,7 +108,7 @@ if [ "${KRAKEN_NATIVE_DOCKER}" = false ]; then
   fi
 
   eval "$(docker-machine env ${KRAKEN_DOCKER_MACHINE_NAME})"
-fi 
+fi
 
 # create the data volume container for state
 if docker inspect kraken_data &> /dev/null; then

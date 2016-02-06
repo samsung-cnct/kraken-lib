@@ -1,6 +1,5 @@
 [Unit]
 Description=Try labeling ourselves
-Requires=install-kubectl.service
 
 [Service]
 Type=simple

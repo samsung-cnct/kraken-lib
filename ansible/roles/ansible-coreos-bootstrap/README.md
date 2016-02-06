@@ -48,7 +48,7 @@ After bootstrap, you can use ansible as usual to manage system services, install
   tasks:
     - name: Start etcd
       service: name=etcd.service state=started
-      sudo: yes
+      become: yes
       sudo_user: root
 
     - name: Install docker-py

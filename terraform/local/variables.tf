@@ -2,6 +2,11 @@ variable "cluster_name" {
   description = "Name of the cluster, useed in kubernetes config as the --cluster"
 }
 
+variable "local_user_prefix" {
+  description = "Cluster user name, for kubectl --user"
+  default     = "vagrant"
+}
+
 variable "kubeconfig" {
   description = "Location of kubeconfig file used during kubectl invocations"
   default     = "~/.kube/config"
@@ -117,9 +122,18 @@ variable "kubernetes_api_version" {
   description = "Kubernetes api version"
 }
 
+variable "kubernetes_cert_dir" {
+  default = "/srv/kubernetes"
+  description = "Location of kubernetes cert, keys, and tokens"
+}
+
 variable "ansible_forks" {
   default     = "5"
   description = "number of parallel processes to use for ansible-playbook run"
+}
+variable "kraken_local_dir" {
+  default = "/opt/kraken"
+  description = "location of kraken files"
 }
 
 variable "kraken_repo" {
@@ -164,7 +178,7 @@ variable "vagrant_private_key" {
 }
 
 variable "ansible_docker_image" {
-  default     = "quay.io/samsung_ag/kraken_ansible"
+  default     = "quay.io/samsung_ag/kraken_ansible_local"
   description = "Docker image to use for ansible-in-docker"
 }
 
@@ -174,6 +188,16 @@ variable "ansible_playbook_command" {
 }
 
 variable "ansible_playbook_file" {
-  default     = "/opt/kraken/ansible/iaas_provision.yaml"
+  default     = "/opt/kraken/ansible/ansible_in_docker.yaml"
   description = "location of playbook file run with ansible_playbook_command"
+}
+
+variable "apiserver_protocol_to_use" {
+  default     = "https"
+  description = "http or https"
+}
+
+variable "apiserver_port_to_use" {
+  default     = "443"
+  description = "443, 8080 etc"
 }

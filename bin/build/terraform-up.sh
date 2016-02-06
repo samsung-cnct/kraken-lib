@@ -26,8 +26,8 @@ terraform apply \
   -state=/kraken_data/${KRAKEN_CLUSTER_NAME}/terraform.tfstate \
   -var-file=/opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/${KRAKEN_CLUSTER_NAME}/terraform.tfvars \
   -var "cluster_name=${KRAKEN_CLUSTER_NAME}" \
+  -var "kubeconfig=/kraken_data/kube_config" \
   /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}
 
 cp /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/rendered/ansible.inventory /kraken_data/${KRAKEN_CLUSTER_NAME}/ansible.inventory
 cp /root/.ssh/config_${KRAKEN_CLUSTER_NAME} /kraken_data/${KRAKEN_CLUSTER_NAME}/ssh_config
-cp /root/.kube/config /kraken_data/kube_config

@@ -5,27 +5,33 @@ write_files:
   - path: /etc/inventory.ansible
     content: |
       [apiservers]
-      apiserver ansible_ssh_host=$private_ipv4
+      $APISERVER_SHORT_NAME ansible_ssh_host=$private_ipv4
 
       [apiservers:vars]
       ansible_connection=ssh
       ansible_python_interpreter="PATH=/home/core/bin:$PATH python"
       ansible_ssh_user=core
       ansible_ssh_private_key_file=/opt/ansible/private_key
+      cluster_name=${cluster_name}
+      cluster_user=${cluster_user}
       dns_domain=${dns_domain}
       dns_ip=${dns_ip}
       dockercfg_base64=${dockercfg_base64}
-      etcd_private_ip=$$ETCD_PRIVATE_IP
+      etcd_private_ip=$ETCD_PRIVATE_IP
       hyperkube_deployment_mode=${hyperkube_deployment_mode}
       hyperkube_image=${hyperkube_image}
       interface_name=${interface_name}
+      kraken_local_dir=${kraken_local_dir}
       kraken_services_branch=${kraken_services_branch}
       kraken_services_dirs=${kraken_services_dirs}
       kraken_services_repo=${kraken_services_repo}
+      kubernetes_cert_dir=${kubernetes_cert_dir}
       kubernetes_api_version=${kubernetes_api_version}
       kubernetes_binaries_uri=${kubernetes_binaries_uri}
       logentries_token=${logentries_token}
       logentries_url=${logentries_url}
+      apiserver_protocol_to_use=${apiserver_protocol_to_use}
+      apiserver_port_to_use="${apiserver_port_to_use}"
 coreos:
   etcd2:
     proxy: on
@@ -74,19 +80,19 @@ coreos:
             Before=docker.service
 
             [Service]
-            ExecStartPre=-/usr/bin/etcdctl set /coreos.com/network/config '{"Network":"10.244.0.0/14", "Backend": {"Type": "vxlan"}}' 
+            ExecStartPre=-/usr/bin/etcdctl set /coreos.com/network/config '{"Network":"10.244.0.0/14", "Backend": {"Type": "vxlan"}}'
     - name: fleet.service
       command: start
     - name: systemd-journal-gatewayd.socket
       command: start
       enable: yes
       content: |
-        [Unit] 
+        [Unit]
         Description=Journal Gateway Service Socket
-        [Socket] 
+        [Socket]
         ListenStream=/var/run/journald.sock
         Service=systemd-journal-gatewayd.service
-        [Install] 
+        [Install]
         WantedBy=sockets.target
     - name: generate-ansible-keys.service
       command: start
@@ -97,7 +103,7 @@ coreos:
         Type=oneshot
         RemainAfterExit=yes
         ExecStartPre=-/usr/bin/rm /home/core/.ssh/ansible_rsa*
-        ExecStart=/usr/bin/bash -c "ssh-keygen -f /home/core/.ssh/ansible_rsa -N ''"
+        ExecStartPre=/usr/bin/bash -c "ssh-keygen -f /home/core/.ssh/ansible_rsa -N ''"
         ExecStart=/usr/bin/bash -c "cat /home/core/.ssh/ansible_rsa.pub >> /home/core/.ssh/authorized_keys"
     - name: kraken-git-pull.service
       command: start
@@ -109,7 +115,7 @@ coreos:
         [Service]
         Type=oneshot
         RemainAfterExit=yes
-        ExecStart=/usr/bin/rm -rf /opt/kraken
+        ExecStartPre=/usr/bin/rm -rf /opt/kraken
         ExecStart=/usr/bin/git clone -b ${kraken_branch} ${kraken_repo} /opt/kraken
     - name: write-sha-file.service
       command: start
@@ -133,7 +139,7 @@ coreos:
         Type=oneshot
         RemainAfterExit=yes
         WorkingDirectory=/opt/kraken
-        ExecStart=/usr/bin/git fetch ${kraken_repo} +refs/pull/*:refs/remotes/origin/pr/*
+        ExecStartPre=/usr/bin/git fetch ${kraken_repo} +refs/pull/*:refs/remotes/origin/pr/*
         ExecStart=/usr/bin/git checkout -f ${kraken_commit}
     - name: ansible-in-docker.service
       command: start
@@ -147,7 +153,7 @@ coreos:
         Restart=on-failure
         RestartSec=5
         ExecStartPre=-/usr/bin/docker rm -f ansible-docker
-        ExecStart=/usr/bin/docker run --name ansible-docker -v /etc/inventory.ansible:/etc/inventory.ansible -v /opt/kraken:/opt/kraken -v /home/core/.ssh/ansible_rsa:/opt/ansible/private_key -v /var/run:/ansible -e ANSIBLE_HOST_KEY_CHECKING=False ${ansible_docker_image} /sbin/my_init --skip-startup-files --skip-runit -- ${ansible_playbook_command} ${ansible_playbook_file}
+        ExecStart=/usr/bin/docker run --name ansible-docker -v /etc/inventory.ansible:/etc/inventory.ansible -v ${kraken_local_dir}:${kraken_local_dir} -v /home/core/.ssh/ansible_rsa:/opt/ansible/private_key -v /var/run:/ansible -e ANSIBLE_HOST_KEY_CHECKING=False ${ansible_docker_image} /sbin/my_init --skip-startup-files --skip-runit -- ${ansible_playbook_command} ${ansible_playbook_file}
   update:
     group: ${coreos_update_channel}
     reboot-strategy: ${coreos_reboot_strategy}

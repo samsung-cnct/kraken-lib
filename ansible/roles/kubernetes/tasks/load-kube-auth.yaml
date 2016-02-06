@@ -1,0 +1,19 @@
+---
+
+- name: Ensure kubernetes cert dir is created
+  become: yes
+  file: >
+    path={{ kubernetes_cert_dir }}
+    state=directory
+    owner=core
+    group=core
+
+- name: Load for kube services users
+  become: yes
+  shell: >
+    {{ kraken_local_dir }}/hack/load_kube_auth.sh -c {{ cluster_name }} -e {{ etcd_private_ip }} -s {{ master_private_ip }} -k kubernetes-auth -d {{ kubernetes_cert_dir }} -t -u "kubelet,kube_proxy,system:controller_manager,system:scheduler,system:logging,system:monitoring,system:dns"
+
+- name: Generate for human user
+  become: yes
+  shell: >
+    {{ kraken_local_dir }}/hack/load_kube_auth.sh -c {{ cluster_name }} -e {{ etcd_private_ip }} -s {{ master_private_ip }} -k kubernetes-auth -d {{ kubernetes_cert_dir }} -b -u "{{ cluster_user }}"

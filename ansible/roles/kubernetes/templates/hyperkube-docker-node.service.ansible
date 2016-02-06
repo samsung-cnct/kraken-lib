@@ -3,7 +3,6 @@ Description=Launch hyperkube node
 EnvironmentFile=/etc/network-environment
 Requires=network-online.target
 After=network-online.target
-After=load-kube-cert.service
 Before=kubernetes-label.service
 
 [Service]
@@ -19,7 +18,7 @@ ExecStart=/usr/bin/docker run \
   --net=host \
   --privileged \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  -v /srv/kubernetes:/srv/kubernetes \
+  -v {{ kubernetes_cert_dir }}:{{ kubernetes_cert_dir }} \
   -v {{kubelet.log_dir}}:{{kubelet.log_dir}}
   {{hyperkube_image}} \
     /hyperkube kubelet \

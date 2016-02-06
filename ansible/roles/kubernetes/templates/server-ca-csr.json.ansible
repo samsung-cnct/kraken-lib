@@ -1,0 +1,19 @@
+{
+  "CN": "{{ cluster_master_record | regex_replace(apiserver_protocol_to_use + '://', '') | regex_replace(':' + apiserver_port_to_use, '') }}",
+  "hosts": [
+    "{{ apiserver_ip_pool }}", "{{ master_public_ip }}", "{{ master_private_ip }}", "{{ kubernetes_service_ip }}"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "US",
+      "L": "Seattle",
+      "O": "Kubernetes",
+      "OU": "CA",
+      "ST": "Washington"
+    }
+  ]
+}

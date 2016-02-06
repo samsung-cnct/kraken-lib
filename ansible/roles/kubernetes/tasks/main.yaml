@@ -8,19 +8,13 @@
 - include: kubectl.yaml
   when: "'master' in group_names or 'apiservers' in group_names or 'nodes' in group_names"
 
+# Kubernetes master specific tasks
+- include: generate-kube-auth.yaml
+  when: "'master' in group_names"
 - include: generate-kube-cert.yaml
   when: "'master' in group_names"
-
-- include: load-kube-cert.yaml
-  when: "'apiservers' in group_names or 'nodes' in group_names or 'specialnodes' in group_names"
-
-# Kubernetes apiserver specific tasks
-- include: apiserver-binary.yaml
-  when: "'apiservers' in group_names and hyperkube_deployment_mode == 'binary'"
-- include: apiserver-docker.yaml
-  when: "'apiservers' in group_names and hyperkube_deployment_mode == 'docker'"
-
-# Kubernetes master specific tasks
+- include: create-kubectl-config.yaml
+  when: "'master' in group_names"
 - include: nginx-proxy.yaml
   when: "'master' in group_names"
 - include: master-binary.yaml
@@ -30,10 +24,26 @@
 - include: kraken-services.yaml
   when: "'master' in group_names"
 
+# Kubernetes apiserver specific tasks
+- include: load-kube-cert.yaml
+  when: "'apiservers' in group_names"
+- include: load-kube-auth.yaml
+  when: "'apiservers' in group_names"
+- include: apiserver-binary.yaml
+  when: "'apiservers' in group_names and hyperkube_deployment_mode == 'binary'"
+- include: apiserver-docker.yaml
+  when: "'apiservers' in group_names and hyperkube_deployment_mode == 'docker'"
+
 # Kubernetes node and special node specific tasks
 - include: node-pre.yaml
   when: "'nodes' in group_names"
 - include: node-pre.yaml
+  when: "'specialnodes' in group_names"
+- include: create-kubectl-config.yaml
+  when: "'nodes' in group_names"
+- include: create-kubectl-config.yaml
+  when: "'nodes' in group_names"
+- include: create-kubectl-config.yaml
   when: "'specialnodes' in group_names"
 - include: node-binary.yaml
   when: "'nodes' in group_names and hyperkube_deployment_mode == 'binary'"

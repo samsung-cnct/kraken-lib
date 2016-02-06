@@ -1,0 +1,9 @@
+---
+- name: Wait until SSH is available
+  local_action:
+    module: wait_for
+    host: "{{ host }}"
+    port: 22
+    delay: "{{ delay }}"
+    timeout: "{{ timeout }}"
+    state: started

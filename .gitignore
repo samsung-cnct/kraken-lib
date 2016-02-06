@@ -12,3 +12,9 @@ temp_*
 gh-pages/
 output/*
 _site/*
+*.gz
+*.logs
+*.log
+*.tfvars
+density/*
+density_out/*
