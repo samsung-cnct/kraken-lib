@@ -35,8 +35,8 @@ write_files:
       logentries_url=${logentries_url}
       master_private_ip=${master_private_ip}
       master_public_ip=${master_public_ip}
-      apiserver_protocol_to_use=${apiserver_protocol_to_use}
-      apiserver_port_to_use="${apiserver_port_to_use}"
+      apiserver_scheme=${apiserver_scheme}
+      master_port="${master_port}"
 coreos:
   etcd2:
     proxy: on

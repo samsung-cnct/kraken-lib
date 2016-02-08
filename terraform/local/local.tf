@@ -58,8 +58,8 @@ resource "template_file" "master_cloudinit" {
     kraken_branch               = "${var.kraken_repo.branch}"
     kraken_commit               = "${var.kraken_repo.commit_sha}"
     ansible_docker_image        = "${var.ansible_docker_image}"
-    apiserver_protocol_to_use   = "${var.apiserver_protocol_to_use}"
-    apiserver_port_to_use       = "${var.apiserver_port_to_use}"
+    apiserver_scheme            = "${var.apiserver_scheme}"
+    master_port                 = "${var.master_port}"
   }
 
   provisioner "local-exec" {
@@ -97,8 +97,8 @@ resource "template_file" "apiserver_cloudinit" {
     kraken_branch               = "${var.kraken_repo.branch}"
     kraken_commit               = "${var.kraken_repo.commit_sha}"
     ansible_docker_image        = "${var.ansible_docker_image}"
-    apiserver_protocol_to_use   = "${var.apiserver_protocol_to_use}"
-    apiserver_port_to_use       = "${var.apiserver_port_to_use}"
+    apiserver_scheme            = "${var.apiserver_scheme}"
+    master_port       = "${var.master_port}"
   }
 
   provisioner "local-exec" {
@@ -135,8 +135,8 @@ resource "template_file" "node_cloudinit" {
     kraken_branch               = "${var.kraken_repo.branch}"
     kraken_commit               = "${var.kraken_repo.commit_sha}"
     ansible_docker_image        = "${var.ansible_docker_image}"
-    apiserver_protocol_to_use   = "${var.apiserver_protocol_to_use}"
-    apiserver_port_to_use       = "${var.apiserver_port_to_use}"
+    apiserver_scheme            = "${var.apiserver_scheme}"
+    master_port       = "${var.master_port}"
   }
 
   provisioner "local-exec" {
@@ -147,10 +147,10 @@ resource "template_file" "node_cloudinit" {
 resource "execute_command" "command" {
   depends_on      = ["template_file.node_cloudinit", "template_file.master_cloudinit", "template_file.etcd_cloudinit", "template_file.apiserver_cloudinit"]
   command         = "echo Running vagrant ..."
-  destroy_command = "KRAKEN_IP_BASE=${var.ip_base} KRAKEN_COREOS_CHANNEL=${var.coreos_update_channel} KRAKEN_COREOS_RELEASE=${coreosbox_vagrant.coreos_version_info.version_out} KRAKEN_NUMBER_APISERVERS=${var.apiserver_count} KRAKEN_NUMBER_NODES=${var.node_count} VAGRANT_CWD=${path.module} VAGRANT_DOTFILE_PATH=${path.module} KRAKEN_ETCD_CPUS=${var.etcd_cpus} KRAKEN_ETCD_MEM=${var.etcd_mem} KRAKEN_MASTER_CPUS=${var.master_cpus} KRAKEN_MASTER_MEM=${var.master_mem} KRAKEN_APISERVER_CPUS=${var.apiserver_cpus} KRAKEN_APISERVER_MEM=${var.apiserver_mem} KRAKEN_NODE_CPUS=${var.node_cpus} KRAKEN_NODE_MEM=${var.node_mem} KRAKEN_KRAKEN_SERVICES_REPO=${var.kraken_services_repo} KRAKEN_NODE_MEMEN_KRAKEN_SERVICES_BRANCH=${var.kraken_services_branch} KRAKEN_DNS_DOMAIN=${var.dns_domain} KRAKEN_DNS_IP=${var.dns_ip} KRAKEN_DOCKERCFG_BASE64='${var.dockercfg_base64}' KRAKEN_HYPERKUBE_DEPLOYMENT_MODE=${var.hyperkube_deployment_mode} KRAKEN_HYPERKUBE_IMAGE=${var.hyperkube_image} KRAKEN_KUBERNETES_BINARIES_URI=${var.kubernetes_binaries_uri} KRAKEN_KUBERNETES_API_VERSION=${var.kubernetes_api_version} KRAKEN_KRAKEN_SERVICES_DIRS='${var.kraken_services_dirs}' KRAKEN_LOGENTRIES_TOKEN=${var.logentries_token} KRAKEN_LOGENTRIES_URL=${var.logentries_url} KRAKEN_VAGRANT_PRIVATE_KEY=${var.vagrant_private_key} KRAKEN_INTERFACE_NAME=eth1 KRAKEN_CLUSTER_USER=${var.local_user_prefix} KRAKEN_CLUSTER_NAME=${var.cluster_name} KRAKEN_APISERVER_PROTOCOL_TO_USE=${var.apiserver_protocol_to_use} KRAKEN_APISERVER_PORT_TO_USE=${var.apiserver_port_to_use} KRAKEN_KRAKEN_LOCAL_DIR=${var.kraken_local_dir} KRAKEN_KUBERNETES_CERT_DIR=${var.kubernetes_cert_dir} vagrant destroy --force"
+  destroy_command = "KRAKEN_IP_BASE=${var.ip_base} KRAKEN_COREOS_CHANNEL=${var.coreos_update_channel} KRAKEN_COREOS_RELEASE=${coreosbox_vagrant.coreos_version_info.version_out} KRAKEN_NUMBER_APISERVERS=${var.apiserver_count} KRAKEN_NUMBER_NODES=${var.node_count} VAGRANT_CWD=${path.module} VAGRANT_DOTFILE_PATH=${path.module} KRAKEN_ETCD_CPUS=${var.etcd_cpus} KRAKEN_ETCD_MEM=${var.etcd_mem} KRAKEN_MASTER_CPUS=${var.master_cpus} KRAKEN_MASTER_MEM=${var.master_mem} KRAKEN_APISERVER_CPUS=${var.apiserver_cpus} KRAKEN_APISERVER_MEM=${var.apiserver_mem} KRAKEN_NODE_CPUS=${var.node_cpus} KRAKEN_NODE_MEM=${var.node_mem} KRAKEN_KRAKEN_SERVICES_REPO=${var.kraken_services_repo} KRAKEN_NODE_MEMEN_KRAKEN_SERVICES_BRANCH=${var.kraken_services_branch} KRAKEN_DNS_DOMAIN=${var.dns_domain} KRAKEN_DNS_IP=${var.dns_ip} KRAKEN_DOCKERCFG_BASE64='${var.dockercfg_base64}' KRAKEN_HYPERKUBE_DEPLOYMENT_MODE=${var.hyperkube_deployment_mode} KRAKEN_HYPERKUBE_IMAGE=${var.hyperkube_image} KRAKEN_KUBERNETES_BINARIES_URI=${var.kubernetes_binaries_uri} KRAKEN_KUBERNETES_API_VERSION=${var.kubernetes_api_version} KRAKEN_KRAKEN_SERVICES_DIRS='${var.kraken_services_dirs}' KRAKEN_LOGENTRIES_TOKEN=${var.logentries_token} KRAKEN_LOGENTRIES_URL=${var.logentries_url} KRAKEN_VAGRANT_PRIVATE_KEY=${var.vagrant_private_key} KRAKEN_INTERFACE_NAME=eth1 KRAKEN_CLUSTER_USER=${var.local_user_prefix} KRAKEN_CLUSTER_NAME=${var.cluster_name} KRAKEN_MASTER_SCHEME=${var.master_scheme} KRAKEN_master_port=${var.master_port} KRAKEN_KRAKEN_LOCAL_DIR=${var.kraken_local_dir} KRAKEN_KUBERNETES_CERT_DIR=${var.kubernetes_cert_dir} vagrant destroy --force"
 
   provisioner "local-exec" {
-    command = "KRAKEN_IP_BASE=${var.ip_base} KRAKEN_COREOS_CHANNEL=${var.coreos_update_channel} KRAKEN_COREOS_RELEASE=${coreosbox_vagrant.coreos_version_info.version_out} KRAKEN_NUMBER_APISERVERS=${var.apiserver_count} KRAKEN_NUMBER_NODES=${var.node_count} VAGRANT_CWD=${path.module} VAGRANT_DOTFILE_PATH=${path.module} KRAKEN_ETCD_CPUS=${var.etcd_cpus} KRAKEN_ETCD_MEM=${var.etcd_mem} KRAKEN_MASTER_CPUS=${var.master_cpus} KRAKEN_MASTER_MEM=${var.master_mem} KRAKEN_APISERVER_CPUS=${var.apiserver_cpus} KRAKEN_APISERVER_MEM=${var.apiserver_mem} KRAKEN_NODE_CPUS=${var.node_cpus} KRAKEN_NODE_MEM=${var.node_mem} KRAKEN_KRAKEN_SERVICES_REPO=${var.kraken_services_repo} KRAKEN_KRAKEN_SERVICES_BRANCH=${var.kraken_services_branch} KRAKEN_DNS_DOMAIN=${var.dns_domain} KRAKEN_DNS_IP=${var.dns_ip} KRAKEN_DOCKERCFG_BASE64='${var.dockercfg_base64}' KRAKEN_HYPERKUBE_DEPLOYMENT_MODE=${var.hyperkube_deployment_mode} KRAKEN_HYPERKUBE_IMAGE=${var.hyperkube_image} KRAKEN_KUBERNETES_BINARIES_URI=${var.kubernetes_binaries_uri} KRAKEN_KUBERNETES_API_VERSION=${var.kubernetes_api_version} KRAKEN_KRAKEN_SERVICES_DIRS='${var.kraken_services_dirs}' KRAKEN_LOGENTRIES_TOKEN=${var.logentries_token} KRAKEN_LOGENTRIES_URL=${var.logentries_url} KRAKEN_VAGRANT_PRIVATE_KEY=${var.vagrant_private_key} KRAKEN_INTERFACE_NAME=eth1 KRAKEN_CLUSTER_USER=${var.local_user_prefix} KRAKEN_CLUSTER_NAME=${var.cluster_name} KRAKEN_APISERVER_PROTOCOL_TO_USE=${var.apiserver_protocol_to_use} KRAKEN_APISERVER_PORT_TO_USE=${var.apiserver_port_to_use} KRAKEN_KRAKEN_LOCAL_DIR=${var.kraken_local_dir} KRAKEN_KUBERNETES_CERT_DIR=${var.kubernetes_cert_dir} vagrant up"
+    command = "KRAKEN_IP_BASE=${var.ip_base} KRAKEN_COREOS_CHANNEL=${var.coreos_update_channel} KRAKEN_COREOS_RELEASE=${coreosbox_vagrant.coreos_version_info.version_out} KRAKEN_NUMBER_APISERVERS=${var.apiserver_count} KRAKEN_NUMBER_NODES=${var.node_count} VAGRANT_CWD=${path.module} VAGRANT_DOTFILE_PATH=${path.module} KRAKEN_ETCD_CPUS=${var.etcd_cpus} KRAKEN_ETCD_MEM=${var.etcd_mem} KRAKEN_MASTER_CPUS=${var.master_cpus} KRAKEN_MASTER_MEM=${var.master_mem} KRAKEN_APISERVER_CPUS=${var.apiserver_cpus} KRAKEN_APISERVER_MEM=${var.apiserver_mem} KRAKEN_NODE_CPUS=${var.node_cpus} KRAKEN_NODE_MEM=${var.node_mem} KRAKEN_KRAKEN_SERVICES_REPO=${var.kraken_services_repo} KRAKEN_KRAKEN_SERVICES_BRANCH=${var.kraken_services_branch} KRAKEN_DNS_DOMAIN=${var.dns_domain} KRAKEN_DNS_IP=${var.dns_ip} KRAKEN_DOCKERCFG_BASE64='${var.dockercfg_base64}' KRAKEN_HYPERKUBE_DEPLOYMENT_MODE=${var.hyperkube_deployment_mode} KRAKEN_HYPERKUBE_IMAGE=${var.hyperkube_image} KRAKEN_KUBERNETES_BINARIES_URI=${var.kubernetes_binaries_uri} KRAKEN_KUBERNETES_API_VERSION=${var.kubernetes_api_version} KRAKEN_KRAKEN_SERVICES_DIRS='${var.kraken_services_dirs}' KRAKEN_LOGENTRIES_TOKEN=${var.logentries_token} KRAKEN_LOGENTRIES_URL=${var.logentries_url} KRAKEN_VAGRANT_PRIVATE_KEY=${var.vagrant_private_key} KRAKEN_INTERFACE_NAME=eth1 KRAKEN_CLUSTER_USER=${var.local_user_prefix} KRAKEN_CLUSTER_NAME=${var.cluster_name} KRAKEN_MASTER_SCHEME=${var.master_scheme} KRAKEN_master_port=${var.master_port} KRAKEN_KRAKEN_LOCAL_DIR=${var.kraken_local_dir} KRAKEN_KUBERNETES_CERT_DIR=${var.kubernetes_cert_dir} vagrant up"
   }
 
   provisioner "local-exec" {

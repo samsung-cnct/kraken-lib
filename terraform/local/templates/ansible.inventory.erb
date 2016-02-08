@@ -28,7 +28,7 @@ ansible_connection=ssh
 ansible_python_interpreter="PATH=/home/core/bin:$PATH python"
 ansible_ssh_user=core
 ansible_ssh_private_key_file=<%= ansible_ssh_private_key_file %>
-cluster_master_record=<%= apiserver_protocol_to_use %>://<%= master_ip %>:<%= apiserver_port_to_use %>
+cluster_master_record=<%= master_scheme %>://<%= master_ip %>:<%= master_port %>
 cluster_proxy_record=<%= node_001_ip %>
 cluster_name=<%= cluster_name %>
 dns_domain=<%= dns_domain %>
@@ -54,8 +54,8 @@ node_001_private_ip=<%= node_001_ip %>
 node_001_public_ip=<%= node_001_ip %>
 apiserver_nginx_pool=<%= apiserver_nginx_pool %>
 cluster_user=<%= cluster_user %>
-apiserver_protocol_to_use=<%= apiserver_protocol_to_use %>
-apiserver_port_to_use="<%= apiserver_port_to_use %>"
+master_scheme=<%= master_scheme %>
+master_port="<%= master_port %>"
 
 [local:vars]
 ansible_connection=local

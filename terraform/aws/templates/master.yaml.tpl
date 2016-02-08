@@ -37,8 +37,8 @@ write_files:
       master_public_ip=$public_ipv4
       apiserver_nginx_pool=${apiserver_nginx_pool}
       apiserver_ip_pool=${apiserver_ip_pool}
-      apiserver_protocol_to_use=${apiserver_protocol_to_use}
-      apiserver_port_to_use="${apiserver_port_to_use}"
+      apiserver_scheme=${apiserver_scheme}
+      master_port="${master_port}"
 coreos:
   etcd2:
     proxy: on

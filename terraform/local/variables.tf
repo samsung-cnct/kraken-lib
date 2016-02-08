@@ -192,12 +192,12 @@ variable "ansible_playbook_file" {
   description = "location of playbook file run with ansible_playbook_command"
 }
 
-variable "apiserver_protocol_to_use" {
+variable "master_scheme" {
   default     = "https"
   description = "http or https"
 }
 
-variable "apiserver_port_to_use" {
+variable "master_port" {
   default     = "443"
   description = "443, 8080 etc"
 }

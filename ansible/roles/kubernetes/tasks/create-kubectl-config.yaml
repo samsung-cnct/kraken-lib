@@ -11,7 +11,7 @@
 - name: run for human user
   become: yes
   shell: >
-    {{ kraken_local_dir }}/hack/create_kubectl_config.sh -b -c {{cluster_name}} -e {{ etcd_private_ip }} -m {{ master_private_ip }} -k kubernetes-auth -d {{ kubernetes_cert_dir }} -u "{{ cluster_user }}"
+    {{ kraken_local_dir }}/hack/create_kubectl_config.sh -b -c {{cluster_name}} -e {{ etcd_private_ip }} -m {{ master_private_ip }} -k kubernetes-auth -d {{ kubernetes_cert_dir }} -u {{ cluster_user }}
 - name: run for kube services users
   become: yes
   shell: >

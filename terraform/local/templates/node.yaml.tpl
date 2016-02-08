@@ -12,7 +12,7 @@ write_files:
       ansible_python_interpreter="PATH=/home/core/bin:$PATH python"
       ansible_ssh_user=core
       ansible_ssh_private_key_file=/opt/ansible/private_key
-      cluster_master_record=${apiserver_protocol_to_use}://$MASTER_PRIVATE_IP:${apiserver_port_to_use}
+      cluster_master_record=${master_scheme}://$MASTER_PRIVATE_IP:${master_port}
       cluster_proxy_record=$NODE_001_IP
       cluster_name=${cluster_name}
       cluster_user=${cluster_user}
@@ -33,8 +33,8 @@ write_files:
       logentries_token=${logentries_token}
       logentries_url=${logentries_url}
       master_private_ip=$MASTER_PRIVATE_IP
-      apiserver_protocol_to_use=${apiserver_protocol_to_use}
-      apiserver_port_to_use="${apiserver_port_to_use}"
+      master_scheme=${master_scheme}
+      master_port="${master_port}"
 coreos:
   etcd2:
     proxy: on

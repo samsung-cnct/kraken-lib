@@ -298,15 +298,15 @@ resource "template_file" "apiserver_cloudinit" {
     kubernetes_cert_dir       = "${var.kubernetes_cert_dir}"
     logentries_token          = "${var.logentries_token}"
     logentries_url            = "${var.logentries_url}"
-    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_master)}"
+    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_apiserver)}"
     coreos_update_channel     = "${var.coreos_update_channel}"
     coreos_reboot_strategy    = "${var.coreos_reboot_strategy}"
     kraken_repo               = "${var.kraken_repo.repo}"
     kraken_branch             = "${var.kraken_repo.branch}"
     kraken_commit             = "${var.kraken_repo.commit_sha}"
     ansible_docker_image      = "${var.ansible_docker_image}"
-    apiserver_protocol_to_use = "${var.apiserver_protocol_to_use}"
-    apiserver_port_to_use     = "${var.apiserver_port_to_use}"
+    apiserver_scheme          = "${var.apiserver_scheme}"
+    master_port     = "${var.master_port}"
   }
 }
 
@@ -345,7 +345,7 @@ resource "template_file" "master_cloudinit" {
   vars {
     ansible_playbook_command  = "${var.ansible_playbook_command}"
     ansible_playbook_file     = "${var.ansible_playbook_file}"
-    cluster_master_record     = "${var.apiserver_protocol_to_use}://${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-master.${var.aws_cluster_domain}:${var.apiserver_port_to_use}"
+    cluster_master_record     = "${var.apiserver_scheme}://${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-master.${var.aws_cluster_domain}:${var.master_port}"
     cluster_name              = "${var.cluster_name}"
     cluster_user              = "${var.aws_user_prefix}"
     dns_domain                = "${var.dns_domain}"
@@ -376,8 +376,8 @@ resource "template_file" "master_cloudinit" {
     apiserver_ip_pool         = "${join(",", concat(formatlist("%v", aws_instance.kubernetes_apiserver.*.private_ip)))}"
     kraken_commit             = "${var.kraken_repo.commit_sha}"
     ansible_docker_image      = "${var.ansible_docker_image}"
-    apiserver_protocol_to_use = "${var.apiserver_protocol_to_use}"
-    apiserver_port_to_use     = "${var.apiserver_port_to_use}"
+    apiserver_scheme          = "${var.apiserver_scheme}"
+    master_port     = "${var.master_port}"
   }
 }
 
@@ -416,7 +416,7 @@ resource "template_file" "node_cloudinit_special" {
   vars {
     ansible_playbook_command   = "${var.ansible_playbook_command}"
     ansible_playbook_file      = "${var.ansible_playbook_file}"
-    cluster_master_record      = "${var.apiserver_protocol_to_use}://${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-master.${var.aws_cluster_domain}:${var.apiserver_port_to_use}"
+    cluster_master_record      = "${var.apiserver_scheme}://${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-master.${var.aws_cluster_domain}:${var.master_port}"
     cluster_name               = "${var.cluster_name}"
     cluster_user               = "${var.aws_user_prefix}"
     dns_domain                 = "${var.dns_domain}"
@@ -449,8 +449,8 @@ resource "template_file" "node_cloudinit_special" {
     kraken_branch              = "${var.kraken_repo.branch}"
     kraken_commit              = "${var.kraken_repo.commit_sha}"
     ansible_docker_image       = "${var.ansible_docker_image}"
-    apiserver_protocol_to_use = "${var.apiserver_protocol_to_use}"
-    apiserver_port_to_use     = "${var.apiserver_port_to_use}"
+    apiserver_scheme           = "${var.apiserver_scheme}"
+    master_port      = "${var.master_port}"
   }
 }
 
@@ -499,7 +499,7 @@ resource "template_file" "node_cloudinit" {
   vars {
     ansible_playbook_command    = "${var.ansible_playbook_command}"
     ansible_playbook_file       = "${var.ansible_playbook_file}"
-    cluster_master_record       = "${var.apiserver_protocol_to_use}://${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-master.${var.aws_cluster_domain}:${var.apiserver_port_to_use}"
+    cluster_master_record       = "${var.apiserver_scheme}://${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-master.${var.aws_cluster_domain}:${var.master_port}"
     cluster_name                = "${var.cluster_name}"
     cluster_user                = "${var.aws_user_prefix}"
     dns_domain                  = "${var.dns_domain}"
@@ -532,8 +532,8 @@ resource "template_file" "node_cloudinit" {
     kraken_branch               = "${var.kraken_repo.branch}"
     kraken_commit               = "${var.kraken_repo.commit_sha}"
     ansible_docker_image        = "${var.ansible_docker_image}"
-    apiserver_protocol_to_use   = "${var.apiserver_protocol_to_use}"
-    apiserver_port_to_use       = "${var.apiserver_port_to_use}"
+    apiserver_scheme            = "${var.apiserver_scheme}"
+    master_port       = "${var.master_port}"
   }
 }
 
@@ -650,8 +650,8 @@ resource "template_file" "ansible_inventory" {
     apiserver_nginx_pool          = "${join(" ", concat(formatlist("server %v:8080;", aws_instance.kubernetes_apiserver.*.private_ip)))}"
     apiserver_ip_pool             = "${join(",", concat(formatlist("%v", aws_instance.kubernetes_apiserver.*.private_ip)))}"
     cluster_user                  = "${var.aws_user_prefix}"
-    apiserver_protocol_to_use     = "${var.apiserver_protocol_to_use}"
-    apiserver_port_to_use         = "${var.apiserver_port_to_use}"
+    apiserver_scheme              = "${var.apiserver_scheme}"
+    master_port         = "${var.master_port}"
   }
 
   provisioner "local-exec" {

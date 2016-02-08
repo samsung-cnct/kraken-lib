@@ -12,7 +12,7 @@ write_files:
       ansible_python_interpreter="PATH=/home/core/bin:$PATH python"
       ansible_ssh_user=core
       ansible_ssh_private_key_file=/opt/ansible/private_key
-      cluster_master_record=${apiserver_protocol_to_use}://$private_ipv4:${apiserver_port_to_use}
+      cluster_master_record=${master_scheme}://$private_ipv4:${master_port}
       dns_domain=${dns_domain}
       dns_ip=${dns_ip}
       cluster_name=${cluster_name}
@@ -36,8 +36,8 @@ write_files:
       master_public_ip=$public_ipv4
       apiserver_nginx_pool=$APISERVER_NGINX_POOL
       apiserver_ip_pool=$APISERVER_IP_POOL
-      apiserver_protocol_to_use=${apiserver_protocol_to_use}
-      apiserver_port_to_use="${apiserver_port_to_use}"
+      master_scheme=${master_scheme}
+      master_port="${master_port}"
 
 coreos:
   etcd2:

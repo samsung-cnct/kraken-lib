@@ -30,8 +30,8 @@ write_files:
       kubernetes_binaries_uri=${kubernetes_binaries_uri}
       logentries_token=${logentries_token}
       logentries_url=${logentries_url}
-      apiserver_protocol_to_use=${apiserver_protocol_to_use}
-      apiserver_port_to_use="${apiserver_port_to_use}"
+      master_scheme=${master_scheme}
+      master_port="${master_port}"
 coreos:
   etcd2:
     proxy: on

@@ -1,5 +1,5 @@
 {
-  "CN": "{{ cluster_master_record | regex_replace(apiserver_protocol_to_use + '://', '') | regex_replace(':' + apiserver_port_to_use, '') }}",
+  "CN": "{{ cluster_master_record | regex_replace(master_scheme + '://', '') | regex_replace(':' + master_port, '') }}",
   "hosts": [
     "{{ apiserver_ip_pool }}", "{{ master_public_ip }}", "{{ master_private_ip }}", "{{ kubernetes_service_ip }}"
   ],

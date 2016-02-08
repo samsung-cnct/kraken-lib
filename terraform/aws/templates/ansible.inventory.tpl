@@ -50,8 +50,8 @@ master_private_ip=${master_private_ip}
 master_public_ip=${master_public_ip}
 apiserver_nginx_pool=${apiserver_nginx_pool}
 apiserver_ip_pool=${apiserver_ip_pool}
-apiserver_protocol_to_use=${apiserver_protocol_to_use}
-apiserver_port_to_use="${apiserver_port_to_use}""
+master_scheme=${master_scheme}
+master_port="${master_port}""
 
 [cluster:children]
 master

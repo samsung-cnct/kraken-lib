@@ -9,6 +9,6 @@ sed -e 's,$CLUSTER_DOMAIN,{{dns_domain}},g' \
     -e 's,$KUBE_MASTER_IP,{{master_private_ip}},g' \
     -e 's,$KUBE_CONTROLLER_IP,{{master_private_ip}},g' \
     -e 's,$KUBE_ETCD_IP,{{ etcd_private_ip }},g' \
-    -e 's,$KUBE_MASTER_URL,{{apiserver_protocol_to_use}}://{{master_private_ip}}:{{apiserver_port_to_use}},g' \
+    -e 's,$KUBE_MASTER_URL,{{master_scheme}}://{{master_private_ip}}:{{master_port}},g' \
     -e 's,$KUBE_SCHEDULER_IP,{{master_private_ip}},g' \
     -i -- ./*/*.{json,yaml}

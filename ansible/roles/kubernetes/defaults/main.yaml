@@ -41,8 +41,8 @@ kube_apiserver:
   token-auth-file: "{{ kubernetes_cert_dir }}/known_tokens.csv"
   basic-auth-file: "{{ kubernetes_cert_dir }}/basic_auth.csv"
   v: 1
-apiserver_port_to_use: "{{apiserver_port_to_use}}"
-apiserver_protocol_to_use: "{{apiserver_protocol_to_use}}"
+master_port: "{{master_port}}"
+master_scheme: "{{master_scheme}}"
 kube_controller_manager:
   address: "{{ master_private_ip }}"
   alsologtostderr: false
@@ -52,7 +52,7 @@ kube_controller_manager:
   deleting-pods-burst: 10
   log_dir: "{{ kubernetes_log_dir }}/controller-manager"
   logtostderr: false
-  master: "{{apiserver_protocol_to_use}}://{{ master_private_ip }}:{{apiserver_port_to_use}}"
+  master: "{{master_scheme}}://{{ master_private_ip }}:{{master_port}}"
   namespace-sync-period: 5m0s
   node-monitor-grace-period: 40s
   node-monitor-period: 5s
@@ -73,7 +73,7 @@ kube_proxy:
   kubeconfig: "{{ kubernetes_cert_dir }}/kube_proxy/kubeconfig"
   log_dir: "{{ kubernetes_log_dir }}/proxy"
   logtostderr: false
-  master: "{{apiserver_protocol_to_use}}://{{ master_private_ip }}:{{apiserver_port_to_use}}"
+  master: "{{master_scheme}}://{{ master_private_ip }}:{{master_port}}"
   v: 1
 kube_scheduler:
   address: "{{ master_private_ip }}"
@@ -81,13 +81,13 @@ kube_scheduler:
   kubeconfig: "{{ kubernetes_cert_dir }}/system:scheduler/kubeconfig"
   log_dir: "{{ kubernetes_log_dir }}/scheduler"
   logtostderr: false
-  master: "{{apiserver_protocol_to_use}}://{{ master_private_ip }}:{{apiserver_port_to_use}}"
+  master: "{{master_scheme}}://{{ master_private_ip }}:{{master_port}}"
   port: 10251
   profiling: true
   v: 1
 kubelet:
   address: 0.0.0.0
-  api-servers: "{{apiserver_protocol_to_use}}://{{ master_private_ip }}:{{apiserver_port_to_use}}"
+  api-servers: "{{master_scheme}}://{{ master_private_ip }}:{{master_port}}"
   alsologtostderr: false
   cadvisor-port: 4194
   cluster-dns: "{{ dns_ip }}"

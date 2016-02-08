@@ -142,8 +142,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           logentries_url
           cluster_user
           cluster_name
-          apiserver_protocol_to_use
-          apiserver_port_to_use
+          master_scheme
+          master_port
         ).map { |s| [s.to_sym, ENV["KRAKEN_#{s.upcase}"]] }
         kraken_env_vars = Hash[kraken_env_var_entries]
 
