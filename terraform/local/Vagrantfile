@@ -39,7 +39,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   apiserver_host_data_arr = []
   get_num_apiservers.times do |n|
     ip_addr = base_ip_address + "#{n+1+2+100}" #n+1(index starts at 0) + <etcd and master> + 100
-    apiserver_nginx_pool_arr << "server #{ip_addr}:443"
+    apiserver_nginx_pool_arr << "server #{ip_addr}:8080"
     apiserver_ip_pool_arr << "#{ip_addr}"
   end
 
