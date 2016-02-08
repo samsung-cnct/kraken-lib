@@ -35,7 +35,7 @@ write_files:
       logentries_url=${logentries_url}
       master_private_ip=${master_private_ip}
       master_public_ip=${master_public_ip}
-      apiserver_scheme=${apiserver_scheme}
+      master_scheme=${master_scheme}
       master_port="${master_port}"
 coreos:
   etcd2:

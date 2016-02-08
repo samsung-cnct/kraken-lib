@@ -368,7 +368,7 @@ variable "ansible_playbook_file" {
   description = "location of playbook file run with ansible_playbook_command"
 }
 
-variable "apiserver_scheme" {
+variable "master_scheme" {
   default     = "https"
   description = "http or https"
 }

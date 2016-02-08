@@ -58,7 +58,7 @@ resource "template_file" "master_cloudinit" {
     kraken_branch               = "${var.kraken_repo.branch}"
     kraken_commit               = "${var.kraken_repo.commit_sha}"
     ansible_docker_image        = "${var.ansible_docker_image}"
-    apiserver_scheme            = "${var.apiserver_scheme}"
+    master_scheme               = "${var.master_scheme}"
     master_port                 = "${var.master_port}"
   }
 
@@ -97,8 +97,8 @@ resource "template_file" "apiserver_cloudinit" {
     kraken_branch               = "${var.kraken_repo.branch}"
     kraken_commit               = "${var.kraken_repo.commit_sha}"
     ansible_docker_image        = "${var.ansible_docker_image}"
-    apiserver_scheme            = "${var.apiserver_scheme}"
-    master_port       = "${var.master_port}"
+    master_scheme               = "${var.master_scheme}"
+    master_port                 = "${var.master_port}"
   }
 
   provisioner "local-exec" {
@@ -135,8 +135,8 @@ resource "template_file" "node_cloudinit" {
     kraken_branch               = "${var.kraken_repo.branch}"
     kraken_commit               = "${var.kraken_repo.commit_sha}"
     ansible_docker_image        = "${var.ansible_docker_image}"
-    apiserver_scheme            = "${var.apiserver_scheme}"
-    master_port       = "${var.master_port}"
+    master_scheme               = "${var.master_scheme}"
+    master_port                 = "${var.master_port}"
   }
 
   provisioner "local-exec" {
