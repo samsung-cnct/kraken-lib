@@ -1,6 +1,7 @@
 [Unit]
 Description=Render kraken-services templates
-Requires=install-kubectl.service
+Requires=network-online.target
+After=network-online.target
 
 [Service]
 TimeoutStartSec=0

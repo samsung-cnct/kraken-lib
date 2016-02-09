@@ -1,6 +1,6 @@
 ---
 - name: Create /opt/bin/manifests for configs
-  sudo: yes
+  become: yes
   file: >
     path=/opt/bin/manifests
     state=directory
@@ -10,17 +10,17 @@
 - name: copy apiserver manifest config
   template: src=kubernetes-apiserver-pod.json.ansible
             dest=/opt/bin/manifests/apiserver.json
-  sudo: yes
+  become: yes
 
 - name: Create hyperkube apiserver
   template: src=hyperkube-docker-apiserver.service.ansible
             dest=/etc/systemd/system/hyperkube-docker-apiserver.service
-  sudo: yes
+  become: yes
   notify:
     - reload systemd
     - restart hyperkube-docker-apiserver
 
 - name: Ensure hyperkube-docker-apiserver.service started
   service: name=hyperkube-docker-apiserver state=started enabled=yes args=--no-block
-  sudo: yes
+  become: yes
 

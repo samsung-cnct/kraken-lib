@@ -1,4 +1,0 @@
----
-- hosts: cluster
-  roles:
-    - kubernetes

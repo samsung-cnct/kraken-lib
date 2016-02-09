@@ -2,6 +2,6 @@
 set -x
 cd /opt/bin/kraken-services-rendered
 for dir in $*; do
-  /opt/bin/kubectl --server=http://{{master_private_ip}}:8080 delete -f ./$dir/ || true
-  /opt/bin/kubectl --server=http://{{master_private_ip}}:8080 create -f ./$dir/
+  /opt/bin/kubectl --kubeconfig={{ kubelet.kubeconfig | expanduser }} delete -f ./$dir/ || true
+  /opt/bin/kubectl --kubeconfig={{ kubelet.kubeconfig | expanduser }} create -f ./$dir/
 done

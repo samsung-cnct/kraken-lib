@@ -28,9 +28,9 @@ ansible_connection=ssh
 ansible_python_interpreter="PATH=/home/core/bin:$PATH python"
 ansible_ssh_user=core
 ansible_ssh_private_key_file=<%= ansible_ssh_private_key_file %>
-cluster_master_record=http://<%= master_ip %>:8080
-cluster_proxy_record=<%= node_001_public_ip %>
-cluster_name=local
+cluster_master_record=<%= master_scheme %>://<%= master_ip %>:<%= master_port %>
+cluster_proxy_record=<%= node_001_ip %>
+cluster_name=<%= cluster_name %>
 dns_domain=<%= dns_domain %>
 dns_ip=<%= dns_ip %>
 dockercfg_base64=<%= dockercfg_base64 %>
@@ -39,11 +39,13 @@ etcd_public_ip=<%= etcd_ip %>
 hyperkube_deployment_mode=<%= hyperkube_deployment_mode %>
 hyperkube_image=<%= hyperkube_image %>
 interface_name=<%= interface_name %>
+kraken_local_dir=<%= kraken_local_dir %>
 kraken_services_branch=<%= kraken_services_branch %>
 kraken_services_dirs=<%= kraken_services_dirs %>
 kraken_services_repo=<%= kraken_services_repo %>
 kubernetes_api_version=<%= kubernetes_api_version %>
 kubernetes_binaries_uri=<%= kubernetes_binaries_uri %>
+kubernetes_cert_dir=<%= kubernetes_cert_dir %>
 logentries_token=<%= logentries_token %>
 logentries_url=<%= logentries_url %>
 master_private_ip=<%= master_ip %>
@@ -51,10 +53,15 @@ master_public_ip=<%= master_ip %>
 node_001_private_ip=<%= node_001_ip %>
 node_001_public_ip=<%= node_001_ip %>
 apiserver_nginx_pool=<%= apiserver_nginx_pool %>
+cluster_user=<%= cluster_user %>
+master_scheme=<%= master_scheme %>
+master_port="<%= master_port %>"
 
 [local:vars]
 ansible_connection=local
 ansible_ssh_private_key_file=<%= ansible_ssh_private_key_file %>
-cluster_name=local
+cluster_name=<%= cluster_name %>
 etcd_public_ip=<%= etcd_ip %>
 master_public_ip=<%= master_ip %>
+kubernetes_cert_dir=<%= kubernetes_cert_dir %>
+cluster_user=<%= cluster_user %>

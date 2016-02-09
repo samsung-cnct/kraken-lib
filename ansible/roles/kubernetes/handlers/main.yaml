@@ -4,112 +4,104 @@
 
 - name: reload systemd
   command: systemctl daemon-reload
-  sudo: yes
+  become: yes
 
 - name: restart logentries-url
   service: name=logentries-url state=restarted enabled=yes
-  sudo: yes
+  become: yes
 
 - name: restart logentries-token
   service: name=logentries-token state=restarted enabled=yes
-  sudo: yes
+  become: yes
 
 - name: restart journal-2-logentries
   service: name=journal-2-logentries state=restarted enabled=yes
-  sudo: yes
+  become: yes
 
 - name: restart install-hyperkube
   service: name=install-hyperkube state=restarted enabled=yes args=--no-block
-  sudo: yes
-
-- name: restart install-kubectl
-  service: name=install-kubectl state=restarted enabled=yes args=--no-block
-  sudo: yes
+  become: yes
 
 - name: restart load-kube-cert
   service: name=load-kube-cert state=restarted enabled=yes
-  sudo: yes
+  become: yes
 
 # master-common
 
 - name: restart nginx-docker
   service: name=nginx-docker state=restarted enabled=yes
-  sudo: yes
-
-- name: restart generate-kube-cert
-  service: name=generate-kube-cert state=restarted enabled=yes
-  sudo: yes
+  become: yes
 
 # master-binary
 
 - name: restart hyperkube-binary-controller-manager
   service: name=hyperkube-binary-controller-manager state=restarted enabled=yes
-  sudo: yes
+  become: yes
 
 - name: restart hyperkube-binary-scheduler
   service: name=hyperkube-binary-scheduler state=restarted enabled=yes
-  sudo: yes
+  become: yes
 
 # master-docker
 
 - name: restart hyperkube-docker-master
   service: name=hyperkube-docker-master state=restarted enabled=yes
-  sudo: yes
+  become: yes
 
 - name: restart hyperkube-docker-proxy
   service: name=hyperkube-docker-proxy state=restarted enabled=yes
-  sudo: yes
+  become: yes
 
 # apiserver-binary
 
-- name: restart hyperkube-binary-apiserver 
+- name: restart hyperkube-binary-apiserver
   service: name=hyperkube-binary-apiserver state=restarted enabled=yes
-  sudo: yes
+  become: yes
 
 # apiserver-docker
 
 - name: restart hyperkube-docker-apiserver
   service: name=hyperkube-docker-apiserver state=restarted enabled=yes
-  sudo: yes
+  become: yes
 
 # node-common
 
 - name: restart kubernetes-label
   service: name=kubernetes-label state=restarted enabled=yes
-  sudo: yes
+  become: yes
 
 # node-binary
 
 - name: restart hyperkube-binary-proxy
   service: name=hyperkube-binary-proxy state=restarted enabled=yes
-  sudo: yes
+  become: yes
 
 - name: restart hyperkube-binary-kubelet
   service: name=hyperkube-binary-kubelet state=restarted enabled=yes
-  sudo: yes
+  become: yes
 
 # node-docker
 
 - name: restart hyperkube-docker-node
   service: name=hyperkube-docker-node state=restarted enabled=yes
-  sudo: yes
+  become: yes
 
 - name: restart hyperkube-docker-proxy-node
   service: name=hyperkube-docker-proxy-node state=restarted enabled=yes
-  sudo: yes
+  become: yes
 
 # kraken-services
 
 - name: restart kraken-render
   service: name=kraken-render state=restarted enabled=yes
-  sudo: yes
+  become: yes
 
 - name: restart kraken-create-services
   service: name=kraken-create-services state=restarted enabled=yes
-  sudo: yes
+  become: yes
 
 # cadvisor
 
 - name: restart cadvisor
   service: name=cadvisor state=restarted enabled=yes
-  sudo: yes
+  become: yes

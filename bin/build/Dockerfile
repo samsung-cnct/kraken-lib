@@ -28,19 +28,19 @@ RUN apt-get update \
 
 RUN mkdir /etc/ansible/
 RUN pip install ansible
-COPY ansible/ansible.cfg /etc/ansible/ansible.cfg
+COPY ansible/build/other/ansible.cfg /etc/ansible/ansible.cfg
 
-# get terraform 
+# get terraform
 RUN wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip
 
-# get custom providers 
+# get custom providers
 RUN wget https://github.com/Samsung-AG/terraform-provider-execute/releases/download/${TERRAFORM_EXECUTE_VERSION}/terraform-provider-execute_linux_amd64.tar.gz
 RUN wget https://github.com/Samsung-AG/terraform-provider-coreosbox/releases/download/${TERRAFORM_COREOSBOX_VERSION}/terraform-provider-coreosbox_linux_amd64.tar.gz
 
 # decompress everything
 RUN unzip -o terraform_${TERRAFORM_VERSION}_linux_amd64.zip -d /usr/local/bin \
     && tar -xvf terraform-provider-coreosbox_linux_amd64.tar.gz \
-    && tar -xvf terraform-provider-execute_linux_amd64.tar.gz 
+    && tar -xvf terraform-provider-execute_linux_amd64.tar.gz
 
 # install all binaries
 RUN cp terraform* /usr/local/bin
@@ -60,8 +60,8 @@ RUN pip install awscli
 RUN ssh-keygen -q -t rsa -N '' -f /root/.ssh/id_rsa
 
 COPY ansible /opt/kraken/ansible/
-COPY generate-cert /opt/kraken/generate-cert/
 COPY terraform /opt/kraken/terraform
+COPY hack /opt/kraken/hack
 COPY bin/build/terraform-up.sh /opt/kraken/terraform-up.sh
 COPY bin/build/terraform-down.sh /opt/kraken/terraform-down.sh
 COPY bin/build/docker-utils.sh /opt/kraken/docker-utils.sh

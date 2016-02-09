@@ -13,12 +13,14 @@ kubernetes_binaries_uri: https://storage.googleapis.com/kubernetes-release/relea
 kubernetes_log_dir: /var/log/k8s
 kubernetes_systemd_stderr: "journal"
 kubernetes_systemd_stdout: "journal"
+# this needs to be kept in sync with kube_apiserver.service-cluster-ip-range CIDR
+kubernetes_service_ip: 10.100.0.1
 kube_apiserver:
   # https://github.com/kubernetes/kubernetes/blob/release-1.1/docs/admin/admission-controllers.md#is-there-a-recommended-set-of-plug-ins-to-use
-  admission-control: NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota
+  admission-control: NamespaceLifecycle,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota
   alsologtostderr: false
   bind-address: 0.0.0.0
-  client-ca-file: /srv/kubernetes/ca.crt
+  client-ca-file: "{{ kubernetes_cert_dir }}/kube-ca.pem"
   cors-allowed-origins: .*
   event-ttl: 1h0m0s
   etcd-servers: "http://{{etcd_private_ip}}:4001"
@@ -34,19 +36,23 @@ kube_apiserver:
   runtime_config: "api/{{kubernetes_api_version}}"
   secure_port: 443
   service-cluster-ip-range: 10.100.0.0/16
-  tls-cert-file: /srv/kubernetes/server.cert
-  tls-private-key-file: /srv/kubernetes/server.key
-  token-auth-file: /srv/kubernetes/known_tokens.csv
+  tls-cert-file: "{{ kubernetes_cert_dir }}/kube-ca.pem"
+  tls-private-key-file: "{{ kubernetes_cert_dir }}/kube-ca-key.pem"
+  token-auth-file: "{{ kubernetes_cert_dir }}/known_tokens.csv"
+  basic-auth-file: "{{ kubernetes_cert_dir }}/basic_auth.csv"
   v: 1
+master_port: "{{master_port}}"
+master_scheme: "{{master_scheme}}"
 kube_controller_manager:
   address: "{{ master_private_ip }}"
   alsologtostderr: false
+  kubeconfig: "{{ kubernetes_cert_dir }}/system:controller_manager/kubeconfig"
   concurrent-endpoint-syncs: 5
   concurrent-rc-syncs: 5
   deleting-pods-burst: 10
   log_dir: "{{ kubernetes_log_dir }}/controller-manager"
   logtostderr: false
-  master: "{{ master_private_ip }}:8080"
+  master: "{{master_scheme}}://{{ master_private_ip }}:{{master_port}}"
   namespace-sync-period: 5m0s
   node-monitor-grace-period: 40s
   node-monitor-period: 5s
@@ -58,29 +64,30 @@ kube_controller_manager:
   pvclaimbinder-sync-period: 10s
   register-retry-count: 10
   resource-quota-sync-period: 20s
-  root-ca-file: /srv/kubernetes/ca.crt
-  service-account-private-key-file: /srv/kubernetes/server.key
+  root-ca-file: "{{ kubernetes_cert_dir }}/kube-ca.pem"
+  service-account-private-key-file: "{{ kubernetes_cert_dir }}/kube-ca-key.pem"
   service-sync-period: 5m0s
   v: 1
 kube_proxy:
   alsologtostderr: false
-  kubeconfig: /srv/kubernetes/kube-proxy/kubeconfig
+  kubeconfig: "{{ kubernetes_cert_dir }}/kube_proxy/kubeconfig"
   log_dir: "{{ kubernetes_log_dir }}/proxy"
   logtostderr: false
-  master: "{{ master_private_ip }}:8080"
+  master: "{{master_scheme}}://{{ master_private_ip }}:{{master_port}}"
   v: 1
 kube_scheduler:
   address: "{{ master_private_ip }}"
   alsologtostderr: false
+  kubeconfig: "{{ kubernetes_cert_dir }}/system:scheduler/kubeconfig"
   log_dir: "{{ kubernetes_log_dir }}/scheduler"
   logtostderr: false
-  master: "{{ master_private_ip }}:8080"
+  master: "{{master_scheme}}://{{ master_private_ip }}:{{master_port}}"
   port: 10251
   profiling: true
   v: 1
 kubelet:
   address: 0.0.0.0
-  api-servers: "http://{{ master_private_ip }}:8080"
+  api-servers: "{{master_scheme}}://{{ master_private_ip }}:{{master_port}}"
   alsologtostderr: false
   cadvisor-port: 4194
   cluster-dns: "{{ dns_ip }}"
@@ -92,7 +99,7 @@ kubelet:
   healthz-port: 10254
   # TODO: do we have access to ansible_local here?
   # hostname_override: "{{ ansible_local.kubernetes_node_ip_fact.node_ip_address }}"
-  kubeconfig: /srv/kubernetes/kubelet/kubeconfig
+  kubeconfig: "{{ kubernetes_cert_dir }}/kubelet/kubeconfig"
   log_dir: "{{ kubernetes_log_dir }}/kubelet"
   logtostderr: false
   # max-pods: 40

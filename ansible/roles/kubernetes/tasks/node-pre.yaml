@@ -5,14 +5,14 @@
     path=/etc/ansible/facts.d
     recurse=yes
     state=directory
-  sudo: yes
+  become: yes
 
 - name: install custom fact module for IP address
   template: >
     src=node_ip_address_fact.sh.ansible
     dest=/etc/ansible/facts.d/kubernetes_node_ip_fact.fact
     mode=0755
-  sudo: yes
+  become: yes
 
 - name: reload ansible_local
   setup: filter=ansible_local

@@ -2,7 +2,6 @@
 Description=Launch hyperkube node proxy
 Requires=hyperkube-docker-node.service
 After=hyperkube-docker-node.service
-After=load-kube-cert.service
 
 [Service]
 StandardOutput={{ kubernetes_systemd_stdout }}
@@ -16,7 +15,7 @@ ExecStart=/usr/bin/docker run \
   --name kube-proxy \
   --net=host \
   --privileged \
-  -v /srv/kubernetes:/srv/kubernetes \
+  -v {{ kubernetes_cert_dir }}:{{ kubernetes_cert_dir }} \
   -v {{kube_proxy.log_dir}}:{{kube_proxy.log_dir}} \
   {{hyperkube_image}} \
     /hyperkube proxy \

@@ -68,7 +68,8 @@ echo "$((SLEEP_TIME*TOTAL_WAITS*RETRIES)) seconds total wait time on kubectl hea
 echo "Host numbering offset is ${NUMBERING_OFFSET}"
 
 function control_c() {
-  echo "Interrupted. Will try to generate local ansible inventory anyway."
+  echo "Interrupted. Will try to generate local ansible inventory and kubeconfig anyway."
+  generate_kubeconfig
   generate_configs
   exit 1
 }
@@ -80,7 +81,7 @@ function generate_configs() {
     $(aws --output text --query "AutoScalingGroups[0].Instances[?LifecycleState=='InService'].InstanceId" autoscaling describe-auto-scaling-groups --auto-scaling-group-names "${ASG_NAME}"))
 
   current_node=$((NUMBERING_OFFSET+1))
-  output="\n[nodes]\n"
+  output="nodes\n[nodes]\n"
   for ec2_ip in $ec2_ips; do
     output="${output}$(printf 'node-%03d' ${current_node}) ansible_ssh_host=${ec2_ip}\n"
     current_node=$((current_node+1))
@@ -95,8 +96,20 @@ function generate_configs() {
   chmod -x ${OUTPUT_FILE}
 
   # run ansible
-  echo "Running ansible-playbook -i ${OUTPUT_FILE} ${script_dir}/../../ansible/localhost_post_provision.yaml ..."
-  ansible-playbook -i ${OUTPUT_FILE} ${script_dir}/../../ansible/localhost_post_provision.yaml
+  echo "Running ansible-playbook -i ${OUTPUT_FILE} ${script_dir}/../../ansible/generate_local_ssh_config.yaml ..."
+  ansible-playbook -i ${OUTPUT_FILE} ${script_dir}/../../ansible/generate_local_ssh_config.yaml
+}
+
+function generate_kubeconfig() {
+  script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+
+  # run ansible
+  echo "Running ansible-playbook -i ${OUTPUT_FILE} ${script_dir}/../../ansible/generate_local_kubeconfig.yaml ..."
+  until ANSIBLE_HOST_KEY_CHECKING=False \
+    ansible-playbook -i ${OUTPUT_FILE} \
+    ${script_dir}/../../ansible/generate_local_kubeconfig.yaml \
+    --extra-vars "kubeconfig=${KUBECONFIG}"; \
+    do echo 'Retrying...'; sleep 5; done;
 }
 
 function  wait_for_asg() {
@@ -105,7 +118,7 @@ function  wait_for_asg() {
   local asg_instances=($(aws --output text --query "AutoScalingGroups[0].Instances[?LifecycleState=='InService'].InstanceId" \
           autoscaling describe-auto-scaling-groups --auto-scaling-group-name "${ASG_NAME}"))
   local autoscaling_wait=${SLEEP_TIME}
-  
+
   local healthy=
   if [[ " ${asg_instances[*]} " == *" None "* ]]; then
     healthy=false
@@ -119,7 +132,7 @@ function  wait_for_asg() {
     sleep ${autoscaling_wait}
     asg_instances=($(aws --output text --query "AutoScalingGroups[0].Instances[?LifecycleState=='InService'].InstanceId" \
       autoscaling describe-auto-scaling-groups --auto-scaling-group-name "${ASG_NAME}"))
-    
+
     if [[ " ${asg_instances[*]} " == *" None "* ]]; then
       echo "${ASG_NAME} still has some nodes without an assigned ip"
       healthy=false
@@ -182,7 +195,7 @@ function nudge_asg_nodes() {
   done
 
   # wait 30 seconds for node termination to take
-  sleep 30 
+  sleep 30
 }
 
 # setup a sigint trap
@@ -191,6 +204,9 @@ trap control_c SIGINT
 # first lets wait for the autoscaling group to fill out.
 echo "Starting wait on ${ASG_NAME} autoscaling group to become healthy."
 wait_for_asg
+
+# generate kubectl config
+generate_kubeconfig
 
 # get a count of nodes from kubectl
 echo "Starting wait on ${NODE_LIMIT} provisioned kubernetes nodes."

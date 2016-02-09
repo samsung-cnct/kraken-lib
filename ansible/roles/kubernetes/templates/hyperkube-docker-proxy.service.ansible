@@ -2,7 +2,6 @@
 Description=Launch hyperkube proxy
 Requires=hyperkube-docker-master.service
 After=hyperkube-docker-master.service
-After=load-kube-cert.service
 
 [Service]
 StandardOutput={{ kubernetes_systemd_stdout }}
@@ -16,12 +15,12 @@ ExecStart=/usr/bin/docker run \
   --name kube-proxy \
   --net=host \
   --privileged \
-  -v /srv/kubernetes:/srv/kubernetes \
+  -v {{ kubernetes_cert_dir }}:{{ kubernetes_cert_dir }} \
   -v {{kube_proxy.log_dir}}:{{kube_proxy.log_dir}} \
   {{hyperkube_image}} \
     /hyperkube proxy \
     {% for k,v in kube_proxy.iteritems() %}
       --{{k}}={{v}} \
     {% endfor %}
-    --master=http://127.0.0.1:8080 \
-    --kubeconfig=/srv/kubernetes/kube-proxy/kubeconfig
+    --master={{master_scheme}}://127.0.0.1:{{master_port}} \
+    --kubeconfig={{ kube_proxy.kubeconfig | expanduser }}

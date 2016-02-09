@@ -3,7 +3,7 @@
 # master-docker
 
 - name: Create /opt/bin/manifests for configs
-  sudo: yes
+  become: yes
   file: >
     path=/opt/bin/manifests
     state=directory
@@ -13,29 +13,29 @@
 - name: copy master manifest config
   template: src=kubernetes-master-pod.json.ansible
             dest=/opt/bin/manifests/master.json
-  sudo: yes
+  become: yes
 
 - name: Create hyperkube-docker-master
   template: src=hyperkube-docker-master.service.ansible
             dest=/etc/systemd/system/hyperkube-docker-master.service
-  sudo: yes
+  become: yes
   notify:
     - reload systemd
     - restart hyperkube-docker-master
 
 - name: Ensure hyperkube-docker-master.service started
   service: name=hyperkube-docker-master state=started enabled=yes args=--no-block
-  sudo: yes
+  become: yes
 
 - name: Create hyperkube-docker-proxy
   template: src=hyperkube-docker-proxy.service.ansible
             dest=/etc/systemd/system/hyperkube-docker-proxy.service
-  sudo: yes
+  become: yes
   notify:
     - reload systemd
     - restart hyperkube-docker-proxy
 
 - name: Ensure hyperkube-docker-proxy.service started
   service: name=hyperkube-docker-proxy state=started enabled=yes args=--no-block
-  sudo: yes
+  become: yes
 

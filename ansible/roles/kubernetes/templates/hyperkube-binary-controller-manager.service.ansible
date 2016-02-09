@@ -1,7 +1,6 @@
 [Unit]
 Description=Launch hyperkube controller-manager
 Requires=install-hyperkube.service
-After=load-kube-cert.service
 
 [Service]
 StandardOutput={{ kubernetes_systemd_stdout }}

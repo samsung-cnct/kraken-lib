@@ -1,12 +1,7 @@
 ---
-- name: create install-kubectl.service
-  template: src=install-kubectl.service.ansible dest=/etc/systemd/system/install-kubectl.service
-  sudo: yes
-  notify:
-    - reload systemd
-    - restart install-kubectl
-
-- name: Ensure install-kubectl.service started
-  service: name=install-kubectl state=started enabled=yes args=--no-block
-  sudo: yes
-
+- name: install kubectl binary
+  command : "{{ item }}"
+  with_items:
+    - sudo /usr/bin/wget -N -O /opt/bin/kubectl.installing {{kubernetes_binaries_uri}}/kubectl
+    - sudo /usr/bin/chmod +x /opt/bin/kubectl.installing
+    - sudo /usr/bin/mv -v /opt/bin/kubectl.installing /opt/bin/kubectl

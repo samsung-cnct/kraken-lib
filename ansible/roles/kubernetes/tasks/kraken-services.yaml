@@ -1,7 +1,7 @@
 ---
 
 - name: Create /opt/bin/kraken-services for custom binaries
-  sudo: yes
+  become: yes
   file: >
     path=/opt/bin/kraken-services
     state=directory
@@ -14,7 +14,7 @@
        version={{kraken_services_branch}}
        accept_hostkey=yes
        force=yes
-  sudo: yes
+  become: yes
   notify:
     - reload systemd
     - restart kraken-render
@@ -23,22 +23,22 @@
 - name: Create kraken-render script
   template: src=kraken-render.sh.ansible
             dest=/opt/bin/kraken-render.sh
-  sudo: yes
+  become: yes
 
 - name: Create kraken-create script
   template: src=kraken-create.sh.ansible
             dest=/opt/bin/kraken-create.sh
-  sudo: yes
+  become: yes
 
 - name: Create kraken-create-only script
   template: src=kraken-create-only.sh.ansible
             dest=/opt/bin/kraken-create-only.sh
-  sudo: yes
+  become: yes
 
 - name: Create kraken-create-services script
   template: src=kraken-create-services.sh.ansible
             dest=/opt/bin/kraken-create-services.sh
-  sudo: yes
+  become: yes
 
 - name: Create kraken-render
   template: src=kraken-render.service.ansible
@@ -50,17 +50,17 @@
 
 - name: Ensure kraken-render.service started
   service: name=kraken-render state=started enabled=yes args=--no-block
-  sudo: yes
+  become: yes
 
 - name: Create kraken-create-services
   template: src=kraken-create-services.service.ansible
             dest=/etc/systemd/system/kraken-create-services.service
-  sudo: yes
+  become: yes
   notify:
     - reload systemd
     - restart kraken-create-services
 
 - name: Ensure kraken-create-services.service started
   service: name=kraken-create-services state=started enabled=yes args=--no-block
-  sudo: yes
+  become: yes
 

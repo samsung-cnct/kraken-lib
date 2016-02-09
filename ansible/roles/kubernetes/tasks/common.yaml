@@ -2,20 +2,20 @@
 # XXX: until we can find a better way to reliably...
 # - reload systemd and restart a service when its unit file changes
 # - reload systemd and start a service when the service isn't present but the unit file is
-# 
+#
 # ... we reload systemd at the start of every run, to pick up files that may have been
 #     rendered last run, but not loaded
 - name: reload systemd (as a workaround)
   command: systemctl daemon-reload
-  sudo: yes
+  become: yes
 
 - name: set hostname
   command: hostnamectl set-hostname {{ inventory_hostname }}
-  sudo: yes
+  become: yes
 
 - name: create logentries-url.service
   template: src=logentries-url.service.ansible dest=/etc/systemd/system/logentries-url.service
-  sudo: yes
+  become: yes
   when: logentries_token|default("") != ""
   notify:
     - reload systemd
@@ -23,7 +23,7 @@
 
 - name: create logentries-token.service
   template: src=logentries-token.service.ansible dest=/etc/systemd/system/logentries-token.service
-  sudo: yes
+  become: yes
   when: logentries_token|default("") != ""
   notify:
     - reload systemd
@@ -31,7 +31,7 @@
 
 - name: create journal-2-logentries.service
   template: src=journal-2-logentries.service.ansible dest=/etc/systemd/system/journal-2-logentries.service
-  sudo: yes
+  become: yes
   when: logentries_token|default("") != ""
   notify:
     - reload systemd

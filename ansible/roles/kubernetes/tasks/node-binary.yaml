@@ -1,7 +1,7 @@
 ---
 - name: create install-hyperkube.service
   template: src=install-hyperkube.service.ansible dest=/etc/systemd/system/install-hyperkube.service
-  sudo: yes
+  become: yes
   notify:
     - reload systemd
     - restart install-hyperkube
@@ -11,28 +11,28 @@
 
 - name: Ensure install-hyperkube.service started
   service: name=install-hyperkube state=started enabled=yes args=--no-block
-  sudo: yes
+  become: yes
 
 - name: Create hyperkube-binary-kubelet
   template: src=hyperkube-binary-kubelet.service.ansible
             dest=/etc/systemd/system/hyperkube-binary-kubelet.service
-  sudo: yes
+  become: yes
   notify:
     - reload systemd
     - restart hyperkube-binary-kubelet
 
 - name: Ensure hyperkube-binary-kubelet.service started
   service: name=hyperkube-binary-kubelet state=started enabled=yes args=--no-block
-  sudo: yes
+  become: yes
 
 - name: Create hyperkube-binary-proxy
   template: src=hyperkube-binary-proxy.service.ansible
             dest=/etc/systemd/system/hyperkube-binary-proxy.service
-  sudo: yes
+  become: yes
   notify:
     - reload systemd
     - restart hyperkube-binary-proxy
 
 - name: Ensure hyperkube-binary-proxy.service started
   service: name=hyperkube-binary-proxy state=started enabled=yes args=--no-block
-  sudo: yes
+  become: yes
