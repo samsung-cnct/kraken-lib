@@ -20,19 +20,19 @@ $krakenRoot = "$(split-path -parent $MyInvocation.MyCommand.Definition)\.."
 
 New-Item -ItemType Directory -Force -Path "$krakenRoot\bin\clusters\$clustername"
 Invoke-Expression "docker cp kraken_data:/kraken_data/$clustername/ssh_config `
-  `"$krakenRoot\bin\clusters\$clustername\ssh_config`""
+  `"$krakenRoot\bin\clusters\$clustername\`""
 Invoke-Expression "docker cp kraken_data:/kraken_data/$clustername/ansible.inventory `
-  `"$krakenRoot\bin\clusters\$clustername\ansible.inventory`""
+  `"$krakenRoot\bin\clusters\$clustername\`""
 Invoke-Expression "docker cp kraken_data:/kraken_data/$clustername/terraform.tfstate `
-  `"$krakenRoot\bin\clusters\$clustername\terraform.tfstate`""
+  `"$krakenRoot\bin\clusters\$clustername\`""
 Invoke-Expression "docker cp $kraken_container_name`:/opt/kraken/terraform/$clustertype/$clustername/terraform.tfvars `
-  `"$krakenRoot\bin\clusters\$clustername\terraform.tfvars`""
+  `"$krakenRoot\bin\clusters\$clustername\`""
 Invoke-Expression "docker cp kraken_data:/kraken_data/kube_config `
-  `"$krakenRoot\bin\clusters\$clustername\kube_config`""
+  `"$krakenRoot\bin\clusters\$clustername\`""
 Invoke-Expression "docker cp $kraken_container_name`:/root/.ssh/id_rsa `
-  `"$krakenRoot\bin\clusters\$clustername\id_rsa`""
+  `"$krakenRoot\bin\clusters\$clustername\`""
 Invoke-Expression "docker cp $kraken_container_name`:/root/.ssh/id_rsa.pub `
-  `"$krakenRoot\bin\clusters\$clustername\id_rsa.pub`""
+  `"$krakenRoot\bin\clusters\$clustername\`""
 
 inf "Parameters for ssh:`n  docker-machine.exe env --shell=powershell $dmname`n  `
   docker run -it --volumes-from kraken_data samsung_ag/kraken ssh -F /kraken_data/$clustername/ssh_config `
