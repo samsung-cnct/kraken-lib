@@ -613,7 +613,8 @@ resource "aws_route53_record" "proxy_record" {
 }
 
 resource "template_file" "ansible_inventory" {
-  template = "${path.module}/templates/ansible.inventory.tpl"
+  depends_on                      = ["aws_autoscaling_group.kubernetes_nodes"] # explicit dependency to make sure autocscaling group is up prior to running helper script
+  template                        = "${path.module}/templates/ansible.inventory.tpl"
 
   vars {
     ansible_ssh_private_key_file  = "${var.aws_local_private_key}"
@@ -659,6 +660,6 @@ resource "template_file" "ansible_inventory" {
   }
 
   provisioner "local-exec" {
-    command = "AWS_ACCESS_KEY_ID=${var.aws_access_key} AWS_SECRET_ACCESS_KEY=${var.aws_secret_key} AWS_DEFAULT_REGION=${var.aws_region} ${path.module}/kraken_asg_helper.sh --kubeconfig ${var.kubeconfig} --cluster ${var.cluster_name} --limit ${var.node_count + var.special_node_count} --name ${var.aws_user_prefix}_${var.cluster_name}_node_asg --output ${path.module}/rendered/ansible.inventory --singlewait ${var.asg_wait_single} --totalwaits ${var.asg_wait_total} --offset ${var.special_node_count} --retries ${var.asg_retries}"
+    command = "AWS_ACCESS_KEY_ID=${var.aws_access_key} AWS_SECRET_ACCESS_KEY=${var.aws_secret_key} AWS_DEFAULT_REGION=${var.aws_region} ${path.module}/kraken_asg_helper.sh --kubeconfig ${var.kubeconfig} --cluster ${var.cluster_name} --limit ${var.node_count + var.special_node_count} --name ${aws_autoscaling_group.kubernetes_nodes.name} --output ${path.module}/rendered/ansible.inventory --singlewait ${var.asg_wait_single} --totalwaits ${var.asg_wait_total} --offset ${var.special_node_count} --retries ${var.asg_retries}"
   }
 }
