@@ -54,7 +54,7 @@ case $key in
   KRAKEN_DOCKER_MACHINE_NAME="$2"
   shift
   ;;
-  --dmname)
+  --dmshell)
   KRAKEN_DOCKER_MACHINE_SHELL="$2"
   shift
   ;;
