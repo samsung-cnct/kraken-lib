@@ -54,6 +54,10 @@ case $key in
   KRAKEN_DOCKER_MACHINE_NAME="$2"
   shift
   ;;
+  --dmname)
+  KRAKEN_DOCKER_MACHINE_SHELL="$2"
+  shift
+  ;;
   *)
     # unknown option
   ;;
@@ -107,7 +111,11 @@ if [ "${KRAKEN_NATIVE_DOCKER}" = false ]; then
     setup_dockermachine
   fi
 
-  eval "$(docker-machine env ${KRAKEN_DOCKER_MACHINE_NAME})"
+  if [ -z ${KRAKEN_DOCKER_MACHINE_SHELL+x} ]; then
+    eval "$(docker-machine env ${KRAKEN_DOCKER_MACHINE_NAME})"
+  else
+    eval "$(docker-machine env ${KRAKEN_DOCKER_MACHINE_NAME} --shell ${KRAKEN_DOCKER_MACHINE_SHELL})"
+  fi
 fi
 
 # create the data volume container for state
