@@ -613,7 +613,6 @@ resource "aws_route53_record" "proxy_record" {
 }
 
 resource "template_file" "ansible_inventory" {
-  depends_on                      = ["aws_autoscaling_group.kubernetes_nodes"] # explicit dependency to make sure autocscaling group is up prior to running helper script
   template                        = "${path.module}/templates/ansible.inventory.tpl"
 
   vars {

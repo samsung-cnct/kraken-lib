@@ -7,6 +7,10 @@
   become: yes
   wait_for: path={{ kubernetes_cert_dir }}/{{ cluster_user }}/kubeconfig timeout=1200 state=present
 
+- name: Wait for kube-ca.pem to show up on master node
+  become: yes
+  wait_for: path={{ kubernetes_cert_dir }}/kube-ca.pem timeout=1200 state=present
+
 - name: fetch master tls cert
   become: yes
   fetch: src={{ kubernetes_cert_dir }}/kube-ca.pem dest={{ master_kube_config_file.stdout }}/kube-ca.pem flat=yes
