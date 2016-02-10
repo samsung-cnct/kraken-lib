@@ -27,7 +27,7 @@ Invoke-Expression "docker cp kraken_data:/kraken_data/$clustername/terraform.tfs
   `"$krakenRoot\bin\clusters\$clustername\`""
 Invoke-Expression "docker cp $kraken_container_name`:/opt/kraken/terraform/$clustertype/$clustername/terraform.tfvars `
   `"$krakenRoot\bin\clusters\$clustername\`""
-Invoke-Expression "docker cp kraken_data:/kraken_data/kube_config `
+Invoke-Expression "docker cp kraken_data:/kraken_data/$clustername/kube_config `
   `"$krakenRoot\bin\clusters\$clustername\`""
 Invoke-Expression "docker cp $kraken_container_name`:/root/.ssh/id_rsa `
   `"$krakenRoot\bin\clusters\$clustername\`""
