@@ -216,7 +216,15 @@ resource "aws_security_group" "vpc_secgroup" {
     self        = true
   }
 
-  # icmp (with the default group)
+  # intra-group all ports / all protocols
+  ingress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    self            = true
+  }
+
+  # inbound all ports / all protocols from the vpc's default secgroup
   ingress {
     from_port       = 0
     to_port         = 0
