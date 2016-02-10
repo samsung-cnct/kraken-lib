@@ -202,20 +202,19 @@ resource "aws_security_group" "vpc_secgroup" {
 
   # intra-group kube-controller-manager http access
   ingress {
-    from_port = 10252
-    to_port   = 10252
-    protocol  = "TCP"
-    self      = true
+    from_port   = 10252
+    to_port     = 10252
+    protocol    = "TCP"
+    self        = true
   }
 
   # intra-group kubelet/healthz http access
   ingress {
-    from_port = 10254
-    to_port   = 10254
-    protocol  = "TCP"
-    self      = true
+    from_port   = 10254
+    to_port     = 10254
+    protocol    = "TCP"
+    self        = true
   }
-
 
   # icmp (with the default group)
   ingress {
@@ -257,18 +256,18 @@ resource "template_file" "etcd_cloudinit" {
   template = "${path.module}/templates/etcd.yaml.tpl"
 
   vars {
+    ansible_docker_image      = "${var.ansible_docker_image}"
     ansible_playbook_command  = "${var.ansible_playbook_command}"
     ansible_playbook_file     = "${var.ansible_playbook_file}"
-    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_etcd)}"
-    coreos_update_channel     = "${var.coreos_update_channel}"
     coreos_reboot_strategy    = "${var.coreos_reboot_strategy}"
+    coreos_update_channel     = "${var.coreos_update_channel}"
+    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_etcd)}"
+    kraken_branch             = "${var.kraken_repo.branch}"
+    kraken_commit             = "${var.kraken_repo.commit_sha}"
+    kraken_repo               = "${var.kraken_repo.repo}"
     kubernetes_binaries_uri   = "${var.kubernetes_binaries_uri}"
     logentries_token          = "${var.logentries_token}"
     logentries_url            = "${var.logentries_url}"
-    kraken_repo               = "${var.kraken_repo.repo}"
-    kraken_branch             = "${var.kraken_repo.branch}"
-    kraken_commit             = "${var.kraken_repo.commit_sha}"
-    ansible_docker_image      = "${var.ansible_docker_image}"
   }
 }
 
@@ -304,19 +303,26 @@ resource "template_file" "apiserver_cloudinit" {
   template = "${path.module}/templates/apiserver.yaml.tpl"
 
   vars {
+    ansible_docker_image      = "${var.ansible_docker_image}"
     ansible_playbook_command  = "${var.ansible_playbook_command}"
     ansible_playbook_file     = "${var.ansible_playbook_file}"
     cluster_name              = "${var.cluster_name}"
     cluster_user              = "${var.aws_user_prefix}"
+    coreos_reboot_strategy    = "${var.coreos_reboot_strategy}"
+    coreos_update_channel     = "${var.coreos_update_channel}"
     dns_domain                = "${var.dns_domain}"
     dns_ip                    = "${var.dns_ip}"
     dockercfg_base64          = "${var.dockercfg_base64}"
     etcd_private_ip           = "${aws_instance.kubernetes_etcd.private_ip}"
     etcd_public_ip            = "${aws_instance.kubernetes_etcd.public_ip}"
+    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_apiserver)}"
     hyperkube_deployment_mode = "${var.hyperkube_deployment_mode}"
     hyperkube_image           = "${var.hyperkube_image}"
     interface_name            = "eth0"
+    kraken_branch             = "${var.kraken_repo.branch}"
+    kraken_commit             = "${var.kraken_repo.commit_sha}"
     kraken_local_dir          = "${var.kraken_local_dir}"
+    kraken_repo               = "${var.kraken_repo.repo}"
     kraken_services_branch    = "${var.kraken_services_branch}"
     kraken_services_dirs      = "${var.kraken_services_dirs}"
     kraken_services_repo      = "${var.kraken_services_repo}"
@@ -325,15 +331,8 @@ resource "template_file" "apiserver_cloudinit" {
     kubernetes_cert_dir       = "${var.kubernetes_cert_dir}"
     logentries_token          = "${var.logentries_token}"
     logentries_url            = "${var.logentries_url}"
-    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_apiserver)}"
-    coreos_update_channel     = "${var.coreos_update_channel}"
-    coreos_reboot_strategy    = "${var.coreos_reboot_strategy}"
-    kraken_repo               = "${var.kraken_repo.repo}"
-    kraken_branch             = "${var.kraken_repo.branch}"
-    kraken_commit             = "${var.kraken_repo.commit_sha}"
-    ansible_docker_image      = "${var.ansible_docker_image}"
-    master_scheme             = "${var.master_scheme}"
     master_port               = "${var.master_port}"
+    master_scheme             = "${var.master_scheme}"
   }
 }
 
@@ -370,20 +369,30 @@ resource "template_file" "master_cloudinit" {
   template = "${path.module}/templates/master.yaml.tpl"
 
   vars {
+    ansible_docker_image      = "${var.ansible_docker_image}"
     ansible_playbook_command  = "${var.ansible_playbook_command}"
     ansible_playbook_file     = "${var.ansible_playbook_file}"
+    apiserver_ip_pool         = "${join(",", concat(formatlist("%v", aws_instance.kubernetes_apiserver.*.private_ip)))}"
+    apiserver_nginx_pool      = "${join(" ", concat(formatlist("server %v:8080;", aws_instance.kubernetes_apiserver.*.private_ip)))}"
     cluster_master_record     = "${var.master_scheme}://${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-master.${var.aws_cluster_domain}:${var.master_port}"
     cluster_name              = "${var.cluster_name}"
+    cluster_proxy_record      = "${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-proxy.${var.aws_cluster_domain}"
     cluster_user              = "${var.aws_user_prefix}"
+    coreos_reboot_strategy    = "${var.coreos_reboot_strategy}"
+    coreos_update_channel     = "${var.coreos_update_channel}"
     dns_domain                = "${var.dns_domain}"
     dns_ip                    = "${var.dns_ip}"
     dockercfg_base64          = "${var.dockercfg_base64}"
     etcd_private_ip           = "${aws_instance.kubernetes_etcd.private_ip}"
     etcd_public_ip            = "${aws_instance.kubernetes_etcd.public_ip}"
+    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_master)}"
     hyperkube_deployment_mode = "${var.hyperkube_deployment_mode}"
     hyperkube_image           = "${var.hyperkube_image}"
     interface_name            = "eth0"
+    kraken_branch             = "${var.kraken_repo.branch}"
+    kraken_commit             = "${var.kraken_repo.commit_sha}"
     kraken_local_dir          = "${var.kraken_local_dir}"
+    kraken_repo               = "${var.kraken_repo.repo}"
     kraken_services_branch    = "${var.kraken_services_branch}"
     kraken_services_dirs      = "${var.kraken_services_dirs}"
     kraken_services_repo      = "${var.kraken_services_repo}"
@@ -392,19 +401,9 @@ resource "template_file" "master_cloudinit" {
     kubernetes_cert_dir       = "${var.kubernetes_cert_dir}"
     logentries_token          = "${var.logentries_token}"
     logentries_url            = "${var.logentries_url}"
-    short_name                = "master"
-    cluster_proxy_record      = "${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-proxy.${var.aws_cluster_domain}"
-    format_docker_storage_mnt = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_master)}"
-    coreos_update_channel     = "${var.coreos_update_channel}"
-    coreos_reboot_strategy    = "${var.coreos_reboot_strategy}"
-    kraken_repo               = "${var.kraken_repo.repo}"
-    kraken_branch             = "${var.kraken_repo.branch}"
-    apiserver_nginx_pool      = "${join(" ", concat(formatlist("server %v:8080;", aws_instance.kubernetes_apiserver.*.private_ip)))}"
-    apiserver_ip_pool         = "${join(",", concat(formatlist("%v", aws_instance.kubernetes_apiserver.*.private_ip)))}"
-    kraken_commit             = "${var.kraken_repo.commit_sha}"
-    ansible_docker_image      = "${var.ansible_docker_image}"
-    master_scheme             = "${var.master_scheme}"
     master_port               = "${var.master_port}"
+    master_scheme             = "${var.master_scheme}"
+    short_name                = "master"
   }
 }
 
@@ -441,20 +440,30 @@ resource "template_file" "node_cloudinit_special" {
   count    = "${var.special_node_count}"
 
   vars {
+    ansible_docker_image       = "${var.ansible_docker_image}"
     ansible_playbook_command   = "${var.ansible_playbook_command}"
     ansible_playbook_file      = "${var.ansible_playbook_file}"
     cluster_master_record      = "${var.master_scheme}://${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-master.${var.aws_cluster_domain}:${var.master_port}"
     cluster_name               = "${var.cluster_name}"
+    cluster_name               = "${var.cluster_name}"
+    cluster_proxy_record       = "${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-proxy.${var.aws_cluster_domain}"
     cluster_user               = "${var.aws_user_prefix}"
+    coreos_reboot_strategy     = "${var.coreos_reboot_strategy}"
+    coreos_update_channel      = "${var.coreos_update_channel}"
     dns_domain                 = "${var.dns_domain}"
     dns_ip                     = "${var.dns_ip}"
     dockercfg_base64           = "${var.dockercfg_base64}"
     etcd_private_ip            = "${aws_instance.kubernetes_etcd.private_ip}"
     etcd_public_ip             = "${aws_instance.kubernetes_etcd.public_ip}"
+    format_docker_storage_mnt  = "${lookup(var.format_docker_storage_mnt, element(split(",", var.aws_storage_type_special_docker), count.index))}"
+    format_kubelet_storage_mnt = "${lookup(var.format_kubelet_storage_mnt, element(split(",", var.aws_storage_type_special_kubelet), count.index))}"
     hyperkube_deployment_mode  = "${var.hyperkube_deployment_mode}"
     hyperkube_image            = "${var.hyperkube_image}"
     interface_name             = "eth0"
+    kraken_branch              = "${var.kraken_repo.branch}"
+    kraken_commit              = "${var.kraken_repo.commit_sha}"
     kraken_local_dir           = "${var.kraken_local_dir}"
+    kraken_repo                = "${var.kraken_repo.repo}"
     kraken_services_branch     = "${var.kraken_services_branch}"
     kraken_services_dirs       = "${var.kraken_services_dirs}"
     kraken_services_repo       = "${var.kraken_services_repo}"
@@ -463,21 +472,11 @@ resource "template_file" "node_cloudinit_special" {
     kubernetes_cert_dir        = "${var.kubernetes_cert_dir}"
     logentries_token           = "${var.logentries_token}"
     logentries_url             = "${var.logentries_url}"
+    master_port                = "${var.master_port}"
     master_private_ip          = "${aws_instance.kubernetes_master.private_ip}"
     master_public_ip           = "${aws_instance.kubernetes_master.public_ip}"
-    cluster_proxy_record       = "${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-proxy.${var.aws_cluster_domain}"
-    cluster_name               = "${var.cluster_name}"
-    format_docker_storage_mnt  = "${lookup(var.format_docker_storage_mnt, element(split(",", var.aws_storage_type_special_docker), count.index))}"
-    format_kubelet_storage_mnt = "${lookup(var.format_kubelet_storage_mnt, element(split(",", var.aws_storage_type_special_kubelet), count.index))}"
-    coreos_update_channel      = "${var.coreos_update_channel}"
-    coreos_reboot_strategy     = "${var.coreos_reboot_strategy}"
-    short_name                 = "node-${format("%03d", count.index+1)}"
-    kraken_repo                = "${var.kraken_repo.repo}"
-    kraken_branch              = "${var.kraken_repo.branch}"
-    kraken_commit              = "${var.kraken_repo.commit_sha}"
-    ansible_docker_image       = "${var.ansible_docker_image}"
     master_scheme              = "${var.master_scheme}"
-    master_port                = "${var.master_port}"
+    short_name                 = "node-${format("%03d", count.index+1)}"
   }
 }
 
@@ -524,20 +523,30 @@ resource "template_file" "node_cloudinit" {
   template = "${path.module}/templates/node.yaml.tpl"
 
   vars {
+    ansible_docker_image        = "${var.ansible_docker_image}"
     ansible_playbook_command    = "${var.ansible_playbook_command}"
     ansible_playbook_file       = "${var.ansible_playbook_file}"
     cluster_master_record       = "${var.master_scheme}://${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-master.${var.aws_cluster_domain}:${var.master_port}"
     cluster_name                = "${var.cluster_name}"
+    cluster_name                = "${var.cluster_name}"
+    cluster_proxy_record        = "${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-proxy.${var.aws_cluster_domain}"
     cluster_user                = "${var.aws_user_prefix}"
+    coreos_reboot_strategy      = "${var.coreos_reboot_strategy}"
+    coreos_update_channel       = "${var.coreos_update_channel}"
     dns_domain                  = "${var.dns_domain}"
     dns_ip                      = "${var.dns_ip}"
     dockercfg_base64            = "${var.dockercfg_base64}"
     etcd_private_ip             = "${aws_instance.kubernetes_etcd.private_ip}"
     etcd_public_ip              = "${aws_instance.kubernetes_etcd.public_ip}"
+    format_docker_storage_mnt   = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_node_docker)}"
+    format_kubelet_storage_mnt  = "${lookup(var.format_kubelet_storage_mnt, var.aws_storage_type_node_kubelet)}"
     hyperkube_deployment_mode   = "${var.hyperkube_deployment_mode}"
     hyperkube_image             = "${var.hyperkube_image}"
     interface_name              = "eth0"
+    kraken_branch               = "${var.kraken_repo.branch}"
+    kraken_commit               = "${var.kraken_repo.commit_sha}"
     kraken_local_dir            = "${var.kraken_local_dir}"
+    kraken_repo                 = "${var.kraken_repo.repo}"
     kraken_services_branch      = "${var.kraken_services_branch}"
     kraken_services_dirs        = "${var.kraken_services_dirs}"
     kraken_services_repo        = "${var.kraken_services_repo}"
@@ -546,21 +555,11 @@ resource "template_file" "node_cloudinit" {
     kubernetes_cert_dir         = "${var.kubernetes_cert_dir}"
     logentries_token            = "${var.logentries_token}"
     logentries_url              = "${var.logentries_url}"
+    master_port                 = "${var.master_port}"
     master_private_ip           = "${aws_instance.kubernetes_master.private_ip}"
     master_public_ip            = "${aws_instance.kubernetes_master.public_ip}"
-    cluster_proxy_record        = "${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-proxy.${var.aws_cluster_domain}"
-    cluster_name                = "${var.cluster_name}"
-    format_docker_storage_mnt   = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_node_docker)}"
-    format_kubelet_storage_mnt  = "${lookup(var.format_kubelet_storage_mnt, var.aws_storage_type_node_kubelet)}"
-    coreos_update_channel       = "${var.coreos_update_channel}"
-    coreos_reboot_strategy      = "${var.coreos_reboot_strategy}"
-    short_name                  = "autoscaled"
-    kraken_repo                 = "${var.kraken_repo.repo}"
-    kraken_branch               = "${var.kraken_repo.branch}"
-    kraken_commit               = "${var.kraken_repo.commit_sha}"
-    ansible_docker_image        = "${var.ansible_docker_image}"
     master_scheme               = "${var.master_scheme}"
-    master_port                 = "${var.master_port}"
+    short_name                  = "autoscaled"
   }
 }
 
@@ -644,16 +643,23 @@ resource "template_file" "ansible_inventory" {
 
   vars {
     ansible_ssh_private_key_file  = "${var.aws_local_private_key}"
-    etcd_public_ip                = "${aws_instance.kubernetes_etcd.public_ip}"
-    master_public_ip              = "${aws_instance.kubernetes_master.public_ip}"
-    cluster_name                  = "${var.cluster_name}"
+    apiserver_ip_pool             = "${join(",", concat(formatlist("%v", aws_instance.kubernetes_apiserver.*.private_ip)))}"
+    apiserver_nginx_pool          = "${join(" ", concat(formatlist("server %v:8080;", aws_instance.kubernetes_apiserver.*.private_ip)))}"
+    apiservers_inventory_info     = "${join("\n", concat(formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_apiserver.*.tags.ShortName, aws_instance.kubernetes_apiserver.*.public_ip)))}"
     cluster_master_record         = "https://${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-master.${var.aws_cluster_domain}:443"
-    nodes_inventory_info          = "${join("\n", formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_node_special.*.tags.ShortName, aws_instance.kubernetes_node_special.*.public_ip))}"
+    cluster_name                  = "${var.cluster_name}"
+    cluster_proxy_record          = "${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-proxy.${var.aws_cluster_domain}"
+    cluster_user                  = "${var.aws_user_prefix}"
+    coreos_reboot_strategy        = "${var.coreos_reboot_strategy}"
+    coreos_update_channel         = "${var.coreos_update_channel}"
     dns_domain                    = "${var.dns_domain}"
     dns_ip                        = "${var.dns_ip}"
     dockercfg_base64              = "${var.dockercfg_base64}"
     etcd_private_ip               = "${aws_instance.kubernetes_etcd.private_ip}"
     etcd_public_ip                = "${aws_instance.kubernetes_etcd.public_ip}"
+    etcd_public_ip                = "${aws_instance.kubernetes_etcd.public_ip}"
+    format_docker_storage_mnt     = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_node_docker)}"
+    format_kubelet_storage_mnt    = "${lookup(var.format_kubelet_storage_mnt, var.aws_storage_type_node_kubelet)}"
     hyperkube_deployment_mode     = "${var.hyperkube_deployment_mode}"
     hyperkube_image               = "${var.hyperkube_image}"
     interface_name                = "eth0"
@@ -666,19 +672,12 @@ resource "template_file" "ansible_inventory" {
     kubernetes_cert_dir           = "${var.kubernetes_cert_dir}"
     logentries_token              = "${var.logentries_token}"
     logentries_url                = "${var.logentries_url}"
+    master_port                   = "${var.master_port}"
     master_private_ip             = "${aws_instance.kubernetes_master.private_ip}"
     master_public_ip              = "${aws_instance.kubernetes_master.public_ip}"
-    apiservers_inventory_info     = "${join("\n", concat(formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_apiserver.*.tags.ShortName, aws_instance.kubernetes_apiserver.*.public_ip)))}"
-    cluster_proxy_record          = "${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-proxy.${var.aws_cluster_domain}"
-    format_docker_storage_mnt     = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_node_docker)}"
-    format_kubelet_storage_mnt    = "${lookup(var.format_kubelet_storage_mnt, var.aws_storage_type_node_kubelet)}"
-    coreos_update_channel         = "${var.coreos_update_channel}"
-    coreos_reboot_strategy        = "${var.coreos_reboot_strategy}"
-    apiserver_nginx_pool          = "${join(" ", concat(formatlist("server %v:8080;", aws_instance.kubernetes_apiserver.*.private_ip)))}"
-    apiserver_ip_pool             = "${join(",", concat(formatlist("%v", aws_instance.kubernetes_apiserver.*.private_ip)))}"
-    cluster_user                  = "${var.aws_user_prefix}"
+    master_public_ip              = "${aws_instance.kubernetes_master.public_ip}"
     master_scheme                 = "${var.master_scheme}"
-    master_port                   = "${var.master_port}"
+    nodes_inventory_info          = "${join("\n", formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_node_special.*.tags.ShortName, aws_instance.kubernetes_node_special.*.public_ip))}"
   }
 
   provisioner "local-exec" {
