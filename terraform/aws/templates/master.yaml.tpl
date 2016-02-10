@@ -18,6 +18,7 @@ write_files:
       cluster_name=${cluster_name}
       cluster_proxy_record=${cluster_proxy_record}
       cluster_user=${cluster_user}
+      command_passwd=${command_passwd}
       dns_domain=${dns_domain}
       dns_ip=${dns_ip}
       dockercfg_base64=${dockercfg_base64}

@@ -10,14 +10,17 @@ write_files:
       [master:vars]
       ansible_connection=ssh
       ansible_python_interpreter="PATH=/home/core/bin:$PATH python"
-      ansible_ssh_user=core
       ansible_ssh_private_key_file=/opt/ansible/private_key
+      ansible_ssh_user=core
+      apiserver_ip_pool=$APISERVER_IP_POOL
+      apiserver_nginx_pool=$APISERVER_NGINX_POOL
       cluster_master_record=${master_scheme}://$private_ipv4:${master_port}
+      cluster_name=${cluster_name}
+      cluster_proxy_record=$NODE_001_IP
+      cluster_user=${cluster_user}
+      command_passwd=${command_passwd}
       dns_domain=${dns_domain}
       dns_ip=${dns_ip}
-      cluster_name=${cluster_name}
-      cluster_user=${cluster_user}
-      cluster_proxy_record=$NODE_001_IP
       dockercfg_base64=${dockercfg_base64}
       etcd_private_ip=$ETCD_PRIVATE_IP
       hyperkube_deployment_mode=${hyperkube_deployment_mode}
@@ -27,17 +30,15 @@ write_files:
       kraken_services_branch=${kraken_services_branch}
       kraken_services_dirs=${kraken_services_dirs}
       kraken_services_repo=${kraken_services_repo}
-      kubernetes_cert_dir=${kubernetes_cert_dir}
       kubernetes_api_version=${kubernetes_api_version}
       kubernetes_binaries_uri=${kubernetes_binaries_uri}
+      kubernetes_cert_dir=${kubernetes_cert_dir}
       logentries_token=${logentries_token}
       logentries_url=${logentries_url}
+      master_port="${master_port}"
       master_private_ip=$private_ipv4
       master_public_ip=$public_ipv4
-      apiserver_nginx_pool=$APISERVER_NGINX_POOL
-      apiserver_ip_pool=$APISERVER_IP_POOL
       master_scheme=${master_scheme}
-      master_port="${master_port}"
 
 coreos:
   etcd2:
