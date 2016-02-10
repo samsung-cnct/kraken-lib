@@ -5,27 +5,28 @@ etcd_private_ip: 127.0.0.1
 hyperkube_deployment_mode: binary
 hyperkube_image: gcr.io/google_containers/hyperkube:v1.1.1
 kraken_services_branch: master
-kraken_services_repo: git://github.com/samsung-ag/kraken-services
 # TODO: can we avoid the skydns hardcode and just specify it here?
 kraken_services_dirs: "heapster kube-ui prometheus"
+kraken_services_repo: git://github.com/samsung-ag/kraken-services
 kubernetes_api_version: v1
 kubernetes_binaries_uri: https://storage.googleapis.com/kubernetes-release/release/v1.1.1/bin/linux/amd64
 kubernetes_log_dir: /var/log/k8s
+# kubernetes_service_ip must be within kube_apiserver.service-cluster-ip-range CIDR
+kubernetes_service_ip: 10.100.0.1
 kubernetes_systemd_stderr: "journal"
 kubernetes_systemd_stdout: "journal"
-# this needs to be kept in sync with kube_apiserver.service-cluster-ip-range CIDR
-kubernetes_service_ip: 10.100.0.1
 kube_apiserver:
   # https://github.com/kubernetes/kubernetes/blob/release-1.1/docs/admin/admission-controllers.md#is-there-a-recommended-set-of-plug-ins-to-use
   admission-control: NamespaceLifecycle,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota
   alsologtostderr: false
+  basic-auth-file: "{{ kubernetes_cert_dir }}/basic_auth.csv"
   bind-address: 0.0.0.0
   client-ca-file: "{{ kubernetes_cert_dir }}/kube-ca.pem"
   cors-allowed-origins: .*
-  event-ttl: 1h0m0s
   etcd-servers: "http://{{etcd_private_ip}}:4001"
   # TODO: enable this once we've got a separate etcd instance
   # etcd-servers-overrides: "/events#http://{{etcd_private_ip}}:4001"
+  event-ttl: 1h0m0s
   insecure-bind-address: 0.0.0.0
   insecure-port: 8080
   kubelet-timeout: 5s
@@ -39,17 +40,14 @@ kube_apiserver:
   tls-cert-file: "{{ kubernetes_cert_dir }}/kube-ca.pem"
   tls-private-key-file: "{{ kubernetes_cert_dir }}/kube-ca-key.pem"
   token-auth-file: "{{ kubernetes_cert_dir }}/known_tokens.csv"
-  basic-auth-file: "{{ kubernetes_cert_dir }}/basic_auth.csv"
   v: 1
-master_port: "{{master_port}}"
-master_scheme: "{{master_scheme}}"
 kube_controller_manager:
-  address: "{{ master_private_ip }}"
+  address: 0.0.0.0
   alsologtostderr: false
-  kubeconfig: "{{ kubernetes_cert_dir }}/system:controller_manager/kubeconfig"
   concurrent-endpoint-syncs: 5
   concurrent-rc-syncs: 5
   deleting-pods-burst: 10
+  kubeconfig: "{{ kubernetes_cert_dir }}/system:controller_manager/kubeconfig"
   log_dir: "{{ kubernetes_log_dir }}/controller-manager"
   logtostderr: false
   master: "{{master_scheme}}://{{ master_private_ip }}:{{master_port}}"
@@ -76,7 +74,7 @@ kube_proxy:
   master: "{{master_scheme}}://{{ master_private_ip }}:{{master_port}}"
   v: 1
 kube_scheduler:
-  address: "{{ master_private_ip }}"
+  address: 0.0.0.0
   alsologtostderr: false
   kubeconfig: "{{ kubernetes_cert_dir }}/system:scheduler/kubeconfig"
   log_dir: "{{ kubernetes_log_dir }}/scheduler"
@@ -87,13 +85,12 @@ kube_scheduler:
   v: 1
 kubelet:
   address: 0.0.0.0
-  api-servers: "{{master_scheme}}://{{ master_private_ip }}:{{master_port}}"
   alsologtostderr: false
+  api-servers: "{{master_scheme}}://{{ master_private_ip }}:{{master_port}}"
   cadvisor-port: 4194
   cluster-dns: "{{ dns_ip }}"
   cluster-domain: "{{ dns_domain }}"
   enable-debugging-handlers: true
-  # enable-server: false
   enable-server: true
   healthz-bind-address: 0.0.0.0
   healthz-port: 10254
@@ -102,7 +99,6 @@ kubelet:
   kubeconfig: "{{ kubernetes_cert_dir }}/kubelet/kubeconfig"
   log_dir: "{{ kubernetes_log_dir }}/kubelet"
   logtostderr: false
-  # max-pods: 40
   max-pods: 200
   node-status-update-frequency: 10s
   port: 10250
@@ -113,4 +109,6 @@ kubelet:
   v: 1
 logentries_token:
 logentries_url:
+master_port: "{{master_port}}"
 master_private_ip: 127.0.0.1
+master_scheme: "{{master_scheme}}"

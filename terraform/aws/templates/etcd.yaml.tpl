@@ -10,8 +10,8 @@ write_files:
       [etcd:vars]
       ansible_connection=ssh
       ansible_python_interpreter="PATH=/home/core/bin:$PATH python"
-      ansible_ssh_user=core
       ansible_ssh_private_key_file=/opt/ansible/private_key
+      ansible_ssh_user=core
       kubernetes_binaries_uri=${kubernetes_binaries_uri}
       logentries_token=${logentries_token}
       logentries_url=${logentries_url}
