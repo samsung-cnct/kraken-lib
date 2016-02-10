@@ -35,7 +35,7 @@ docker cp \
   ${kraken_container_name}:/opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/${KRAKEN_CLUSTER_NAME}/terraform.tfvars \
   "${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/"
 docker cp \
-  kraken_data:/kraken_data/kube_config \
+  kraken_data:/kraken_data/${KRAKEN_CLUSTER_NAME}/kube_config \
   "${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/"
 docker cp \
   ${kraken_container_name}:/root/.ssh/id_rsa \
