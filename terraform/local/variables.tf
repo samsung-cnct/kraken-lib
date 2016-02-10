@@ -201,3 +201,8 @@ variable "master_port" {
   default     = "443"
   description = "443, 8080 etc"
 }
+
+variable "command_passwd" {
+  default     = ""
+  description = "password to use for command addon in kraken-services"
+}
