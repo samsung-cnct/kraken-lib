@@ -44,7 +44,7 @@ kube_apiserver:
 master_port: "{{master_port}}"
 master_scheme: "{{master_scheme}}"
 kube_controller_manager:
-  address: "{{ master_private_ip }}"
+  address: 0.0.0.0
   alsologtostderr: false
   kubeconfig: "{{ kubernetes_cert_dir }}/system:controller_manager/kubeconfig"
   concurrent-endpoint-syncs: 5
@@ -76,7 +76,7 @@ kube_proxy:
   master: "{{master_scheme}}://{{ master_private_ip }}:{{master_port}}"
   v: 1
 kube_scheduler:
-  address: "{{ master_private_ip }}"
+  address: 0.0.0.0
   alsologtostderr: false
   kubeconfig: "{{ kubernetes_cert_dir }}/system:scheduler/kubeconfig"
   log_dir: "{{ kubernetes_log_dir }}/scheduler"

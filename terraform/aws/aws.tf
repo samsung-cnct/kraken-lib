@@ -150,7 +150,7 @@ resource "aws_security_group" "vpc_secgroup" {
   description = "Security group for ${var.aws_user_prefix}_${var.cluster_name} cluster"
   vpc_id      = "${aws_vpc.vpc.id}"
 
-  # ssh
+  # inbound ssh access from the world
   ingress {
     from_port   = 22
     to_port     = 22
@@ -158,7 +158,9 @@ resource "aws_security_group" "vpc_secgroup" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # http
+  # XXX: all of the ports below are hardcodes / copy-pasta from ansible/roles/kubernetes/defaults/main.yaml
+
+  # inbound kube-apiserver http access from the world
   ingress {
     from_port   = 8080
     to_port     = 8080
@@ -166,7 +168,7 @@ resource "aws_security_group" "vpc_secgroup" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # https
+  # inbound kube-apiserver https access from the world
   ingress {
     from_port   = 443
     to_port     = 443
@@ -174,7 +176,7 @@ resource "aws_security_group" "vpc_secgroup" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # non-embedded cadvisor
+  # inbound cadvisor access from the world
   ingress {
     from_port   = 8094
     to_port     = 8094
@@ -182,13 +184,38 @@ resource "aws_security_group" "vpc_secgroup" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # icmp (intra-group)
+  # intra-group kubelet http access
   ingress {
-    self      = true
-    from_port = 0
-    to_port   = 0
-    protocol  = "-1"
+    from_port   = 10250
+    to_port     = 10250
+    protocol    = "TCP"
+    self        = true
   }
+
+  # intra-group kube-scheduler http access
+  ingress {
+    from_port   = 10251
+    to_port     = 10251
+    protocol    = "TCP"
+    self        = true
+  }
+
+  # intra-group kube-controller-manager http access
+  ingress {
+    from_port = 10252
+    to_port   = 10252
+    protocol  = "TCP"
+    self      = true
+  }
+
+  # intra-group kubelet/healthz http access
+  ingress {
+    from_port = 10254
+    to_port   = 10254
+    protocol  = "TCP"
+    self      = true
+  }
+
 
   # icmp (with the default group)
   ingress {
