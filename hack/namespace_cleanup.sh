@@ -21,7 +21,12 @@ case $key in
     SSH_CONFIG_PATH="$2"
     shift # past argument
     ;;
+    -k|--key)
+    SSH_KEY_PATH="$2"
+    shift # past argument
+    ;;
     *)
+
             # unknown option
     ;;
 esac
@@ -46,11 +51,17 @@ fi
 
 echo "Removing all namespaces containing '$NAMESPACE_PREFIX' on etcd server $ETCD_IP..."
 
-ssh_command=
-if [ -z ${SSH_CONFIG_PATH+x} ]; then
-  ssh_command="ssh core@$ETCD_IP"
+ssh_command="ssh"
+if [ -z ${SSH_KEY_PATH+x} ]; then
+  ssh_command="$ssh_command"
 else
-  ssh_command="ssh -F $SSH_CONFIG_PATH $ETCD_IP"
+  ssh_command="$ssh_command -i $SSH_KEY_PATH"
+fi
+
+if [ -z ${SSH_CONFIG_PATH+x} ]; then
+  ssh_command="$ssh_command core@$ETCD_IP"
+else
+  ssh_command="$ssh_command -F $SSH_CONFIG_PATH $ETCD_IP"
 fi
 
 namespaces=( $($ssh_command etcdctl ls /registry/namespaces) )
