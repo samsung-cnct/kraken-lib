@@ -105,14 +105,21 @@ function generate_kubeconfig() {
 
   # run ansible
   echo "Running ansible-playbook -i ${OUTPUT_FILE} ${script_dir}/../../ansible/generate_local_kubeconfig.yaml ..."
-  until ANSIBLE_HOST_KEY_CHECKING=False \
-    ansible-playbook -i ${OUTPUT_FILE} \
-    ${script_dir}/../../ansible/generate_local_kubeconfig.yaml \
-    --extra-vars "kubeconfig=${KUBECONFIG}"; \
-    do echo 'Retrying...'; sleep 5; done;
+  local max_retries=$((RETRIES-1))
+
+  until ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ${OUTPUT_FILE} ${script_dir}/../../ansible/generate_local_kubeconfig.yaml --extra-vars "kubeconfig=${KUBECONFIG}"
+  do
+    if [ ${max_retries} -ge 0 ]; then
+      max_retries=$((max_retries-1))
+      echo 'Retrying...'
+      sleep 5
+    else
+      exit 1
+    fi
+  done
 }
 
-function  wait_for_asg() {
+function wait_for_asg() {
   local asg_instance_limit=$(aws --output text --query "AutoScalingGroups[0].DesiredCapacity" \
           autoscaling describe-auto-scaling-groups --auto-scaling-group-name "${ASG_NAME}")
   local asg_instances=($(aws --output text --query "AutoScalingGroups[0].Instances[?LifecycleState=='InService'].InstanceId" \
