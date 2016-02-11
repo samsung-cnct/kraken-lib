@@ -21,46 +21,46 @@ if [ ${is_running} == "true" ];  then
   exit 1
 fi
 
-mkdir -p "${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}"
-docker cp \
-  kraken_data:/kraken_data/${KRAKEN_CLUSTER_NAME}/ssh_config \
-  "${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/"
-docker cp \
-  kraken_data:/kraken_data/${KRAKEN_CLUSTER_NAME}/ansible.inventory \
-  "${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/"
-docker cp \
-  kraken_data:/kraken_data/${KRAKEN_CLUSTER_NAME}/terraform.tfstate \
-  "${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/"
-docker cp \
-  ${kraken_container_name}:/opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/${KRAKEN_CLUSTER_NAME}/terraform.tfvars \
-  "${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/"
-docker cp \
-  kraken_data:/kraken_data/${KRAKEN_CLUSTER_NAME}/kube_config \
-  "${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/"
-docker cp \
-  ${kraken_container_name}:/root/.ssh/id_rsa \
-  "${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/"
-docker cp \
-  ${kraken_container_name}:/root/.ssh/id_rsa.pub \
-  "${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/"
+src_cluster_dir="/kraken_data/${KRAKEN_CLUSTER_NAME}"
+
+containerfiles=(
+  kraken_data:${src_cluster_dir}/ssh_config
+  kraken_data:${src_cluster_dir}/ansible.inventory
+  kraken_data:${src_cluster_dir}/terraform.tfstate
+  kraken_data:${src_cluster_dir}/kube_config
+  ${kraken_container_name}:/root/.ssh/id_rsa
+  ${kraken_container_name}:/root/.ssh/id_rsa.pub
+  ${kraken_container_name}:/opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/${KRAKEN_CLUSTER_NAME}/terraform.tfvars
+)
+
+target_cluster_dir="${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}"
+mkdir -p "${target_cluster_dir}"
+
+for containerfile in "${containerfiles[@]}"; do
+  docker cp $containerfile ${target_cluster_dir}
+done
+
+# ssh_config comes with IdentityFile hardcoded to path of key in docker instance
+# so use sed to translate to path of key we just copied out
+sed -e "s|~/.ssh/id_rsa|${target_cluster_dir}/id_rsa|" ${target_cluster_dir}/ssh_config > ${target_cluster_dir}/ssh_config.tmp
+mv ${target_cluster_dir}/ssh_config{.tmp,}
 
 inf "Parameters for ssh:\n   \
-  ssh -F ${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/ssh_config -i \
-  ${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/id_rsa <node-name>\n"
+  ssh -F ${target_cluster_dir}/ssh_config -i <node-name>\n"
 inf "Alternatively: \n"
 inf "   eval \$(docker-machine env ${KRAKEN_DOCKER_MACHINE_NAME})\n   \
   docker run -it --volumes-from kraken_data samsung_ag/kraken ssh -F \
-  /kraken_data/${KRAKEN_CLUSTER_NAME}/ssh_config <other ssh options> <node-name>"
+  ${src_cluster_dir}/ssh_config <other ssh options> <node-name>"
 
 inf "\n\nParameters for ansible:\n   \
-  --inventory-file ${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/ansible.inventory\n   \
-  --private-key ${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/id_rsa"
+  --inventory-file ${target_cluster_dir}/ansible.inventory\n   \
+  --private-key ${target_cluster_dir}/id_rsa"
 
 inf "\n\nParameters for terraform:\n   \
-  -state=${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/terraform.tfstate\n   \
-  -var-file=${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/terraform.tfvars\n   \
+  -state=${target_cluster_dir}/terraform.tfstate\n   \
+  -var-file=${target_cluster_dir}/terraform.tfvars\n   \
   -var 'cluster_name=${KRAKEN_CLUSTER_NAME}'"
 
 inf "\n\nTo control your cluster use:\n  \
-  kubectl --kubeconfig=${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}/kube_config \
+  kubectl --kubeconfig=${target_cluster_dir}/kube_config \
   --cluster=${KRAKEN_CLUSTER_NAME} <kubectl commands>"
