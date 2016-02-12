@@ -17,7 +17,7 @@ variable "aws_user_prefix" {
 
 variable "sysdigcloud_access_key" {
   description = "Sysdig Cloud Access Key"
-  default = "DISABLED"
+  default = ""
 }
 
 # variables with defaults
