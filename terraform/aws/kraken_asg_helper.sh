@@ -107,7 +107,9 @@ function generate_kubeconfig() {
   echo "Running ansible-playbook -i ${OUTPUT_FILE} ${script_dir}/../../ansible/generate_local_kubeconfig.yaml ..."
   local max_retries=$((RETRIES-1))
 
-  until ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ${OUTPUT_FILE} ${script_dir}/../../ansible/generate_local_kubeconfig.yaml --extra-vars "kubeconfig=${KUBECONFIG}"
+  until ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook \
+    -i ${OUTPUT_FILE} ${script_dir}/../../ansible/generate_local_kubeconfig.yaml \
+    --extra-vars "kubeconfig=${KUBECONFIG}"
   do
     if [ ${max_retries} -ge 0 ]; then
       max_retries=$((max_retries-1))
