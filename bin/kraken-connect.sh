@@ -4,9 +4,9 @@
 #author          :Samsung SDSRA
 #==============================================================================
 
-#set -o errexit
-#set -o nounset
-#set -o pipefail
+set -o errexit
+set -o nounset
+set -o pipefail
 
 # kraken root folder
 KRAKEN_ROOT=$(dirname "${BASH_SOURCE}")/..
@@ -46,7 +46,6 @@ done
 if [ ${is_running} == "true" ];  then
   inf "Parameters for ssh:\n   \
     ssh -i ${target_cluster_dir}/id_rsa <node ip address>\n"
-
   exit 0
 fi
 
