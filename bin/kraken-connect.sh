@@ -36,7 +36,7 @@ if [ ${is_running} == "true" ];  then
   )
 fi
 
-target_cluster_dir=$(cd $(dirname ${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}); pwd) 
+target_cluster_dir="$(cd $(dirname ${KRAKEN_ROOT}/bin); pwd)/clusters/${KRAKEN_CLUSTER_NAME}" 
 mkdir -p "${target_cluster_dir}"
 
 for containerfile in "${containerfiles[@]}"; do
