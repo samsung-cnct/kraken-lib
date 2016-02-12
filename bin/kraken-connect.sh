@@ -4,9 +4,9 @@
 #author          :Samsung SDSRA
 #==============================================================================
 
-set -o errexit
-set -o nounset
-set -o pipefail
+#set -o errexit
+#set -o nounset
+#set -o pipefail
 
 # kraken root folder
 KRAKEN_ROOT=$(dirname "${BASH_SOURCE}")/..
@@ -14,15 +14,7 @@ KRAKEN_ROOT=$(dirname "${BASH_SOURCE}")/..
 source "${KRAKEN_ROOT}/bin/utils.sh"
 
 kraken_container_name="kraken_cluster_${KRAKEN_CLUSTER_NAME}"
-is_running=$(docker inspect -f '{{ .State.Running }}' ${kraken_container_name})
-if [ ${is_running} == "true" ];  then
-  error "Cluster build is currently running:\n Run\n  \
-    'docker logs --follow ${kraken_container_name}'\n to see logs."
-  exit 1
-fi
-
 src_cluster_dir="/kraken_data/${KRAKEN_CLUSTER_NAME}"
-
 containerfiles=(
   kraken_data:${src_cluster_dir}/ssh_config
   kraken_data:${src_cluster_dir}/ansible.inventory
@@ -33,6 +25,17 @@ containerfiles=(
   ${kraken_container_name}:/opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/${KRAKEN_CLUSTER_NAME}/terraform.tfvars
 )
 
+is_running=$(docker inspect -f '{{ .State.Running }}' ${kraken_container_name})
+if [ ${is_running} == "true" ];  then
+  warn "Cluster build is currently running. Will only copy SSH keys.\n Run\n  \
+    'docker logs --follow ${kraken_container_name}'\n to current log."
+  
+  containerfiles=(
+    ${kraken_container_name}:/root/.ssh/id_rsa
+    ${kraken_container_name}:/root/.ssh/id_rsa.pub
+  )
+fi
+
 target_cluster_dir="${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}"
 mkdir -p "${target_cluster_dir}"
 
@@ -40,13 +43,20 @@ for containerfile in "${containerfiles[@]}"; do
   docker cp $containerfile ${target_cluster_dir}
 done
 
+if [ ${is_running} == "true" ];  then
+  inf "Parameters for ssh:\n   \
+    ssh -i ${target_cluster_dir}/id_rsa <node ip address>\n"
+
+  exit 0
+fi
+
 # ssh_config comes with IdentityFile hardcoded to path of key in docker instance
 # so use sed to translate to path of key we just copied out
 sed -e "s|~/.ssh/id_rsa|${target_cluster_dir}/id_rsa|" ${target_cluster_dir}/ssh_config > ${target_cluster_dir}/ssh_config.tmp
 mv ${target_cluster_dir}/ssh_config{.tmp,}
 
 inf "Parameters for ssh:\n   \
-  ssh -F ${target_cluster_dir}/ssh_config -i <node-name>\n"
+  ssh -F ${target_cluster_dir}/ssh_config <node-name>\n"
 inf "Alternatively: \n"
 inf "   eval \$(docker-machine env ${KRAKEN_DOCKER_MACHINE_NAME})\n   \
   docker run -it --volumes-from kraken_data samsung_ag/kraken ssh -F \
