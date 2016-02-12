@@ -40,6 +40,7 @@ write_files:
       master_private_ip=$private_ipv4
       master_public_ip=$public_ipv4
       master_scheme=${master_scheme}
+      sysdigcloud_access_key=${sysdigcloud_access_key}
 coreos:
   etcd2:
     proxy: on

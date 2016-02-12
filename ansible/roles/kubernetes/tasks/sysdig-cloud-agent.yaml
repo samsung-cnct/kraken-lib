@@ -1,0 +1,14 @@
+---
+- name: Create sysdig-cloud-agent
+  template: src=sysdig-cloud-agent.service.ansible
+            dest=/etc/systemd/system/sysdig-cloud-agent.service
+  become: yes
+  when: sysdigcloud_access_key|default("") != ""
+  notify:
+    - reload systemd
+    - restart sysdig-cloud-agent
+
+- name: Ensure sysdig-cloud-agent.service started
+  service: name=sysdig-cloud-agent state=started enabled=yes args=--no-block
+  when: sysdigcloud_access_key|default("") != ""
+  become: yes

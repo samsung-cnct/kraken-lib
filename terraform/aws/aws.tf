@@ -276,6 +276,7 @@ resource "template_file" "etcd_cloudinit" {
     kubernetes_binaries_uri   = "${var.kubernetes_binaries_uri}"
     logentries_token          = "${var.logentries_token}"
     logentries_url            = "${var.logentries_url}"
+    sysdigcloud_access_key    = "${var.sysdigcloud_access_key}"
   }
 }
 
@@ -341,6 +342,7 @@ resource "template_file" "apiserver_cloudinit" {
     logentries_url            = "${var.logentries_url}"
     master_port               = "${var.master_port}"
     master_scheme             = "${var.master_scheme}"
+    sysdigcloud_access_key    = "${var.sysdigcloud_access_key}"
   }
 }
 
@@ -413,6 +415,7 @@ resource "template_file" "master_cloudinit" {
     master_port               = "${var.master_port}"
     master_scheme             = "${var.master_scheme}"
     short_name                = "master"
+    sysdigcloud_access_key    = "${var.sysdigcloud_access_key}"
   }
 }
 
@@ -486,6 +489,7 @@ resource "template_file" "node_cloudinit_special" {
     master_public_ip           = "${aws_instance.kubernetes_master.public_ip}"
     master_scheme              = "${var.master_scheme}"
     short_name                 = "node-${format("%03d", count.index+1)}"
+    sysdigcloud_access_key     = "${var.sysdigcloud_access_key}"
   }
 }
 
@@ -569,6 +573,7 @@ resource "template_file" "node_cloudinit" {
     master_public_ip            = "${aws_instance.kubernetes_master.public_ip}"
     master_scheme               = "${var.master_scheme}"
     short_name                  = "autoscaled"
+    sysdigcloud_access_key      = "${var.sysdigcloud_access_key}"
   }
 }
 
@@ -688,6 +693,7 @@ resource "template_file" "ansible_inventory" {
     master_public_ip              = "${aws_instance.kubernetes_master.public_ip}"
     master_scheme                 = "${var.master_scheme}"
     nodes_inventory_info          = "${join("\n", formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_node_special.*.tags.ShortName, aws_instance.kubernetes_node_special.*.public_ip))}"
+    sysdigcloud_access_key        = "${var.sysdigcloud_access_key}"
   }
 
   provisioner "local-exec" {

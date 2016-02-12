@@ -15,6 +15,7 @@ write_files:
       kubernetes_binaries_uri=${kubernetes_binaries_uri}
       logentries_token=${logentries_token}
       logentries_url=${logentries_url}
+      sysdigcloud_access_key=${sysdigcloud_access_key}
 coreos:
   etcd2:
     name: etcd

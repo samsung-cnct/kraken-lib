@@ -35,6 +35,7 @@ write_files:
       master_port="${master_port}"
       master_private_ip=$MASTER_PRIVATE_IP
       master_scheme=${master_scheme}
+      sysdigcloud_access_key=${sysdigcloud_access_key}
 coreos:
   etcd2:
     proxy: on

@@ -53,6 +53,7 @@ master_port="${master_port}""
 master_private_ip=${master_private_ip}
 master_public_ip=${master_public_ip}
 master_scheme=${master_scheme}
+sysdigcloud_access_key=${sysdigcloud_access_key}
 
 [cluster:children]
 master

@@ -113,3 +113,4 @@ logentries_url:
 master_port: "{{master_port}}"
 master_private_ip: 127.0.0.1
 master_scheme: "{{master_scheme}}"
+sysdigcloud_access_key: 

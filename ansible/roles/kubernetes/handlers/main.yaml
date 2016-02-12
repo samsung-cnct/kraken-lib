@@ -26,6 +26,7 @@
   service: name=load-kube-cert state=restarted enabled=yes
   become: yes
 
+
 # master-common
 
 - name: restart nginx-docker
@@ -104,4 +105,10 @@
 
 - name: restart cadvisor
   service: name=cadvisor state=restarted enabled=yes
+  become: yes
+
+# sysdig-agent
+
+- name: restart sysdig-cloud-agent
+  service: name=sysdig-cloud-agent state=restarted enabled=yes
   become: yes
