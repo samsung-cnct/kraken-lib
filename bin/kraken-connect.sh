@@ -52,6 +52,9 @@ fi
 sed -e "s|~/.ssh/id_rsa|${target_cluster_dir}/id_rsa|" ${target_cluster_dir}/ssh_config > ${target_cluster_dir}/ssh_config.tmp
 mv ${target_cluster_dir}/ssh_config{.tmp,}
 
+inf "Useful environment variables:\n   \
+  export DIR=${target_cluster_dir}\n"
+
 inf "Parameters for ssh:\n   \
   ssh -F ${target_cluster_dir}/ssh_config <node-name>\n"
 inf "Alternatively: \n"
