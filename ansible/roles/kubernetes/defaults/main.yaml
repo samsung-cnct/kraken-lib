@@ -7,7 +7,7 @@ hyperkube_deployment_mode: binary
 hyperkube_image: gcr.io/google_containers/hyperkube:v1.1.1
 kraken_services_branch: master
 # TODO: can we avoid the skydns hardcode and just specify it here?
-kraken_services_dirs: "heapster kube-ui prometheus"
+kraken_services_dirs: "skydns cluster-monitoring kube-ui prometheus"
 kraken_services_repo: git://github.com/samsung-ag/kraken-services
 kubernetes_api_version: v1
 kubernetes_binaries_uri: https://storage.googleapis.com/kubernetes-release/release/v1.1.1/bin/linux/amd64

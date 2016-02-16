@@ -6,5 +6,5 @@ cd /opt/bin/kraken-services-rendered
 service_dirs="{{kraken_services_dirs}}"
 
 for dir in $service_dirs; do
-  /opt/bin/kubectl --kubeconfig={{ kubelet.kubeconfig | expanduser }} delete -f ./$dir/ || true
+  /opt/bin/kubectl --kubeconfig={{ kubelet.kubeconfig | expanduser }} delete -f ./$dir/ --ignore-not-found
 done

@@ -6,6 +6,9 @@ set -o pipefail
 cd /opt/bin/kraken-services-rendered
 service_dirs="{{kraken_services_dirs}}"
 
+# for each service directory try to create. 
+# if create fails, attempt to apply - in case creating a service with resources that already exist.
 for dir in $service_dirs; do
-  /opt/bin/kubectl --kubeconfig={{ kubelet.kubeconfig | expanduser }} create -f ./$dir/
+  /opt/bin/kubectl --kubeconfig={{ kubelet.kubeconfig | expanduser }} create -f ./$dir/ || \
+    /opt/bin/kubectl --kubeconfig={{ kubelet.kubeconfig | expanduser }} apply -f ./$dir/
 done

@@ -288,8 +288,7 @@ variable "kraken_services_branch" {
 }
 
 variable "kraken_services_dirs" {
-  # TODO: skydns is also hardcoded into the scripts, can we just extract that here?
-  default     = "cluster-monitoring kube-ui prometheus"
+  default     = "skydns cluster-monitoring kube-ui prometheus"
   description = "Kraken services folders under kraken repo to deploy kubernetes services from."
 }
 
