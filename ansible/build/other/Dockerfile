@@ -1,10 +1,13 @@
 FROM phusion/baseimage
 
-RUN apt-get update && \
-    apt-get install -y python python-dev python-pip ca-certificates&& \
-    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+ENV ANSIBLE_VERSION 2.0.0.2
 
-RUN pip install ansible
+RUN apt-get update && \
+    apt-get install -y python python-dev python-pip ca-certificates && \
+    pip install ansible==${ANSIBLE_VERSION} && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
 COPY ansible.cfg /etc/ansible/ansible.cfg
 
 CMD ["/sbin/my_init"]
