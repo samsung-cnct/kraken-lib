@@ -30,6 +30,11 @@
             dest=/opt/bin/kraken-create-services.sh
   become: yes
 
+- name: Create kraken-delete-services script
+  template: src=kraken-delete-services.sh.ansible
+            dest=/opt/bin/kraken-delete-services.sh
+  become: yes
+
 - name: Create kraken-render
   template: src=kraken-render.service.ansible
             dest=/etc/systemd/system/kraken-render.service

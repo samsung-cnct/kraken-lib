@@ -4,7 +4,8 @@ set -o nounset
 set -o pipefail
 
 cd /opt/bin/kraken-services-rendered
-for dir in "{{kraken_services_dirs}}"; do
-  /opt/bin/kubectl --kubeconfig={{ kubelet.kubeconfig | expanduser }} delete -f ./$dir/ || true
+service_dirs="{{kraken_services_dirs}}"
+
+for dir in $service_dirs; do
   /opt/bin/kubectl --kubeconfig={{ kubelet.kubeconfig | expanduser }} create -f ./$dir/
 done
