@@ -7,15 +7,13 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-# kraken root folder
-KRAKEN_ROOT=$(dirname "${BASH_SOURCE}")/..
-
-source "${KRAKEN_ROOT}/bin/utils.sh"
+# pull in utils
+my_dir=$(dirname "${BASH_SOURCE}")
+source "${my_dir}/utils.sh"
 
 # shut down cluster
-kraken_container_name="kraken_cluster_${KRAKEN_CLUSTER_NAME}"
-if docker inspect ${kraken_container_name} &> /dev/null; then
-  run_command "docker rm -f ${kraken_container_name}"
+if docker inspect ${KRAKEN_CONTAINER_NAME} &> /dev/null; then
+  run_command "docker rm -f ${KRAKEN_CONTAINER_NAME}"
 fi
 
 if ! docker inspect kraken_data &> /dev/null; then
@@ -24,13 +22,13 @@ if ! docker inspect kraken_data &> /dev/null; then
   exit 0;
 fi
 
-run_command "docker run -d --name ${kraken_container_name} --volumes-from kraken_data \
-  samsung_ag/kraken bash -c \"/opt/kraken/terraform-down.sh --clustertype ${KRAKEN_CLUSTER_TYPE} \
+run_command "docker run -d --name ${KRAKEN_CONTAINER_NAME} --volumes-from kraken_data \
+  ${KRAKEN_CONTAINER_IMAGE_NAME} bash -c \"/opt/kraken/terraform-down.sh --clustertype ${KRAKEN_CLUSTER_TYPE} \
   --clustername ${KRAKEN_CLUSTER_NAME}\""
 
-follow ${kraken_container_name}
+follow ${KRAKEN_CONTAINER_NAME}
 
-kraken_error_code=$(docker inspect -f {{.State.ExitCode}} ${kraken_container_name})
+kraken_error_code=$(docker inspect -f {{.State.ExitCode}} ${KRAKEN_CONTAINER_NAME})
 if [ ${kraken_error_code} -eq 0 ]; then
   inf "Exiting with ${kraken_error_code}"
 else
