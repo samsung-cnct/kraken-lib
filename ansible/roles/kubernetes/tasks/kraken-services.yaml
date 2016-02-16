@@ -25,16 +25,6 @@
             dest=/opt/bin/kraken-render.sh
   become: yes
 
-- name: Create kraken-create script
-  template: src=kraken-create.sh.ansible
-            dest=/opt/bin/kraken-create.sh
-  become: yes
-
-- name: Create kraken-create-only script
-  template: src=kraken-create-only.sh.ansible
-            dest=/opt/bin/kraken-create-only.sh
-  become: yes
-
 - name: Create kraken-create-services script
   template: src=kraken-create-services.sh.ansible
             dest=/opt/bin/kraken-create-services.sh

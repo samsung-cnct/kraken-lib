@@ -1,11 +1,9 @@
 [Unit]
-Description=Launch kraken services (excluding skydns)
 Requires=kraken-render.service
-
+Description=Launch kraken services
 [Service]
+Type=simple
+Restart=on-failure
 RestartSec=5
-Restart=always
-ExecStartPre=-/usr/bin/chmod +x /opt/bin/kraken-create.sh
-ExecStartPre=-/usr/bin/chmod +x /opt/bin/kraken-create-only.sh
 ExecStartPre=-/usr/bin/chmod +x /opt/bin/kraken-create-services.sh
 ExecStart=/usr/bin/bash /opt/bin/kraken-create-services.sh
