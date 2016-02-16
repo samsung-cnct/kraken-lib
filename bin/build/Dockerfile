@@ -6,6 +6,8 @@ ENV TERRAFORM_VERSION 0.6.11
 ENV TERRAFORM_EXECUTE_VERSION v0.0.2
 ENV TERRAFORM_COREOSBOX_VERSION v0.0.1
 ENV KUBERNETES_VERSION v1.1.3
+ENV ANSIBLE_VERSION 2.0.0.2
+ENV AWSCLI_VERSION 1.10.4
 
 # python and ansible
 RUN apt-get update \
@@ -27,7 +29,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir /etc/ansible/
-RUN pip install ansible
+RUN pip install ansible==${ANSIBLE_VERSION}
 COPY ansible/build/other/ansible.cfg /etc/ansible/ansible.cfg
 
 # get terraform
@@ -54,7 +56,7 @@ RUN tar -xvf kubernetes.tar.gz
 RUN cp kubernetes/platforms/linux/amd64/kubectl /usr/bin && rm kubernetes.tar.gz
 
 # install awscli
-RUN pip install awscli
+RUN pip install awscli==${AWSCLI_VERSION}
 
 # generate a keypair
 RUN ssh-keygen -q -t rsa -N '' -f /root/.ssh/id_rsa
