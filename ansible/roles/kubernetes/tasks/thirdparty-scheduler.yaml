@@ -15,14 +15,14 @@
 - name: Kill off native scheduler for binary deployment
   service: name=hyperkube-binary-scheduler state=stopped enabled=yes 
   become: yes
-  when: hyperkube_deployment_mode == 'binary'"
+  when: "hyperkube_deployment_mode == 'binary'"
 
 - name: remove scheduler manifest for docker deployments
   shell: rm /opt/bin/manifests/scheduler.json
   become: yes
-  when: hyperkube_deployment_mode == 'binary'"
+  when: "hyperkube_deployment_mode == 'binary'"
 
 - name: restart master pod for docker deployment
   service: name=hyperkube-docker-master state=restarted enabled=yes 
   become: yes
-  when: hyperkube_deployment_mode == 'binary'"
+  when: "hyperkube_deployment_mode == 'binary'"
