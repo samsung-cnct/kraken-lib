@@ -26,7 +26,7 @@
 - include: master-docker.yaml
   when: "'master' in group_names and hyperkube_deployment_mode == 'docker'"
 - include: thirdparty-scheduler.yaml
-  when: thirdparty_scheduler|default("") != ""
+  when: "'master' in group_names and thirdparty_scheduler|default('') != ''"
 - include: kraken-services-run.yaml
   when: "'master' in group_names"
 
