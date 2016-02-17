@@ -4,20 +4,30 @@
             dest=/opt/bin/kraken-create-services.sh
   become: yes
 
+- name: Make kraken-create-services script executable
+  become: yes
+  file: path=/opt/bin/kraken-create-services.sh state=file mode="a+x"
+
 - name: Create kraken-delete-services script
   template: src=kraken-delete-services.sh.ansible
             dest=/opt/bin/kraken-delete-services.sh
   become: yes
 
-- name: Create kraken-create-services
-  template: src=kraken-create-services.service.ansible
-            dest=/etc/systemd/system/kraken-create-services.service
+- name: Make kraken-delete-services script executable
   become: yes
-  notify:
-    - reload systemd
-    - restart kraken-create-services
+  file: path=/opt/bin/kraken-delete-services.sh state=file mode="a+x"
 
-- name: Ensure kraken-create-services.service started
-  service: name=kraken-create-services state=started enabled=yes args=--no-block
+- name: Create kraken kraken services
   become: yes
+  shell: /opt/bin/kraken-create-services.sh 
+  register: create_result 
+  ignore_errors: yes
 
+- name: Clean up kraken services
+  become: yes
+  shell: /opt/bin/kraken-delete-services.sh 
+  ignore_errors: yes
+  when: create_result.rc != 0
+
+- fail: msg="Kraken services creation failed"
+  when: create_result.rc != 0

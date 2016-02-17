@@ -16,3 +16,7 @@
   become: yes
   shell: >
     {{ kraken_local_dir }}/hack/create_kubectl_config.sh -t -c {{cluster_name}} -e {{ etcd_private_ip }} -m {{ master_private_ip }} -k kubernetes-auth -d {{ kubernetes_cert_dir }} -u "kubelet,kube_proxy,system:controller_manager,system:scheduler"
+
+- name: create marker file
+  become: yes
+  file: path={{ kubernetes_cert_dir }}/secured state=touch
