@@ -18,7 +18,6 @@
   notify:
     - reload systemd
     - restart kraken-render
-    - restart kraken-create-services
 
 - name: Create kraken-render script
   template: src=kraken-render.sh.ansible
