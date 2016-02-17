@@ -1,0 +1,10 @@
+[Unit]
+Description=Launch third party cheduler scheduler
+{% if hyperkube_deployment_mode == "binary" %}
+Requires=hyperkube-binary-scheduler.service
+{% else %}
+Requires=hyperkube-docker-master.service
+{% endif %}
+
+[Service]
+ExecStart=/opt/bin/kubectl --kubeconfig={{ kubelet.kubeconfig | expanduser }} create -f /opt/bin/kraken-services-rendered/{{ thirdparty_scheduler }}

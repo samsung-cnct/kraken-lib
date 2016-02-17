@@ -19,11 +19,15 @@
   when: "'master' in group_names"
 - include: nginx-proxy.yaml
   when: "'master' in group_names"
+- include: kraken-services-setup.yaml
+  when: "'master' in group_names"
 - include: master-binary.yaml
   when: "'master' in group_names and hyperkube_deployment_mode == 'binary'"
 - include: master-docker.yaml
   when: "'master' in group_names and hyperkube_deployment_mode == 'docker'"
-- include: kraken-services.yaml
+- include: thirdparty-scheduler.yaml
+  when: thirdparty_scheduler|default("") != ""
+- include: kraken-services-run.yaml
   when: "'master' in group_names"
 
 # Kubernetes apiserver specific tasks

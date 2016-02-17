@@ -25,20 +25,10 @@
             dest=/opt/bin/kraken-render.sh
   become: yes
 
-- name: Create kraken-create-services script
-  template: src=kraken-create-services.sh.ansible
-            dest=/opt/bin/kraken-create-services.sh
-  become: yes
-
-- name: Create kraken-delete-services script
-  template: src=kraken-delete-services.sh.ansible
-            dest=/opt/bin/kraken-delete-services.sh
-  become: yes
-
 - name: Create kraken-render
   template: src=kraken-render.service.ansible
             dest=/etc/systemd/system/kraken-render.service
-  sudo: yes
+  become: yes
   notify:
     - reload systemd
     - restart kraken-render
@@ -46,16 +36,3 @@
 - name: Ensure kraken-render.service started
   service: name=kraken-render state=started enabled=yes args=--no-block
   become: yes
-
-- name: Create kraken-create-services
-  template: src=kraken-create-services.service.ansible
-            dest=/etc/systemd/system/kraken-create-services.service
-  become: yes
-  notify:
-    - reload systemd
-    - restart kraken-create-services
-
-- name: Ensure kraken-create-services.service started
-  service: name=kraken-create-services state=started enabled=yes args=--no-block
-  become: yes
-

@@ -30,6 +30,7 @@ write_files:
       kraken_services_branch=${kraken_services_branch}
       kraken_services_dirs=${kraken_services_dirs}
       kraken_services_repo=${kraken_services_repo}
+      thirdparty_scheduler=${thirdparty_scheduler}
       kubernetes_api_version=${kubernetes_api_version}
       kubernetes_binaries_uri=${kubernetes_binaries_uri}
       kubernetes_cert_dir=${kubernetes_cert_dir}

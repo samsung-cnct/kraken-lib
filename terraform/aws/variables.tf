@@ -292,6 +292,11 @@ variable "kraken_services_dirs" {
   description = "Kraken services folders under kraken repo to deploy kubernetes services from."
 }
 
+variable "thirdparty_scheduler" {
+  default     = ""
+  description = "Kraken services folder that has a third party scheduler pod"
+}
+
 variable "ansible_docker_image" {
   default     = "quay.io/samsung_ag/kraken_ansible"
   description = "Docker image to use for ansible-in-docker"

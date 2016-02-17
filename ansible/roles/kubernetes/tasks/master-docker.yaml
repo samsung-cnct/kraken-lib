@@ -10,9 +10,14 @@
     owner=core
     group=core
 
-- name: copy master manifest config
-  template: src=kubernetes-master-pod.json.ansible
-            dest=/opt/bin/manifests/master.json
+- name: copy master manifest controller manager config
+  template: src=kubernetes-master-pod-controller.json.ansible
+            dest=/opt/bin/manifests/controller.json
+  become: yes
+
+- name: copy master manifest scheduler config
+  template: src=kubernetes-master-pod-scheduler.json.ansible
+            dest=/opt/bin/manifests/scheduler.json
   become: yes
 
 - name: Create hyperkube-docker-master

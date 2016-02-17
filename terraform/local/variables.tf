@@ -166,6 +166,11 @@ variable "kraken_services_dirs" {
   description = "Kraken services folders under kraken repo to deploy kubernetes services from."
 }
 
+variable "thirdparty_scheduler" {
+  default     = ""
+  description = "Kraken services folder that has a third party scheduler pod"
+}
+
 variable "logentries_token" {
   default     = ""
   description = "Logentries.com token"

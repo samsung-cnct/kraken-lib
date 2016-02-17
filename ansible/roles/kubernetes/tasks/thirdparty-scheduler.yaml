@@ -1,0 +1,28 @@
+---
+
+- name: Create thirdparty-scheduler.service
+  become: yes
+  template: src=thirdparty-scheduler.service.ansible
+            dest=/etc/systemd/system/thirdparty-scheduler.service
+  notify:
+    - reload systemd
+    - restart thirdparty-scheduler
+
+- name: Ensure thirdparty-scheduler.service started
+  service: name=thirdparty-scheduler state=started enabled=yes args=--no-block
+  become: yes
+
+- name: Kill off native scheduler for binary deployment
+  service: name=hyperkube-binary-scheduler state=stopped enabled=yes 
+  become: yes
+  when: hyperkube_deployment_mode == 'binary'"
+
+- name: remove scheduler manifest for docker deployments
+  shell: rm /opt/bin/manifests/scheduler.json
+  become: yes
+  when: hyperkube_deployment_mode == 'binary'"
+
+- name: restart master pod for docker deployment
+  service: name=hyperkube-docker-master state=restarted enabled=yes 
+  become: yes
+  when: hyperkube_deployment_mode == 'binary'"
