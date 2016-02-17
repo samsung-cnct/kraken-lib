@@ -1,13 +1,14 @@
 #! /usr/bin/bash
-set -x
+set -o errexit
+set -o nounset
+set -o pipefail
 
-services_created=false
-while true; do
-  if ! $services_created; then
-    /opt/bin/kraken-create-only.sh namespaces 
-    /opt/bin/kraken-create.sh skydns {{kraken_services_dirs}} && services_created=true
-    sleep 5
-  else
-    sleep 900
-  fi
+cd /opt/bin/kraken-services-rendered
+service_dirs="{{kraken_services_dirs}}"
+
+# for each service directory try to create. 
+# if create fails, attempt to apply - in case creating a service with resources that already exist.
+for dir in $service_dirs; do
+  /opt/bin/kubectl --kubeconfig={{ kubelet.kubeconfig | expanduser }} create -f ./$dir/ || \
+    /opt/bin/kubectl --kubeconfig={{ kubelet.kubeconfig | expanduser }} apply -f ./$dir/
 done

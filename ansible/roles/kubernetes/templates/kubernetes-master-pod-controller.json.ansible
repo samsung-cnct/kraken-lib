@@ -18,18 +18,6 @@
           {% endfor %}
           ""
         ]
-      },
-      {
-        "name": "scheduler",
-        "image": "{{hyperkube_image}}",
-        "command": [
-          "/hyperkube",
-          "scheduler",
-          {% for k,v in kube_scheduler.iteritems() %}
-            "--{{k}}={{v}}",
-          {% endfor %}
-          ""
-        ]
       }
     ]
   }

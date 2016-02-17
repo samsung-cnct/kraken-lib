@@ -1,0 +1,16 @@
+---
+
+- name: Create thirdparty-scheduler.service
+  become: yes
+  template: src=thirdparty-scheduler.service.ansible
+            dest=/etc/systemd/system/thirdparty-scheduler.service
+  notify:
+    - reload systemd
+    - restart thirdparty-scheduler
+    - kill binary scheduler
+    - modify dockerized scheduler
+    - restart dockerized master pod
+
+- name: Ensure thirdparty-scheduler.service started
+  service: name=thirdparty-scheduler state=started enabled=yes args=--no-block
+  become: yes

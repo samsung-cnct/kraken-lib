@@ -1,7 +1,11 @@
 #! /usr/bin/bash
 set -x
+
+if test -f "/opt/bin/kraken-created-services"; then exit 0; fi
+
 cd /opt/bin/kraken-services-rendered
-for dir in $*; do
+service_dirs="{{kraken_services_dirs}}"
+
+for dir in $service_dirs; do
   /opt/bin/kubectl --kubeconfig={{ kubelet.kubeconfig | expanduser }} delete -f ./$dir/ || true
-  /opt/bin/kubectl --kubeconfig={{ kubelet.kubeconfig | expanduser }} create -f ./$dir/
 done
