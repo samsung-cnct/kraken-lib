@@ -72,7 +72,7 @@ function hack_ginkgo_e2e() {
   elif [[ ${KUBE_CONFORMANCE_BRANCH} == "release-1.1" ]]; then
     echo "additional e2e test args for ${KUBE_CONFORMANCE_BRANCH} branch"
     e2e_test_args+=("--ginkgo.focus=\[Conformance\]")
-  elif [[ ${KUBE_CONFORMANCE_BRANCH} == "master" ]]; then
+  else
     echo "additional e2e test args for ${KUBE_CONFORMANCE_BRANCH} branch"
     e2e_test_args+=("--ginkgo.focus=\[Conformance\]")
   fi

@@ -4,6 +4,11 @@
 #author          :Samsung SDSRA
 #==============================================================================
 
+my_dir=$(dirname "${BASH_SOURCE}")
+
+# set KRAKEN_ROOT to absolute path for use in other scripts
+readonly KRAKEN_ROOT=$(cd "${my_dir}/.."; pwd)
+
 function warn {
   echo -e "\033[1;33mWARNING: $1\033[0m"
 }
@@ -94,7 +99,6 @@ if [ ${KRAKEN_CLUSTER_TYPE} == "local" ]; then
   exit 1
 fi
 
-KRAKEN_ROOT=$(dirname "${BASH_SOURCE}")/..
 if [ ! -f "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/${KRAKEN_CLUSTER_NAME}/terraform.tfvars" ]; then
   error "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/${KRAKEN_CLUSTER_NAME}/terraform.tfvars is not present."
   exit 1
@@ -117,6 +121,10 @@ if [ "${KRAKEN_NATIVE_DOCKER}" = false ]; then
     eval "$(docker-machine env ${KRAKEN_DOCKER_MACHINE_NAME} --shell ${KRAKEN_DOCKER_MACHINE_SHELL})"
   fi
 fi
+
+# common / global variables for use in scripts
+readonly KRAKEN_CONTAINER_IMAGE_NAME="samsung_ag/kraken"
+readonly KRAKEN_CONTAINER_NAME="kraken_cluster_${KRAKEN_CLUSTER_NAME}"
 
 # create the data volume container for state
 if docker inspect kraken_data &> /dev/null; then
