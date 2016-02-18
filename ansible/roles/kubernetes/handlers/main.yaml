@@ -33,10 +33,6 @@
   service: name=nginx-docker state=restarted enabled=yes
   become: yes
 
-- name: restart thirdparty-scheduler
-  service: name=thirdparty-scheduler state=restarted enabled=yes
-  become: yes
-
 # master-binary
 
 - name: restart hyperkube-binary-controller-manager
@@ -46,11 +42,7 @@
 - name: restart hyperkube-binary-scheduler
   service: name=hyperkube-binary-scheduler state=restarted enabled=yes
   become: yes
-
-- name: kill binary scheduler
-  service: name=hyperkube-binary-scheduler state=stopped enabled=yes 
-  become: yes
-  when: "hyperkube_deployment_mode == 'binary'"
+  when: "thirdparty_scheduler|default('') == ''"
 
 # master-docker
 
@@ -61,16 +53,6 @@
 - name: restart hyperkube-docker-proxy
   service: name=hyperkube-docker-proxy state=restarted enabled=yes
   become: yes
-
-- name: modify dockerized scheduler
-  shell: rm /opt/bin/manifests/scheduler.json
-  become: yes
-  when: "hyperkube_deployment_mode == 'docker'"
-
-- name: restart dockerized master pod
-  service: name=hyperkube-docker-master state=restarted enabled=yes 
-  become: yes
-  when: "hyperkube_deployment_mode == 'docker'"
 
 # apiserver-binary
 
@@ -108,16 +90,6 @@
 
 - name: restart hyperkube-docker-proxy-node
   service: name=hyperkube-docker-proxy-node state=restarted enabled=yes
-  become: yes
-
-# kraken-services
-
-- name: restart kraken-render
-  service: name=kraken-render state=restarted enabled=yes
-  become: yes
-
-- name: restart kraken-create-services
-  service: name=kraken-create-services state=restarted enabled=yes
   become: yes
 
 # cadvisor

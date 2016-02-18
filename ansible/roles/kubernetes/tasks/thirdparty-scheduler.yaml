@@ -1,16 +1,35 @@
 ---
 
-- name: Create thirdparty-scheduler.service
+- name: Ensure binary scheduler is running
   become: yes
-  template: src=thirdparty-scheduler.service.ansible
-            dest=/etc/systemd/system/thirdparty-scheduler.service
-  notify:
-    - reload systemd
-    - restart thirdparty-scheduler
-    - kill binary scheduler
-    - modify dockerized scheduler
-    - restart dockerized master pod
+  service: name=hyperkube-binary-scheduler state=started enabled=yes
+  when: "hyperkube_deployment_mode == 'binary'"
 
-- name: Ensure thirdparty-scheduler.service started
-  service: name=thirdparty-scheduler state=started enabled=yes args=--no-block
+- name: Ensure dockerized scheduler is running
   become: yes
+  service: name=hyperkube-docker-master state=started enabled=yes
+  when: "hyperkube_deployment_mode == 'docker'"
+
+- name: Create third party scheduler pod
+  become: yes
+  shell: >
+    /opt/bin/kubectl --kubeconfig={{ kubelet.kubeconfig | expanduser }} create -f /opt/bin/kraken-services-rendered/{{ thirdparty_scheduler }} || /opt/bin/kubectl --kubeconfig={{ kubelet.kubeconfig | expanduser }} apply -f /opt/bin/kraken-services-rendered/{{ thirdparty_scheduler }}
+  register: pod_result
+  until: pod_result.rc == 0
+  retries: 100
+  delay: 5
+
+- name: Shut down binary scheduler
+  become: yes
+  service: name=hyperkube-binary-scheduler state=stopped enabled=yes
+  when: "hyperkube_deployment_mode == 'binary'"
+
+- name: Modify dockerized scheduler
+  become: yes
+  file: path=/opt/bin/manifests/scheduler.json state=absent
+  when: "hyperkube_deployment_mode == 'docker'"
+
+- name: Restart dockerized contorller manager pod scheduler
+  become: yes
+  service: name=hyperkube-docker-master state=restarted enabled=yes
+  when: "hyperkube_deployment_mode == 'docker'"

@@ -11,12 +11,16 @@
   when: "'master' in group_names or 'apiservers' in group_names or 'nodes' in group_names"
 
 # Kubernetes master specific tasks
+- stat: path={{ kubernetes_cert_dir }}/secured
+  register: run_cert_generation
+  when: "'master' in group_names"
+
 - include: generate-kube-auth.yaml
-  when: "'master' in group_names"
+  when: "'master' in group_names and run_cert_generation.stat.exists == False"
 - include: generate-kube-cert.yaml
-  when: "'master' in group_names"
+  when: "'master' in group_names and run_cert_generation.stat.exists == False"
 - include: create-kubectl-config.yaml
-  when: "'master' in group_names"
+  when: "'master' in group_names and run_cert_generation.stat.exists == False"
 - include: nginx-proxy.yaml
   when: "'master' in group_names"
 - include: master-binary.yaml
