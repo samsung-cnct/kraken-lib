@@ -42,6 +42,7 @@
 - name: restart hyperkube-binary-scheduler
   service: name=hyperkube-binary-scheduler state=restarted enabled=yes
   become: yes
+  when: "thirdparty_scheduler|default('') == ''"
 
 # master-docker
 
