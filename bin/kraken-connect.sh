@@ -32,32 +32,33 @@ fi
 target_cluster_dir="${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}" 
 mkdir -p "${target_cluster_dir}"
 
+# kill off the old ssh config, since we want to be doing post processing on a new one only
+rm ${target_cluster_dir}/ssh_config 2>/dev/null || true
+
 for containerfile in "${containerfiles[@]}"; do
   if ! docker cp $containerfile ${target_cluster_dir}; then
     warn "Failed docker cp $containerfile ${target_cluster_dir}. Not available yet?"
   fi
 done
 
-if [ ${is_running} == "true" ];  then
-  inf "Parameters for ssh:\n   \
-    ssh -i ${target_cluster_dir}/id_rsa <node ip address>\n"
-  exit 0
-fi
-
-# ssh_config comes with IdentityFile hardcoded to path of key in docker instance
-# so use sed to translate to path of key we just copied out
-sed -e "s|~/.ssh/id_rsa|${target_cluster_dir}/id_rsa|" ${target_cluster_dir}/ssh_config > ${target_cluster_dir}/ssh_config.tmp
-mv ${target_cluster_dir}/ssh_config{.tmp,}
-
 inf "Useful environment variables:\n   \
   export DIR=${target_cluster_dir}\n"
 
-inf "Parameters for ssh:\n   \
-  ssh -F ${target_cluster_dir}/ssh_config <node-name>\n"
-inf "Alternatively: \n"
-inf "   eval \$(docker-machine env ${KRAKEN_DOCKER_MACHINE_NAME})\n   \
-  docker run -it --volumes-from kraken_data samsung_ag/kraken ssh -F \
-  ${src_cluster_dir}/ssh_config <other ssh options> <node-name>"
+# ssh_config comes with IdentityFile hardcoded to path of key in docker instance
+# so use sed to translate to path of key we just copied out
+if ! sed -e "s|~/.ssh/id_rsa|${target_cluster_dir}/id_rsa|" ${target_cluster_dir}/ssh_config > ${target_cluster_dir}/ssh_config.tmp; then
+  warn "Post processing ${target_cluster_dir}/ssh_config failed. Not present yet?"
+  inf "Parameters for ssh:\n   \
+    ssh -i ${target_cluster_dir}/id_rsa <node ip address>"
+else
+  mv ${target_cluster_dir}/ssh_config{.tmp,}
+  inf "Parameters for ssh:\n   \
+    ssh -F ${target_cluster_dir}/ssh_config <node-name>\n"
+  inf "Alternatively: \n"
+  inf "   eval \$(docker-machine env ${KRAKEN_DOCKER_MACHINE_NAME})\n   \
+    docker run -it --volumes-from kraken_data samsung_ag/kraken ssh -F \
+    ${src_cluster_dir}/ssh_config <other ssh options> <node-name>"
+fi
 
 inf "\n\nParameters for ansible:\n   \
   --inventory-file ${target_cluster_dir}/ansible.inventory\n   \
