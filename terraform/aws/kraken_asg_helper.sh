@@ -96,20 +96,20 @@ function generate_configs() {
   chmod -x ${OUTPUT_FILE}
 
   # run ansible
-  echo "Running ansible-playbook -i ${OUTPUT_FILE} ${script_dir}/../../ansible/generate_local_ssh_config.yaml ..."
-  ansible-playbook -i ${OUTPUT_FILE} ${script_dir}/../../ansible/generate_local_ssh_config.yaml
+  echo "Running ansible-playbook -i ${OUTPUT_FILE} ${script_dir}/../../ansible/generate_local_ssh_config.yaml --ssh-extra-args=\"-T\"..."
+  ansible-playbook -i ${OUTPUT_FILE} ${script_dir}/../../ansible/generate_local_ssh_config.yaml --ssh-extra-args="-T"
 }
 
 function generate_kubeconfig() {
   script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
   # run ansible
-  echo "Running ansible-playbook -i ${OUTPUT_FILE} ${script_dir}/../../ansible/generate_local_kubeconfig.yaml ..."
+  echo "Running ansible-playbook -i ${OUTPUT_FILE} ${script_dir}/../../ansible/generate_local_kubeconfig.yaml --ssh-extra-args=\"-T\"..."
   local max_retries=$((RETRIES-1))
 
   until ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook \
     -i ${OUTPUT_FILE} ${script_dir}/../../ansible/generate_local_kubeconfig.yaml \
-    --extra-vars "kubeconfig=${KUBECONFIG}"
+    --extra-vars "kubeconfig=${KUBECONFIG}" --ssh-extra-args="-T"
   do
     if [ ${max_retries} -ge 0 ]; then
       max_retries=$((max_retries-1))

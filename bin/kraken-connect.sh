@@ -25,20 +25,17 @@ containerfiles=(
 
 is_running=$(docker inspect -f '{{ .State.Running }}' ${KRAKEN_CONTAINER_NAME})
 if [ ${is_running} == "true" ];  then
-  warn "Cluster build is currently running. Will only copy SSH keys.\n Run\n  \
+  warn "Cluster build is currently running. Some of the state files might not yet be available.\n Run\n  \
     'docker logs --follow ${KRAKEN_CONTAINER_NAME}'\n to see the current log."
-  
-  containerfiles=(
-    ${KRAKEN_CONTAINER_NAME}:/root/.ssh/id_rsa
-    ${KRAKEN_CONTAINER_NAME}:/root/.ssh/id_rsa.pub
-  )
 fi
 
 target_cluster_dir="${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}" 
 mkdir -p "${target_cluster_dir}"
 
 for containerfile in "${containerfiles[@]}"; do
-  docker cp $containerfile ${target_cluster_dir}
+  if ! docker cp $containerfile ${target_cluster_dir}; then
+    warn "Failed docker cp $containerfile ${target_cluster_dir}. Not available yet?"
+  fi
 done
 
 if [ ${is_running} == "true" ];  then
