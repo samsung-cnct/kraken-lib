@@ -52,7 +52,7 @@ RUN wget https://github.com/GoogleCloudPlatform/kubernetes/releases/download/${K
 # generate a keypair
 RUN ssh-keygen -q -t rsa -N '' -f /root/.ssh/id_rsa
 
-COPY ansible/build/other/ansible.cfg /etc/ansible/ansible.cfg
+COPY ansible/build/ansible.cfg /etc/ansible/ansible.cfg
 COPY ansible /opt/kraken/ansible/
 COPY terraform /opt/kraken/terraform
 COPY hack /opt/kraken/hack
