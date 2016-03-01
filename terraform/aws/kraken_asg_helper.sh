@@ -81,7 +81,7 @@ function generate_configs() {
     $(aws --output text --query "AutoScalingGroups[0].Instances[?LifecycleState=='InService'].InstanceId" autoscaling describe-auto-scaling-groups --auto-scaling-group-names "${ASG_NAME}"))
 
   current_node=$((NUMBERING_OFFSET+1))
-  output="nodes\n[nodes]\n"
+  output=""
   for ec2_ip in $ec2_ips; do
     output="${output}$(printf 'node-%03d' ${current_node}) ansible_ssh_host=${ec2_ip}\n"
     current_node=$((current_node+1))

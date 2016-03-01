@@ -1,0 +1,33 @@
+[Unit]
+Description=Launch dockerized kubernetes hyperkube scheduler
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+StandardOutput={{ kubernetes_systemd_stdout }}
+StandardError={{ kubernetes_systemd_stderr }}
+Restart=always
+RestartSec=5
+LimitNOFILE=infinity
+ExecStartPre=-/usr/bin/mkdir -p {{scheduler_settings.log_dir}}
+ExecStartPre=-/usr/bin/docker kill k8s-scheduler
+ExecStartPre=-/usr/bin/docker rm k8s-scheduler
+ExecStartPre=-/usr/bin/docker kill $(docker ps -a -q --filter="name=k8s-scheduler")
+ExecStartPre=-/usr/bin/docker rm $(docker ps -a -q --filter="name=k8s-scheduler")
+ExecStart=/usr/bin/docker run \
+  --name k8s-scheduler \
+  --net=host \
+  --privileged \
+  -v /opt/bin/manifests:/etc/kubernetes/manifests-override \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v {{ kubernetes_cert_dir }}:{{ kubernetes_cert_dir }} \
+  -v {{scheduler_settings.log_dir}}:{{scheduler_settings.log_dir}} \
+  {{hyperkube_image}} \
+    /hyperkube \
+    kubelet \
+    --cluster_dns={{dns_ip}} \
+    --cluster_domain={{dns_domain}} \
+    --config=/etc/kubernetes/manifests-override \
+    --enable_server \
+    --kubeconfig={{ scheduler_settings.kubeconfig | expanduser }} \
+    --hostname_override={{master_private_ip}}

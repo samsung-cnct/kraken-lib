@@ -1,0 +1,12 @@
+---
+- name: Create cadvisor service
+  template: src=cadvisor-service.service.jinja2
+            dest=/etc/systemd/system/cadvisor-service.service
+  become: yes
+  notify:
+    - reload systemd
+    - restart cadvisor
+
+- name: Ensure cadvisor.service started
+  service: name=cadvisor-service state=started enabled=yes args=--no-block
+  become: yes

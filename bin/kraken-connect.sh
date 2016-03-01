@@ -15,12 +15,17 @@ source "${my_dir}/utils.sh"
 src_cluster_dir="/kraken_data/${KRAKEN_CLUSTER_NAME}"
 containerfiles=(
   kraken_data:${src_cluster_dir}/ssh_config
-  kraken_data:${src_cluster_dir}/ansible.inventory
+  kraken_data:${src_cluster_dir}/hosts
   kraken_data:${src_cluster_dir}/terraform.tfstate
   kraken_data:${src_cluster_dir}/kube_config
   ${KRAKEN_CONTAINER_NAME}:/root/.ssh/id_rsa
   ${KRAKEN_CONTAINER_NAME}:/root/.ssh/id_rsa.pub
   ${KRAKEN_CONTAINER_NAME}:/opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/${KRAKEN_CLUSTER_NAME}/terraform.tfvars
+)
+
+container_var_files=(
+  kraken_data:${src_cluster_dir}/group_vars/cluster
+  kraken_data:${src_cluster_dir}/group_vars/all
 )
 
 is_running=$(docker inspect -f '{{ .State.Running }}' ${KRAKEN_CONTAINER_NAME})
@@ -29,8 +34,11 @@ if [ ${is_running} == "true" ];  then
     'docker logs --follow ${KRAKEN_CONTAINER_NAME}'\n to see the current log."
 fi
 
-target_cluster_dir="${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}" 
-mkdir -p "${target_cluster_dir}"
+target_cluster_dir="${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}"
+mkdir -p "${target_cluster_dir}/group_vars"
+
+# kill off the old ssh config, since we want to be doing post processing on a new one only
+rm ${target_cluster_dir}/ssh_config 2>/dev/null || true
 
 # kill off the old ssh config, since we want to be doing post processing on a new one only
 rm ${target_cluster_dir}/ssh_config 2>/dev/null || true
@@ -38,6 +46,12 @@ rm ${target_cluster_dir}/ssh_config 2>/dev/null || true
 for containerfile in "${containerfiles[@]}"; do
   if ! docker cp $containerfile ${target_cluster_dir}; then
     warn "Failed docker cp $containerfile ${target_cluster_dir}. Not available yet?"
+  fi
+done
+
+for containervarfile in "${container_var_files[@]}"; do
+  if ! docker cp $containervarfile ${target_cluster_dir}/group_vars; then
+    warn "Failed docker cp $containervarfile ${target_cluster_dir}/group_vars. Not available yet?"
   fi
 done
 
@@ -61,8 +75,12 @@ else
 fi
 
 inf "\n\nParameters for ansible:\n   \
-  --inventory-file ${target_cluster_dir}/ansible.inventory\n   \
-  --private-key ${target_cluster_dir}/id_rsa"
+  ansible-playbook\n   \
+  --inventory-file ${target_cluster_dir}/hosts\n   \
+  --extra-vars 'ansible_ssh_private_key_file=${target_cluster_dir}/id_rsa\n   \
+                ansible_ssh_key_checking=False'\n   \
+  <path to ansible playbook yaml>"
+
 
 inf "\n\nParameters for terraform:\n   \
   -state=${target_cluster_dir}/terraform.tfstate\n   \

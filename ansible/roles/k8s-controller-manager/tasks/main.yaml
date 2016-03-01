@@ -1,0 +1,5 @@
+---
+- include: controller-manager-binary.yaml
+  when: "deployment_mode == 'binary'"
+- include: controller-manager-docker.yaml
+  when: "deployment_mode == 'container'"

@@ -1,0 +1,25 @@
+---
+- name: Create /opt/nginx for nginx configuration files
+  become: yes
+  file: >
+    path=/opt/nginx
+    state=directory
+    owner=core
+    group=core
+
+- name: Create nginx configuration
+  template: src=nginx.conf.jinja2
+            dest=/opt/nginx/nginx.conf
+  become: yes
+
+- name: Create nginx load balancer service
+  template: src=nginx-docker.service.jinja2
+            dest=/etc/systemd/system/nginx-docker.service
+  become: yes
+  notify:
+    - reload systemd
+    - restart nginx-docker
+
+- name: Ensure nginx-docker.service started
+  service: name=nginx-docker state=started enabled=yes args=--no-block
+  become: yes

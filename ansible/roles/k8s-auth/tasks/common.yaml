@@ -1,0 +1,19 @@
+---
+- name: Create kubernetes cert dir for kubernetes credential files
+  become: yes
+  file: >
+    path={{ kubernetes_cert_dir }}
+    state=directory
+    owner=core
+    group=core
+- name: Generate folders for system users
+  become: yes
+  file: path={{ kubernetes_cert_dir }}/{{ item.value.name }} state=directory owner=core group=core
+  with_dict: "{{ system_users }}"
+- name: Generate folder for basic auth user
+  become: yes
+  file: path={{ kubernetes_cert_dir }}/{{ kubernetes_basic_auth_user.name }} state=directory owner=core group=core
+- name: Wait for ETCD to become available
+  wait_for: host={{ etcd_private_ip }} port={{ etcd_port }} state=started timeout=1200
+- name: Install passlib
+  pip: name=passlib state=present executable={{ coreos_pypy_home }}/bin/pip

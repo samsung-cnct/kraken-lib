@@ -1,0 +1,33 @@
+[Unit]
+Description=Launch dockerized kubernetes hyperkube apiserver
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+StandardOutput={{ kubernetes_systemd_stdout }}
+StandardError={{ kubernetes_systemd_stderr }}
+Restart=always
+RestartSec=5
+LimitNOFILE=infinity
+ExecStartPre=-/usr/bin/mkdir -p {{apiserver_settings.log_dir}}
+ExecStartPre=-/usr/bin/docker kill k8s-apiserver
+ExecStartPre=-/usr/bin/docker rm k8s-apiserver
+ExecStartPre=-/usr/bin/docker kill $(docker ps -a -q --filter="name=k8s-apiserver")
+ExecStartPre=-/usr/bin/docker rm $(docker ps -a -q --filter="name=k8s-apiserver")
+ExecStart=/usr/bin/docker run \
+  --name kube-apiserver \
+  --net=host \
+  --privileged \
+  -v /opt/bin/manifests:/etc/kubernetes/manifests-override \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v {{ kubernetes_cert_dir }}:{{ kubernetes_cert_dir }} \
+  -v {{apiserver_settings.log_dir}}:{{apiserver_settings.log_dir}}
+  {{hyperkube_image}} \
+    /hyperkube \
+    kubelet \
+    --cluster_dns={{dns_ip}} \
+    --cluster_domain={{dns_domain}} \
+    --config=/etc/kubernetes/manifests-override \
+    --enable_server \
+    --kubeconfig={{ apiserver_settings.kubeconfig | expanduser }} \
+    --hostname_override={{master_private_ip}}

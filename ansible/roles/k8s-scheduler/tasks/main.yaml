@@ -1,0 +1,5 @@
+---
+- include: scheduler-binary.yaml
+  when: "deployment_mode == 'binary'"
+- include: scheduler-docker.yaml
+  when: "deployment_mode == 'container'"

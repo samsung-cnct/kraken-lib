@@ -1,0 +1,25 @@
+---
+- name: Create /opt/bin/manifests for configs
+  become: yes
+  file: >
+    path=/opt/bin/manifests
+    state=directory
+    owner=core
+    group=core
+
+- name: Copy controller manager manifest config
+  template: src=k8s-scheduler-pod-controller.json.jinja2
+            dest=/opt/bin/manifests/scheduler.json
+  become: yes
+
+- name: Create k8s-docker-scheduler
+  template: src=k8s-docker-scheduler.service.jinja2
+            dest=/etc/systemd/system/k8s-docker-scheduler.service
+  become: yes
+  notify:
+    - reload systemd
+    - restart k8s-docker-scheduler
+
+- name: Ensure k8s-docker-scheduler.service started
+  service: name=k8s-docker-scheduler state=started enabled=yes args=--no-block
+  become: yes

@@ -1,0 +1,6 @@
+---
+dependencies:
+  - { role: cadvisor }
+  - { role: kraken-common }
+  - { role: k8s-kubelet, kubernetes_auth_operation: load }
+  - { role: k8s-proxy }

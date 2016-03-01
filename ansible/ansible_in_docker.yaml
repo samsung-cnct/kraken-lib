@@ -1,9 +1,0 @@
----
-- hosts: etcd:master:nodes:apiservers
-  gather_facts: False
-  roles:
-    - { role: ansible-coreos-bootstrap, coreos_pypy_url: 'https://bitbucket.org/squeaky/portable-pypy/downloads' }
-
-- hosts: etcd:master:nodes:apiservers
-  roles:
-    - kubernetes

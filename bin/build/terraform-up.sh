@@ -20,7 +20,7 @@ if [ -z ${KRAKEN_CLUSTER_NAME+x} ]; then
   exit 1
 fi
 
-mkdir -p "/kraken_data/${KRAKEN_CLUSTER_NAME}"
+mkdir -p "/kraken_data/${KRAKEN_CLUSTER_NAME}/group_vars"
 terraform apply \
   -input=false \
   -state=/kraken_data/${KRAKEN_CLUSTER_NAME}/terraform.tfstate \
@@ -29,5 +29,7 @@ terraform apply \
   -var "kubeconfig=/kraken_data/${KRAKEN_CLUSTER_NAME}/kube_config" \
   /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}
 
-cp /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/rendered/ansible.inventory /kraken_data/${KRAKEN_CLUSTER_NAME}/ansible.inventory
+cp /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/rendered/hosts /kraken_data/${KRAKEN_CLUSTER_NAME}/hosts
+cp /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/rendered/group_vars/cluster /kraken_data/${KRAKEN_CLUSTER_NAME}/group_vars/cluster
+cp /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/rendered/group_vars/all /kraken_data/${KRAKEN_CLUSTER_NAME}/group_vars/all
 cp /root/.ssh/config_${KRAKEN_CLUSTER_NAME} /kraken_data/${KRAKEN_CLUSTER_NAME}/ssh_config

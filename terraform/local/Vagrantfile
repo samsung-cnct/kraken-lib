@@ -26,7 +26,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.trigger.before :up, :vm => 'etcd'  do
     info "getting ansible roles"
     run "ansible-galaxy install sigma.coreos-bootstrap --ignore-errors"
-    run "touch #{ENV['VAGRANT_CWD']}/rendered/ansible.inventory"
   end
 
   # array of systems with multinodes for ansible inventory
@@ -142,27 +141,31 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           logentries_token
           logentries_url
           cluster_user
+          cluster_passwd
           cluster_name
-          master_scheme
-          master_port
+          access_scheme
+          access_port
 	        sysdigcloud_access_key
         ).map { |s| [s.to_sym, ENV["KRAKEN_#{s.upcase}"]] }
         kraken_env_vars = Hash[kraken_env_var_entries]
 
         other_vars = {
-          :ansible_ssh_private_key_file => File.expand_path(ENV['KRAKEN_VAGRANT_PRIVATE_KEY']),
-          :etcd_ip => base_ip_address + "#{1+100}",
           :master_ip => base_ip_address + "#{2+100}",
+          :etcd_ip => base_ip_address + "#{1+100}",
+          :apiservers_inventory_info => apiserver_host_data,
+          :nodes_inventory_info => node_host_data,
+          :ansible_ssh_private_key_file => File.expand_path(ENV['KRAKEN_VAGRANT_PRIVATE_KEY']),
           :node_001_ip => base_ip_address + "#{(2 + get_num_apiservers)+100}",
           :apiserver_nginx_pool => apiserver_nginx_pool,
           :apiserver_ip_pool => apiserver_ip_pool,
-          :apiservers_inventory_info => apiserver_host_data,
-          :nodes_inventory_info => node_host_data
         }
 
         render_vars = other_vars.merge(kraken_env_vars)
 
-        render("#{ENV['VAGRANT_CWD']}/templates/ansible.inventory.erb", "#{ENV['VAGRANT_CWD']}/rendered/ansible.inventory", render_vars)
+        render("#{ENV['VAGRANT_CWD']}/templates/hosts.erb", "#{ENV['VAGRANT_CWD']}/rendered/hosts", render_vars)
+        render("#{ENV['VAGRANT_CWD']}/templates/cluster.erb", "#{ENV['VAGRANT_CWD']}/rendered/group_vars/cluster", render_vars)
+        render("#{ENV['VAGRANT_CWD']}/templates/local.erb", "#{ENV['VAGRANT_CWD']}/rendered/group_vars/local", render_vars)
+        render("#{ENV['VAGRANT_CWD']}/templates/all.erb", "#{ENV['VAGRANT_CWD']}/rendered/group_vars/all", render_vars)
       end
     end
   end

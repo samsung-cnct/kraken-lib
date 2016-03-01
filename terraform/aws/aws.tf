@@ -312,10 +312,13 @@ resource "template_file" "apiserver_cloudinit" {
   template = "${path.module}/templates/apiserver.yaml.tpl"
 
   vars {
+    access_port               = "${var.access_port}"
+    access_scheme             = "${var.access_scheme}"
     ansible_docker_image      = "${var.ansible_docker_image}"
     ansible_playbook_command  = "${var.ansible_playbook_command}"
     ansible_playbook_file     = "${var.ansible_playbook_file}"
     cluster_name              = "${var.cluster_name}"
+    cluster_passwd            = "${var.cluster_passwd}"
     cluster_user              = "${var.aws_user_prefix}"
     coreos_reboot_strategy    = "${var.coreos_reboot_strategy}"
     coreos_update_channel     = "${var.coreos_update_channel}"
@@ -340,8 +343,6 @@ resource "template_file" "apiserver_cloudinit" {
     kubernetes_cert_dir       = "${var.kubernetes_cert_dir}"
     logentries_token          = "${var.logentries_token}"
     logentries_url            = "${var.logentries_url}"
-    master_port               = "${var.master_port}"
-    master_scheme             = "${var.master_scheme}"
     sysdigcloud_access_key    = "${var.sysdigcloud_access_key}"
   }
 }
@@ -379,14 +380,15 @@ resource "template_file" "master_cloudinit" {
   template = "${path.module}/templates/master.yaml.tpl"
 
   vars {
+    access_port               = "${var.access_port}"
+    access_scheme             = "${var.access_scheme}"
     ansible_docker_image      = "${var.ansible_docker_image}"
     ansible_playbook_command  = "${var.ansible_playbook_command}"
     ansible_playbook_file     = "${var.ansible_playbook_file}"
     apiserver_ip_pool         = "${join(",", concat(formatlist("%v", aws_instance.kubernetes_apiserver.*.private_ip)))}"
     apiserver_nginx_pool      = "${join(" ", concat(formatlist("server %v:8080;", aws_instance.kubernetes_apiserver.*.private_ip)))}"
-    cluster_master_record     = "${var.master_scheme}://${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-master.${var.aws_cluster_domain}:${var.master_port}"
     cluster_name              = "${var.cluster_name}"
-    cluster_proxy_record      = "${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-proxy.${var.aws_cluster_domain}"
+    cluster_passwd            = "${var.cluster_passwd}"
     cluster_user              = "${var.aws_user_prefix}"
     command_passwd            = "${var.command_passwd}"
     coreos_reboot_strategy    = "${var.coreos_reboot_strategy}"
@@ -407,16 +409,16 @@ resource "template_file" "master_cloudinit" {
     kraken_services_branch    = "${var.kraken_services_branch}"
     kraken_services_dirs      = "${var.kraken_services_dirs}"
     kraken_services_repo      = "${var.kraken_services_repo}"
-    thirdparty_scheduler      = "${var.thirdparty_scheduler}"
     kubernetes_api_version    = "${var.kubernetes_api_version}"
     kubernetes_binaries_uri   = "${var.kubernetes_binaries_uri}"
     kubernetes_cert_dir       = "${var.kubernetes_cert_dir}"
     logentries_token          = "${var.logentries_token}"
     logentries_url            = "${var.logentries_url}"
-    master_port               = "${var.master_port}"
-    master_scheme             = "${var.master_scheme}"
+    master_record             = "${var.access_scheme}://${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-master.${var.aws_cluster_domain}:${var.access_port}"
+    proxy_record              = "${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-proxy.${var.aws_cluster_domain}"
     short_name                = "master"
     sysdigcloud_access_key    = "${var.sysdigcloud_access_key}"
+    thirdparty_scheduler      = "${var.thirdparty_scheduler}"
   }
 }
 
@@ -453,13 +455,14 @@ resource "template_file" "node_cloudinit_special" {
   count    = "${var.special_node_count}"
 
   vars {
+    access_port                = "${var.access_port}"
+    access_scheme              = "${var.access_scheme}"
     ansible_docker_image       = "${var.ansible_docker_image}"
     ansible_playbook_command   = "${var.ansible_playbook_command}"
     ansible_playbook_file      = "${var.ansible_playbook_file}"
-    cluster_master_record      = "${var.master_scheme}://${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-master.${var.aws_cluster_domain}:${var.master_port}"
     cluster_name               = "${var.cluster_name}"
     cluster_name               = "${var.cluster_name}"
-    cluster_proxy_record       = "${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-proxy.${var.aws_cluster_domain}"
+    cluster_passwd             = "${var.cluster_passwd}"
     cluster_user               = "${var.aws_user_prefix}"
     coreos_reboot_strategy     = "${var.coreos_reboot_strategy}"
     coreos_update_channel      = "${var.coreos_update_channel}"
@@ -485,10 +488,10 @@ resource "template_file" "node_cloudinit_special" {
     kubernetes_cert_dir        = "${var.kubernetes_cert_dir}"
     logentries_token           = "${var.logentries_token}"
     logentries_url             = "${var.logentries_url}"
-    master_port                = "${var.master_port}"
     master_private_ip          = "${aws_instance.kubernetes_master.private_ip}"
     master_public_ip           = "${aws_instance.kubernetes_master.public_ip}"
-    master_scheme              = "${var.master_scheme}"
+    master_record              = "${var.access_scheme}://${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-master.${var.aws_cluster_domain}:${var.access_port}"
+    proxy_record               = "${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-proxy.${var.aws_cluster_domain}"
     short_name                 = "node-${format("%03d", count.index+1)}"
     sysdigcloud_access_key     = "${var.sysdigcloud_access_key}"
   }
@@ -537,13 +540,14 @@ resource "template_file" "node_cloudinit" {
   template = "${path.module}/templates/node.yaml.tpl"
 
   vars {
+    access_port                 = "${var.access_port}"
+    access_scheme               = "${var.access_scheme}"
     ansible_docker_image        = "${var.ansible_docker_image}"
     ansible_playbook_command    = "${var.ansible_playbook_command}"
     ansible_playbook_file       = "${var.ansible_playbook_file}"
-    cluster_master_record       = "${var.master_scheme}://${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-master.${var.aws_cluster_domain}:${var.master_port}"
     cluster_name                = "${var.cluster_name}"
     cluster_name                = "${var.cluster_name}"
-    cluster_proxy_record        = "${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-proxy.${var.aws_cluster_domain}"
+    cluster_passwd              = "${var.cluster_passwd}"
     cluster_user                = "${var.aws_user_prefix}"
     coreos_reboot_strategy      = "${var.coreos_reboot_strategy}"
     coreos_update_channel       = "${var.coreos_update_channel}"
@@ -569,10 +573,10 @@ resource "template_file" "node_cloudinit" {
     kubernetes_cert_dir         = "${var.kubernetes_cert_dir}"
     logentries_token            = "${var.logentries_token}"
     logentries_url              = "${var.logentries_url}"
-    master_port                 = "${var.master_port}"
     master_private_ip           = "${aws_instance.kubernetes_master.private_ip}"
     master_public_ip            = "${aws_instance.kubernetes_master.public_ip}"
-    master_scheme               = "${var.master_scheme}"
+    master_record               = "${var.access_scheme}://${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-master.${var.aws_cluster_domain}:${var.access_port}"
+    proxy_record                = "${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-proxy.${var.aws_cluster_domain}"
     short_name                  = "autoscaled"
     sysdigcloud_access_key      = "${var.sysdigcloud_access_key}"
   }
@@ -654,55 +658,95 @@ resource "aws_route53_record" "proxy_record" {
 }
 
 resource "template_file" "ansible_inventory" {
-  template                        = "${path.module}/templates/ansible.inventory.tpl"
+  template                        = "${path.module}/templates/hosts.tpl"
+
+  vars {
+    master_public_ip              = "${aws_instance.kubernetes_master.public_ip}"
+    etcd_public_ip                = "${aws_instance.kubernetes_etcd.public_ip}"
+    apiservers_inventory_info     = "${join("\n", concat(formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_apiserver.*.tags.ShortName, aws_instance.kubernetes_apiserver.*.public_ip)))}"
+    nodes_inventory_info          = "${join("\n", formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_node_special.*.tags.ShortName, aws_instance.kubernetes_node_special.*.public_ip))}"
+  }
+
+  provisioner "local-exec" {
+    command = "cat << 'EOF' > ${path.module}/rendered/hosts\n${self.rendered}\nEOF"
+  }
+}
+
+resource "template_file" "local_groupvars" {
+  depends_on                      = ["template_file.ansible_inventory"]
+  template                        = "${path.module}/templates/local.tpl"
+
+  vars {
+  }
+
+  provisioner "local-exec" {
+    command = "cat << 'EOF' > ${path.module}/rendered/group_vars/local\n${self.rendered}\nEOF"
+  }
+}
+
+resource "template_file" "all_groupvars" {
+  depends_on                      = ["template_file.ansible_inventory"]
+  template                        = "${path.module}/templates/all.tpl"
 
   vars {
     ansible_ssh_private_key_file  = "${var.aws_local_private_key}"
+    cluster_name                  = "${var.cluster_name}"
+    cluster_passwd                = "${var.cluster_passwd}"
+    cluster_user                  = "${var.aws_user_prefix}"
+    etcd_public_ip                = "${aws_instance.kubernetes_etcd.public_ip}"
+    kubernetes_cert_dir           = "${var.kubernetes_cert_dir}"
+    master_public_ip              = "${aws_instance.kubernetes_master.public_ip}"
+    master_record                 = "https://${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-master.${var.aws_cluster_domain}:${var.access_port}"
+  }
+
+  provisioner "local-exec" {
+    command = "cat << 'EOF' > ${path.module}/rendered/group_vars/all\n${self.rendered}\nEOF"
+  }
+}
+
+resource "template_file" "cluster_groupvars" {
+  depends_on                      = ["template_file.local_groupvars"]
+  template                        = "${path.module}/templates/cluster.tpl"
+
+  vars {
+    access_port                   = "${var.access_port}"
+    access_scheme                 = "${var.access_scheme}"
+    ansible_ssh_private_key_file  = "${var.aws_local_private_key}"
     apiserver_ip_pool             = "${join(",", concat(formatlist("%v", aws_instance.kubernetes_apiserver.*.private_ip)))}"
     apiserver_nginx_pool          = "${join(" ", concat(formatlist("server %v:8080;", aws_instance.kubernetes_apiserver.*.private_ip)))}"
-    apiservers_inventory_info     = "${join("\n", concat(formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_apiserver.*.tags.ShortName, aws_instance.kubernetes_apiserver.*.public_ip)))}"
-    cluster_master_record         = "https://${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-master.${var.aws_cluster_domain}:443"
     cluster_name                  = "${var.cluster_name}"
-    cluster_proxy_record          = "${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-proxy.${var.aws_cluster_domain}"
+    cluster_passwd                = "${var.cluster_passwd}"
     cluster_user                  = "${var.aws_user_prefix}"
     command_passwd                = "${var.command_passwd}"
-    coreos_reboot_strategy        = "${var.coreos_reboot_strategy}"
-    coreos_update_channel         = "${var.coreos_update_channel}"
     dns_domain                    = "${var.dns_domain}"
     dns_ip                        = "${var.dns_ip}"
     dockercfg_base64              = "${var.dockercfg_base64}"
     etcd_private_ip               = "${aws_instance.kubernetes_etcd.private_ip}"
     etcd_public_ip                = "${aws_instance.kubernetes_etcd.public_ip}"
-    etcd_public_ip                = "${aws_instance.kubernetes_etcd.public_ip}"
-    format_docker_storage_mnt     = "${lookup(var.format_docker_storage_mnt, var.aws_storage_type_node_docker)}"
-    format_kubelet_storage_mnt    = "${lookup(var.format_kubelet_storage_mnt, var.aws_storage_type_node_kubelet)}"
     hyperkube_deployment_mode     = "${var.hyperkube_deployment_mode}"
     hyperkube_image               = "${var.hyperkube_image}"
     interface_name                = "eth0"
-    kraken_local_dir              = "${var.kraken_local_dir}"
     kraken_services_branch        = "${var.kraken_services_branch}"
     kraken_services_dirs          = "${var.kraken_services_dirs}"
     kraken_services_repo          = "${var.kraken_services_repo}"
-    thirdparty_scheduler          = "${var.thirdparty_scheduler}"
     kubernetes_api_version        = "${var.kubernetes_api_version}"
     kubernetes_binaries_uri       = "${var.kubernetes_binaries_uri}"
     kubernetes_cert_dir           = "${var.kubernetes_cert_dir}"
     logentries_token              = "${var.logentries_token}"
     logentries_url                = "${var.logentries_url}"
-    master_port                   = "${var.master_port}"
     master_private_ip             = "${aws_instance.kubernetes_master.private_ip}"
     master_public_ip              = "${aws_instance.kubernetes_master.public_ip}"
-    master_public_ip              = "${aws_instance.kubernetes_master.public_ip}"
-    master_scheme                 = "${var.master_scheme}"
-    nodes_inventory_info          = "${join("\n", formatlist("%v ansible_ssh_host=%v", aws_instance.kubernetes_node_special.*.tags.ShortName, aws_instance.kubernetes_node_special.*.public_ip))}"
+    master_record                 = "https://${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-master.${var.aws_cluster_domain}:${var.access_port}"
+    proxy_record                  = "${replace(var.aws_user_prefix,"_","-")}-${replace(var.cluster_name,"_","-")}-proxy.${var.aws_cluster_domain}"
     sysdigcloud_access_key        = "${var.sysdigcloud_access_key}"
+    thirdparty_scheduler          = "${var.thirdparty_scheduler}"
   }
 
   provisioner "local-exec" {
-    command = "cat << 'EOF' > ${path.module}/rendered/ansible.inventory\n${self.rendered}\nEOF"
+    command = "cat << 'EOF' > ${path.module}/rendered/group_vars/cluster\n${self.rendered}\nEOF"
   }
 
   provisioner "local-exec" {
-    command = "AWS_ACCESS_KEY_ID=${var.aws_access_key} AWS_SECRET_ACCESS_KEY=${var.aws_secret_key} AWS_DEFAULT_REGION=${var.aws_region} ${path.module}/kraken_asg_helper.sh --kubeconfig ${var.kubeconfig} --cluster ${var.cluster_name} --limit ${var.node_count + var.special_node_count} --name ${aws_autoscaling_group.kubernetes_nodes.name} --output ${path.module}/rendered/ansible.inventory --singlewait ${var.asg_wait_single} --totalwaits ${var.asg_wait_total} --offset ${var.special_node_count} --retries ${var.asg_retries}"
+    command = "AWS_ACCESS_KEY_ID=${var.aws_access_key} AWS_SECRET_ACCESS_KEY=${var.aws_secret_key} AWS_DEFAULT_REGION=${var.aws_region} ${path.module}/kraken_asg_helper.sh --kubeconfig ${var.kubeconfig} --cluster ${var.cluster_name} --limit ${var.node_count + var.special_node_count} --name ${aws_autoscaling_group.kubernetes_nodes.name} --output ${path.module}/rendered/hosts --singlewait ${var.asg_wait_single} --totalwaits ${var.asg_wait_total} --offset ${var.special_node_count} --retries ${var.asg_retries}"
   }
 }

@@ -1,0 +1,25 @@
+---
+deployment_mode: binary
+kubernetes_version: v1.1.1
+hyperkube_image: gcr.io/google_containers/hyperkube:{{kubernetes_version}}
+kubernetes_api_version: v1
+kubernetes_binaries_uri: https://storage.googleapis.com/kubernetes-release/release/{{kubernetes_version}}/bin/linux/amd64
+kubernetes_log_dir: /var/log/k8s
+cluster_ip_range: 10.100.0.0/16
+kubernetes_service_ip: 10.100.0.1 # kubernetes_service_ip must be within cluster_ip_range CIDR
+kubernetes_systemd_stderr: "journal"
+kubernetes_systemd_stdout: "journal"
+dependency_retries: 100
+dependency_sleep: 10 # seconds
+access_scheme: https
+access_port: 443
+dns_domain: kubernetes.local
+dns_ip: 10.100.0.10
+etcd_private_ip: 127.0.0.1
+etcd_port: 4001
+apiserver_ip_pool: 127.0.0.1
+master_public_ip: 127.0.0.1
+master_private_ip: 127.0.0.1
+master_record: localhost
+cluster_name: kraken_cluster
+interface_name: eth0

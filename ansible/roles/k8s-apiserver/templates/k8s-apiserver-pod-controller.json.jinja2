@@ -1,0 +1,35 @@
+{
+  "apiVersion": "v1",
+  "kind": "Pod",
+  "metadata": {
+    "name": "k8s-apiserver"
+  },
+  "spec": {
+    "hostNetwork": true,
+    "containers": [
+      {
+        "name": "k8s-apiserver",
+        "image": "{{hyperkube_image}}",
+        "command": [
+          "/hyperkube",
+          "apiserver",
+          {% for k,v in apiserver_settings.iteritems() %}
+            "--{{k}}={{v}}",
+          {% endfor %}
+        ],
+        "ports": [
+          {
+            "name": "https",
+            "hostPort": 443,
+            "containerPort": 443
+          },
+          {
+            "name": "local",
+            "hostPort": 8080,
+            "containerPort": 8080
+          }
+        ]
+      }
+    ]
+  }
+}

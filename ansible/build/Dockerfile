@@ -8,6 +8,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY ansible.cfg /etc/ansible/ansible.cfg
+ENV ANSIBLE_CONFIG=/etc/ansible-config/ansible.cfg
+COPY ansible.cfg $ANSIBLE_CONFIG
 
 CMD ["/sbin/my_init"]

@@ -1,0 +1,7 @@
+---
+- name: Create journal-to-logentries.service
+  template: src=journal-to-logentries.service.jinja2 dest=/etc/systemd/system/journal-to-logentries.service
+  become: yes
+  notify:
+    - reload systemd
+    - restart journal-to-logentries

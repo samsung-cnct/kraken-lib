@@ -1,0 +1,8 @@
+---
+- name: restart k8s-binary-apiserver
+  service: name=k8s-binary-apiserver state=restarted enabled=yes
+  become: yes
+
+- name: restart k8s-docker-apiserver
+  service: name=k8s-docker-apiserver state=restarted enabled=yes
+  become: yes

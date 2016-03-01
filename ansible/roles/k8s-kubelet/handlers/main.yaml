@@ -1,0 +1,8 @@
+---
+- name: restart k8s-binary-kubelet
+  service: name=hyperkube-binary-kubelet state=restarted enabled=yes
+  become: yes
+
+- name: restart k8s-docker-kubelet
+  service: name=k8s-docker-kubelet state=restarted enabled=yes
+  become: yes

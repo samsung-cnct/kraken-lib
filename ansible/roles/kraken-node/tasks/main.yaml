@@ -1,0 +1,9 @@
+---
+- name: Attempt to label the node
+  become: yes
+  shell: >
+    /opt/bin/kubectl --kubeconfig={{ kubelet_settings.kubeconfig | expanduser }} label nodes {{ ansible_local.kubernetes_node_ip_fact.node_ip_address }} kraken-node={{inventory_hostname}} --overwrite
+  register: kubectl_result
+  until: kubectl_result.rc == 0
+  retries: 120
+  delay: 10

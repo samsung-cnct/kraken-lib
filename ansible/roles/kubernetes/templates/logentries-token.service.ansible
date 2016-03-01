@@ -1,9 +1,0 @@
-[Unit]
-Description=sets a logentries url in etcd
-After=etcd2.service
-Before=journal-2-logentries.service
-
-[Service]
-ExecStart=/usr/bin/etcdctl set /logentries.com/token {{logentries_token}}
-RemainAfterExit=true
-Type=oneshot

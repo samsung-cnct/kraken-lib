@@ -2,20 +2,21 @@
 
 ---
 write_files:
-  - path: /etc/inventory.ansible
+  - path: /etc/ansible/hosts
     content: |
       [etcd]
       etcd ansible_ssh_host=$private_ipv4
-
-      [etcd:vars]
-      ansible_connection=ssh
-      ansible_python_interpreter="PATH=/home/core/bin:$PATH python"
-      ansible_ssh_private_key_file=/opt/ansible/private_key
-      ansible_ssh_user=core
-      kubernetes_binaries_uri=${kubernetes_binaries_uri}
-      logentries_token=${logentries_token}
-      logentries_url=${logentries_url}
-      sysdigcloud_access_key=${sysdigcloud_access_key}
+  - path: /etc/ansible/group_vars/etcd
+    content: |
+      ---
+        ansible_connection: ssh
+        ansible_python_interpreter: "PATH=/home/core/bin:$PATH python"
+        ansible_ssh_private_key_file: /opt/ansible/private_key
+        ansible_ssh_user: core
+        kubernetes_binaries_uri: ${kubernetes_binaries_uri}
+        logentries_token: ${logentries_token}
+        logentries_url: ${logentries_url}
+        sysdigcloud_access_key: ${sysdigcloud_access_key}
 coreos:
   etcd2:
     name: etcd
@@ -158,7 +159,7 @@ coreos:
         Restart=on-failure
         RestartSec=5
         ExecStartPre=-/usr/bin/docker rm -f ansible-docker
-        ExecStart=/usr/bin/docker run --name ansible-docker -v /etc/inventory.ansible:/etc/inventory.ansible -v /opt/kraken:/opt/kraken -v /home/core/.ssh/ansible_rsa:/opt/ansible/private_key -v /var/run:/ansible -e ANSIBLE_HOST_KEY_CHECKING=False ${ansible_docker_image} /sbin/my_init --skip-startup-files --skip-runit -- ${ansible_playbook_command} ${ansible_playbook_file}
+        ExecStart=/usr/bin/docker run --name ansible-docker -v /etc/ansible:/etc/ansible -v /opt/kraken:/opt/kraken -v /home/core/.ssh/ansible_rsa:/opt/ansible/private_key -v /var/run:/ansible -e ANSIBLE_HOST_KEY_CHECKING=False ${ansible_docker_image} /sbin/my_init --skip-startup-files --skip-runit -- ${ansible_playbook_command} ${ansible_playbook_file}
   update:
     group: ${coreos_update_channel}
     reboot-strategy: ${coreos_reboot_strategy}

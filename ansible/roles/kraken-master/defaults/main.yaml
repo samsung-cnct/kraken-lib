@@ -1,0 +1,16 @@
+---
+apiserver_nginx_pool: 127.0.0.1:443
+deployment_mode: binary
+kraken_services_branch: master
+kraken_services_dirs: skydns prometheus kube-ui cluster-monitoring
+kraken_services_repo: git://github.com/samsung-ag/kraken-services
+thirdparty_scheduler:
+services:
+  command_passwd: "{{command_passwd}}"
+  dockercfg_base64: "{{dockercfg_base64}}"
+  master_ip: "{{master_private_ip}}"
+  apiserver_ip: "{{master_private_ip}}"
+  controller_manager_ip: "{{master_private_ip}}"
+  scheduler_ip: "{{master_private_ip}}"
+  etcd_ip: "{{etcd_private_ip}}"
+  dns_domain: "{{dns_domain}}"
