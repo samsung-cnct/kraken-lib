@@ -1,0 +1,4 @@
+---
+- name: Download hyperkube binary
+  become: yes
+  get_url: url={{kubernetes_binaries_uri}}/hyperkube dest=/opt/bin/hyperkube force=no mode="a+x" validate_certs=no

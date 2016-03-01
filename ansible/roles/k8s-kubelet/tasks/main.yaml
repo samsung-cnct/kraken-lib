@@ -1,0 +1,22 @@
+---
+- name: Ensure custom facts directory exists
+  file: >
+    path=/etc/ansible/facts.d
+    recurse=yes
+    state=directory
+  become: yes
+
+- name: Install custom fact module for IP address
+  template: >
+    src=node_ip_address_fact.sh.jinja2
+    dest=/etc/ansible/facts.d/kubernetes_node_ip_fact.fact
+    mode=0755
+  become: yes
+
+- name: Reload facts
+  setup: filter=ansible_local
+
+- include: kubelet-binary.yaml
+  when: "deployment_mode == 'binary'"
+- include: kubelet-docker.yaml
+  when: "deployment_mode == 'container'"

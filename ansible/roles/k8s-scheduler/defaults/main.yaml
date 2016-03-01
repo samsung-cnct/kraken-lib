@@ -1,0 +1,11 @@
+---
+scheduler_settings:
+  address: 0.0.0.0
+  alsologtostderr: false
+  kubeconfig: "{{ kubernetes_cert_dir }}/system:scheduler/kubeconfig"
+  log_dir: "{{ kubernetes_log_dir }}/scheduler"
+  logtostderr: false
+  master: "{{access_scheme}}://{{ master_private_ip }}:{{access_port}}"
+  port: 10251
+  profiling: true
+  v: 1

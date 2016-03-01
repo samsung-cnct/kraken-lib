@@ -1,0 +1,33 @@
+---
+- name: Create /opt/bin/kraken-services for custom binaries
+  become: yes
+  file: >
+    path=/opt/bin/kraken-services
+    state=directory
+    owner=core
+    group=core
+
+- name: Download kraken-services
+  git: repo={{kraken_services_repo}}
+       dest=/opt/bin/kraken-services
+       version={{kraken_services_branch}}
+       accept_hostkey=yes
+       force=yes
+  become: yes
+
+- name: Grab all yaml files from the cloned repo
+  find: paths="/opt/bin/kraken-services" patterns="^.*?\.(?:yaml|yml)$" recurse=yes use_regex=True
+  register: k8s_files
+
+- name: Fetch the found files into a temporary folder
+  fetch: src={{ item.path }} dest=/tmp/kraken-templates
+  with_items: "{{k8s_files.files}}"
+
+- name: Grab paths to all yaml files locally
+  local_action: find paths="/tmp/kraken-templates/{{ ansible_nodename }}/opt/bin/kraken-services" patterns="^.*?\.(?:yaml|yml)$" recurse=yes use_regex=True
+  register: k8s_local_files
+
+- name: Render the fetched files
+  become: yes
+  template: src={{ item.path }} dest={{ item.path | regex_replace('/tmp/kraken-templates/' + ansible_nodename,'') }}
+  with_items: "{{ k8s_local_files.files }}"

@@ -109,7 +109,7 @@ variable "dockercfg_base64" {
 
 variable "hyperkube_deployment_mode" {
   default     = "binary"
-  description = "Run inside 'docker' or run on host as 'binary'"
+  description = "Run inside 'container' or run on host as 'binary'"
 }
 
 variable "hyperkube_image" {
@@ -192,21 +192,21 @@ variable "ansible_docker_image" {
 }
 
 variable "ansible_playbook_command" {
-  default     = "ansible-playbook -i /etc/inventory.ansible"
+  default     = "ansible-playbook"
   description = "ansible-playbook invocation that will run inside ansible-docker container via cloudinit"
 }
 
 variable "ansible_playbook_file" {
-  default     = "/opt/kraken/ansible/ansible_in_docker.yaml"
+  default     = "/opt/kraken/ansible/kraken.yaml"
   description = "location of playbook file run with ansible_playbook_command"
 }
 
-variable "master_scheme" {
+variable "access_scheme" {
   default     = "https"
   description = "http or https"
 }
 
-variable "master_port" {
+variable "access_port" {
   default     = "443"
   description = "443, 8080 etc"
 }
@@ -214,4 +214,9 @@ variable "master_port" {
 variable "command_passwd" {
   default     = ""
   description = "password to use for command addon in kraken-services"
+}
+
+variable "cluster_passwd" {
+  default     = "kraken"
+  description = "password to use for basic auth on the completed cluster"
 }

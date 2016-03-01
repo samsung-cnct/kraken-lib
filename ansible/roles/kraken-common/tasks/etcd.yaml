@@ -1,0 +1,3 @@
+---
+- name: Wait for ETCD to become available
+  wait_for: host={{ etcd_private_ip }} port={{ etcd_port }} state=started timeout=1200

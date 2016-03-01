@@ -2,40 +2,43 @@
 
 ---
 write_files:
-  - path: /etc/inventory.ansible
+  - path: /etc/ansible/hosts
     content: |
-      [nodes]
+      [node]
       $NODE_SHORT_NAME ansible_ssh_host=$private_ipv4
-
-      [nodes:vars]
-      ansible_connection=ssh
-      ansible_python_interpreter="PATH=/home/core/bin:$PATH python"
-      ansible_ssh_private_key_file=/opt/ansible/private_key
-      ansible_ssh_user=core
-      cluster_master_record=${master_scheme}://$MASTER_PRIVATE_IP:${master_port}
-      cluster_name=${cluster_name}
-      cluster_proxy_record=$NODE_001_IP
-      cluster_user=${cluster_user}
-      dns_domain=${dns_domain}
-      dns_ip=${dns_ip}
-      dockercfg_base64=${dockercfg_base64}
-      etcd_private_ip=$ETCD_PRIVATE_IP
-      hyperkube_deployment_mode=${hyperkube_deployment_mode}
-      hyperkube_image=${hyperkube_image}
-      interface_name=${interface_name}
-      kraken_local_dir=${kraken_local_dir}
-      kraken_services_branch=${kraken_services_branch}
-      kraken_services_dirs=${kraken_services_dirs}
-      kraken_services_repo=${kraken_services_repo}
-      kubernetes_api_version=${kubernetes_api_version}
-      kubernetes_binaries_uri=${kubernetes_binaries_uri}
-      kubernetes_cert_dir=${kubernetes_cert_dir}
-      logentries_token=${logentries_token}
-      logentries_url=${logentries_url}
-      master_port="${master_port}"
-      master_private_ip=$MASTER_PRIVATE_IP
-      master_scheme=${master_scheme}
-      sysdigcloud_access_key=${sysdigcloud_access_key}
+  - path: /etc/ansible/group_vars/node
+    content: |
+      ---
+        ansible_connection: ssh
+        ansible_python_interpreter: "PATH=/home/core/bin:$PATH python"
+        ansible_ssh_private_key_file: /opt/ansible/private_key
+        ansible_ssh_user: core
+        master_record: ${access_scheme}://$MASTER_PRIVATE_IP:${access_port}
+        cluster_name: ${cluster_name}
+        proxy_record: $NODE_001_IP
+        kubernetes_basic_auth_user:
+            name: ${cluster_user}
+            password: ${cluster_passwd}
+        dns_domain: ${dns_domain}
+        dns_ip: ${dns_ip}
+        dockercfg_base64: ${dockercfg_base64}
+        etcd_private_ip: $ETCD_PRIVATE_IP
+        hyperkube_deployment_mode: ${hyperkube_deployment_mode}
+        hyperkube_image: ${hyperkube_image}
+        interface_name: ${interface_name}
+        kraken_local_dir: ${kraken_local_dir}
+        kraken_services_branch: ${kraken_services_branch}
+        kraken_services_dirs: ${kraken_services_dirs}
+        kraken_services_repo: ${kraken_services_repo}
+        kubernetes_api_version: ${kubernetes_api_version}
+        kubernetes_binaries_uri: ${kubernetes_binaries_uri}
+        kubernetes_cert_dir: ${kubernetes_cert_dir}
+        logentries_token: ${logentries_token}
+        logentries_url: ${logentries_url}
+        access_port: "${access_port}"
+        master_private_ip: $MASTER_PRIVATE_IP
+        access_scheme: ${access_scheme}
+        sysdigcloud_access_key: ${sysdigcloud_access_key}
 coreos:
   etcd2:
     proxy: on
@@ -145,7 +148,7 @@ coreos:
         Restart=on-failure
         RestartSec=3
         ExecStartPre=-/usr/bin/docker rm -f ansible-docker
-        ExecStart=/usr/bin/docker run --name ansible-docker -v /etc/inventory.ansible:/etc/inventory.ansible -v ${kraken_local_dir}:${kraken_local_dir} -v /home/core/.ssh/ansible_rsa:/opt/ansible/private_key -v /var/run:/ansible -e ANSIBLE_HOST_KEY_CHECKING=False ${ansible_docker_image} /sbin/my_init --skip-startup-files --skip-runit -- ${ansible_playbook_command} ${ansible_playbook_file}
+        ExecStart=/usr/bin/docker run --name ansible-docker -v /etc/ansible:/etc/ansible -v ${kraken_local_dir}:${kraken_local_dir} -v /home/core/.ssh/ansible_rsa:/opt/ansible/private_key -v /var/run:/ansible -e ANSIBLE_HOST_KEY_CHECKING=False ${ansible_docker_image} /sbin/my_init --skip-startup-files --skip-runit -- ${ansible_playbook_command} ${ansible_playbook_file}
   update:
     group: ${coreos_update_channel}
     reboot-strategy: ${coreos_reboot_strategy}

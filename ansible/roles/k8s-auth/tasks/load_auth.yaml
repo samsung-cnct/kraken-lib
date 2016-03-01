@@ -1,0 +1,59 @@
+---
+- name: Remove credentails generated for system users
+  become: yes
+  file: path={{ kubernetes_cert_dir }}/known_tokens.csv state=absent
+- name: Create credentials file for system users
+  become: yes
+  file: path={{ kubernetes_cert_dir }}/known_tokens.csv state=touch
+
+- name: Remove credentails csv generated for basic auth user
+  become: yes
+  file: path={{ kubernetes_cert_dir }}/basic_auth.csv state=absent
+- name: Create credentails file for basic auth user
+  become: yes
+  file: path={{ kubernetes_cert_dir }}/basic_auth.csv state=touch
+
+- name: Wait for each ETCD key to be available for system users
+  include: etcd_key_wait.yml
+  with_dict: "{{ system_users }}"
+
+- name: Wait for ETCD key to be available for basic_auth user
+  shell: >
+    etcdctl --endpoint "http://{{ etcd_private_ip }}:{{ etcd_port }}" get /{{ etcd_key }}/{{ kubernetes_basic_auth_user.name }}/basic-auth
+  register: etcd_ba_result
+  until: etcd_ba_result.rc == 0
+  retries: 120
+  delay: 10
+
+- name: Collect all etcd keys for system users
+  shell: >
+    etcdctl --endpoint "http://{{ etcd_private_ip }}:{{ etcd_port }}" get /{{ etcd_key }}/{{ item.value.name }}/token
+  with_dict: "{{ system_users }}"
+  register: etcd_results
+
+- name: Create a new fact for system user name array
+  set_fact: system_usernames="[]"
+
+- name: Add names to system user array
+  set_fact: system_usernames="{{system_usernames}} + [ {{item.value.name}} ]"
+  with_dict: "{{ system_users }}"
+
+- name: Fill out credentials file for system users
+  lineinfile: dest={{ kubernetes_cert_dir }}/known_tokens.csv
+                regexp=''
+                insertafter=EOF
+                line="{{ item.0.stdout }},{{ item.1 }},{{ item.1 }}"
+  with_together:
+    - "{{etcd_results.results}}"
+    - "{{system_usernames}}"
+
+- name: Collect etcd key for basic_auth user
+  shell: >
+    etcdctl --endpoint "http://{{ etcd_private_ip }}:{{ etcd_port }}" get /{{ etcd_key }}/{{ kubernetes_basic_auth_user.name }}/basic-auth
+  register: etcd_ba_results
+
+- name: Fill out credentails file for basic_auth user
+  lineinfile: dest={{ kubernetes_cert_dir }}/basic_auth.csv
+                regexp=''
+                insertafter=EOF
+                line="{{ etcd_ba_results.stdout }},{{ kubernetes_basic_auth_user.name }},{{ kubernetes_basic_auth_user.name }}"

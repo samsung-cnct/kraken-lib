@@ -1,0 +1,25 @@
+---
+- name: Create /opt/bin/manifests for configs
+  become: yes
+  file: >
+    path=/opt/bin/manifests
+    state=directory
+    owner=core
+    group=core
+
+- name: Copy controller manager manifest config
+  template: src=k8s-apiserver-pod-controller.json.jinja2
+            dest=/opt/bin/manifests/apiserver.json
+  become: yes
+
+- name: Create k8s-docker-apiserver
+  template: src=k8s-docker-apiserver.service.jinja2
+            dest=/etc/systemd/system/k8s-docker-apiserver.service
+  become: yes
+  notify:
+    - reload systemd
+    - restart k8s-docker-apiserver
+
+- name: Ensure k8s-docker-apiserver.service started
+  service: name=k8s-docker-apiserver state=started enabled=yes args=--no-block
+  become: yes

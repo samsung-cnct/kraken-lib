@@ -1,0 +1,23 @@
+---
+kubelet_settings:
+  address: 0.0.0.0
+  alsologtostderr: false
+  api-servers: "{{access_scheme}}://{{ master_private_ip }}:{{access_port}}"
+  cadvisor-port: 4194
+  cluster-dns: "{{ dns_ip }}"
+  cluster-domain: "{{ dns_domain }}"
+  enable-debugging-handlers: true
+  enable-server: true
+  healthz-bind-address: 0.0.0.0
+  healthz-port: 10254
+  kubeconfig: "{{ kubernetes_cert_dir }}/kubelet/kubeconfig"
+  log_dir: "{{ kubernetes_log_dir }}/kubelet"
+  logtostderr: false
+  max-pods: 200
+  node-status-update-frequency: 10s
+  port: 10250
+  read-only-port: 10255
+  registry-burst: 0
+  registry-qps: 0
+  sync-frequency: 10s
+  v: 1

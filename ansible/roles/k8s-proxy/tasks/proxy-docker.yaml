@@ -1,0 +1,12 @@
+---
+- name: Create k8s-docker-proxy
+  template: src=k8s-docker-proxy.service.jinja2
+            dest=/etc/systemd/system/k8s-docker-proxy.service
+  become: yes
+  notify:
+    - reload systemd
+    - restart k8s-docker-proxy
+
+- name: Ensure k8s-docker-proxy.service started
+  service: name=k8s-docker-proxy state=started enabled=yes args=--no-block
+  become: yes

@@ -1,0 +1,9 @@
+---
+proxy_type: node
+proxy_settings:
+  alsologtostderr: false
+  kubeconfig: "{{ kubernetes_cert_dir }}/kube_proxy/kubeconfig"
+  log_dir: "{{ kubernetes_log_dir }}/proxy"
+  logtostderr: false
+  master: "{{access_scheme}}://{{ master_private_ip }}:{{access_port}}"
+  v: 1

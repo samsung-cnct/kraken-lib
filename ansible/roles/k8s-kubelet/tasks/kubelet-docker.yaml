@@ -1,0 +1,12 @@
+---
+- name: Create k8s-docker-kubelet
+  template: src=k8s-docker-kubelet.service.jinja2
+            dest=/etc/systemd/system/k8s-docker-kubelet.service
+  become: yes
+  notify:
+    - reload systemd
+    - restart k8s-docker-kubelet
+
+- name: Ensure k8s-docker-kubelet.service started
+  service: name=k8s-docker-kubelet state=started enabled=yes args=--no-block
+  become: yes

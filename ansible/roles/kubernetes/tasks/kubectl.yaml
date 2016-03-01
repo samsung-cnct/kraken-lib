@@ -1,7 +1,0 @@
----
-- name: install kubectl binary
-  command : "{{ item }}"
-  with_items:
-    - sudo /usr/bin/wget -N -O /opt/bin/kubectl.installing {{kubernetes_binaries_uri}}/kubectl
-    - sudo /usr/bin/chmod +x /opt/bin/kubectl.installing
-    - sudo /usr/bin/mv -v /opt/bin/kubectl.installing /opt/bin/kubectl

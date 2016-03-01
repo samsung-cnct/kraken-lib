@@ -1,0 +1,16 @@
+[Unit]
+Description=Launch kubernetes hyperkube apiserver
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+StandardOutput={{ kubernetes_systemd_stdout }}
+StandardError={{ kubernetes_systemd_stderr }}
+Restart=always
+RestartSec=5
+LimitNOFILE=infinity
+ExecStartPre=-/usr/bin/mkdir -p {{apiserver_settings.log_dir}}
+ExecStart=/opt/bin/hyperkube apiserver \
+  {% for k,v in apiserver_settings.iteritems() %}
+    --{{k}}={{v}} \
+  {% endfor %}

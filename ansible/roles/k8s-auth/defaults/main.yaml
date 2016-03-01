@@ -1,0 +1,31 @@
+---
+kubernetes_auth_operation: create # create or load
+kubernetes_cert_dir: /srv/kubernetes
+etcd_key: k8s-auth
+system_users:
+  kubernetes_kubelet_user:
+    name: "kubelet"
+    token: "{{ lookup('password', '/tmp/kubelet.token length=15') }}"
+  kubernetes_proxy_user:
+    name: "kube_proxy"
+    token: "{{ lookup('password', '/tmp/kube_proxy.token length=15') }}"
+  kubernetes_controller_user:
+    name: "system:controller_manager"
+    token: "{{ lookup('password', '/tmp/system:controller_manager.token length=15') }}"
+  kubernetes_scheduler_user:
+    name: "system:scheduler"
+    token: "{{ lookup('password', '/tmp/system:scheduler.token length=15') }}"
+  kubernetes_logging_user:
+    name: "system:logging"
+    token: "{{ lookup('password', '/tmp/system:logging.token length=15') }}"
+  kubernetes_monitoring_user:
+    name: "system:monitoring"
+    token: "{{ lookup('password', '/tmp/system:monitoring.token length=15') }}"
+  kubernetes_dns_user:
+    name: "system:dns"
+    token: "{{ lookup('password', '/tmp/system:dns.token length=15') }}"
+kubernetes_basic_auth_user:
+  name: "kraken"
+  password: "{{ lookup('password', '/tmp/kubernetes_basic_auth_user.token length=8') }}"
+coreos_pkg_home: "/home/core"
+coreos_pypy_home: "{{coreos_pkg_home}}/pypy"

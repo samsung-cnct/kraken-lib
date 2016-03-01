@@ -1,0 +1,19 @@
+---
+- name: Check whether credentials have already been generated
+  stat: path={{ kubernetes_cert_dir }}/secured_auth
+  register: run_auth_generation
+
+- name: Check whether credentials have already been generated
+  stat: path={{ kubernetes_cert_dir }}/secured_cert
+  register: run_cert_generation
+
+- include: common.yaml
+- include: create_auth.yaml
+  when: "kubernetes_auth_operation == 'create' and run_auth_generation.stat.exists == False"
+- include: create_cert.yaml
+  when: "kubernetes_auth_operation == 'create' and run_cert_generation.stat.exists == False"
+- include: load_auth.yaml
+  when: "kubernetes_auth_operation == 'load'"
+- include: load_cert.yaml
+  when: "kubernetes_auth_operation == 'load'"
+- include: create_kubeconfig.yaml
