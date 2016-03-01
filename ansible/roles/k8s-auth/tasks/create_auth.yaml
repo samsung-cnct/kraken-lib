@@ -29,7 +29,7 @@
 
 - name: Set ETCD key for basic auth user
   shell: >
-    etcdctl --endpoint "http://{{ etcd_private_ip }}:{{ etcd_port }}" set {{ etcd_key }}/{{ kubernetes_basic_auth_user.name }}/basic-auth {{ kubernetes_basic_auth_user.password }}
+    etcdctl --endpoint "http://{{ etcd_private_ip }}:{{ etcd_port }}" set {{ etcd_key }}/{{ kubernetes_basic_auth_user.name }}/basic-auth "{{ kubernetes_basic_auth_user.password }}""
 
 - name: create marker file
   become: yes
