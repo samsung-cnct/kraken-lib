@@ -11,7 +11,7 @@
 
 - name: Set ETCD keys for system users
   shell: >
-    etcdctl --endpoint "http://{{ etcd_private_ip }}:{{ etcd_port }}" set {{ etcd_key }}/{{ item.value.name }}/token {{ item.value.token }}
+    etcdctl --endpoint "http://{{ etcd_private_ip }}:{{ etcd_port }}" set {{ etcd_key }}/{{ item.value.name }}/token "{{ item.value.token }}"
   with_dict: "{{ system_users }}"
 
 - name: Remove credentails htpasswd generated for basic auth user
@@ -29,7 +29,7 @@
 
 - name: Set ETCD key for basic auth user
   shell: >
-    etcdctl --endpoint "http://{{ etcd_private_ip }}:{{ etcd_port }}" set {{ etcd_key }}/{{ kubernetes_basic_auth_user.name }}/basic-auth "{{ kubernetes_basic_auth_user.password }}""
+    etcdctl --endpoint "http://{{ etcd_private_ip }}:{{ etcd_port }}" set {{ etcd_key }}/{{ kubernetes_basic_auth_user.name }}/basic-auth "{{ kubernetes_basic_auth_user.password }}"
 
 - name: create marker file
   become: yes
