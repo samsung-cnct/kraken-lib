@@ -32,11 +32,8 @@
   register: etcd_results
 
 - name: Create a new fact for system user name array
-  set_fact: system_usernames="[]"
-
-- name: Add names to system user array
-  set_fact: system_usernames="{{system_usernames}} + [ {{item.value.name}} ]"
-  with_dict: "{{ system_users }}"
+  become: yes
+  set_fact: system_usernames="{{ lookup('template', 'get_usernames.jinja2').split(',') }}"
 
 - name: Fill out credentials file for system users
   lineinfile: dest={{ kubernetes_cert_dir }}/known_tokens.csv

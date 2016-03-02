@@ -32,6 +32,20 @@ is_running=$(docker inspect -f '{{ .State.Running }}' ${KRAKEN_CONTAINER_NAME})
 if [ ${is_running} == "true" ];  then
   warn "Cluster build is currently running. Some of the state files might not yet be available.\n Run\n  \
     'docker logs --follow ${KRAKEN_CONTAINER_NAME}'\n to see the current log."
+    containerfiles=(
+      ${KRAKEN_CONTAINER_NAME}:/root/.ssh/config_${KRAKEN_CLUSTER_NAME}
+      ${KRAKEN_CONTAINER_NAME}:/opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/rendered/hosts
+      kraken_data:${src_cluster_dir}/terraform.tfstate
+      kraken_data:${src_cluster_dir}/kube_config
+      ${KRAKEN_CONTAINER_NAME}:/root/.ssh/id_rsa
+      ${KRAKEN_CONTAINER_NAME}:/root/.ssh/id_rsa.pub
+      ${KRAKEN_CONTAINER_NAME}:/opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/${KRAKEN_CLUSTER_NAME}/terraform.tfvars
+    )
+
+    container_var_files=(
+      ${KRAKEN_CONTAINER_NAME}:/opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/rendered/group_vars/cluster
+      ${KRAKEN_CONTAINER_NAME}:/opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/rendered/group_vars/all
+    )
 fi
 
 target_cluster_dir="${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}"
@@ -48,6 +62,10 @@ for containerfile in "${containerfiles[@]}"; do
     warn "Failed docker cp $containerfile ${target_cluster_dir}. Not available yet?"
   fi
 done
+
+if [ ${is_running} == "true" ];  then
+  mv -f ${target_cluster_dir}/config_${KRAKEN_CLUSTER_NAME} ${target_cluster_dir}/ssh_config 2>/dev/null || true
+fi
 
 for containervarfile in "${container_var_files[@]}"; do
   if ! docker cp $containervarfile ${target_cluster_dir}/group_vars; then
