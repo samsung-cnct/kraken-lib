@@ -1,6 +1,6 @@
 ---
 - name: restart k8s-binary-controller-manager
-  service: name=hyperkube-binary-controller-manager state=restarted enabled=yes
+  service: name=k8s-binary-controller-manager state=restarted enabled=yes
   become: yes
 
 - name: restart k8s-docker-controller-manager

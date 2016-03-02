@@ -2,12 +2,12 @@
 
 - name: Ensure binary scheduler is running
   become: yes
-  service: name=hyperkube-binary-scheduler state=started enabled=yes
+  service: name=k8s-binary-scheduler state=started enabled=yes
   when: "hyperkube_deployment_mode == 'binary'"
 
 - name: Ensure dockerized scheduler is running
   become: yes
-  service: name=hyperkube-docker-master state=started enabled=yes
+  service: name=k8s-docker-master state=started enabled=yes
   when: "hyperkube_deployment_mode == 'container'"
 
 - name: Create third party scheduler pod
@@ -21,7 +21,7 @@
 
 - name: Shut down binary scheduler
   become: yes
-  service: name=hyperkube-binary-scheduler state=stopped enabled=yes
+  service: name=k8s-binary-scheduler state=stopped enabled=yes
   when: "hyperkube_deployment_mode == 'binary'"
 
 - name: Modify dockerized scheduler
@@ -31,5 +31,5 @@
 
 - name: Restart dockerized contorller manager pod scheduler
   become: yes
-  service: name=hyperkube-docker-master state=restarted enabled=yes
+  service: name=k8s-docker-master state=restarted enabled=yes
   when: "hyperkube_deployment_mode == 'container'"
