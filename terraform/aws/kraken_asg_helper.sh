@@ -70,11 +70,11 @@ echo "Host numbering offset is ${NUMBERING_OFFSET}"
 function control_c() {
   echo "Interrupted. Will try to generate local ansible inventory and kubeconfig anyway."
   generate_kubeconfig
-  generate_configs
+  generate_ssh_config
   exit 1
 }
 
-function generate_configs() {
+function generate_ssh_config() {
   ec2_ips=$(aws --output text \
     --query "Reservations[*].Instances[*].PublicIpAddress" \
     ec2 describe-instances --instance-ids \
@@ -210,15 +210,15 @@ function nudge_asg_nodes() {
 # setup a sigint trap
 trap control_c SIGINT
 
-# generate kubectl config
-generate_kubeconfig
-
 # first lets wait for the autoscaling group to fill out.
 echo "Starting wait on ${ASG_NAME} autoscaling group to become healthy."
 wait_for_asg
 
 # generate ssh configurations
-generate_configs
+generate_ssh_config
+
+# generate kubectl config
+generate_kubeconfig
 
 # get a count of nodes from kubectl
 echo "Starting wait on ${NODE_LIMIT} provisioned kubernetes nodes."
