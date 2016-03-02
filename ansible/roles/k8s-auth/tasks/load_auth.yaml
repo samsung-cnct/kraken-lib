@@ -36,10 +36,9 @@
   set_fact: system_usernames="{{ lookup('template', 'get_usernames.jinja2').split(',') }}"
 
 - name: Fill out credentials file for system users
-  lineinfile: dest={{ kubernetes_cert_dir }}/known_tokens.csv
-                regexp=''
-                insertafter=EOF
-                line="{{ item.0.stdout }},{{ item.1 }},{{ item.1 }}"
+  become: yes
+  shell: >
+    echo "{{ item.0.stdout }},{{ item.1 }},{{ item.1 }}" >> {{ kubernetes_cert_dir }}/known_tokens.csv
   with_together:
     - "{{etcd_results.results}}"
     - "{{system_usernames}}"
@@ -50,7 +49,6 @@
   register: etcd_ba_results
 
 - name: Fill out credentails file for basic_auth user
-  lineinfile: dest={{ kubernetes_cert_dir }}/basic_auth.csv
-                regexp=''
-                insertafter=EOF
-                line="{{ etcd_ba_results.stdout }},{{ kubernetes_basic_auth_user.name }},{{ kubernetes_basic_auth_user.name }}"
+  become: yes
+  shell: >
+    echo "{{ etcd_ba_results.stdout }},{{ kubernetes_basic_auth_user.name }},{{ kubernetes_basic_auth_user.name }}" >> {{ kubernetes_cert_dir }}/basic_auth.csv
