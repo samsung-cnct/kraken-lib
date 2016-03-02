@@ -1,6 +1,6 @@
 ---
 - name: restart k8s-binary-scheduler
-  service: name=hyperkube-binary-scheduler state=restarted enabled=yes
+  service: name=k8s-binary-scheduler state=restarted enabled=yes
   become: yes
 
 - name: restart k8s-docker-scheduler

@@ -1,6 +1,6 @@
 ---
 - name: restart k8s-binary-proxy
-  service: name=hyperkube-binary-proxy state=restarted enabled=yes
+  service: name=k8s-binary-proxy state=restarted enabled=yes
   become: yes
 
 - name: restart k8s-docker-proxy
