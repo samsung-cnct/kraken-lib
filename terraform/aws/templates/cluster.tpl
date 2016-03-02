@@ -9,7 +9,7 @@ dns_domain: ${dns_domain}
 dns_ip: ${dns_ip}
 dockercfg_base64: ${dockercfg_base64}
 etcd_private_ip: ${etcd_private_ip}
-deployment_mode: ${hyperkube_deployment_mode}
+deployment_mode: ${deployment_mode}
 hyperkube_image: ${hyperkube_image}
 interface_name: ${interface_name}
 kraken_services_branch: ${kraken_services_branch}

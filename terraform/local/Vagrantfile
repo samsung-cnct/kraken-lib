@@ -128,7 +128,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           dns_ip
           dockercfg_base64
           hyperkube_image
-          hyperkube_deployment_mode
+          deployment_mode
           interface_name
           kraken_local_dir
           kraken_services_branch
