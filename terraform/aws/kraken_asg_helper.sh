@@ -210,12 +210,15 @@ function nudge_asg_nodes() {
 # setup a sigint trap
 trap control_c SIGINT
 
+# generate kubectl config
+generate_kubeconfig
+
 # first lets wait for the autoscaling group to fill out.
 echo "Starting wait on ${ASG_NAME} autoscaling group to become healthy."
 wait_for_asg
 
-# generate kubectl config
-generate_kubeconfig
+# generate ssh configurations
+generate_configs
 
 # get a count of nodes from kubectl
 echo "Starting wait on ${NODE_LIMIT} provisioned kubernetes nodes."
@@ -249,9 +252,6 @@ do
     break
   fi
 done
-
-# generate all post-wait configurations
-generate_configs
 
 if (( success )); then
   echo "Success!"
