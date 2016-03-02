@@ -13,7 +13,7 @@
 - name: Create third party scheduler pod
   become: yes
   shell: >
-    /opt/bin/kubectl --kubeconfig={{ controller_manager_settings.kubeconfig | expanduser }} create -f /opt/bin/kraken-services-rendered/{{ thirdparty_scheduler }} || /opt/bin/kubectl --kubeconfig={{ controller_manager_settings.kubeconfig | expanduser }} apply -f /opt/bin/kraken-services-rendered/{{ thirdparty_scheduler }}
+    /opt/bin/kubectl --kubeconfig={{ controller_manager_settings.kubeconfig | expanduser }} create -f /opt/bin/kraken-services/{{ thirdparty_scheduler }} || /opt/bin/kubectl --kubeconfig={{ controller_manager_settings.kubeconfig | expanduser }} apply -f /opt/bin/kraken-services/{{ thirdparty_scheduler }}
   register: pod_result
   until: pod_result.rc == 0
   retries: 120
