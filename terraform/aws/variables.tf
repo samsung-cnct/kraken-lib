@@ -317,7 +317,7 @@ variable "dockercfg_base64" {
   description = "Docker base64-encoded configuration string"
 }
 
-variable "hyperkube_deployment_mode" {
+variable "deployment_mode" {
   default     = "binary"
   description = "Run inside 'container' or run on host as 'binary'"
 }

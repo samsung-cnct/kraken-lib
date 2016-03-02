@@ -27,7 +27,7 @@ write_files:
         dockercfg_base64: ${dockercfg_base64}
         etcd_private_ip: ${etcd_private_ip}
         etcd_public_ip: ${etcd_public_ip}
-        hyperkube_deployment_mode: ${hyperkube_deployment_mode}
+        deployment_mode: ${deployment_mode}
         hyperkube_image: ${hyperkube_image}
         interface_name: ${interface_name}
         kraken_local_dir: ${kraken_local_dir}
