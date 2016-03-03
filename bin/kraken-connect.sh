@@ -87,24 +87,15 @@ else
   inf "Parameters for ssh:\n   \
     ssh -F ${target_cluster_dir}/ssh_config <node-name>\n"
   inf "Alternatively: \n"
-  inf "   eval \$(docker-machine env ${KRAKEN_DOCKER_MACHINE_NAME})\n   \
-    docker run -it --volumes-from kraken_data samsung_ag/kraken ssh -F \
-    ${src_cluster_dir}/ssh_config <other ssh options> <node-name>"
+  inf "   eval \$(docker-machine env ${KRAKEN_DOCKER_MACHINE_NAME})\n   docker run -it --volumes-from kraken_data samsung_ag/kraken ssh -F ${src_cluster_dir}/ssh_config <other ssh options> <node-name>"
 fi
 
 inf "\n\nParameters for ansible:\n   \
-  ansible-playbook\n   \
-  --inventory-file ${target_cluster_dir}/hosts\n   \
-  --extra-vars 'ansible_ssh_private_key_file=${target_cluster_dir}/id_rsa\n   \
-                ansible_ssh_key_checking=False'\n   \
-  <path to ansible playbook yaml>"
+  ansible-playbook --inventory-file ${target_cluster_dir}/hosts --extra-vars 'ansible_ssh_private_key_file=${target_cluster_dir}/id_rsa' --ssh-common-args '-o StrictHostKeyChecking=no' <playbook>"
 
 
 inf "\n\nParameters for terraform:\n   \
-  -state=${target_cluster_dir}/terraform.tfstate\n   \
-  -var-file=${target_cluster_dir}/terraform.tfvars\n   \
-  -var 'cluster_name=${KRAKEN_CLUSTER_NAME}'"
+  -state=${target_cluster_dir}/terraform.tfstate -var-file=${target_cluster_dir}/terraform.tfvars -var 'cluster_name=${KRAKEN_CLUSTER_NAME}'"
 
 inf "\n\nTo control your cluster use:\n  \
-  kubectl --kubeconfig=${target_cluster_dir}/kube_config \
-  --cluster=${KRAKEN_CLUSTER_NAME} <kubectl commands>"
+  kubectl --kubeconfig=${target_cluster_dir}/kube_config --cluster=${KRAKEN_CLUSTER_NAME} <kubectl commands>"
