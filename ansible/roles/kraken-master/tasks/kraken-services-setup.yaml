@@ -7,12 +7,12 @@
   local_action: git repo={{kraken_services_repo}} dest={{services_local_path.stdout}} version={{kraken_services_branch}} accept_hostkey=yes force=yes
 
 - name: Grab all yaml files from the cloned repo
-  local_action: find paths="{{services_local_path}}" patterns="^.*?\.(?:yaml|yml)$" recurse=yes use_regex=True
+  local_action: find paths="{{services_local_path.stdout}}" patterns="^.*?\.(?:yaml|yml)$" recurse=yes use_regex=True
   register: k8s_local_files
 
 - name: Render the fetched files
   become: yes
-  template: src={{ item.path }} dest={{ item.path | regex_replace(services_local_path,'/opt/bin/kraken-services') }}
+  template: src={{ item.path }} dest={{ item.path | regex_replace(services_local_path.stdout,'/opt/bin/kraken-services') }}
   with_items: "{{ k8s_local_files.files }}"
 
 - name: delete local temp kraken services path
