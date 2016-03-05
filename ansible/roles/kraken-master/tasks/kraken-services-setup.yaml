@@ -10,6 +10,11 @@
   local_action: find paths="{{services_local_path.stdout}}" patterns="^.*?\.(?:yaml|yml)$" recurse=yes use_regex=True
   register: k8s_local_files
 
+- name: Create directories
+  become: yes
+  file: path={{ item.path | dirname | regex_replace(services_local_path.stdout,'/opt/bin/kraken-services') }} state=directory
+  with_items: "{{ k8s_local_files.files }}"
+
 - name: Render the fetched files
   become: yes
   template: src={{ item.path }} dest={{ item.path | regex_replace(services_local_path.stdout,'/opt/bin/kraken-services') }}
