@@ -12,7 +12,7 @@ Feature: Make sure we have the correct kubernetes services
       .*
       heapster.*
       kube-dns.*
-      kube-ui.*
+      kubedash.*
       monitoring-grafana.*
       monitoring-influxdb.*
       """
