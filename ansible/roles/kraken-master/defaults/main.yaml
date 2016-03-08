@@ -2,7 +2,7 @@
 apiserver_nginx_pool: 127.0.0.1:443
 deployment_mode: binary
 kraken_services_branch: master
-kraken_services_dirs: skydns prometheus kube-ui cluster-monitoring
+kraken_services_dirs: skydns prometheus kubedash cluster-monitoring
 kraken_services_repo: git://github.com/samsung-ag/kraken-services
 thirdparty_scheduler:
 services:
