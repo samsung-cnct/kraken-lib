@@ -1,6 +1,6 @@
 # Kraken
 ## Overview
-Deploy a __Kubernetes__ cluster using __Terraform__  and __Ansible__ on top of __CoreOS__.
+Deploy a __Kubernetes__ cluster to AWS or Virtualbox using __Terraform__  and __Ansible__ on top of __CoreOS__.
 
 ## Tools setup
 Install [docker toolbox](https://www.docker.com/docker-toolbox), or just docker-machine and docker client separately.  
@@ -58,6 +58,22 @@ Looking to create a **ludicrous** cluster? Use the following `terraform.tfvars`:
 All available variables to override and set are under
 
     terraform/<cluster type>/variables.tf
+
+### Cluster Services
+
+Kraken supports turnkey deployment of a number of useful cluster services, via the [kraken-services](https://github.com/samsung-ag/kraken-services) repository.  Don't see a service you want in our repo?  You can use your own!
+
+    kraken_services_repo = "git://github.com/your-fork/kraken-services"
+    kraken_services_branch = "your-branch"
+    kraken_services_dirs = "your-service1 your-service2"
+
+### Third Party Scheduler
+
+Kraken supports optionally deploying a third-party scheduler as a set of Kubernetes resources, and using that instead of the default `kube-scheduler` process.  The third party scheduler is assumed to be a service available for deployment from the services repo specified by `kraken_services_repo`
+
+    kraken_services_repo = "git://github.com/your-fork/kraken-services"
+    kraken_services_branch = "your-branch"
+    thirdparty_scheduler = "custom-scheduler"
     
 ## Create cluster
 
