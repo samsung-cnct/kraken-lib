@@ -16,6 +16,27 @@ If terraform is having trouble finding the custom providers, try explicitly unin
     done
     brew bundle
 
+## If you already have a hypervisor (Virtualbox, Vmware Fusion), ansible, AWS CLI installed:
+* Install Terraform:
+
+Access [https://www.terraform.io/downloads.html] to obtain the download for your OS. Unzip the archive, and copy all terraform* binaries in the uncompressed directory to ```/usr/local/bin```
+
+* Install terraform-provider-execute:
+
+```brew tap Samsung-AG/terraform-provider-execute```
+
+```brew install terraform-provider-execute```
+
+* Install terraform-provider-coreosbox
+
+```brew tap Samsung-AG/terraform-provider-coreosbox```
+
+```brew install terraform-provider-coreosbox```
+
+* Install ```kubectl```
+
+```brew install kubectl```
+
 Alternative/non-OSX setup:
 
 * Install [Ansible](https://github.com/ansible/ansible/releases)
