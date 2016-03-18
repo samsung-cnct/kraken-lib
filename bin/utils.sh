@@ -100,8 +100,7 @@ if [ ${KRAKEN_CLUSTER_TYPE} == "local" ]; then
 fi
 
 if [ ! -f "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/${KRAKEN_CLUSTER_NAME}/terraform.tfvars" ]; then
-  error "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/${KRAKEN_CLUSTER_NAME}/terraform.tfvars is not present."
-  exit 1
+  warn "${KRAKEN_ROOT}/terraform/${KRAKEN_CLUSTER_TYPE}/${KRAKEN_CLUSTER_NAME}/terraform.tfvars is not present."
 fi
 
 if [ "${KRAKEN_NATIVE_DOCKER}" = false ]; then

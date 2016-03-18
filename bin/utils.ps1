@@ -46,8 +46,7 @@ If ($clustertype -eq "local") {
 }
 
 If (!(Test-Path "$krakenRoot/terraform/$clustertype/$clustername/terraform.tfvars")) {
-  error "$krakenRoot/terraform/$clustertype/$clustername/terraform.tfvars is not present."
-  exit 1
+  warn "$krakenRoot/terraform/$clustertype/$clustername/terraform.tfvars is not present."
 }
 
 # look for the docker machine specified 
