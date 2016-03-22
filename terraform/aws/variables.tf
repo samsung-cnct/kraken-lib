@@ -303,7 +303,7 @@ variable "ansible_docker_image" {
 }
 
 variable "dns_domain" {
-  default     = "kubernetes.local"
+  default     = "cluster.local"
   description = "Kubenretes DNS domain"
 }
 
