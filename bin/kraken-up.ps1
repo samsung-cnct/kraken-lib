@@ -8,9 +8,9 @@ Param(
   [string]$dmopts = "",
   [Parameter(Mandatory=$true)]
   [string]$clustertype = "",
-  [Parameter(Mandatory=$true)] 
-  [string]$clustername = "", 
-  [Parameter(Mandatory=$true)] 
+  [Parameter(Mandatory=$true)]
+  [string]$clustername = "",
+  [Parameter(Mandatory=$true)]
   [string]$dmname = ""
 )
 
@@ -31,11 +31,11 @@ If ($LASTEXITCODE -eq 0) {
   Invoke-Expression "docker rm -f $kraken_container_name"
 }
 
-inf "Building kraken container:`n  'docker build -t samsung_ag/kraken -f '$krakenRoot/bin/build/Dockerfile' '$krakenRoot' '"
-Invoke-Expression "docker build -t samsung_ag/kraken -f '$krakenRoot/bin/build/Dockerfile' '$krakenRoot'"
+inf "Building kraken container:`n  'docker build -t samsung_ag/kraken:$clustername -f '$krakenRoot/bin/build/Dockerfile' '$krakenRoot' '"
+Invoke-Expression "docker build -t samsung_ag/kraken:$clustername -f '$krakenRoot/bin/build/Dockerfile' '$krakenRoot'"
 
 # run cluster up
-$command =  "docker run -d --name $kraken_container_name -v /var/run:/ansible --volumes-from kraken_data samsung_ag/kraken bash -c " + 
+$command =  "docker run -d --name $kraken_container_name -v /var/run:/ansible --volumes-from kraken_data samsung_ag/kraken:$clustername bash -c " +
             "`"/opt/kraken/terraform-up.sh --clustertype $clustertype --clustername $clustername`""
 
 inf "Building kraken cluster:`n  '$command'"
