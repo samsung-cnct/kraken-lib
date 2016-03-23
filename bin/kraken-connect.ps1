@@ -39,7 +39,7 @@ Invoke-Expression "docker cp $kraken_container_name`:/root/.ssh/id_rsa.pub `
   `"$krakenRoot\bin\clusters\$clustername\`""
 
 inf "Parameters for ssh:`n  docker-machine.exe env --shell=powershell $dmname`n  `
-  docker run -it --volumes-from kraken_data samsung_ag/kraken ssh -F /kraken_data/$clustername/ssh_config `
+  docker run -it --volumes-from kraken_data samsung_ag/kraken:$clustername ssh -F /kraken_data/$clustername/ssh_config `
   <other ssh parameters> <node name>"
 inf "Alternatively:"
 inf "  Config file: $krakenRoot\bin\clusters\$clustername\ssh_config`n  SSH key: `

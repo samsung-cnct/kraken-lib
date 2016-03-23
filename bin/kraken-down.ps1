@@ -8,9 +8,9 @@ Param(
   [string]$dmopts = "",
   [Parameter(Mandatory=$true)]
   [string]$clustertype = "",
-  [Parameter(Mandatory=$true)] 
-  [string]$clustername = "", 
-  [Parameter(Mandatory=$true)] 
+  [Parameter(Mandatory=$true)]
+  [string]$clustername = "",
+  [Parameter(Mandatory=$true)]
   [string]$dmname = ""
 )
 
@@ -32,8 +32,8 @@ If ($LASTEXITCODE -ne 0) {
    exit 0
 }
 
-$command = 	"docker run -d --name $kraken_container_name --volumes-from kraken_data " +  
-			"samsung_ag/kraken bash -c `"/opt/kraken/terraform-down.sh --clustertype $clustertype " + 
+$command = 	"docker run -d --name $kraken_container_name --volumes-from kraken_data " +
+			"samsung_ag/kraken:$clustername bash -c `"/opt/kraken/terraform-down.sh --clustertype $clustertype " +
       "--clustername $clustername`""
 
 inf "Tearing down kraken cluster:`n  '$command'"
