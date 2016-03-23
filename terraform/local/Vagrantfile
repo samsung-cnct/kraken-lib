@@ -67,6 +67,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         vb.cpus = user_data[:cpus]
       end
 
+      config2.vm.provider :vmware_fusion do |v|
+        v.vmx["memsize"] = user_data[:mem]
+        v.vmx["numvcpus"] = user_data[:cpus]
+      end
+
       ip_address = base_ip_address + "#{i+100}"
       config2.vm.network :private_network, ip: ip_address
 
