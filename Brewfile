@@ -1,6 +1,6 @@
 # homebrew addons
 tap 'homebrew/bundle'
-tap 'homebrew/cask'
+tap 'caskroom/cask'
 
 # to use docker
 cask 'virtualbox'
