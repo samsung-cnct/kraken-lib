@@ -136,7 +136,7 @@ On a system with powershell:
 
 ## Using SysdigCloud
 1. Create an account on sysdigcloud.com
-2. Populate the terraform variable sysdigcloud_access_key with your sysdig cloud access key either in your terraform.tfvars file or via the -var switch.
+2. Populate the terraform variable sysdigcloud_access_key with your sysdig cloud access key either in your terraform.tfvars file or via the -var switch
 3. SysdigCloud is only included in your cluster if you supply the above key value.
 
 Limitations: Currently only works with sysdigcloud, not on premises.  Only works with a single apiserver running, not multiple.
