@@ -21,7 +21,7 @@ if [ -z ${KRAKEN_CLUSTER_NAME+x} ]; then
 fi
 
 mkdir -p "/kraken_data/${KRAKEN_CLUSTER_NAME}/group_vars"
-terraform apply \
+time terraform apply \
   -input=false \
   -state=/kraken_data/${KRAKEN_CLUSTER_NAME}/terraform.tfstate \
   -var-file=/opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/${KRAKEN_CLUSTER_NAME}/terraform.tfvars \
