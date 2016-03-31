@@ -63,6 +63,10 @@ case $key in
   KRAKEN_DOCKER_MACHINE_SHELL="$2"
   shift
   ;;
+  --terraform-retries)
+  TERRAFORM_RETRIES="$2"
+  shift
+  ;;
   *)
     # unknown option
   ;;
@@ -120,6 +124,9 @@ if [ "${KRAKEN_NATIVE_DOCKER}" = false ]; then
     eval "$(docker-machine env ${KRAKEN_DOCKER_MACHINE_NAME} --shell ${KRAKEN_DOCKER_MACHINE_SHELL})"
   fi
 fi
+
+# Defaults for optional arguments
+TERRAFORM_RETRIES=${TERRAFORM_RETRIES:-0}
 
 # common / global variables for use in scripts
 readonly KRAKEN_CONTAINER_IMAGE_NAME="samsung_ag/kraken:${KRAKEN_CLUSTER_NAME}"
