@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -
 #title           :terraform-up.sh
 #description     :run terraform with parameters. This is intended to be executed inside a docker container.
 #author          :Samsung SDSRA
