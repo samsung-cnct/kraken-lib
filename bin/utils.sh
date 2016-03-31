@@ -125,9 +125,6 @@ if [ "${KRAKEN_NATIVE_DOCKER}" = false ]; then
   fi
 fi
 
-# Defaults for optional arguments
-TERRAFORM_RETRIES=${TERRAFORM_RETRIES:-0}
-
 # common / global variables for use in scripts
 readonly KRAKEN_CONTAINER_IMAGE_NAME="samsung_ag/kraken:${KRAKEN_CLUSTER_NAME}"
 readonly KRAKEN_CONTAINER_NAME="kraken_cluster_${KRAKEN_CLUSTER_NAME}"

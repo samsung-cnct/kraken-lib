@@ -11,6 +11,9 @@ set -o pipefail
 my_dir=$(dirname "${BASH_SOURCE}")
 source "${my_dir}/utils.sh"
 
+# Defaults for optional arguments
+TERRAFORM_RETRIES=${TERRAFORM_RETRIES:-0}
+
 # now build the docker container
 if docker inspect ${KRAKEN_CONTAINER_NAME} &> /dev/null; then
   is_running=$(docker inspect -f '{{ .State.Running }}' ${KRAKEN_CONTAINER_NAME})

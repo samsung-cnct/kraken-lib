@@ -20,15 +20,15 @@ if [ -z ${KRAKEN_CLUSTER_NAME+x} ]; then
   exit 1
 fi
 
-max_retries=10
+max_retries=${TERRAFORM_RETRIES}
 time until terraform destroy -force -input=false \
   -var-file=/opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}/${KRAKEN_CLUSTER_NAME}/terraform.tfvars \
   -state=/kraken_data/${KRAKEN_CLUSTER_NAME}/terraform.tfstate \
   -var 'cluster_name=${KRAKEN_CLUSTER_NAME}' /opt/kraken/terraform/${KRAKEN_CLUSTER_TYPE}
 do
-  if [ ${max_retries} -ge 0 ]; then
+  if [ ${max_retries} -gt 0 ]; then
     max_retries=$((max_retries-1))
-    echo 'Retrying...'
+    echo "terraform destroy failed with return code $?, retrying..."
     sleep 5
   else
     rm -rf /kraken_data/${KRAKEN_CLUSTER_NAME}
