@@ -10,21 +10,14 @@ ENV ANSIBLE_VERSION 2.0.0.2
 ENV AWSCLI_VERSION 1.10.4
 
 # python and ansible
-# TODO: install python dependencies via pip isntead of apt
 RUN apt-get update \
     && apt-get install -y --force-yes \
       curl \
       unzip \
       jq \
-      build-essential \
-      python-yaml \
-      python-jinja2 \
-      python-httplib2 \
-      python-keyczar \
-      python-paramiko \
-      python-setuptools \
-      python-pkg-resources \
       python-pip \
+      python-dev \
+      python-yaml \
       openssh-client \
       vim \
     && mkdir /etc/ansible/ \
