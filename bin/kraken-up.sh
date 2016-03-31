@@ -11,6 +11,9 @@ set -o pipefail
 my_dir=$(dirname "${BASH_SOURCE}")
 source "${my_dir}/utils.sh"
 
+# Defaults for optional arguments
+TERRAFORM_RETRIES=${TERRAFORM_RETRIES:-0}
+
 # now build the docker container
 if docker inspect ${KRAKEN_CONTAINER_NAME} &> /dev/null; then
   is_running=$(docker inspect -f '{{ .State.Running }}' ${KRAKEN_CONTAINER_NAME})
@@ -26,7 +29,7 @@ fi
 # run cluster up
 run_command "docker build -t ${KRAKEN_CONTAINER_IMAGE_NAME} -f '${KRAKEN_ROOT}/bin/build/Dockerfile' '${KRAKEN_ROOT}'"
 run_command "docker run -d --name ${KRAKEN_CONTAINER_NAME} -v /var/run:/ansible --volumes-from kraken_data ${KRAKEN_CONTAINER_IMAGE_NAME} \
-  bash -c \"/opt/kraken/terraform-up.sh --clustertype ${KRAKEN_CLUSTER_TYPE} --clustername ${KRAKEN_CLUSTER_NAME}\""
+  bash -c \"/opt/kraken/terraform-up.sh --clustertype ${KRAKEN_CLUSTER_TYPE} --clustername ${KRAKEN_CLUSTER_NAME} --terraform-retries ${TERRAFORM_RETRIES}\""
 
 follow ${KRAKEN_CONTAINER_NAME}
 

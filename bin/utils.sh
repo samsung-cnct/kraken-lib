@@ -63,6 +63,10 @@ case $key in
   KRAKEN_DOCKER_MACHINE_SHELL="$2"
   shift
   ;;
+  --terraform-retries)
+  TERRAFORM_RETRIES="$2"
+  shift
+  ;;
   *)
     # unknown option
   ;;
