@@ -29,6 +29,10 @@ case $key in
   KRAKEN_CLUSTER_NAME="$2"
   shift
   ;;
+  --terraform-retries)
+  TERRAFORM_RETRIES="$2"
+  shift
+  ;;
   *)
     # unknown option
   ;;
