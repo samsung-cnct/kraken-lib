@@ -9,6 +9,7 @@ KUBE_DENSITY_PROM_PUSH_GATEWAY=""
 KUBE_DENSITY_DELETE_NAMESPACE=${KUBE_DENSITY_DELETE_NAMEPACE:-true}
 # TODO: external build-or-download script instead
 KUBE_DENSITY_REBUILD_TESTS=${KUBE_DENSITY_REBUILD_TESTS:-false}
+KUBE_SSH_KEY=${KUBE_SSH_KEY:-"${AWS_SSH_KEY}"}
 
 if [[ $# < 2 ]]; then
   echo "Usage: $0 density_branch pods_per_node"
@@ -50,6 +51,8 @@ function hack_ginkgo_e2e() {
 
   mkdir -p ${KUBE_DENSITY_OUTPUT_DIR}
 
+  export AWS_SSH_KEY="${KUBE_SSH_KEY}"
+
   e2e_test_args=()
   # standard args
   e2e_test_args+=("--repo-root=${KUBE_ROOT}")
@@ -60,6 +63,13 @@ function hack_ginkgo_e2e() {
 
   # TODO: (for which branches) are these necessary?
   e2e_test_args+=("--num-nodes=${KUBE_DENSITY_NUM_NODES}")
+
+  # Provider specific args are currently required for SSH access. Note that
+  # https://github.com/kubernetes/kubernetes/issues/20919 suggests that we
+  # would like to fix kubernetes so that --provider is no longer necessary.
+  e2e_test_args+=("--provider=aws")
+  e2e_test_args+=("--gce-zone=us-west-2")
+  e2e_test_args+=("--cluster-tag=kraken-node")
 
   if [[ ${KUBE_DENSITY_BRANCH} == "conformance-test-v1" ]]; then
     echo "additional e2e test args for ${KUBE_DENSITY_BRANCH} branch"
