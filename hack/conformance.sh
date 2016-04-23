@@ -8,6 +8,8 @@ KUBE_CONFORMANCE_OUTPUT_DIR=${KUBE_CONFORMANCE_OUTPUT_DIR:-"$(pwd)/output/confor
 KUBE_CONFORMANCE_SEED="1436380640"
 # TODO: external build-or-download script instead
 KUBE_CONFORMANCE_REBUILD_TESTS=${KUBE_CONFORMANCE_REBUILD_TESTS:-false}
+KUBE_SSH_USER=${KUBE_SSH_USER:-"core"}
+KUBE_SSH_KEY=${KUBE_SSH_KEY:-"${AWS_SSH_KEY}"}
 
 if [[ $# < 1 ]]; then
   echo "Usage: $0 conformance_branch"
@@ -51,6 +53,8 @@ function hack_ginkgo_e2e() {
   KUBECONFIG="${KUBE_CONFORMANCE_KUBECONFIG}"
   # detect-master-from-kubeconfig
 
+  export AWS_SSH_KEY="${KUBE_SSH_KEY}"
+
   e2e_test_args=()
   # standard args
   e2e_test_args+=("--repo-root=${KUBE_ROOT}")
@@ -58,6 +62,13 @@ function hack_ginkgo_e2e() {
   e2e_test_args+=("--e2e-output-dir=${KUBE_CONFORMANCE_OUTPUT_DIR}")
   e2e_test_args+=("--report-dir=${KUBE_CONFORMANCE_OUTPUT_DIR}")
   e2e_test_args+=("--prefix=e2e")
+
+  # Provider specific args are currently required for SSH access. Note that
+  # https://github.com/kubernetes/kubernetes/issues/20919 suggests that we
+  # would like to fix kubernetes so that --provider is no longer necessary.
+  e2e_test_args+=("--provider=aws")
+  e2e_test_args+=("--gce-zone=us-west-2")
+  e2e_test_args+=("--cluster-tag=kraken-node")
 
   # TODO: (for which branches) are these necessary?
   e2e_test_args+=("--num-nodes=${KUBE_CONFORMANCE_NUM_NODES}")
