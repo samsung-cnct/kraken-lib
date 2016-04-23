@@ -143,7 +143,7 @@ variable "kraken_local_dir" {
 
 variable "kraken_repo" {
   default = {
-    "repo"       = "https://github.com/Samsung-AG/kraken.git"
+    "repo"       = "https://github.com/samsung-cnct/kraken.git"
     "branch"     = "master"
     "commit_sha" = ""
   }
@@ -152,7 +152,7 @@ variable "kraken_repo" {
 }
 
 variable "kraken_services_repo" {
-  default     = "git://github.com/samsung-ag/kraken-services"
+  default     = "git://github.com/samsung-cnct/kraken-services"
   description = "Kraken services git repo"
 }
 

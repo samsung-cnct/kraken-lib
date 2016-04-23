@@ -46,12 +46,12 @@ In the case where you already have a hypervisor (Virtualbox, Vmware Fusion, etc.
 
 #### Install terraform-provider-execute:
 
-    brew tap Samsung-AG/terraform-provider-execute
+    brew tap samsung-cnct/terraform-provider-execute
     brew install terraform-provider-execute
 
 #### Install terraform-provider-coreosbox
 
-    brew tap Samsung-AG/terraform-provider-coreosbox
+    brew tap samsung-cnct/terraform-provider-coreosbox
     brew install terraform-provider-coreosbox
 
 #### Install ```kubectl```
@@ -123,13 +123,13 @@ The next steps detail how to obtain the necessary Samsung terraform providers
 
 ### Obtain terraform-provider-execute 
 
-    wget https://github.com/Samsung-AG/terraform-provider-execute/releases/download/v0.0.2/terraform-provider-execute_linux_amd64.tar.gz
+    wget https://github.com/samsung-cnct/terraform-provider-execute/releases/download/v0.0.2/terraform-provider-execute_linux_amd64.tar.gz
     tar xvzf terraform-provider-execute_linux_amd64.tar.gz
     sudo mv terraform-provider-execute /usr/local/bin
     
-### Obtain [terraform-provider-coreosbox](https://github.com/Samsung-AG/terraform-provider-coreosbox/releases)
+### Obtain [terraform-provider-coreosbox](https://github.com/samsung-cnct/terraform-provider-coreosbox/releases)
 
-	wget https://github.com/Samsung-AG/terraform-provider-coreosbox/releases/download/v0.0.1/terraform-provider-coreosbox_linux_amd64.tar.gz
+	wget https://github.com/samsung-cnct/terraform-provider-coreosbox/releases/download/v0.0.1/terraform-provider-coreosbox_linux_amd64.tar.gz
 	tar zxvf terraform-provider-coreosbox_linux_amd64.tar.gz
 	sudo mv terraform-provider-coreosbox /usr/local/bin/
 	
@@ -148,7 +148,7 @@ Now that you have the required programs and packages installed its time to confi
 ### Clone the Kraken project
 
     cd ~   ## or to a directory you want to clone the Kraken repo into.
-    git clone https://github.com/Samsung-AG/kraken
+    git clone https://github.com/samsung-cnct/kraken
 
 ## Set up the cluster directory
 
