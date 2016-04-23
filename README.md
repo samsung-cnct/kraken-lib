@@ -6,7 +6,7 @@ Deploy a __Kubernetes__ cluster to AWS or Virtualbox using __Terraform__  and __
 Install [docker toolbox](https://www.docker.com/docker-toolbox), or just docker-machine and docker client separately.  
 Then:
 
-    git clone git@github.com:Samsung-AG/kraken.git
+    git clone https://github.com/samsung-cnct/kraken.git
     cd kraken
 
 ## Variables setup
@@ -61,7 +61,7 @@ All available variables to override and set are under
 
 ### Cluster Services
 
-Kraken supports turnkey deployment of a number of useful cluster services, via the [kraken-services](https://github.com/samsung-ag/kraken-services) repository.  Don't see a service you want in our repo?  You can use your own!
+Kraken supports turnkey deployment of a number of useful cluster services, via the [kraken-services](https://github.com/samsung-cnct/kraken-services) repository.  Don't see a service you want in our repo?  You can use your own!
 
     kraken_services_repo = "git://github.com/your-fork/kraken-services"
     kraken_services_branch = "your-branch"
