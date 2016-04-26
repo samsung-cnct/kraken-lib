@@ -87,7 +87,7 @@ else
   inf "Parameters for ssh:\n   \
     ssh -F ${target_cluster_dir}/ssh_config <node-name>\n"
   inf "Alternatively: \n"
-  inf "   eval \$(docker-machine env ${KRAKEN_DOCKER_MACHINE_NAME})\n   docker run -it --volumes-from kraken_data samsung_ag/kraken ssh -F ${src_cluster_dir}/ssh_config <other ssh options> <node-name>"
+  inf "   eval \$(docker-machine env ${KRAKEN_DOCKER_MACHINE_NAME})\n   docker run -it --volumes-from kraken_data samsung_cnct/kraken ssh -F ${src_cluster_dir}/ssh_config <other ssh options> <node-name>"
 fi
 
 inf "\n\nParameters for ansible:\n   \

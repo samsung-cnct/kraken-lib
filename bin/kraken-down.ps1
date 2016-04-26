@@ -33,7 +33,7 @@ If ($LASTEXITCODE -ne 0) {
 }
 
 $command = 	"docker run -d --name $kraken_container_name --volumes-from kraken_data " +
-			"samsung_ag/kraken:$clustername bash -c `"/opt/kraken/terraform-down.sh --clustertype $clustertype " +
+			"samsung_cnct/kraken:$clustername bash -c `"/opt/kraken/terraform-down.sh --clustertype $clustertype " +
       "--clustername $clustername`""
 
 inf "Tearing down kraken cluster:`n  '$command'"

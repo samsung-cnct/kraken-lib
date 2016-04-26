@@ -126,7 +126,7 @@ if [ "${KRAKEN_NATIVE_DOCKER}" = false ]; then
 fi
 
 # common / global variables for use in scripts
-readonly KRAKEN_CONTAINER_IMAGE_NAME="samsung_ag/kraken:${KRAKEN_CLUSTER_NAME}"
+readonly KRAKEN_CONTAINER_IMAGE_NAME="samsung_cnct/kraken:${KRAKEN_CLUSTER_NAME}"
 readonly KRAKEN_CONTAINER_NAME="kraken_cluster_${KRAKEN_CLUSTER_NAME}"
 
 # create the data volume container for state

@@ -187,7 +187,7 @@ variable "vagrant_private_key" {
 }
 
 variable "ansible_docker_image" {
-  default     = "quay.io/samsung_ag/kraken_ansible"
+  default     = "quay.io/samsung_cnct/kraken_ansible"
   description = "Docker image to use for ansible-in-docker"
 }
 
