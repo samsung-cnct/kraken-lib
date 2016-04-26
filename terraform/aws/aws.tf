@@ -261,7 +261,7 @@ resource "coreosbox_ami" "latest_ami" {
 }
 
 resource "template_file" "etcd_cloudinit" {
-  template = "${path.module}/templates/etcd.yaml.tpl"
+  template = "${file("${path.module}/templates/etcd.yaml.tpl")}"
 
   vars {
     ansible_docker_image      = "${var.ansible_docker_image}"
@@ -309,7 +309,7 @@ resource "aws_instance" "kubernetes_etcd" {
 }
 
 resource "template_file" "apiserver_cloudinit" {
-  template = "${path.module}/templates/apiserver.yaml.tpl"
+  template = "${file("${path.module}/templates/apiserver.yaml.tpl")}"
 
   vars {
     access_port               = "${var.access_port}"
@@ -377,7 +377,7 @@ resource "aws_instance" "kubernetes_apiserver" {
 }
 
 resource "template_file" "master_cloudinit" {
-  template = "${path.module}/templates/master.yaml.tpl"
+  template = "${file("${path.module}/templates/master.yaml.tpl")}"
 
   vars {
     access_port               = "${var.access_port}"
@@ -451,7 +451,7 @@ resource "aws_instance" "kubernetes_master" {
 }
 
 resource "template_file" "node_cloudinit_special" {
-  template = "${path.module}/templates/node.yaml.tpl"
+  template = "${file("${path.module}/templates/node.yaml.tpl")}"
   count    = "${var.special_node_count}"
 
   vars {
@@ -537,7 +537,7 @@ resource "aws_instance" "kubernetes_node_special" {
 }
 
 resource "template_file" "node_cloudinit" {
-  template = "${path.module}/templates/node.yaml.tpl"
+  template = "${file("${path.module}/templates/node.yaml.tpl")}"
 
   vars {
     access_port                 = "${var.access_port}"
@@ -658,7 +658,7 @@ resource "aws_route53_record" "proxy_record" {
 }
 
 resource "template_file" "ansible_inventory" {
-  template                        = "${path.module}/templates/hosts.tpl"
+  template                        = "${file("${path.module}/templates/hosts.tpl")}"
 
   vars {
     master_public_ip              = "${aws_instance.kubernetes_master.public_ip}"
@@ -674,7 +674,7 @@ resource "template_file" "ansible_inventory" {
 
 resource "template_file" "local_groupvars" {
   depends_on                      = ["template_file.ansible_inventory"]
-  template                        = "${path.module}/templates/local.tpl"
+  template                        = "${file("${path.module}/templates/local.tpl")}"
 
   vars {
   }
@@ -686,7 +686,7 @@ resource "template_file" "local_groupvars" {
 
 resource "template_file" "all_groupvars" {
   depends_on                      = ["template_file.ansible_inventory"]
-  template                        = "${path.module}/templates/all.tpl"
+  template                        = "${file("${path.module}/templates/all.tpl")}"
 
   vars {
     ansible_ssh_private_key_file  = "${var.aws_local_private_key}"
@@ -706,7 +706,7 @@ resource "template_file" "all_groupvars" {
 
 resource "template_file" "cluster_groupvars" {
   depends_on                      = ["template_file.local_groupvars"]
-  template                        = "${path.module}/templates/cluster.tpl"
+  template                        = "${file("${path.module}/templates/cluster.tpl")}"
 
   vars {
     access_port                   = "${var.access_port}"

@@ -5,7 +5,7 @@ resource "coreosbox_vagrant" "coreos_version_info" {
 }
 
 resource "template_file" "etcd_cloudinit" {
-  template = "${path.module}/templates/etcd.yaml.tpl"
+  template = "${file("${path.module}/templates/etcd.yaml.tpl")}"
 
   vars {
     ansible_docker_image = "${var.ansible_docker_image}"
@@ -29,7 +29,7 @@ resource "template_file" "etcd_cloudinit" {
 }
 
 resource "template_file" "master_cloudinit" {
-  template = "${path.module}/templates/master.yaml.tpl"
+  template = "${file("${path.module}/templates/master.yaml.tpl")}"
 
   vars {
     access_port                 = "${var.access_port}"
@@ -73,7 +73,7 @@ resource "template_file" "master_cloudinit" {
 }
 
 resource "template_file" "apiserver_cloudinit" {
-  template = "${path.module}/templates/apiserver.yaml.tpl"
+  template = "${file("${path.module}/templates/apiserver.yaml.tpl")}"
 
   vars {
     access_port                 = "${var.access_port}"
@@ -114,7 +114,7 @@ resource "template_file" "apiserver_cloudinit" {
 }
 
 resource "template_file" "node_cloudinit" {
-  template = "${path.module}/templates/node.yaml.tpl"
+  template = "${file("${path.module}/templates/node.yaml.tpl")}"
   vars {
     access_port                 = "${var.access_port}"
     access_scheme               = "${var.access_scheme}"
