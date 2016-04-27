@@ -26,10 +26,27 @@ if docker inspect ${KRAKEN_CONTAINER_NAME} &> /dev/null; then
   run_command "docker rm -f ${KRAKEN_CONTAINER_NAME}"
 fi
 
-# run cluster up
+# Create container which will manage kubernetes cluster infrastructure.
 run_command "docker build -t ${KRAKEN_CONTAINER_IMAGE_NAME} -f '${KRAKEN_ROOT}/bin/build/Dockerfile' '${KRAKEN_ROOT}'"
-run_command "docker run -d --name ${KRAKEN_CONTAINER_NAME} -v /var/run:/ansible --volumes-from kraken_data ${KRAKEN_CONTAINER_IMAGE_NAME} \
-  bash -c \"/opt/kraken/terraform-up.sh --clustertype ${KRAKEN_CLUSTER_TYPE} --clustername ${KRAKEN_CLUSTER_NAME} --terraform-retries ${TERRAFORM_RETRIES}\""
+
+# Copy credentials to kubernetes cluster manager.
+if [ "${KRAKEN_NATIVE_DOCKER}" = false ] ; then
+  run_command "docker-machine ssh ${KRAKEN_DOCKER_MACHINE_NAME} rm -rf ${KRAKEN_CREDENTIAL_DIRECTORY}"
+  run_command "docker-machine ssh ${KRAKEN_DOCKER_MACHINE_NAME} mkdir -p ${KRAKEN_CREDENTIAL_DIRECTORY}"
+  run_command "docker-machine scp ${AWS_CREDENTIAL_DIRECTORY}/config ${KRAKEN_DOCKER_MACHINE_NAME}:${KRAKEN_CREDENTIAL_DIRECTORY}" || true
+  run_command "docker-machine scp ${AWS_CREDENTIAL_DIRECTORY}/credentials ${KRAKEN_DOCKER_MACHINE_NAME}:${KRAKEN_CREDENTIAL_DIRECTORY}"
+  run_command "docker-machine ssh ${KRAKEN_DOCKER_MACHINE_NAME} chmod +x ${KRAKEN_CREDENTIAL_DIRECTORY}"
+fi
+
+# Run a container to create kubernetes cluster infrastructure.
+run_command "docker run -d --name ${KRAKEN_CONTAINER_NAME} \
+        -v "${KRAKEN_CREDENTIAL_DIRECTORY}":/root/.aws \
+        -v /var/run:/ansible \
+        --volumes-from kraken_data ${KRAKEN_CONTAINER_IMAGE_NAME} \
+  bash -c \"/opt/kraken/terraform-up.sh \
+        --clustertype ${KRAKEN_CLUSTER_TYPE} \
+        --clustername ${KRAKEN_CLUSTER_NAME} \
+        --terraform-retries ${TERRAFORM_RETRIES}\""
 
 follow ${KRAKEN_CONTAINER_NAME}
 

@@ -25,8 +25,15 @@ if ! docker inspect kraken_data &> /dev/null; then
   exit 0;
 fi
 
-run_command "docker run -d --name ${KRAKEN_CONTAINER_NAME} --volumes-from kraken_data ${KRAKEN_CONTAINER_IMAGE_NAME}
-  bash -c \"/opt/kraken/terraform-down.sh --clustertype ${KRAKEN_CLUSTER_TYPE} --clustername ${KRAKEN_CLUSTER_NAME} --terraform-retries ${TERRAFORM_RETRIES}\""
+# Run a container to destroy kubernetes cluster infrastructure.
+run_command "docker run -d --name ${KRAKEN_CONTAINER_NAME} \
+        -v "${KRAKEN_CREDENTIAL_DIRECTORY}":/root/.aws/ \
+        -v /var/run:/ansible \
+        --volumes-from kraken_data ${KRAKEN_CONTAINER_IMAGE_NAME} \
+  bash -c \"/opt/kraken/terraform-down.sh \
+        --clustertype ${KRAKEN_CLUSTER_TYPE} \
+        --clustername ${KRAKEN_CLUSTER_NAME} \
+        --terraform-retries ${TERRAFORM_RETRIES}\""
 
 follow ${KRAKEN_CONTAINER_NAME}
 
