@@ -8,6 +8,7 @@ my_dir=$(dirname "${BASH_SOURCE}")
 
 # set KRAKEN_ROOT to absolute path for use in other scripts
 readonly KRAKEN_ROOT=$(cd "${my_dir}/.."; pwd)
+KRAKEN_VERBOSE=${KRAKEN_VERBOSE:-false}
 
 function warn {
   echo -e "\033[1;33mWARNING: $1\033[0m"
@@ -28,7 +29,11 @@ function follow {
 
 function run_command {
   inf "Running:\n $1"
-  eval $1 &> /dev/null
+  if ${KRAKEN_VERBOSE}; then
+    eval $1
+  else
+    eval $1 &> /dev/null
+  fi
 }
 
 function setup_dockermachine {
