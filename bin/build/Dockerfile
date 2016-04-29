@@ -12,15 +12,19 @@ ENV AWSCLI_VERSION 1.10.4
 # python and ansible
 RUN apt-get update \
     && apt-get install -y --force-yes \
+      build-essential \
       curl \
-      unzip \
       jq \
-      python-pip \
+      libffi-dev \
       python-dev \
+      python-pip \
       python-yaml \
       openssh-client \
+      libssl-dev \
+      unzip \
       vim \
     && mkdir /etc/ansible/ \
+    && pip install --upgrade cffi==1.5.0 \
     && pip install ansible==${ANSIBLE_VERSION} \
     && pip install awscli==${AWSCLI_VERSION} \
     && apt-get clean \
