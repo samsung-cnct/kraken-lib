@@ -6,24 +6,27 @@ ENV TERRAFORM_VERSION 0.6.14
 ENV TERRAFORM_EXECUTE_VERSION v0.0.2
 ENV TERRAFORM_COREOSBOX_VERSION v0.0.1
 ENV KUBERNETES_VERSION v1.1.3
-ENV ANSIBLE_VERSION 2.0.0.2
-ENV AWSCLI_VERSION 1.10.4
 
-# python and ansible
+# system dependencie
 RUN apt-get update \
     && apt-get install -y --force-yes \
+      build-essential \
       curl \
-      unzip \
       jq \
-      python-pip \
+      libffi-dev \
       python-dev \
+      python-pip \
       python-yaml \
       openssh-client \
+      libssl-dev \
+      unzip \
       vim \
-    && mkdir /etc/ansible/ \
-    && pip install ansible==${ANSIBLE_VERSION} \
-    && pip install awscli==${AWSCLI_VERSION} \
     && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# python dependencies
+COPY bin/build/requirements.txt /tmp/requirements.txt
+RUN pip install --upgrade --requirement /tmp/requirements.txt \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # terraform and custom providers
