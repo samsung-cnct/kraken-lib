@@ -31,7 +31,7 @@ run_command "docker build -t ${KRAKEN_CONTAINER_IMAGE_NAME} -f '${KRAKEN_ROOT}/b
 
 # Copy credentials to kubernetes cluster manager.
 if [ "${KRAKEN_NATIVE_DOCKER}" = false ] ; then
-  run_command "docker-machine ssh ${KRAKEN_DOCKER_MACHINE_NAME} rm -rf ${KRAKEN_CREDENTIAL_DIRECTORY}"
+  run_command "docker-machine ssh ${KRAKEN_DOCKER_MACHINE_NAME} rm -rf ${KRAKEN_CREDENTIAL_DIRECTORY}" || true
   run_command "docker-machine ssh ${KRAKEN_DOCKER_MACHINE_NAME} mkdir -p ${KRAKEN_CREDENTIAL_DIRECTORY}"
   run_command "docker-machine scp ${AWS_CREDENTIAL_DIRECTORY}/config ${KRAKEN_DOCKER_MACHINE_NAME}:${KRAKEN_CREDENTIAL_DIRECTORY}" || true
   run_command "docker-machine scp ${AWS_CREDENTIAL_DIRECTORY}/credentials ${KRAKEN_DOCKER_MACHINE_NAME}:${KRAKEN_CREDENTIAL_DIRECTORY}"
