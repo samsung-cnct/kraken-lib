@@ -94,10 +94,6 @@ On a system with a Bash shell:
 
     ./kraken-up.sh --dmname DOCKER_MACHINE_NAME --clustertype aws --clustername KUBERNETES_CLUSTER_NAME --dmopts "--driver amazonec2 --amazonec2-vpc-id ID_OF_VPC --amazonec2-region EC2_REGION"
     
-On a system with powershell:
-
-    ./kraken-up.ps1 -dmname DOCKER_MACHINE_NAME -clustertype aws -clustername KUBERNETES_CLUSTER_NAME -dmopts "--driver amazonec2 --amazonec2-vpc-id ID_OF_VPC --amazonec2-region EC2_REGION"
-    
 The '--dmopts/-dmopts' parameter is a string of driver parameters for docker-machine. You can use any driver you want - info on supported drivers is available in docker-machine help. Also, '--dmopts/-dmopts' is only required the first time you start up a cluster, after that as long as docker-machine is running you don't need to provide the option string again.  
 
 If you prefer to store your AWS credentials file in a directory other than ~/.aws, you can pass --provider-credential-directory path, however note that if you are using docker-machine, then you will need to add the appropriate --dmopts as docker-machine can not generally determine atypical credential directory locations. For example, for AWS, you would add "--amazonec2-access-key AWS_KEY_ID --amazonec2-secret-key AWS_SECRET_KEY" to --dmopts.
@@ -113,14 +109,6 @@ On a system with a Bash shell:
         kubectl --kubeconfig=clusters/ec2/kube_config --cluster=<cluster name> <kubectl commands>
     $ kubectl --kubeconfig=clusters/ec2/kube_config --cluster=KUBERNETES_CLUSTER_NAME get nodes
 
-On a system with powershell:
-
-    PS> ./kraken-connect.ps1 -dmname DOCKER_MACHINE_NAME -clustername KUBERNETES_CLUSTER_NAME
-    Machine DOCKER_MACHINE_NAME exists.
-        To control your cluster use:
-        kubectl --kubeconfig=clusters/ec2/kube_config --cluster=<cluster name> <kubectl commands>
-    PS> kubectl --kubeconfig=clusters/ec2/kube_config --cluster=KUBERNETES_CLUSTER_NAME get nodes
-
 Follow the instructions in script output.
     
 ## Destroy Cluster
@@ -128,11 +116,6 @@ On a system with a Bash shell:
 
     $ ./kraken-down.sh --dmname DOCKER_MACHINE_NAME --clustername KUBERNETES_CLUSTER_NAME
     
-On a system with powershell:
-
-    PS> ./kraken-down.ps1 -dmname DOCKER_MACHINE_NAME -clustername KUBERNETES_CLUSTER_NAME
-
-
 ## Using LogEntries.com
 1. First, create an account on logentries.com.
 2. Create a new log in your Logentries account by clicking + Add New Log.
