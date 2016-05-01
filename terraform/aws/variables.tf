@@ -3,6 +3,16 @@ variable "cluster_name" {
   description = "Name of the cluster, useed in kubernetes config as the --cluster"
 }
 
+variable "aws_access_key" {
+  description = "AWS key id"
+  default = ""
+}
+ 
+variable "aws_secret_key" {
+  description = "AWS secret key"
+  default = ""
+}
+
 variable "aws_shared_credentials_file" {
   description = "This is the path to the shared credentials file. If this is not set and a profile is specified, ~/.aws/credentials will be used."
   default = ""
