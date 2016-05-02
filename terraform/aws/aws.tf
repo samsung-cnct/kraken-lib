@@ -1,6 +1,8 @@
 provider "aws" {
   access_key  = "${var.aws_access_key}"
   secret_key  = "${var.aws_secret_key}"
+  shared_credentials_file = "${var.aws_shared_credentials_file}"
+  profile     = "${var.aws_profile}"
   region      = "${var.aws_region}"
   max_retries = "${var.max_retries}"
 }
@@ -747,6 +749,6 @@ resource "template_file" "cluster_groupvars" {
   }
 
   provisioner "local-exec" {
-    command = "AWS_ACCESS_KEY_ID=${var.aws_access_key} AWS_SECRET_ACCESS_KEY=${var.aws_secret_key} AWS_DEFAULT_REGION=${var.aws_region} ${path.module}/kraken_asg_helper.sh --kubeconfig ${var.kubeconfig} --cluster ${var.cluster_name} --limit ${var.node_count + var.special_node_count} --name ${aws_autoscaling_group.kubernetes_nodes.name} --output ${path.module}/rendered/hosts --singlewait ${var.asg_wait_single} --totalwaits ${var.asg_wait_total} --offset ${var.special_node_count} --retries ${var.asg_retries}"
+    command = "AWS_DEFAULT_REGION=${var.aws_region} ${path.module}/kraken_asg_helper.sh --kubeconfig ${var.kubeconfig} --cluster ${var.cluster_name} --limit ${var.node_count + var.special_node_count} --name ${aws_autoscaling_group.kubernetes_nodes.name} --output ${path.module}/rendered/hosts --singlewait ${var.asg_wait_single} --totalwaits ${var.asg_wait_total} --offset ${var.special_node_count} --retries ${var.asg_retries}"
   }
 }

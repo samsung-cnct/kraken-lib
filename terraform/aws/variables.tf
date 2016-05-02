@@ -5,10 +5,22 @@ variable "cluster_name" {
 
 variable "aws_access_key" {
   description = "AWS key id"
+  default = ""
 }
-
+ 
 variable "aws_secret_key" {
   description = "AWS secret key"
+  default = ""
+}
+
+variable "aws_shared_credentials_file" {
+  description = "This is the path to the shared credentials file. If this is not set and a profile is specified, ~/.aws/credentials will be used."
+  default = ""
+}
+
+variable "aws_profile" {
+  description = "This is the AWS profile name as set in the shared credentials file."
+  default = "default"
 }
 
 variable "aws_user_prefix" {
