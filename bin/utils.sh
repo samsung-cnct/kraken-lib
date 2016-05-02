@@ -136,9 +136,9 @@ fi
 
 AWS_CREDENTIAL_DIRECTORY="${AWS_CREDENTIAL_DIRECTORY:-"${HOME}/.aws"}"
 if [ "${KRAKEN_NATIVE_DOCKER}" = false ] ; then
-  KRAKEN_CREDENTIAL_DIRECTORY="$(docker-machine ssh ${KRAKEN_DOCKER_MACHINE_NAME} "cd && pwd")/.aws"
+  KRAKEN_AWS_CREDENTIAL_DIRECTORY="$(docker-machine ssh ${KRAKEN_DOCKER_MACHINE_NAME} "cd && pwd")/.aws"
 else
-  KRAKEN_CREDENTIAL_DIRECTORY="${AWS_CREDENTIAL_DIRECTORY}"
+  KRAKEN_AWS_CREDENTIAL_DIRECTORY="${AWS_CREDENTIAL_DIRECTORY}"
 fi
 
 # common / global variables for use in scripts

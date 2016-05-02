@@ -27,7 +27,7 @@ fi
 
 # Run a container to destroy kubernetes cluster infrastructure.
 run_command "docker run -d --name ${KRAKEN_CONTAINER_NAME} \
-        -v "${KRAKEN_CREDENTIAL_DIRECTORY}":/root/.aws/ \
+        -v "${KRAKEN_AWS_CREDENTIAL_DIRECTORY}":/root/.aws/ \
         -v /var/run:/ansible \
         --volumes-from kraken_data ${KRAKEN_CONTAINER_IMAGE_NAME} \
   bash -c \"/opt/kraken/terraform-down.sh \
