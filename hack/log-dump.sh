@@ -18,7 +18,7 @@ key="$1"
 
 case $key in
   --clustername)
-  KRAKEN_CLUSTER_NAME="$2"
+  CLUSTER_NAME="$2"
   shift
   ;;
   --user-prefix)
@@ -36,25 +36,19 @@ esac
 shift # past argument or value
 done
 
-[[ -n "${KRAKEN_CLUSTER_NAME-}" ]] || die "The --clustername parameter is required"
+[[ -n "${CLUSTER_NAME-}" ]] || die "The --clustername parameter is required"
 [[ -n "${USER_PREFIX-}" ]] || die "The --user-prefix parameter is required" 
 LOG_DIRECTORY=${LOG_DIRECTORY:-"$(pwd)/_artifacts"}
 
-CLUSTER_ID="${USER_PREFIX}_${KRAKEN_CLUSTER_NAME}"
+CLUSTER_ID="${USER_PREFIX}_${CLUSTER_NAME}"
 
 KRAKEN_ROOT=${KRAKEN_ROOT:-"$(pwd)"}
-KRAKEN_CLUSTER_DIR="${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}"
+KRAKEN_CLUSTER_DIR="${KRAKEN_ROOT}/bin/clusters/${CLUSTER_NAME}"
 KRAKEN_CLUSTER_SSH_CONFIG="${KRAKEN_CLUSTER_DIR}/ssh_config"
+KRAKEN_CLUSTER_ANSIBLE_HOSTS="${KRAKEN_CLUSTER_DIR}/hosts"
 
 SSH_CMD="ssh -F ${KRAKEN_CLUSTER_SSH_CONFIG}"
 SCP_CMD="scp -F ${KRAKEN_CLUSTER_SSH_CONFIG}"
-AWS_CMD="aws ec2"
-
-function ensure_prefix() {
-  local -r node_name="${1}"
-  node_prefix="${LOG_DIRECTORY}/${node_name}"
-  mkdir -p "${node_prefix}"
-}
 
 # Saves the output of running a given command ($2) on a given node ($1)
 # into a given local file ($3). Does not fail if the ssh command fails for any
@@ -83,7 +77,7 @@ function save_directory() {
   fi
 }
 
-# Retrives logs from node name ($1) and stores them in files under directory ($2).
+# Retrives logs from node ($1) and stores them in files under directory ($2).
 function save_common_logs() {
     local -r node_name="${1}"
     local -r node_prefix="${2}"
@@ -97,11 +91,7 @@ function save_common_logs() {
 }
 
 function save_master_logs() {
-  node_names=$(${AWS_CMD} describe-instances \
-                          --filters Name=tag:ClusterId,Values=${CLUSTER_ID} \
-                                    Name=tag:Role,Values=master \
-                          --query 'Reservations[].Instances[].Tags[?Key==`ShortName`].Value[]' \
-                          --output text)
+  node_names=$(awk 'sub(/\[master\]/,""){f=1} /^\[[^\]\r\n]+/{f=0} {if (f) print $1}' ${KRAKEN_CLUSTER_ANSIBLE_HOSTS})
 
   for node_name in ${node_names}; do
     node_prefix="${LOG_DIRECTORY}/${node_name}"
@@ -116,11 +106,7 @@ function save_master_logs() {
 }
 
 function save_api_server_logs() {
-  node_names=$(${AWS_CMD} describe-instances \
-                          --filters Name=tag:ClusterId,Values=${CLUSTER_ID} \
-                                    Name=tag:Role,Values=apiserver \
-                          --query 'Reservations[].Instances[].Tags[?Key==`ShortName`].Value[]' \
-                          --output text)
+  node_names=$(awk 'sub(/\[apiserver\]/,""){f=1} /^\[[^\]\r\n]+/{f=0} {if (f) print $1}' ${KRAKEN_CLUSTER_ANSIBLE_HOSTS})
 
   for node_name in ${node_names}; do
     node_prefix="${LOG_DIRECTORY}/${node_name}"
@@ -134,11 +120,7 @@ function save_api_server_logs() {
 }
 
 function save_etcd_logs() {
-  node_names=$(${AWS_CMD} describe-instances \
-                          --filters Name=tag:ClusterId,Values=${CLUSTER_ID} \
-                                    Name=tag:Role,Values=etcd \
-                          --query 'Reservations[].Instances[].Tags[?Key==`ShortName`].Value[]' \
-                          --output text)
+  node_names=$(awk 'sub(/\[etcd\]/,""){f=1} /^\[[^\]\r\n]+/{f=0} {if (f) print $1}' ${KRAKEN_CLUSTER_ANSIBLE_HOSTS})
 
   for node_name in ${node_names}; do
     node_prefix="${LOG_DIRECTORY}/${node_name}"
@@ -152,9 +134,7 @@ function save_etcd_logs() {
 }
 
 function save_minion_logs() {
-  # Minions are currently all tagged with the same ShortName. TODO: Fix this. For now
-  # we use this ugly fragile hack of parsing the hosts file...
-  node_names=$(awk '/node/ {print $1}' bin/clusters/test/hosts | tail -n +3)
+  node_names=$(awk 'sub(/\[node\]/,""){f=1} /^\[[^\]\r\n]+/{f=0} {if (f) print $1}' ${KRAKEN_CLUSTER_ANSIBLE_HOSTS})
 
   for node_name in ${node_names}; do
     node_prefix="${LOG_DIRECTORY}/${node_name}"
@@ -172,7 +152,6 @@ function main() {
   save_master_logs
   save_api_server_logs
   save_etcd_logs
-  # TODO: Special nodes are currently treated as minions. Should they be?
   save_minion_logs
 }
 
