@@ -21,10 +21,6 @@ case $key in
   CLUSTER_NAME="$2"
   shift
   ;;
-  --user-prefix)
-  USER_PREFIX="$2"
-  shift
-  ;;
   --log-directory)
   LOG_DIRECTORY="$2"
   shift
@@ -37,10 +33,7 @@ shift # past argument or value
 done
 
 [[ -n "${CLUSTER_NAME-}" ]] || die "The --clustername parameter is required"
-[[ -n "${USER_PREFIX-}" ]] || die "The --user-prefix parameter is required" 
 LOG_DIRECTORY=${LOG_DIRECTORY:-"$(pwd)/_artifacts"}
-
-CLUSTER_ID="${USER_PREFIX}_${CLUSTER_NAME}"
 
 KRAKEN_ROOT=${KRAKEN_ROOT:-"$(pwd)"}
 KRAKEN_CLUSTER_DIR="${KRAKEN_ROOT}/bin/clusters/${CLUSTER_NAME}"
@@ -86,7 +79,7 @@ function save_common_logs() {
 
     save_log "${node_name}" "journalctl --output=cat -k" "${node_prefix}/kern.log"
     save_log "${node_name}" "journalctl --output=cat -u docker" "${node_prefix}/docker.log"
-    save_log "${node_name}" "sudo journalctl --output=cat -u k8s-binary-kubelet.service" "${node_prefix}/kubelet.log"
+    save_log "${node_name}" "journalctl --output=cat -u k8s-binary-kubelet.service" "${node_prefix}/kubelet.log"
     save_directory "${node_name}" "/var/log/k8s" "${node_prefix}"
 }
 
