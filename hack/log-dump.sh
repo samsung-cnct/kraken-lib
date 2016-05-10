@@ -40,6 +40,8 @@ done
 [[ -n "${USER_PREFIX-}" ]] || die "The --user-prefix parameter is required" 
 LOG_DIRECTORY=${LOG_DIRECTORY:-"$(pwd)/_artifacts"}
 
+CLUSTER_ID="${USER_PREFIX}_${KRAKEN_CLUSTER_NAME}"
+
 KRAKEN_ROOT=${KRAKEN_ROOT:-"$(pwd)"}
 KRAKEN_CLUSTER_DIR="${KRAKEN_ROOT}/bin/clusters/${KRAKEN_CLUSTER_NAME}"
 KRAKEN_CLUSTER_SSH_CONFIG="${KRAKEN_CLUSTER_DIR}/ssh_config"
@@ -95,7 +97,11 @@ function save_common_logs() {
 }
 
 function save_master_logs() {
-  node_names=("master")
+  node_names=$(${AWS_CMD} describe-instances \
+                          --filters Name=tag:ClusterId,Values=${CLUSTER_ID} \
+                                    Name=tag:Role,Values=master \
+                          --query 'Reservations[].Instances[].Tags[?Key==`ShortName`].Value[]' \
+                          --output text)
 
   for node_name in ${node_names}; do
     node_prefix="${LOG_DIRECTORY}/${node_name}"
@@ -110,7 +116,11 @@ function save_master_logs() {
 }
 
 function save_api_server_logs() {
-  node_names=("apiserver-001")
+  node_names=$(${AWS_CMD} describe-instances \
+                          --filters Name=tag:ClusterId,Values=${CLUSTER_ID} \
+                                    Name=tag:Role,Values=apiserver \
+                          --query 'Reservations[].Instances[].Tags[?Key==`ShortName`].Value[]' \
+                          --output text)
 
   for node_name in ${node_names}; do
     node_prefix="${LOG_DIRECTORY}/${node_name}"
@@ -124,7 +134,11 @@ function save_api_server_logs() {
 }
 
 function save_etcd_logs() {
-  node_names=("etcd")
+  node_names=$(${AWS_CMD} describe-instances \
+                          --filters Name=tag:ClusterId,Values=${CLUSTER_ID} \
+                                    Name=tag:Role,Values=etcd \
+                          --query 'Reservations[].Instances[].Tags[?Key==`ShortName`].Value[]' \
+                          --output text)
 
   for node_name in ${node_names}; do
     node_prefix="${LOG_DIRECTORY}/${node_name}"
@@ -138,10 +152,11 @@ function save_etcd_logs() {
 }
 
 function save_minion_logs() {
-  node_names=("node-001")
+  # Minions are currently all tagged with the same ShortName. TODO: Fix this. For now
+  # we use this ugly fragile hack of parsing the hosts file...
+  node_names=$(awk '/node/ {print $1}' bin/clusters/test/hosts | tail -n +3)
 
-  echo "Node Names: ${node_names[*]}"
-  for node_name in "${node_names[@]}"; do
+  for node_name in ${node_names}; do
     node_prefix="${LOG_DIRECTORY}/${node_name}"
     mkdir -p "${node_prefix}"
 
@@ -157,6 +172,7 @@ function main() {
   save_master_logs
   save_api_server_logs
   save_etcd_logs
+  # TODO: Special nodes are currently treated as minions. Should they be?
   save_minion_logs
 }
 
