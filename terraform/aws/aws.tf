@@ -307,6 +307,8 @@ resource "aws_instance" "kubernetes_etcd" {
   tags {
     Name      = "${var.aws_user_prefix}_${var.cluster_name}_etcd"
     ShortName = "etcd"
+    ClusterId = "${var.aws_user_prefix}_${var.cluster_name}"
+    Role      = "etcd"
   }
 }
 
@@ -375,6 +377,8 @@ resource "aws_instance" "kubernetes_apiserver" {
   tags {
     Name      = "${var.aws_user_prefix}_${var.cluster_name}_apiserver-${format("%03d", count.index+1)}"
     ShortName = "${format("apiserver-%03d", count.index+1)}"
+    ClusterId = "${var.aws_user_prefix}_${var.cluster_name}"
+    Role      = "apiserver"
   }
 }
 
@@ -449,6 +453,8 @@ resource "aws_instance" "kubernetes_master" {
   tags {
     Name      = "${var.aws_user_prefix}_${var.cluster_name}_master"
     ShortName = "master"
+    ClusterId = "${var.aws_user_prefix}_${var.cluster_name}"
+    Role      = "master"
   }
 }
 
@@ -535,6 +541,8 @@ resource "aws_instance" "kubernetes_node_special" {
   tags {
     Name      = "${var.aws_user_prefix}_${var.cluster_name}_node-${format("%03d", count.index+1)}"
     ShortName = "${format("node-%03d", count.index+1)}"
+    ClusterId = "${var.aws_user_prefix}_${var.cluster_name}"
+    Role      = "special"
   }
 }
 
@@ -639,6 +647,18 @@ resource "aws_autoscaling_group" "kubernetes_nodes" {
   tag {
     key                 = "ShortName"
     value               = "node-autoscaled"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "ClusterId"
+    value               = "${var.aws_user_prefix}_${var.cluster_name}"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "Role"
+    value               = "node"
     propagate_at_launch = true
   }
 }
