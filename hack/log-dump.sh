@@ -126,14 +126,14 @@ function save_etcd_logs() {
   done
 }
 
-function save_minion_logs() {
+function save_node_logs() {
   node_names=$(awk 'sub(/\[node\]/,""){f=1} /^\[[^\]\r\n]+/{f=0} {if (f) print $1}' ${KRAKEN_CLUSTER_ANSIBLE_HOSTS})
 
   for node_name in ${node_names}; do
     node_prefix="${LOG_DIRECTORY}/${node_name}"
     mkdir -p "${node_prefix}"
 
-    echo "Dumping logs for minion ${node_name}"
+    echo "Dumping logs for node ${node_name}"
 
     save_common_logs "${node_name}" "${node_prefix}"
   done
@@ -145,7 +145,7 @@ function main() {
   save_master_logs
   save_api_server_logs
   save_etcd_logs
-  save_minion_logs
+  save_node_logs
 }
 
 main
