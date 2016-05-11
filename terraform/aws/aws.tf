@@ -454,7 +454,7 @@ resource "aws_instance" "kubernetes_master" {
     Name      = "${var.aws_user_prefix}_${var.cluster_name}_master"
     ShortName = "master"
     ClusterId = "${var.aws_user_prefix}_${var.cluster_name}"
-    Role = "master"
+    Role      = "master"
   }
 }
 
@@ -658,7 +658,7 @@ resource "aws_autoscaling_group" "kubernetes_nodes" {
 
   tag {
     key                 = "Role"
-    value               = "minion"
+    value               = "node"
     propagate_at_launch = true
   }
 }
