@@ -23,11 +23,7 @@ ExecStart=/usr/bin/docker run \
   -v {{ kubernetes_cert_dir }}:{{ kubernetes_cert_dir }} \
   -v {{controller_manager_settings.log_dir}}:{{controller_manager_settings.log_dir}} \
   {{hyperkube_image}} \
-    /hyperkube \
-    kubelet \
-    --cluster_dns={{dns_ip}} \
-    --cluster_domain={{dns_domain}} \
-    --config=/etc/kubernetes/manifests-override \
-    --enable_server \
-    --kubeconfig={{ controller_manager_settings.kubeconfig | expanduser }} \
-    --hostname_override={{master_private_ip}}
+    /hyperkube controller-manager \
+  {% for k,v in controller_manager_settings.iteritems() %}
+    --{{k}}={{v}} \
+  {% endfor %}
