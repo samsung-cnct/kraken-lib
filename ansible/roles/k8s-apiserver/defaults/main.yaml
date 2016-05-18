@@ -1,7 +1,7 @@
 ---
 apiserver_settings:
-  # https://github.com/kubernetes/kubernetes/blob/release-1.1/docs/admin/admission-controllers.md#is-there-a-recommended-set-of-plug-ins-to-use
-  admission-control: NamespaceLifecycle,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota
+  # based off of kubernetes@release-1.2:cluster/{aws,gce}/config-{default,test}.sh ADMISSION_CONTROL entry
+  admission-control: NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota,PersistentVolumeLabel
   alsologtostderr: false
   basic-auth-file: "{{ kubernetes_cert_dir }}/basic_auth.csv"
   bind-address: 0.0.0.0
