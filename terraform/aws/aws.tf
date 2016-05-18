@@ -94,36 +94,16 @@ resource "aws_subnet" "vpc_subnet_main" {
   }
 }
 
-resource "aws_subnet" "vpc_subnet_1_asg" {
-  availability_zone       = "${element(split(",", lookup(var.aws_region_azs, var.aws_region)), 0)}"
+resource "aws_subnet" "vpc_subnet_asg" {
+  availability_zone       = "${element(split(",", lookup(var.aws_region_azs, var.aws_region)), count.index)}"
   vpc_id                  = "${aws_vpc.vpc.id}"
-  cidr_block              = "10.0.4.0/22"
+  cidr_block              = "10.0.${(count.index + 1) * 4}.0/22"
   map_public_ip_on_launch = true
+  count = "${length(split(",", var.aws_region))}"
 
   tags {
-    Name = "${var.aws_user_prefix}_${var.cluster_name}_subnet_asg_1"
-  }
-}
-
-resource "aws_subnet" "vpc_subnet_2_asg" {
-  availability_zone       = "${element(split(",", lookup(var.aws_region_azs, var.aws_region)), 1)}"
-  vpc_id                  = "${aws_vpc.vpc.id}"
-  cidr_block              = "10.0.8.0/22"
-  map_public_ip_on_launch = true
-
-  tags {
-    Name = "${var.aws_user_prefix}_${var.cluster_name}_subnet_asg_2"
-  }
-}
-
-resource "aws_subnet" "vpc_subnet_3_asg" {
-  availability_zone       = "${element(split(",", lookup(var.aws_region_azs, var.aws_region)), 2)}"
-  vpc_id                  = "${aws_vpc.vpc.id}"
-  cidr_block              = "10.0.12.0/22"
-  map_public_ip_on_launch = true
-
-  tags {
-    Name = "${var.aws_user_prefix}_${var.cluster_name}_subnet_asg_3"
+    Name = "${concat("${var.aws_user_prefix}_${var.cluster_name}_subnet_asg_", count.index)}"
+    propagate_at_launch = true
   }
 }
 
@@ -132,19 +112,10 @@ resource "aws_route_table_association" "vpc_subnet_main_rt_association" {
   route_table_id = "${aws_route_table.vpc_rt.id}"
 }
 
-resource "aws_route_table_association" "vpc_subnet_1_asg_rt_association" {
-  subnet_id      = "${aws_subnet.vpc_subnet_1_asg.id}"
+resource "aws_route_table_association" "vpc_subnet_asg_rt_association" {
+  subnet_id      = "${element(aws_subnet.vpc_subnet_asg.*.id, count.index)}"
   route_table_id = "${aws_route_table.vpc_rt.id}"
-}
-
-resource "aws_route_table_association" "vpc_subnet_2_asg_rt_association" {
-  subnet_id      = "${aws_subnet.vpc_subnet_2_asg.id}"
-  route_table_id = "${aws_route_table.vpc_rt.id}"
-}
-
-resource "aws_route_table_association" "vpc_subnet_3_asg_rt_association" {
-  subnet_id      = "${aws_subnet.vpc_subnet_3_asg.id}"
-  route_table_id = "${aws_route_table.vpc_rt.id}"
+  count = "${length(split(",", var.aws_region))}"
 }
 
 resource "aws_security_group" "vpc_secgroup" {
@@ -626,7 +597,7 @@ resource "aws_launch_configuration" "kubernetes_node" {
 
 resource "aws_autoscaling_group" "kubernetes_nodes" {
   name                      = "${var.aws_user_prefix}_${var.cluster_name}_node_asg"
-  vpc_zone_identifier       = ["${aws_subnet.vpc_subnet_1_asg.id}", "${aws_subnet.vpc_subnet_2_asg.id}", "${aws_subnet.vpc_subnet_3_asg.id}"]
+  vpc_zone_identifier       = ["${aws_subnet.vpc_subnet_asg.*.id}"]
   max_size                  = "${var.node_count}"
   min_size                  = "${var.node_count}"
   desired_capacity          = "${var.node_count}"
