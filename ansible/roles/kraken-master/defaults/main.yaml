@@ -14,3 +14,9 @@ services:
   scheduler_ip: "{{master_private_ip}}"
   etcd_ip: "{{etcd_private_ip}}"
   dns_domain: "{{dns_domain}}"
+nginx:
+  kubernetes_api_proxy_uri_regexes:
+    - "/api/v1/proxy/namespaces/([^/]+)/(pods|services)"
+    - "/api/v1/proxy/nodes"
+    - "/api/v1/namespaces/([^/]+)/(pods|services)/([^/]+)/proxy"
+    - "/api/v1/nodes/([^/]+)/proxy"
