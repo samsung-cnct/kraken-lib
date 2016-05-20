@@ -13,7 +13,7 @@ dependency_retries: 100
 dependency_sleep: 10 # seconds
 access_scheme: https
 access_port: 443
-dns_domain: kubernetes.local
+dns_domain: cluster.local
 dns_ip: 10.100.0.10
 etcd_private_ip: 127.0.0.1
 etcd_port: 4001
