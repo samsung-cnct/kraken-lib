@@ -20,6 +20,14 @@ echo "Conformance test dir: ${KUBE_ROOT}"
 echo "Conformance test kubeconfig: ${KUBE_CONFORMANCE_KUBECONFIG}"
 
 function run_hack_e2e_go() {
+# XXX: e2e-internal scripts assume KUBERNETES_PROVIDER=gce,
+  #      which assumes gcloud is present and configured; instead
+  #      set a provider that has fewer dependencies
+  export KUBERNETES_PROVIDER=aws
+
+  # XXX: e2e-internal scripts require USER to be set
+  export USER=${USER:-$(whoami)}
+
   # avoid provider-specific e2e setup
   export KUBERNETES_CONFORMANCE_TEST="y"
 
