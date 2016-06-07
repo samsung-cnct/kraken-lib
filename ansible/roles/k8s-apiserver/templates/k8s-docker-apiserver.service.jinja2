@@ -21,7 +21,7 @@ ExecStart=/usr/bin/docker run \
   -v /opt/bin/manifests:/etc/kubernetes/manifests-override \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v {{ kubernetes_cert_dir }}:{{ kubernetes_cert_dir }} \
-  -v {{apiserver_settings.log_dir}}:{{apiserver_settings.log_dir}}
+  -v {{apiserver_settings.log_dir}}:{{apiserver_settings.log_dir}} \
   {{hyperkube_image}} \
     /hyperkube apiserver \
   {% for k,v in apiserver_settings.iteritems() %}
