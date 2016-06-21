@@ -6,8 +6,8 @@ After=docker.service
 [Service]
 Type=simple
 Restart=on-failure
-RestartSec=5
-TimeoutStartSec=5
+RestartSec=10
+TimeoutStartSec=10
 ExecStartPre=-/usr/bin/docker kill sysdig-agent
 ExecStartPre=-/usr/bin/docker rm sysdig-agent
 ExecStartPre=/usr/bin/docker pull sysdig/agent
