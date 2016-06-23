@@ -4,7 +4,7 @@ MAINTAINER Marat Garafutdinov <marat.g@samsung.com>
 ENV TERRAFORM_VERSION=0.6.14 \
     TERRAFORM_EXECUTE_VERSION=v0.0.2 \
     TERRAFORM_COREOSBOX_VERSION=v0.0.1 \
-    KUBERNETES_VERSION=v1.1.3
+    KUBERNETES_VERSION=v1.2.4
 
 # system dependencie
 RUN apt-get update \
