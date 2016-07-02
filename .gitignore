@@ -18,3 +18,5 @@ _site/*
 *.tfvars
 density/*
 density_out/*
+.idea
+

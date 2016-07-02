@@ -20,8 +20,7 @@ The contents of the file consists of variable-value pairs. For example:
 
     variable_name = "variable_value"
 
-As described [here](https://www.terraform.io/intro/getting-started/variables.ht
-ml). For a local cluster you __must__ provide:
+As described [here](https://www.terraform.io/intro/getting-started/variables.html). For a local cluster you __must__ provide:
 
     cluster_name=<name of your cluster> 
 
@@ -30,8 +29,7 @@ For an AWS cluster you __must__ provide:
     cluster_name = "<name of your cluster>"
     aws_user_prefix = "<prefix to use for named resources>"
 
-For an AWS cluster you __must__ configure an AWS credentials file as documented [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started
-.html#cli-config-files)
+For an AWS cluster you __must__ configure an AWS credentials file as documented [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
 
 If the profile in your credential file is not named "default", you can specify 
  different profile name as follows:
