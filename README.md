@@ -129,8 +129,8 @@ On a system with a Bash shell:
 Limitations: Currently only works with sysdigcloud, not on premises.  Only works with a single apiserver running, not multiple.
 
 ### Helpful Links
-* kubectl user documentation can be found [here](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/kubectl.md)
-* kubectl [FAQ](https://github.com/GoogleCloudPlatform/kubernetes/wiki/User-FAQ)
+* kubectl user documentation can be found [here](https://github.com/kubernetes/kubernetes/blob/master/docs/user-guide/kubectl-overview.md)
+* Kubernetes [FAQ](https://github.com/GoogleCloudPlatform/kubernetes/wiki/User-FAQ)
 * Kubernetes conformance test logs run after a PR is merged to this repo located at http://e2e.kubeme.io
 
 ### Setting up without docker machine / setting up local cluster
