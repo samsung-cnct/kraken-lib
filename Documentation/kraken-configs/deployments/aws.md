@@ -12,7 +12,7 @@ Examples include `us-east-1` and `us-west-2`
 
 ## subnets
 
-Subnets describe 
+Subnets describe the AWS subnets to be created per 
 
 # Prototype
 ```yaml
@@ -24,15 +24,15 @@ Subnets describe
       subnets:
         - 
           az: us-east-1a
-          ipStart: 10.0.1.0
+          cidr: 10.0.1.0/22
           netmask: 255.255.255.0
         -
           az: us-east-1b
-          ipStart: 10.0.2.0
+          cidr: 10.0.2.0/22
           netmask: 255.255.255.0
         - 
           az: us-east-1c
-          ipStart: 10.0.3.0
+          cidr: 10.0.3.0/22
           netmask: 255.255.255.0
       authentication:
         accessKey: abc123
