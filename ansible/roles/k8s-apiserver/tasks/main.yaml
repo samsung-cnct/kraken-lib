@@ -1,5 +1,0 @@
----
-- include: apiserver-binary.yaml
-  when: "deployment_mode == 'binary'"
-- include: apiserver-docker.yaml
-  when: "deployment_mode == 'container'"

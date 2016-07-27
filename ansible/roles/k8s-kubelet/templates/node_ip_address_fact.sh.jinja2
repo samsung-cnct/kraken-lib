@@ -1,9 +1,0 @@
-#!/bin/bash
-
-IP_ADDRESS=$(ifconfig {{interface_name}} | grep 'inet ' | sed -e 's/:/ /' | awk '{print $2}')
-
-cat <<EOF
-{
-    "node_ip_address" : "$IP_ADDRESS"
-}
-EOF

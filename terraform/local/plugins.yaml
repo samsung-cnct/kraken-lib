@@ -1,4 +1,0 @@
----
-plugins:
-  - name: vagrant-triggers
-    version: 0.5.0

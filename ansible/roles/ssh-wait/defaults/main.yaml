@@ -1,4 +1,0 @@
----
-delay: 5
-timeout: 300
-host: "{{ inventory_hostname }}"

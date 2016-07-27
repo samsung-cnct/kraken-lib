@@ -1,4 +1,0 @@
----
-- name: restart nginx-docker
-  service: name=nginx-docker state=restarted enabled=yes
-  become: yes

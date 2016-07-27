@@ -1,4 +1,0 @@
----
-- name: Download kubectl binary
-  become: yes
-  get_url: url={{kubernetes_binaries_uri}}/kubectl dest=/opt/bin/kubectl force=no mode="a+x" validate_certs=no

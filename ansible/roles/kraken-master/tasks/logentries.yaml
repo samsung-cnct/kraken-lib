@@ -1,8 +1,0 @@
----
-- name: Create logentries url etcd key
-  shell: >
-    etcdctl --endpoint "http://{{ etcd_private_ip }}:{{ etcd_port }}" set /logentries.com/url {{logentries_url}}
-
-- name: Create logentries token etcd key
-  shell: >
-    etcdctl --endpoint "http://{{ etcd_private_ip }}:{{ etcd_port }}" set /logentries.com/token "{{logentries_token}}"

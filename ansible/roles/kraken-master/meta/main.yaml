@@ -1,7 +1,0 @@
----
-dependencies:
-  - { role: cadvisor }
-  - { role: kraken-common }
-  - { role: k8s-controller-manager, kubernetes_auth_operation: create }
-  - { role: k8s-scheduler }
-  - { role: k8s-proxy, when: deployment_mode == 'container'}

@@ -1,4 +1,0 @@
-{%- set comma = joiner(",") -%}
-{%- for key, value in system_users.iteritems() -%}
-  {{ comma() }}{{ value.name }}
-{%- endfor -%}

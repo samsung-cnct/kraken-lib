@@ -1,8 +1,0 @@
----
-- include: logentries.yaml
-  when: not((logentries_token is undefined) or (logentries_token is none) or (logentries_token|trim == ''))
-- include: nginx-proxy.yaml
-- include: kraken-services-setup.yaml
-- include: thirdparty-scheduler.yaml
-  when: not((thirdparty_scheduler is undefined) or (thirdparty_scheduler is none) or (thirdparty_scheduler|trim == ''))
-- include: kraken-services-run.yaml

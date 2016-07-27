@@ -1,8 +1,0 @@
----
-- name: restart k8s-binary-controller-manager
-  service: name=k8s-binary-controller-manager state=restarted enabled=yes
-  become: yes
-
-- name: restart k8s-docker-controller-manager
-  service: name=k8s-docker-controller-manager state=restarted enabled=yes
-  become: yes

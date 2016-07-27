@@ -1,4 +1,0 @@
----
-dependencies:
-  - { role: cadvisor }
-  - { role: kraken-common }

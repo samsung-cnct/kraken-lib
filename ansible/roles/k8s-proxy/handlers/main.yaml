@@ -1,8 +1,0 @@
----
-- name: restart k8s-binary-proxy
-  service: name=k8s-binary-proxy state=restarted enabled=yes
-  become: yes
-
-- name: restart k8s-docker-proxy
-  service: name=k8s-docker-proxy state=restarted enabled=yes
-  become: yes

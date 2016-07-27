@@ -1,3 +1,0 @@
----
-dependencies:
-  - { role: k8s-common }

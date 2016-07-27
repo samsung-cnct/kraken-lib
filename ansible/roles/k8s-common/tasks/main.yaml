@@ -1,4 +1,0 @@
----
-- include: install-kubectl.yaml
-- include: install-hyperkube.yaml
-  when: "deployment_mode == 'binary'"

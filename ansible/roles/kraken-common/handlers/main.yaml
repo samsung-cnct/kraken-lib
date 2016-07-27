@@ -1,8 +1,0 @@
----
-- name: restart journal-to-logentries service
-  service: name=journal-to-logentries state=restarted enabled=yes
-  become: yes
-
-- name: restart sysdig-cloud-agent service
-  service: name=sysdig-cloud-agent state=restarted enabled=yes
-  become: yes

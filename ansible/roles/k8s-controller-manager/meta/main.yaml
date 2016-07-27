@@ -1,5 +1,0 @@
----
-dependencies:
-  - { role: systemd }
-  - { role: k8s-common }
-  - { role: k8s-auth }

@@ -1,7 +1,0 @@
----
-- shell: >
-    etcdctl --endpoint "http://{{ etcd_private_ip }}:{{ etcd_port }}" get /{{ etcd_key }}/{{ item.value.name }}/token
-  register: etcd_result
-  until: etcd_result.rc == 0
-  retries: 120
-  delay: 10

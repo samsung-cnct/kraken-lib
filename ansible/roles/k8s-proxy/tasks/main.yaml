@@ -1,5 +1,0 @@
----
-- include: proxy-binary.yaml
-  when: "deployment_mode == 'binary'"
-- include: proxy-docker.yaml
-  when: "deployment_mode == 'container'"
