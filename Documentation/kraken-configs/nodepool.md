@@ -1,6 +1,16 @@
 #Kraken nodepools
 
-Configures nodepools to be used by various kraken node types
+All instances in the cluster are to be described within the node pool.
+
+Examples would include
+
+* Instances used for etcd
+* Instance used for non-HA master
+* Instances used for specific worker loads
+
+Each node pool is given a name that is referenced elsewhere in the configuration for the cluster.
+
+We do not expect the same machine types to be used for each purpose, therefore each node pool will have information specific to its hardware provider (public cloud, local, bare metal, etc.)
 
 #Sections
 
@@ -12,7 +22,11 @@ name of the nodepool
 
 number of nodes in the nodepool
 
-##configuration
+##sshKeyName
+
+Indicates what ssh key should be able to SSH in. Lack of setting this indicates nobody should be able to log in.
+
+##providerConfig
 
 [Provider](nodepool/README.md) - specific node configuration 
 
@@ -50,8 +64,9 @@ nodepools:
   - 
     name: master
     number: 3
-    configuration:
+    providerConfig:
       ...
+    sshKeyName: master-key
     kubernetes:
       version: 1.3.2
       mode: container
@@ -61,7 +76,8 @@ nodepools:
   -
     name: etcd_cluster
     number: 3
-    configuration:
+    sshKeyName: etcd-key
+    providerConfig:
       ...
     kubernetes:
       version: 1.3.2
@@ -72,7 +88,8 @@ nodepools:
   -
     name: cluster_nodes
     number: 20
-    configuration:
+    sshKeyName: node-key
+    providerConfig:
       ...
     kubernetes:
       version: 1.3.2
