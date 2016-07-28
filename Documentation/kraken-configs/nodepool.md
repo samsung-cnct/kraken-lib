@@ -12,53 +12,19 @@ Each node pool is given a name that is referenced elsewhere in the configuration
 
 We do not expect the same machine types to be used for each purpose, therefore each node pool will have information specific to its hardware provider (public cloud, local, bare metal, etc.)
 
-#Sections
 
-##name
+# Options
+## Root Options
+| Key Name | Required | Type | Description|
+| --- | --- | --- | --- |
+| name | __Required__ | String |node pool name |
+| count | __Required__| Integer | Total count of nodepool nodes |
+| sshKeyName | Optional | String | Key name from list of keypairs in [deployment](deployment.md). Lack of setting this indicates nobody should be able to log in. |
+| providerConfig | __Required__ | Object | [Provider](nodepools/README.md) - specific node configuration |
+| kubeConfig | Optional | String | Name of one of the [Kubernetes configurations](kubernetes.md)|
 
-name of the nodepool
 
-##count
-
-number of nodes in the nodepool
-
-##sshKeyName
-
-Indicates what ssh key should be able to SSH in. Lack of setting this indicates nobody should be able to log in.
-
-##providerConfig
-
-[Provider](nodepools/README.md) - specific node configuration 
-
-##kubernetes
-
-Kubernetes - specific node configuration
-
-###version
-
-Kubernetes version
-
-###mode
-
-How to run kubernetes components. Binary or container
-
-###labels
-
-Array of kubernetes labels to apply to node
-
-## container
-
-Information on container runtime to use
-
-###runtime
-
-Currently only docker is supported
-
-###version
-
-runtime version
-
-# Prototype
+# Example
 ```yaml
 nodepools:
   - 
@@ -67,38 +33,25 @@ nodepools:
     providerConfig:
       ...
     sshKeyName: master-key
-    kubernetes:
-      version: 1.3.2
-      mode: container
-    container:
-      runtime: docker
-      version: 1.11.1
+    kubeConfig: masterconfig
   -
     name: etcd_cluster
     count: 3
     sshKeyName: etcd-key
     providerConfig:
       ...
-    kubernetes:
-      version: 1.3.2
-      mode: container
-    container:
-      runtime: docker
-      version: 1.11.1 
   -
     name: cluster_nodes
     count: 20
     sshKeyName: node-key
     providerConfig:
       ...
-    kubernetes:
-      version: 1.3.2
-      mode: container
-      labels:
-        - 
-          name: kind
-          value: "etcd state"
-    container:
-      runtime: docker
-      version: 1.11.1 
+    kubeConfig: nodeconfig
+  -
+    name: special_nodes
+    count: 5
+    sshKeyName: node-key
+    providerConfig:
+      ...
+    kubeConfig: nodeconfig
 ```

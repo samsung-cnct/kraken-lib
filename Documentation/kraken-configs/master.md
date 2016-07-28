@@ -1,18 +1,13 @@
 #Kubernetes master configuration
 
-Configures kubernetes master
+# Options
+## Root Options
+| Key Name | Required | Type | Description|
+| --- | --- | --- | --- |
+| nodepool | __Required__ | String | Name of the [nodepool](nodepool.md) to use for master |
+| loadbalancer | __Required__ | String | Type of loadbalancer to use. cloud or nginx. Some loadbalncers might not be compatible with some providers |
 
-#Sections
-
-##nodepool 
-
-Name of the [nodepool](nodepool.md) to use for master
-
-##loadbalancer
-
-Type of loadbalancer to use if ha is enabled. cloud or nginx. Some loadbalncers might not be compatible with some providers
-
-# Prototype
+# Example
 ```yaml
 master: 
   nodepool: master
