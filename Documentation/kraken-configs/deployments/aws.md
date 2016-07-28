@@ -4,13 +4,22 @@ This snippet will describe an AWS configuration for deployment
 
 # Sections
 
-## region
+## Root
+
+| Name | Required | Type | Description |
+| --- | --- | --- | --- |
+| resourcePrefix | __TRUE__ | String | What all resources within AWS will be prefixed |
+| region | __TRUE__ | String | The AWS region the environment should be deployed to |
+| subnets | __TRUE__ | Array of Subnet Objects | Describes the subnets that should be created for deploying ec2 resources |
+| authentication | __TRUE__ | Authentication Object | Credentials to be used for creation of environment |
+
+## Region
 
 Region will describe what region you want your cluster to be created in.  Currently we only support one AWS region per cluster
 
 Examples include `us-east-1` and `us-west-2`
 
-## subnets
+## Subnets
 
 Subnets describe the AWS subnets to be created per AZ
 
