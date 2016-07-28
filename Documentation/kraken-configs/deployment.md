@@ -2,51 +2,33 @@
 
 The snippet configuration for deployments depends on the provider.
 
-#Sections
+# Options
+## Root Options
+| Key Name | Required | Type | Description|
+| --- | --- | --- | --- |
+| name | __Required__ | String | Name to use for the cluster created by this deployment |
+| coreos | Optional | Object | CoreOS options |
+| keypairs | Optional | Object Array | Array of key pairs to use in this deployment (in node pools and so on) |
+| provider | __Required__ | String | Type of cluster provider, e.g. aws, vagrant, etc |
+| providerConfig | __Required__ | Object | [Provider](deployments/README.md) - specific configuration section |
 
-##name
 
-Name to use for the cluster created by this deployment
+## coreos Options
 
-##coreos
+| Key Name | Required | Type | Description|
+| --- | --- | --- | --- |
+| version | Optional | String | OS version. Specific version number or 'latest'. Defaults to latest |
+| channel | Optional | String | OS update channel. Stable, alpha, beta. Defaults to beta |
+| rebootStrategy | Optional | String | CoreOS reboot strategy values. etcd-lock, reboot, off. Defaults to off. |
 
-CoreOS options 
+## keypairs Options
 
-###version
+| Key Name | Required | Type | Description|
+| --- | --- | --- | --- |
+| name | __Required__ | String | Keypair name |
+| publicKeyFile | Optional | String | Path to public key material. |
+| publickey | Optional | String | Public key material. |
 
-OS verison. Specific verison number or 'latest'
-
-###channel 
-
-OS update channel. Stable, alpha, beta
-
-###rebootStrategy
-
-CoreOS reboot strategy values. etcd-lock, reboot, off
-
-##keypairs
-
-Array of key pairs to use in this deployment (in node pools and so on)
-
-###name 
-
-Keypair name
-
-###publicKeyFile
-
-Path to public key material. Optional
-
-###publickey
-
-Public key material. Optional
-
-##provider
-
-Type of cluster provider, e.g. aws, vagrant, etc
-
-##providerConfig
-
-[Provider](deployments/README.md) - specific configuration section
 
 # Prototype
 ```yaml
