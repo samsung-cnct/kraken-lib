@@ -31,7 +31,7 @@ Type of cluster provider, e.g. aws, vagrant, etc
 
 ##configuration
 
-Provider - specific configuration section
+[Provider](deployments/README.md) - specific configuration section
 
 # Prototype
 ```yaml
