@@ -17,7 +17,7 @@ Subnets describe the AWS subnets to be created per AZ
 # Prototype
 ```yaml
     provider: aws
-    configuration:
+    providerConfig:
       # Provider-Specific Configuration Data
       resourcePrefix: mrrobot
       region: us-east-1
