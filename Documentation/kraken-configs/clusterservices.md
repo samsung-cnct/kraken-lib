@@ -1,4 +1,4 @@
-#Kubernetes cluster services configuration
+# Kubernetes cluster services configuration
 
 Cluster services are helm charts to be installed on cluster startup
 

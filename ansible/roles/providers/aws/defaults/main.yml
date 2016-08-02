@@ -1,0 +1,2 @@
+---
+provider_config: "{{ deployment.providerConfig }}"

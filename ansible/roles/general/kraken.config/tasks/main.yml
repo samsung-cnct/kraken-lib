@@ -1,0 +1,9 @@
+---
+- name: Include configuration variables
+  include_vars: "{{config_file}}"
+  when: not((config_file is undefined) or (config_file is none) or (config_file|trim == ''))
+
+- name: Persist deployment fact
+  set_fact:
+    kraken_deployment: "{{ deployment.name }}"
+

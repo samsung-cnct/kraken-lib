@@ -1,0 +1,196 @@
+---
+config_file:
+deployment:  
+  name: krakenCluster
+  coreos:
+    version: latest
+    channel: beta
+    rebootStrategy: off
+  keypairs:
+    -
+      name: krakenTesting
+      publickeyFile: "{{ '~/.ssh/id_rsa.pub' | expanduser}}"
+  kubeConfig:
+    - 
+      name: allConfig
+      version: 1.3.2
+      runMode: container
+      containerConfig: dockerconfig
+  containerConfig:
+    - 
+      name: dockerconfig
+      version: 1.12.0
+      runtime: docker
+  fabric:
+    # network fabric TODO
+  provider: aws
+  providerConfig:
+    resourcePrefix: defaults
+    region: us-west-2
+    subnets:
+      - 
+        az: us-west-2a
+        cidr: 10.0.1.0/22
+      -
+        az: us-west-2b
+        cidr: 10.0.2.0/22
+      - 
+        az: us-west-2c
+        cidr: 10.0.3.0/22
+    authentication:
+      accessKey:
+      accessSecret:
+      credentialsFile:
+      credentialsProfile:
+  nodepools:
+    -
+      name: masterNodes
+      count: 3
+      providerConfig:
+        type: m3.xlarge
+        azs:
+          - az: us-west-2a
+            count: 1
+          - az: us-west-2b
+            count: 1
+          - az: us-west-2c
+            count: 1
+        tags:
+          -
+            key: comments
+            value: "One of three master instances"
+        storage:
+          -
+            type: root
+            volume: gp2
+            size: 50
+            delete: false
+          - 
+            type: ebs
+            deviceName: sdf
+            volume: gp2
+            size: 100
+            delete: true
+            snapshotId:
+            encrypted: false
+      sshKeyName: krakenTesting
+      kubeConfig: allConfig
+    -
+      name: apiServers
+      count: 3
+      providerConfig:
+        type: m3.xlarge
+        azs:
+          - az: us-west-2a
+            count: 1
+          - az: us-west-2b
+            count: 1
+          - az: us-west-2c
+            count: 1
+        tags:
+          -
+            key: comments
+            value: "One of three api server instances"
+        storage:
+          -
+            type: root
+            volume: gp2
+            size: 50
+            delete: false
+          - 
+            type: ebs
+            deviceName: sdf
+            volume: gp2
+            size: 100
+            delete: true
+            snapshotId:
+            encrypted: false
+      sshKeyName: krakenTesting
+      kubeConfig: allConfig
+    -
+      name: clusterNodes
+      count: 90
+      sshKeyName: krakenTesting
+      providerConfig:
+        type: m3.medium
+        azs:
+          - az: us-west-2a
+            count: 30
+          - az: us-west-2b
+            count: 30
+          - az: us-west-2c
+            count: 30
+        tags:
+          -
+            key: comments
+            value: "One of 90 nodes"
+        storage:
+          -
+            type: root
+            volume: gp2
+            size: 50
+            delete: false
+          - 
+            type: ebs
+            deviceName: sdf
+            volume: gp2
+            size: 100
+            delete: true
+            snapshotId:
+            encrypted: false
+      kubeConfig: allConfig
+    -
+      name: specialNodes
+      count: 10
+      sshKeyName: krakenTesting
+      providerConfig:
+        type: m3.large
+        azs:
+          - az: us-west-2a
+            count: 3
+          - az: us-west-2b
+            count: 3
+          - az: us-west-2c
+            count: 4
+        tags:
+          -
+            key: comments
+            value: "One of ten special nodes"
+        storage:
+          -
+            type: root
+            volume: gp2
+            size: 50
+            delete: false
+          - 
+            type: ebs
+            deviceName: sdf
+            volume: gp2
+            size: 100
+            delete: true
+            snapshotId:
+            encrypted: false
+      kubeConfig: allConfig
+  etcd:
+    # etcd config TODO 
+  master:
+    nodepool: masterNodes
+    loadbalancer: cloud
+  nodes:
+    - nodepool: clusterNodes
+    - nodepool: specialNodes
+  apiServer:
+    nodepool: apiServers
+    loadbalancer: cloud
+  clusterServices:
+    namespaces:
+      - kube-system
+    repos: 
+      -
+        name: atlas
+        url: http://atlas.cnct.io
+    services:
+      -
+        name: kubedns
+        repo: atlas
+        chart: kubedns-0.1.0

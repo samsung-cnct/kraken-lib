@@ -1,0 +1,6 @@
+galaxy_info:
+  author: Samsung CNCT
+  description: 
+  company: Samsung CNCT
+  license: Apache  
+  min_ansible_version: 2.1

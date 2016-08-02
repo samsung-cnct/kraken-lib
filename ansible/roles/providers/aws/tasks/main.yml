@@ -1,0 +1,3 @@
+---
+- name: Display provider_config
+  debug: var=provider_config verbosity=4
