@@ -1,6 +1,6 @@
 ---
-config_file:
-deployment:  
+config_file: "{{ config_file | default('~/.kraken/config.yml' | expanduser) }}"
+deployment:
   name: krakenCluster
   coreos:
     version: latest
@@ -11,13 +11,13 @@ deployment:
       name: krakenTesting
       publickeyFile: "{{ '~/.ssh/id_rsa.pub' | expanduser}}"
   kubeConfig:
-    - 
+    -
       name: allConfig
       version: 1.3.2
       runMode: container
       containerConfig: dockerconfig
   containerConfig:
-    - 
+    -
       name: dockerconfig
       version: 1.12.0
       runtime: docker
@@ -28,13 +28,13 @@ deployment:
     resourcePrefix: defaults
     region: us-west-2
     subnets:
-      - 
+      -
         az: us-west-2a
         cidr: 10.0.1.0/22
       -
         az: us-west-2b
         cidr: 10.0.2.0/22
-      - 
+      -
         az: us-west-2c
         cidr: 10.0.3.0/22
     authentication:
@@ -65,7 +65,7 @@ deployment:
             volume: gp2
             size: 50
             delete: false
-          - 
+          -
             type: ebs
             deviceName: sdf
             volume: gp2
@@ -97,7 +97,7 @@ deployment:
             volume: gp2
             size: 50
             delete: false
-          - 
+          -
             type: ebs
             deviceName: sdf
             volume: gp2
@@ -130,7 +130,7 @@ deployment:
             volume: gp2
             size: 50
             delete: false
-          - 
+          -
             type: ebs
             deviceName: sdf
             volume: gp2
@@ -162,7 +162,7 @@ deployment:
             volume: gp2
             size: 50
             delete: false
-          - 
+          -
             type: ebs
             deviceName: sdf
             volume: gp2
@@ -172,7 +172,7 @@ deployment:
             encrypted: false
       kubeConfig: allConfig
   etcd:
-    # etcd config TODO 
+    # etcd config TODO
   master:
     nodepool: masterNodes
     loadbalancer: cloud
@@ -185,7 +185,7 @@ deployment:
   clusterServices:
     namespaces:
       - kube-system
-    repos: 
+    repos:
       -
         name: atlas
         url: http://atlas.cnct.io
