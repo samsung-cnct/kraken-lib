@@ -1,8 +1,8 @@
 Role Name
 =========
-kraken.config
+kraken.kubeconfig
 
-Sets a bunch of config facts from a loaded config yml
+Generates kubernetes units from loaded yaml configuration
 
 Requirements
 ------------
@@ -17,7 +17,7 @@ refer to repository docs
 Dependencies
 ------------
 
-TBD
+must run after kraken.config
 
 Example Playbook
 ----------------
@@ -27,7 +27,7 @@ Basic role call:
     ---
     - hosts: localhost
       roles:
-        - { role: kraken.config, config_file: "{{config_file}}" }
+        - { role: kraken.kubeconfig }
 
 License
 -------
