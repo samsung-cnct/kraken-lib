@@ -1,0 +1,9 @@
+galaxy_info:
+  author: Samsung CNCT
+  description: 
+  company: Samsung CNCT
+  license: Apache  
+  min_ansible_version: 1.2
+
+dependencies:
+  - { role: '{{ playbook_dir }}/roles/providers/aws', when: deployment.provider == 'aws' }

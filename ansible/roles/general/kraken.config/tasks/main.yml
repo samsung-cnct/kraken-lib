@@ -1,0 +1,8 @@
+---
+- name: Check if configuration file exists
+  stat: path={{ config_file | default(config_file_default) }}
+  register: config_stat
+
+- name: Include configuration variables
+  include_vars: "{{config_file}}"
+  when: config_stat.stat.exists == True

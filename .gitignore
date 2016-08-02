@@ -16,7 +16,6 @@ _site/*
 *.logs
 *.log
 *.tfvars
-density/*
-density_out/*
 .idea
+*.retry
 
