@@ -11,4 +11,4 @@ set -o pipefail
 my_dir=$(dirname "${BASH_SOURCE}")
 source "${my_dir}/bin/utils.sh"
 
-ansible-playbook -i ansible/inventory/localhost ansible/up.yaml --extra-vars "config_file=${KRAKEN_CONFIG}" -vvvv
+ansible-playbook -i ansible/inventory/localhost ansible/up.yaml --extra-vars "config_file=${KRAKEN_CONFIG}"
