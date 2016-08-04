@@ -44,6 +44,100 @@ deployment:
       credentialsProfile:
   nodepool:
     -
+      name: etcd
+      count: 3
+      providerConfig:
+        type: m3.xlarge
+        azs:
+          - az: us-west-2a
+            count: 1
+          - az: us-west-2b
+            count: 1
+          - az: us-west-2c
+            count: 1
+        tags:
+          -
+            key: comments
+            value: "One of three master instances"
+        storage:
+          -
+            type: root
+            volume: gp2
+            size: 50
+            delete: false
+          -
+            type: ebs
+            deviceName: sdf
+            volume: gp2
+            size: 100
+            delete: true
+            snapshotId:
+            encrypted: false
+      keypair: krakenTesting
+    -
+      name: etcdEvents
+      count: 3
+      providerConfig:
+        type: m3.xlarge
+        azs:
+          - az: us-west-2a
+            count: 1
+          - az: us-west-2b
+            count: 1
+          - az: us-west-2c
+            count: 1
+        tags:
+          -
+            key: comments
+            value: "One of three master instances"
+        storage:
+          -
+            type: root
+            volume: gp2
+            size: 50
+            delete: false
+          -
+            type: ebs
+            deviceName: sdf
+            volume: gp2
+            size: 100
+            delete: true
+            snapshotId:
+            encrypted: false
+      keypair: krakenTesting
+    -
+      name: masterNodes
+      count: 3
+      providerConfig:
+        type: m3.xlarge
+        azs:
+          - az: us-west-2a
+            count: 1
+          - az: us-west-2b
+            count: 1
+          - az: us-west-2c
+            count: 1
+        tags:
+          -
+            key: comments
+            value: "One of three master instances"
+        storage:
+          -
+            type: root
+            volume: gp2
+            size: 50
+            delete: false
+          -
+            type: ebs
+            deviceName: sdf
+            volume: gp2
+            size: 100
+            delete: true
+            snapshotId:
+            encrypted: false
+      keypair: krakenTesting
+      kubeConfig: allConfig
+    -
       name: masterNodes
       count: 3
       providerConfig:
@@ -172,7 +266,24 @@ deployment:
             encrypted: false
       kubeConfig: allConfig
   etcd:
-    # etcd config TODO
+    containerConfig: dockerconfig
+    clusters:
+      -
+        clientPorts: [2379, 4001]
+        clusterToken: etcd-cluster-token
+        name: etcd
+        nodepool: etcd
+        peerPorts: [2380]
+        ssl: true
+        version: 3.0.3
+      -
+        clientPorts: [2381]
+        clusterToken: etcd-events-cluster-token
+        name: etcdEvents
+        nodepool: etcdEvents
+        peerPorts: [2382]
+        ssl: true
+        version: 3.0.3
   master:
     nodepool: masterNodes
     loadbalancer: cloud

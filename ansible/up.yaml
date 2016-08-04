@@ -2,5 +2,6 @@
 - hosts: localhost
   roles:
     - { role: 'kraken.config', config_file: "{{ config_path | default('') }}" }
+    - { role: 'roles/kraken.etcd/kraken.etcd.selector' }
     - { role: 'roles/kraken.master/kraken.master.selector' }
     - { role: 'roles/providers/kraken.selector' }
