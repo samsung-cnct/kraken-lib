@@ -1,8 +1,7 @@
 Role Name
 =========
-kraken.kubeconfig
 
-Generates kubernetes units from loaded yaml configuration
+kraken.master.docker - sets up cloud config parts for docker based kraken master
 
 Requirements
 ------------
@@ -12,22 +11,17 @@ TBD
 Role Variables
 --------------
 
-refer to repository docs
+TBD
 
 Dependencies
 ------------
 
-must run after kraken.config
+TBD
 
 Example Playbook
 ----------------
 
-Basic role call:
-
-    ---
-    - hosts: localhost
-      roles:
-        - { role: kraken.kubeconfig }
+TBD
 
 License
 -------

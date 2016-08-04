@@ -1,3 +1,0 @@
----
-- name: Output containerConfig
-  debug: var=deployment.containerConfig

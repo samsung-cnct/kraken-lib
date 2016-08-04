@@ -1,12 +1,12 @@
 ---
 config_file: "{{ config_file | default('~/.kraken/config.yml' | expanduser) }}"
 deployment:
-  name: krakenCluster
+  cluster: krakenCluster
   coreos:
     version: latest
     channel: beta
     rebootStrategy: off
-  keypairs:
+  keypair:
     -
       name: krakenTesting
       publickeyFile: "{{ '~/.ssh/id_rsa.pub' | expanduser}}"
@@ -42,7 +42,7 @@ deployment:
       accessSecret:
       credentialsFile:
       credentialsProfile:
-  nodepools:
+  nodepool:
     -
       name: masterNodes
       count: 3
@@ -73,7 +73,7 @@ deployment:
             delete: true
             snapshotId:
             encrypted: false
-      sshKeyName: krakenTesting
+      keypair: krakenTesting
       kubeConfig: allConfig
     -
       name: apiServers
@@ -105,12 +105,12 @@ deployment:
             delete: true
             snapshotId:
             encrypted: false
-      sshKeyName: krakenTesting
+      keypair: krakenTesting
       kubeConfig: allConfig
     -
       name: clusterNodes
       count: 90
-      sshKeyName: krakenTesting
+      keypair: krakenTesting
       providerConfig:
         type: m3.medium
         azs:
@@ -142,7 +142,7 @@ deployment:
     -
       name: specialNodes
       count: 10
-      sshKeyName: krakenTesting
+      keypair: krakenTesting
       providerConfig:
         type: m3.large
         azs:

@@ -1,0 +1,3 @@
+---
+- name: Display binary master config config
+  debug: var=kraken_config.master
