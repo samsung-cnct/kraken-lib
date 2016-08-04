@@ -10,10 +10,10 @@ def expand_config(config_data):
     # expand each dictionary when found
     for key, value in all_data.items():
       if isinstance(value, dict):
-        expand_dict(value, top_level_categories, all_data)
+        expand_object(value, top_level_categories, all_data)
       elif isinstance(value, list):
         for item in value:
-          expand_dict(item, top_level_categories, all_data)
+          expand_object(item, top_level_categories, all_data)
       else:
         continue
     return all_data
@@ -27,13 +27,28 @@ def expand_config(config_data):
 # that matches a top level category
 # if it does - look up a value under one of the top category arrays with a matching 'name'
 # if it does not - move on
-def expand_dict(dict_to_expand, top_level_categories, all_data):
-  for key, value in dict_to_expand.items():
+def expand_object(object_to_expand, top_level_categories, all_data):
+  if not isinstance(object_to_expand, dict):
+    return
+
+  for key, value in object_to_expand.items():
     if isinstance(value, basestring):
-      if key in top_level_categories:
-        dict_to_expand[key] = get_named_section(key, value, all_data)
-        if isinstance(value, dict):
-          expand_dict(dict_to_expand[key], top_level_categories, all_data)
+      key_lookup(key, value, object_to_expand, top_level_categories, all_data)
+    elif isinstance(value, dict):
+      expand_object(object_to_expand[key], top_level_categories, all_data)
+    elif isinstance(value, list):
+      for item in value:
+        expand_object(item, top_level_categories, all_data)
+
+def key_lookup(key, value, object_to_expand, top_level_categories, all_data):
+  if key in top_level_categories:
+    object_to_expand[key] = get_named_section(key, value, all_data)
+    if isinstance(object_to_expand[key], dict):
+      expand_object(object_to_expand[key], top_level_categories, all_data)
+    elif isinstance(object_to_expand[key], list):
+      for item in object_to_expand[key]:
+        expand_object(item, top_level_categories, all_data)
+
 
 def get_named_section(key, value, all_data):
   # get key'ed value from all data
