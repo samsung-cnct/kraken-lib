@@ -9,7 +9,7 @@
 | tags | Optional | Object Array |  Array of tags to apply to node. Note that 'Name' is forced to value of resourcePrefix + pool name. |
 | storage | Required | Object Array | Array of storage volume specs.|
 
-    
+
 ## azs Options
 
 | Key Name | Required | Type | Description|
@@ -42,8 +42,8 @@
 # Example
 
 ```yaml
-nodepools:
-  - 
+nodepool:
+  -
     name: master
     ...
     providerConfig:
@@ -65,7 +65,7 @@ nodepools:
           volume: gp2
           size: 10
           delete: false
-        - 
+        -
           type: ebs
           deviceName: sdf
           volume: io1
@@ -74,7 +74,7 @@ nodepools:
           delete: false
           snapshotId:
           encrypted: true
-        - 
+        -
           type: ephemeral
           deviceName: sdb
           virtualName: ephemeral0

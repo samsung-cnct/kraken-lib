@@ -19,38 +19,38 @@ We do not expect the same machine types to be used for each purpose, therefore e
 | --- | --- | --- | --- |
 | name | __Required__ | String |node pool name |
 | count | __Required__| Integer | Total count of nodepool nodes |
-| sshKeyName | Optional | String | Key name from list of keypairs in [deployment](deployment.md). Lack of setting this indicates nobody should be able to log in. |
+| keypair | Optional | String | Key name from list of keypairs in [deployment](deployment.md). Lack of setting this indicates nobody should be able to log in. |
 | providerConfig | __Required__ | Object | [Provider](nodepools/README.md) - specific node configuration |
 | kubeConfig | Optional | String | Name of one of the [Kubernetes configurations](kubernetes.md)|
 
 
 # Example
 ```yaml
-nodepools:
-  - 
+nodepool:
+  -
     name: master
     count: 3
     providerConfig:
       ...
-    sshKeyName: master-key
+    keypair: master-key
     kubeConfig: masterconfig
   -
     name: etcd_cluster
     count: 3
-    sshKeyName: etcd-key
+    keypair: etcd-key
     providerConfig:
       ...
   -
     name: cluster_nodes
     count: 20
-    sshKeyName: node-key
+    keypair: node-key
     providerConfig:
       ...
     kubeConfig: nodeconfig
   -
     name: special_nodes
     count: 5
-    sshKeyName: node-key
+    keypair: node-key
     providerConfig:
       ...
     kubeConfig: nodeconfig

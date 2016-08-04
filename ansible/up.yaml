@@ -1,7 +1,6 @@
 ---
 - hosts: localhost
   roles:
-    - { role: 'roles/general/kraken.config', config_file: "{{ config_path | default('') }}" }
-    - { role: 'roles/general/kraken.containerconfig' }
-    - { role: 'roles/general/kraken.kubeconfig' }
+    - { role: 'kraken.config', config_file: "{{ config_path | default('') }}" }
+    - { role: 'roles/kraken.master/kraken.master.selector' }
     - { role: 'roles/providers/kraken.selector' }

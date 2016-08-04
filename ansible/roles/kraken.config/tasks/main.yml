@@ -6,3 +6,7 @@
 - name: Include configuration variables
   include_vars: "{{config_file}}"
   when: config_stat.stat.exists == True
+
+- name: expand configuration and register the config fact
+  set_fact:
+    kraken_config: "{{ deployment | expand_config }}"
