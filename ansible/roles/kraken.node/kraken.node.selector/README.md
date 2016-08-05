@@ -1,7 +1,7 @@
 Role Name
 =========
 
-kraken.etcd.selector - selects the etcd role to load
+kraken.node.selector - selects the kraken node role to load
 
 Requirements
 ------------

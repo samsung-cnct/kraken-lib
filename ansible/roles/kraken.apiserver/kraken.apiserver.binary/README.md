@@ -1,12 +1,12 @@
 Role Name
 =========
 
-kraken.etcd.selector - selects the etcd role to load
+kraken.apiserver.binary - sets up cloud config parts for binary based kraken apiserver
 
 Requirements
 ------------
 
-must run after kraken.config
+TBD
 
 Role Variables
 --------------

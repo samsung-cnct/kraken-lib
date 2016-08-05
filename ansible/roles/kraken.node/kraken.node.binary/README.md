@@ -1,12 +1,12 @@
 Role Name
 =========
 
-kraken.selector - selects the provider role to load
+kraken.node.binary - sets up cloud config parts for binary based kraken nodes
 
 Requirements
 ------------
 
-must run after kraken.config
+TBD
 
 Role Variables
 --------------

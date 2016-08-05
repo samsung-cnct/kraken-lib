@@ -8,5 +8,5 @@ galaxy_info:
 dependencies:
   - {
       role: '{{ playbook_dir }}/roles/kraken.etcd/kraken.etcd.docker',
-      when: kraken_config.etcd.containerConfig.runtime == 'docker'
+      when: "{{ kraken_config.etcd | selectattr('containerConfig.runtime', 'equalto', 'docker') | map(attribute='name') | list | length }} > 0"
     }
