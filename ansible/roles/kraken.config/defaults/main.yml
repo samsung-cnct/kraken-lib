@@ -22,7 +22,9 @@ deployment:
       version: 1.12.0
       runtime: docker
   fabric:
-    # network fabric TODO
+    provider: flannel
+    options:
+      backend: aws-vpc
   provider: aws
   providerConfig:
     resourcePrefix: defaults
