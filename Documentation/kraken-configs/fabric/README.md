@@ -1,4 +1,4 @@
-#Delpoyment providers
+#Fabric providers
 
-* `aws` - [AWS provider](aws.md)
-* `vagrant` - [Vagrant provider](vagrant.md)
+* `flannel` - [FLannel](flannel.md)
+* `calico` - [Calico](calico.md)
