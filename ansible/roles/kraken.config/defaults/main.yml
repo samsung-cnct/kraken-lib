@@ -266,28 +266,28 @@ deployment:
             encrypted: false
       kubeConfig: allConfig
   etcd:
-    containerConfig: dockerconfig
-    clusters:
-      -
-        clientPorts: [2379, 4001]
-        clusterToken: etcd-cluster-token
-        name: etcd
-        nodepool: etcd
-        peerPorts: [2380]
-        ssl: true
-        version: 3.0.3
-      -
-        clientPorts: [2381]
-        clusterToken: etcd-events-cluster-token
-        name: etcdEvents
-        nodepool: etcdEvents
-        peerPorts: [2382]
-        ssl: true
-        version: 3.0.3
+    -
+      clientPorts: [2379, 4001]
+      clusterToken: etcd-cluster-token
+      name: etcd
+      nodepool: etcd
+      peerPorts: [2380]
+      ssl: true
+      version: 3.0.3
+      containerConfig: dockerconfig
+    -
+      clientPorts: [2381]
+      clusterToken: etcd-events-cluster-token
+      name: etcdEvents
+      nodepool: etcdEvents
+      peerPorts: [2382]
+      ssl: true
+      version: 3.0.3
+      containerConfig: dockerconfig
   master:
     nodepool: masterNodes
     loadbalancer: cloud
-  nodes:
+  node:
     - nodepool: clusterNodes
     - nodepool: specialNodes
   apiServer:

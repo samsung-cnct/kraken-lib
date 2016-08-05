@@ -10,10 +10,6 @@ By default we have an array of etcd clusters that we want to configure
 | --- | --- | --- | --- |
 | clusters | __TRUE__ | Object Array | array of etcd clusters |
 | containerConfig | __TRUE__ | String | Name of a [Container runtime configuration](container.md)  |
-
-## clusters options
-| Name | Required | Type | Description |
-| --- | --- | --- | --- |
 | clientPorts | __FALSE__ | Integer Array | Defaults to 2379 and 4001 - the client ports for etcd |
 | clusterToken | __FALSE__ | String | Defaults to _name_-cluster-token - the initial cluster token used |
 | name | __TRUE__ | String | Name of the etcd cluster |

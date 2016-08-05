@@ -4,7 +4,7 @@
 ## Root Options
 | Key Name | Required | Type | Description|
 | --- | --- | --- | --- |
-| nodes | __Required__ | Object array | Array of node objects |
+| node | __Required__ | Object array | Array of node objects |
 
 ## workers Options
 | Key Name | Required | Type | Description|
@@ -14,7 +14,7 @@
 
 #Example
 ```yaml
-nodes:
+node:
   - nodepool: cluster_nodes
   - nodepool: special_nodes
 ```
