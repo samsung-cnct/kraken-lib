@@ -1,0 +1,174 @@
+# provider configuration
+
+provider "aws" {
+  access_key  = "{{kraken_config.providerConfig.authentication.accessKey}}"
+  secret_key  = "{{kraken_config.providerConfig.authentication.accessSecret}}"
+  shared_credentials_file = "{{kraken_config.providerConfig.authentication.credentialsFile}}"
+  profile     = "{{kraken_config.providerConfig.authentication.credentialsProfile}}"
+  region      = "{{kraken_config.providerConfig.region}}"
+  max_retries = "10"
+}
+
+# AWS VPC block
+resource "aws_vpc" "vpc" {
+  cidr_block           = "{{kraken_config.providerConfig.vpc}}"
+  instance_tenancy     = "default"
+  enable_dns_support   = true
+  enable_dns_hostnames = true
+
+  tags {
+    Name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_vpc"
+  }
+}
+
+# DHCP options set
+resource "aws_vpc_dhcp_options" "vpc_dhcp" {
+  domain_name         = "{{kraken_config.providerConfig.region}}.compute.internal"
+  domain_name_servers = ["AmazonProvidedDNS"]
+
+  tags {
+    Name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_dhcp"
+  }
+}
+
+# DHCP association
+resource "aws_vpc_dhcp_options_association" "vpc_dhcp_association" {
+  vpc_id          = "${aws_vpc.vpc.id}"
+  dhcp_options_id = "${aws_vpc_dhcp_options.vpc_dhcp.id}"
+}
+
+# AWS internet gateway
+resource "aws_internet_gateway" "vpc_gateway" {
+  vpc_id = "${aws_vpc.vpc.id}"
+
+  tags {
+    Name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_gateway"
+  }
+}
+
+# Route table
+resource "aws_route_table" "vpc_rt" {
+  vpc_id = "${aws_vpc.vpc.id}"
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = "${aws_internet_gateway.vpc_gateway.id}"
+  }
+
+  tags {
+    Name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_routetable"
+  }
+}
+
+# VPC ACL
+resource "aws_network_acl" "vpc_acl" {
+  vpc_id = "${aws_vpc.vpc.id}"
+
+{% for egress in kraken_config.providerConfig.egressAcl %}
+  egress {
+    {% for k,v in egress.iteritems() %}
+    {{k}} = {{v}}
+    {% endfor %}
+  }
+{% endfor %}
+
+{% for ingress in kraken_config.providerConfig.ingressAcl %}
+  ingress {
+    {% for k,v in ingress.iteritems() %}
+    {{k}} = {{v}}
+    {% endfor %}
+  }
+{% endfor %}
+
+  tags {
+    Name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_acl"
+  }
+}
+
+# all defined keypairs
+{% for keypair in kraken_config.keypair %}
+resource "aws_key_pair" "{{keypair.name}}" {
+  key_name   = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{keypair.name}}"
+{% if keypair.publickey is defined  %}
+  public_key = "{{keypair.publickey}}"
+{% elif keypair.publickeyFile is defined %}
+  public_key = "${file({{keypair.publickeyFile}})}"
+{% endif %}
+}  
+{% endfor %}
+
+# all defined subnets
+{% for subnet in kraken_config.providerConfig.subnet %}
+resource "aws_subnet" "vpc_subnet_{{subnet}}" {
+  vpc_id                  = "${aws_vpc.vpc.id}"
+  cidr_block              = "{{subnet.cidr}}"
+  availability_zone       = "{{subnet.az}}"
+  map_public_ip_on_launch = true
+
+  tags {
+    Name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_subnet"
+  }
+}
+{% endfor %}
+
+
+{% for subnet in kraken_config.providerConfig.subnet %}
+resource "aws_route_table_association" "vpc_subnet_asg_rt_association_{{subnet.name}}" {
+  subnet_id      = "${aws_subnet.vpc_subnet_{{subnet}}.id}"
+  route_table_id = "${aws_route_table.vpc_rt.id}"
+}
+{% endfor %}
+
+resource "aws_security_group" "vpc_secgroup" {
+  name        = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_secgroup"
+  description = "Security group for {{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}} cluster"
+  vpc_id      = "${aws_vpc.vpc.id}"
+
+  {% for ingress in kraken_config.providerConfig.ingressSecurity %}
+  ingress {
+    {% for k,v in ingress.iteritems() %}
+    {{k}} = {{v}}
+    {% endfor %}
+  }
+  {% endfor %}
+
+  # intra-group all ports / all protocols
+  ingress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    self            = true
+  }
+
+  # inbound all ports / all protocols from the vpc's default secgroup
+  ingress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    security_groups = ["${aws_vpc.vpc.default_security_group_id}"]
+  }
+
+  {% for ingress in kraken_config.providerConfig.egressSecurity %}
+  egress {
+    {% for k,v in egress.iteritems() %}
+    {{k}} = {{v}}
+    {% endfor %}
+  }
+  {% endfor %}
+}
+
+resource "coreosbox_ami" "latest_ami" {
+  channel        = "{{kraken_config.coreos.channel}}"
+  virtualization = "hvm"
+  region         = "{{kraken_config.providerConfig.region}}"
+  version        = "{{kraken_config.coreos.version}}"
+}
+
+{% for etcd in kraken_config.etcd %}
+resource "aws_launch_configuration" "{{etcd.name}}_launch_config" {
+  name                        = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{etcd.name}}_launch_config"
+  image_id                    = "${coreosbox_ami.latest_ami.box_string}"
+  key_name                    = "{{etcd.nodepool.keypair.}}"
+
+}
+{% endfor %}

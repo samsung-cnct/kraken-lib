@@ -4,20 +4,11 @@
 ## Root Options
 | Key Name | Required | Type | Description|
 | --- | --- | --- | --- |
-| azs | __Required__ | Object Array | Indicates what availability zone we are addressing |
+| subnet | __Required__ | String Array | Which subnets to span (defined in top level providerConfig) |
 | type | __Required__ | String | String indicating machine type (m3.medium, etc.) |
 | tags | Optional | Object Array |  Array of tags to apply to node. Note that 'Name' is forced to value of resourcePrefix + pool name. |
 | storage | Required | Object Array | Array of storage volume specs.|
 
-
-## azs Options
-
-| Key Name | Required | Type | Description|
-| --- | --- | --- | --- |
-| az  | __Required__ | String | Name of the AZ this option is regarding |
-| count | __Required__ | Integer | Number of instances created in that AZ. Total count of all AZs must match the node pool count|
-
-## tags Options
 
 | Key Name | Required | Type | Description|
 | --- | --- | --- | --- |
