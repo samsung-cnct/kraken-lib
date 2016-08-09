@@ -4,20 +4,11 @@
 ## Root Options
 | Key Name | Required | Type | Description|
 | --- | --- | --- | --- |
-| azs | __Required__ | Object Array | Indicates what availability zone we are addressing |
+| subnet | __Required__ | String Array | Which subnets to span (defined in top level providerConfig) |
 | type | __Required__ | String | String indicating machine type (m3.medium, etc.) |
 | tags | Optional | Object Array |  Array of tags to apply to node. Note that 'Name' is forced to value of resourcePrefix + pool name. |
 | storage | Required | Object Array | Array of storage volume specs.|
 
-
-## azs Options
-
-| Key Name | Required | Type | Description|
-| --- | --- | --- | --- |
-| az  | __Required__ | String | Name of the AZ this option is regarding |
-| count | __Required__ | Integer | Number of instances created in that AZ. Total count of all AZs must match the node pool count|
-
-## tags Options
 
 | Key Name | Required | Type | Description|
 | --- | --- | --- | --- |
@@ -28,15 +19,21 @@
 
 | Key Name | Required | Type | Description|
 | --- | --- | --- | --- |
-| type  | __Required__ | String | Storage volume type. root (only one supported), ebs or ephemeral |
-| volume | __Required__ | String | The type of volume. Can be "standard", "gp2", or "io1". Only supported by root and ebs volumes |
-| size | __Required__ | Integer | Size of volume in gigabytes. Only supported by root and ebs volumes. |
-| delete | Optional | Bool | Delete volume on instance termination. Defaults to false |
+| type  | __Required__ | String | Storage volume type. root_block_device (only one supported), ebs_block_device or ephemeral_block_device |
+| opts  | __Required__ | Object | Storage options |
+
+## storage.opts Options
+
+| Key Name | Required | Type | Description|
+| --- | --- | --- | --- |
+| volume_type | __Required__ | String | The type of volume. Can be "standard", "gp2", or "io1". Only supported by root and ebs volumes |
+| volume_size | __Required__ | Integer | Size of volume in gigabytes. Only supported by root and ebs volumes. |
+| delete_on_termination | Optional | Bool | Delete volume on instance termination. Defaults to false |
 | iops | Optional | Integer | The amount of provisioned IOPS. This must be set with a volume of "io1". Only supported by root and ebs volumes |
-| snapshotId | Optional | String | The Snapshot ID to mount. Only supported by ebs volumes |
+| snapshot_id | Optional | String | The Snapshot ID to mount. Only supported by ebs volumes |
 | encrypted | Optional | Bool | Enables EBS encryption on the volume. Cannot be used with snapshotId. Only supported by ebs volumes. Defaults to false |
-| deviceName | Optional | String | The name of the device to mount. Supported by ebs and ephemeral only. |
-| virtualName | Optional | String | The [Instance Store Device](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/InstanceStorage.html#InstanceStoreDeviceNames) Name (e.g. "ephemeral0") |
+| device_name | Optional | String | The name of the device to mount. Supported by ebs and ephemeral only. |
+| virtual_name | Optional | String | The [Instance Store Device](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/InstanceStorage.html#InstanceStoreDeviceNames) Name (e.g. "ephemeral0") |
 
 
 # Example
@@ -58,24 +55,27 @@ nodepool:
       tags:
         -
           key: comments
-          value: "bow down before your master"
+          value: "bleep bloop, I'm a cluster master"
       storage:
         -
-          type: root
-          volume: gp2
-          size: 10
-          delete: false
+          type: root_block_device
+          opts:
+            volume_type: gp2
+            volume_size: 10
+            delete_on_termination: false
         -
-          type: ebs
-          deviceName: sdf
-          volume: io1
-          size: 100
-          iops: 5000
-          delete: false
-          snapshotId:
-          encrypted: true
+          type: ebs_block_device
+          opts:
+            device_name: sdf
+            volume_type: io1
+            volume_size: 100
+            iops: 5000
+            delete_on_termination: false
+            snapshot_id:
+            encrypted: true
         -
-          type: ephemeral
-          deviceName: sdb
-          virtualName: ephemeral0
+          type: ephemeral_block_device
+          opts:
+            device_name: sdb
+            virtual_name: ephemeral0
 ```

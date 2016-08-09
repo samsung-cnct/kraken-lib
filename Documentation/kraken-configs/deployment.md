@@ -15,7 +15,6 @@ The snippet configuration for deployments depends on the provider.
 | providerConfig | __Required__ | Object | [Provider](deployments/README.md) - specific configuration section |
 | master | __Required__ | Object | [Master](master.md) - specific configuration section |
 | node | __Required__ | Object | [Nodes](nodes.md) - specific configuration section |
-| apiServer | __Required__ | Object | [API Server](apiserver.md) - specific configuration section |
 | clusterServices | __Required__ | Object | [Cluster services](clusterservices.md) - specific configuration section |
 | etcd | __Required__ | Object | [etcd](nodes.md) - specific configuration section |
 

@@ -1,0 +1,458 @@
+{% set comma = joiner(",") %}
+
+# provider configuration
+provider "aws" {
+  access_key  = "{{kraken_config.providerConfig.authentication.accessKey}}"
+  secret_key  = "{{kraken_config.providerConfig.authentication.accessSecret}}"
+  shared_credentials_file = "{{kraken_config.providerConfig.authentication.credentialsFile}}"
+  profile     = "{{kraken_config.providerConfig.authentication.credentialsProfile}}"
+  region      = "{{kraken_config.providerConfig.region}}"
+  max_retries = "10"
+}
+
+# AWS VPC block
+resource "aws_vpc" "vpc" {
+  cidr_block           = "{{kraken_config.providerConfig.vpc}}"
+  instance_tenancy     = "default"
+  enable_dns_support   = true
+  enable_dns_hostnames = true
+
+  tags {
+    Name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_vpc"
+  }
+}
+
+# DHCP options set
+resource "aws_vpc_dhcp_options" "vpc_dhcp" {
+  domain_name         = "{{kraken_config.providerConfig.region}}.compute.internal"
+  domain_name_servers = ["AmazonProvidedDNS"]
+
+  tags {
+    Name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_dhcp"
+  }
+}
+
+# DHCP association
+resource "aws_vpc_dhcp_options_association" "vpc_dhcp_association" {
+  vpc_id          = "${aws_vpc.vpc.id}"
+  dhcp_options_id = "${aws_vpc_dhcp_options.vpc_dhcp.id}"
+}
+
+# AWS internet gateway
+resource "aws_internet_gateway" "vpc_gateway" {
+  vpc_id = "${aws_vpc.vpc.id}"
+
+  tags {
+    Name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_gateway"
+  }
+}
+
+# Route table
+resource "aws_route_table" "vpc_rt" {
+  vpc_id = "${aws_vpc.vpc.id}"
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = "${aws_internet_gateway.vpc_gateway.id}"
+  }
+
+  tags {
+    Name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_routetable"
+  }
+}
+
+# VPC ACL
+resource "aws_network_acl" "vpc_acl" {
+  vpc_id = "${aws_vpc.vpc.id}"
+
+{% for egress in kraken_config.providerConfig.egressAcl %}
+  egress {
+    {% for k,v in egress.iteritems() %}
+    {{k}} = {{v}}
+    {% endfor %}
+  }
+{% endfor %}
+
+{% for ingress in kraken_config.providerConfig.ingressAcl %}
+  ingress {
+    {% for k,v in ingress.iteritems() %}
+    {{k}} = {{v}}
+    {% endfor %}
+  }
+{% endfor %}
+
+  tags {
+    Name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_acl"
+  }
+}
+
+# all defined keypairs
+{% for keypair in kraken_config.keypair %}
+resource "aws_key_pair" "{{keypair.name}}" {
+  key_name   = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{keypair.name}}"
+{% if keypair.publickey is defined  %}
+  public_key = "{{keypair.publickey}}"
+{% elif keypair.publickeyFile is defined %}
+  public_key = "${file({{keypair.publickeyFile}})}"
+{% endif %}
+}
+{% endfor %}
+
+# all defined subnets
+{% for subnet in kraken_config.providerConfig.subnet %}
+resource "aws_subnet" "vpc_subnet_{{subnet.name}}" {
+  vpc_id                  = "${aws_vpc.vpc.id}"
+  cidr_block              = "{{subnet.cidr}}"
+  availability_zone       = "{{subnet.az}}"
+  map_public_ip_on_launch = true
+
+  tags {
+    Name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_subnet"
+  }
+}
+{% endfor %}
+
+
+{% for subnet in kraken_config.providerConfig.subnet %}
+resource "aws_route_table_association" "vpc_subnet_asg_rt_association_{{subnet.name}}" {
+  subnet_id      = "${aws_subnet.vpc_subnet_{{subnet}}.id}"
+  route_table_id = "${aws_route_table.vpc_rt.id}"
+}
+{% endfor %}
+
+resource "aws_security_group" "vpc_kubernetes_secgroup" {
+  name        = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_secgroup"
+  description = "Security group for {{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}} cluster"
+  vpc_id      = "${aws_vpc.vpc.id}"
+
+  {% for ingress in kraken_config.providerConfig.ingressSecurity %}
+  ingress {
+    {% for k,v in ingress.iteritems() %}
+    {{k}} = {{v}}
+    {% endfor %}
+  }
+  {% endfor %}
+
+  # intra-group all ports / all protocols
+  ingress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    self            = true
+  }
+
+  # inbound all ports / all protocols from the vpc's default secgroup
+  ingress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    security_groups = ["${aws_vpc.vpc.default_security_group_id}"]
+  }
+
+  {% for ingress in kraken_config.providerConfig.egressSecurity %}
+  egress {
+    {% for k,v in egress.iteritems() %}
+    {{k}} = {{v}}
+    {% endfor %}
+  }
+  {% endfor %}
+}
+
+{% for etcd in kraken_config.etcd %}
+resource "aws_security_group" "vpc_etcd_{{etcd.nodepool.name}}_secgroup" {
+  name        = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_secgroup"
+  description = "Security group for {{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}} etcd clusters"
+  vpc_id      = "${aws_vpc.vpc.id}"
+
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Allow etcd peers to communicate, include etcd proxies
+  {% for peerPort in etcd.peerPorts %}
+  ingress {
+    from_port = {{peerPort}}
+    to_port = {{peerPorts}}
+    protocol = "tcp"
+    cidr_blocks = ["{{kraken_config.providerConfig.vpc}}"]
+  }
+  {% endfor %}
+
+  # Allow etcd clients to communicate
+  {% for clientPort in etcd.clientPorts %}
+  ingress {
+    from_port = {{clientPort}}
+    to_port = {{clientPort}}
+    protocol = "tcp"
+    cidr_blocks = ["{{kraken_config.providerConfig.vpc}}"]
+  }
+  {% endfor %}
+
+  # Allow SSH
+  ingress {
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    self = true
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+{% endfor %}
+
+# information on CoreOS AMIs
+resource "coreosbox_ami" "latest_ami" {
+  channel        = "{{kraken_config.coreos.channel}}"
+  virtualization = "hvm"
+  region         = "{{kraken_config.providerConfig.region}}"
+  version        = "{{kraken_config.coreos.version}}"
+}
+
+# Launch configurations for all etcd clusters
+{% for etcd in kraken_config.etcd %}
+resource "aws_launch_configuration" "{{etcd.nodepool.name}}_launch_config" {
+  name                        = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{etcd.nodepool.name}}_launch_config"
+  image_id                    = "${coreosbox_ami.latest_ami.box_string}"
+  key_name                    = "${aws_key_pair.{{etcd.nodepool.keypair.name}}.key_name}"
+  instance_type               = "{{etcd.nodepool.providerConfig.type}}"
+  security_groups             = ["${aws_security_group.vpc_etcd_{{etcd.nodepool.name}}_secgroup.id}"]
+  associate_public_ip_address = true
+  #TODO
+  user_data                   = ""
+
+  # storage 
+  {% for storage in etcd.nodepool.storage %} 
+  {{storage.type}} {
+    {% for k,v in storage.iteritems() %}
+    {{k}} = {{v}}
+    {% endfor %}
+  }
+  {% endfor %}
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+{% endfor %}
+
+# Autoscaling groups for all etcd clusters
+{% for etcd in kraken_config.etcd %}
+resource "aws_autoscaling_group" "{{etcd.nodepool.name}}_nodes" {
+  name                      = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{etcd.nodepool.name}}_asg"
+  vpc_zone_identifier       = [{% for subnet in etcd.nodepool.providerConfig.subnet %}{{ comma() }}"${aws_subnet.vpc_subnet_{{subnet}}.id}"{% endfor %}]
+  launch_configuration      = "${aws_launch_configuration.{{etcd.nodepool.name}}_launch_config.name}"
+  wait_for_capacity_timeout = "0"
+  force_delete              = true
+  health_check_grace_period = "30"
+  max_size                  = "{{etcd.nodepool.count}}"
+  min_size                  = "{{etcd.nodepool.count}}"
+  desired_capacity          = "{{etcd.nodepool.count}}"
+  health_check_type         = "EC2"
+
+  tag {
+    key                 = "Name"
+    value               = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{etcd.nodepool.name}}_node-autoscaled"
+    propagate_at_launch = true
+  }
+
+  {% for tag in etcd.nodepool.providerConfig.tags %}
+  tag {
+    key                 = "{{tag.key}}"
+    value               = "{{tag.value}}"
+    propagate_at_launch = true
+  }
+  {% endfor %}
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+{% endfor %}
+
+# Launch configuration for master
+resource "aws_launch_configuration" "master_launch_config" {
+  name                        = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_master_launch_config"
+  image_id                    = "${coreosbox_ami.latest_ami.box_string}"
+  key_name                    = "${aws_key_pair.{{kraken_config.master.nodepool.keypair.name}}.key_name}"
+  instance_type               = "{{kraken_config.master.nodepool.providerConfig.type}}"
+  security_groups             = ["${aws_security_group.vpc_kubernetes_secgroup.id}"]
+  associate_public_ip_address = true
+  #TODO
+  user_data                   = ""
+
+  # storage 
+  {% for storage in kraken_config.master.nodepool.storage %}
+  {{storage.type}} {
+    {% for k,v in storage.iteritems() %}
+    {{k}} = {{v}}
+    {% endfor %}
+  }
+  {% endfor %}
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# if masters are load-balanced with a cloud loadbalancer, we need to define an ELB and a IAM cert to use for SSL
+{% if kraken_config.apiServer.loadbalancer == 'cloud'  %}
+
+resource "aws_iam_server_certificate" "master_cert" {
+  name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_apiserver_cert"
+  
+  #TODO 
+  certificate_body = "${file("TODO")}"
+  private_key = "${file("TODO")}"
+}
+
+resource "aws_elb" "master_elb" {
+  name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_master_elb"
+  cross_zone_load_balancing = true
+  subnets = [{% for subnet in kraken_config.master.nodepool.providerConfig.subnet %}{{ comma() }}"${aws_subnet.vpc_subnet_{{subnet}}.id}"{% endfor %}]
+
+  listener {
+    instance_port = 443
+    instance_protocol = "ssl"
+    lb_port = 443
+    lb_protocol = "ssl"
+
+    # TODO
+    ssl_certificate_id = "${aws_iam_server_certificate.master_cert.arn}"
+  }
+
+  health_check {
+    healthy_threshold = 2
+    unhealthy_threshold = 2
+    timeout = 5
+    target = "SSL:443"
+    interval = 30
+  }
+
+  tags {
+    Name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_master_elb"
+  }
+}
+{% endif %} 
+
+# Autoscaling group for master. 
+resource "aws_autoscaling_group" "master_nodes" {
+  name                      = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_master_asg"
+  vpc_zone_identifier       = [{% for subnet in kraken_config.master.nodepool.providerConfig.subnet %}{{ comma() }}"${aws_subnet.vpc_subnet_{{subnet}}.id}"{% endfor %}]
+  launch_configuration      = "${aws_launch_configuration.master_launch_config.name}"
+  wait_for_capacity_timeout = "0"
+  force_delete              = true
+  health_check_grace_period = "30"
+  max_size                  = "{{kraken_config.master.nodepool.count}}"
+  min_size                  = "{{kraken_config.master.nodepool.count}}"
+  desired_capacity          = "{{kraken_config.master.nodepool.count}}"
+  {% if kraken_config.apiServer.loadbalancer == 'cloud'  %}
+  wait_for_elb_capacity     =  "{{kraken_config.master.nodepool.count}}"
+  load_balancers            = ["${aws_elb.master_elb.name}"]
+  {% endif %}  
+
+  {% if kraken_config.master.loadbalancer == 'cloud'  %}
+  health_check_type         = "ELB"
+  {% else %}
+  health_check_type         = "EC2"
+  {% endif %}
+  
+  tag {
+    key                 = "Name"
+    value               = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_master_node-autoscaled"
+    propagate_at_launch = true
+  }
+
+  {% for tag in kraken_config.master.nodepool.providerConfig.tags %}
+  tag {
+    key                 = "{{tag.key}}"
+    value               = "{{tag.value}}"
+    propagate_at_launch = true
+  }
+  {% endfor %}
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# Launch configurations for all node pools
+{% for node in kraken_config.node %}
+resource "aws_launch_configuration" "{{node.nodepool.name}}_launch_config" {
+  name                        = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{node.nodepool.name}}_launch_config"
+  image_id                    = "${coreosbox_ami.latest_ami.box_string}"
+  key_name                    = "${aws_key_pair.{{node.nodepool.keypair.name}}.key_name}"
+  instance_type               = "{{node.nodepool.providerConfig.type}}"
+  security_groups             = ["${aws_security_group.vpc_kubernetes_secgroup.id}"]
+  associate_public_ip_address = true
+  #TODO
+  user_data                   = ""
+
+  # storage 
+  {% for storage in node.nodepool.storage %} 
+  {{storage.type}} {
+    {% for k,v in storage.iteritems() %}
+    {{k}} = {{v}}
+    {% endfor %}
+  }
+  {% endfor %}
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+{% endfor %}
+
+# Autoscaling groups for all node pools
+{% for node in kraken_config.node %}
+resource "aws_autoscaling_group" "{{node.nodepool.name}}_nodes" {
+  name                      = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{node.nodepool.name}}_asg"
+  vpc_zone_identifier       = [{% for subnet in etcd.nodepool.providerConfig.subnet %}{{ comma() }}"${aws_subnet.vpc_subnet_{{subnet}}.id}"{% endfor %}]
+  launch_configuration      = "${aws_launch_configuration.{{node.nodepool.name}}_launch_config.name}"
+  wait_for_capacity_timeout = "0"
+  force_delete              = true
+  health_check_grace_period = "30"
+  max_size                  = "{{node.nodepool.count}}"
+  min_size                  = "{{node.nodepool.count}}"
+  desired_capacity          = "{{node.nodepool.count}}"
+  health_check_type         = "EC2"
+
+  tag {
+    key                 = "Name"
+    value               = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{node.nodepool.name}}_node-autoscaled"
+    propagate_at_launch = true
+  }
+
+  {% for tag in etcd.nodepool.providerConfig.tags %}
+  tag {
+    key                 = "{{tag.key}}"
+    value               = "{{tag.value}}"
+    propagate_at_launch = true
+  }
+  {% endfor %}
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+{% endfor %}
+
+# A VPC-only route53 zone and record
+resource "aws_route53_zone" "private_zone" {
+   name     = "kraken.io"
+   comment  = "A VPC-only zone for {{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}} kubernetes cluster"
+   vpc_id   = "${aws_vpc.vpc.id}"
+   
+
+   tag {
+    key                 = "Name"
+    value               = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_zone"
+    propagate_at_launch = true
+  }
+}
+

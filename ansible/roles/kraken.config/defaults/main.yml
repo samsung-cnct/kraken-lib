@@ -4,7 +4,7 @@ deployment:
   cluster: krakenCluster
   coreos:
     version: latest
-    channel: beta
+    channel: stable
     rebootStrategy: off
   keypair:
     -
@@ -28,179 +28,175 @@ deployment:
   provider: aws
   providerConfig:
     resourcePrefix: defaults
+    vpc: 10.0.0.0/16
     region: us-west-2
-    subnets:
+    subnet:
       -
+        name: uwswest2a
         az: us-west-2a
         cidr: 10.0.1.0/22
       -
+        name: uwswest2b
         az: us-west-2b
         cidr: 10.0.2.0/22
       -
+        name: uwswest2c
         az: us-west-2c
         cidr: 10.0.3.0/22
+    egressAcl:
+      -
+        protocol: "-1"
+        rule_no: 100
+        action: "allow"
+        cidr_block: "0.0.0.0/0"
+        from_port: 0
+        to_port: 0
+    ingressAcl:
+      -
+        protocol: "-1"
+        rule_no: 100
+        action: "allow"
+        cidr_block: "0.0.0.0/0"
+        from_port: 0
+        to_port: 0
     authentication:
       accessKey:
       accessSecret:
       credentialsFile:
       credentialsProfile:
+    ingressSecurity:
+      - 
+        from_port: 22
+        to_port: 22
+        protocol: "TCP"
+        cidr_blocks: ["0.0.0.0/0"]
+      - 
+        from_port: 8080
+        to_port: 8080
+        protocol: "TCP"
+        cidr_blocks: ["0.0.0.0/0"]
+      - 
+        from_port: 443
+        to_port: 443
+        protocol: "TCP"
+        cidr_blocks: ["0.0.0.0/0"]
+      - 
+        from_port: 8094
+        to_port: 8094
+        protocol: "TCP"
+        cidr_blocks: ["0.0.0.0/0"]
+      - 
+        from_port: 10250
+        to_port: 10250
+        protocol: "TCP"
+        cidr_blocks: ["0.0.0.0/0"]
+      - 
+        from_port: 10251
+        to_port: 10251
+        protocol: "TCP"
+        cidr_blocks: ["0.0.0.0/0"]
+      - 
+        from_port: 10252
+        to_port: 10252
+        protocol: "TCP"
+        cidr_blocks: ["0.0.0.0/0"]
+      - 
+        from_port: 10254
+        to_port: 10254
+        protocol: "TCP"
+        cidr_blocks: ["0.0.0.0/0"]
+      - 
+        from_port: 30000
+        to_port: 32767
+        protocol: "TCP"
+        cidr_blocks: ["0.0.0.0/0"]
+    egressSecurity:
+      - 
+        from_port: 0
+        to_port: 0
+        protocol: "-1"
+        cidr_blocks: ["0.0.0.0/0"]
   nodepool:
     -
       name: etcd
       count: 3
       providerConfig:
         type: m3.xlarge
-        azs:
-          - az: us-west-2a
-            count: 1
-          - az: us-west-2b
-            count: 1
-          - az: us-west-2c
-            count: 1
+        subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
         tags:
           -
             key: comments
             value: "One of three master instances"
         storage:
           -
-            type: root
-            volume: gp2
-            size: 50
-            delete: false
+            type: root_block_device
+            opts:
+              volume_type: gp2
+              volume_size: 50
+              delete_on_termination: false
           -
-            type: ebs
-            deviceName: sdf
-            volume: gp2
-            size: 100
-            delete: true
-            snapshotId:
-            encrypted: false
+            type: ebs_block_device
+            opts:
+              device_name: sdf
+              volume_type: gp2
+              volume_size: 100
+              delete_on_termination: true
+              snapshot_id:
+              encrypted: false
       keypair: krakenTesting
     -
       name: etcdEvents
       count: 3
       providerConfig:
         type: m3.xlarge
-        azs:
-          - az: us-west-2a
-            count: 1
-          - az: us-west-2b
-            count: 1
-          - az: us-west-2c
-            count: 1
+        subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
         tags:
           -
             key: comments
             value: "One of three master instances"
         storage:
           -
-            type: root
-            volume: gp2
-            size: 50
-            delete: false
+            type: root_block_device
+            opts:
+              volume_type: gp2
+              volume_size: 50
+              delete_on_termination: false
           -
-            type: ebs
-            deviceName: sdf
-            volume: gp2
-            size: 100
-            delete: true
-            snapshotId:
-            encrypted: false
+            type: ebs_block_device
+            opts:
+              device_name: sdf
+              volume_type: gp2
+              volume_size: 100
+              delete_on_termination: true
+              snapshot_id:
+              encrypted: false
       keypair: krakenTesting
     -
       name: masterNodes
       count: 3
       providerConfig:
         type: m3.xlarge
-        azs:
-          - az: us-west-2a
-            count: 1
-          - az: us-west-2b
-            count: 1
-          - az: us-west-2c
-            count: 1
+        subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
         tags:
           -
             key: comments
             value: "One of three master instances"
         storage:
           -
-            type: root
-            volume: gp2
-            size: 50
-            delete: false
+            type: root_block_device
+            opts:
+              volume_type: gp2
+              volume_size: 50
+              delete_on_termination: false
           -
-            type: ebs
-            deviceName: sdf
-            volume: gp2
-            size: 100
-            delete: true
-            snapshotId:
-            encrypted: false
-      keypair: krakenTesting
-      kubeConfig: allConfig
-    -
-      name: masterNodes
-      count: 3
-      providerConfig:
-        type: m3.xlarge
-        azs:
-          - az: us-west-2a
-            count: 1
-          - az: us-west-2b
-            count: 1
-          - az: us-west-2c
-            count: 1
-        tags:
-          -
-            key: comments
-            value: "One of three master instances"
-        storage:
-          -
-            type: root
-            volume: gp2
-            size: 50
-            delete: false
-          -
-            type: ebs
-            deviceName: sdf
-            volume: gp2
-            size: 100
-            delete: true
-            snapshotId:
-            encrypted: false
-      keypair: krakenTesting
-      kubeConfig: allConfig
-    -
-      name: apiServers
-      count: 3
-      providerConfig:
-        type: m3.xlarge
-        azs:
-          - az: us-west-2a
-            count: 1
-          - az: us-west-2b
-            count: 1
-          - az: us-west-2c
-            count: 1
-        tags:
-          -
-            key: comments
-            value: "One of three api server instances"
-        storage:
-          -
-            type: root
-            volume: gp2
-            size: 50
-            delete: false
-          -
-            type: ebs
-            deviceName: sdf
-            volume: gp2
-            size: 100
-            delete: true
-            snapshotId:
-            encrypted: false
+            type: ebs_block_device
+            opts:
+              device_name: sdf
+              volume_type: gp2
+              volume_size: 100
+              delete_on_termination: true
+              snapshot_id:
+              encrypted: false
       keypair: krakenTesting
       kubeConfig: allConfig
     -
@@ -209,31 +205,27 @@ deployment:
       keypair: krakenTesting
       providerConfig:
         type: m3.medium
-        azs:
-          - az: us-west-2a
-            count: 30
-          - az: us-west-2b
-            count: 30
-          - az: us-west-2c
-            count: 30
+        subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
         tags:
           -
             key: comments
             value: "One of 90 nodes"
         storage:
           -
-            type: root
-            volume: gp2
-            size: 50
-            delete: false
+            type: root_block_device
+            opts:
+              volume_type: gp2
+              volume_size: 50
+              delete_on_termination: false
           -
-            type: ebs
-            deviceName: sdf
-            volume: gp2
-            size: 100
-            delete: true
-            snapshotId:
-            encrypted: false
+            type: ebs_block_device
+            opts:
+              device_name: sdf
+              volume_type: gp2
+              volume_size: 100
+              delete_on_termination: true
+              snapshot_id:
+              encrypted: false
       kubeConfig: allConfig
     -
       name: specialNodes
@@ -241,37 +233,32 @@ deployment:
       keypair: krakenTesting
       providerConfig:
         type: m3.large
-        azs:
-          - az: us-west-2a
-            count: 3
-          - az: us-west-2b
-            count: 3
-          - az: us-west-2c
-            count: 4
+        subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
         tags:
           -
             key: comments
             value: "One of ten special nodes"
         storage:
           -
-            type: root
-            volume: gp2
-            size: 50
-            delete: false
+            type: root_block_device
+            opts:
+              volume_type: gp2
+              volume_size: 50
+              delete_on_termination: false
           -
-            type: ebs
-            deviceName: sdf
-            volume: gp2
-            size: 100
-            delete: true
-            snapshotId:
-            encrypted: false
+            type: ebs_block_device
+            opts:
+              device_name: sdf
+              volume_type: gp2
+              volume_size: 100
+              delete_on_termination: true
+              snapshot_id:
+              encrypted: false
       kubeConfig: allConfig
   etcd:
     -
       clientPorts: [2379, 4001]
       clusterToken: etcd-cluster-token
-      name: etcd
       nodepool: etcd
       peerPorts: [2380]
       ssl: true
@@ -280,7 +267,6 @@ deployment:
     -
       clientPorts: [2381]
       clusterToken: etcd-events-cluster-token
-      name: etcdEvents
       nodepool: etcdEvents
       peerPorts: [2382]
       ssl: true
@@ -292,9 +278,6 @@ deployment:
   node:
     - nodepool: clusterNodes
     - nodepool: specialNodes
-  apiServer:
-    nodepool: apiServers
-    loadbalancer: cloud
   clusterServices:
     namespaces:
       - kube-system
