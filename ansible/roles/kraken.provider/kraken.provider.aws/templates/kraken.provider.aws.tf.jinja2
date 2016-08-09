@@ -94,7 +94,7 @@ resource "aws_key_pair" "{{keypair.name}}" {
 {% elif keypair.publickeyFile is defined %}
   public_key = "${file({{keypair.publickeyFile}})}"
 {% endif %}
-}  
+}
 {% endfor %}
 
 # all defined subnets
@@ -119,7 +119,7 @@ resource "aws_route_table_association" "vpc_subnet_asg_rt_association_{{subnet.n
 }
 {% endfor %}
 
-resource "aws_security_group" "vpc_secgroup" {
+resource "aws_security_group" "vpc_kubernetes_secgroup" {
   name        = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_secgroup"
   description = "Security group for {{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}} cluster"
   vpc_id      = "${aws_vpc.vpc.id}"
@@ -157,6 +157,51 @@ resource "aws_security_group" "vpc_secgroup" {
   {% endfor %}
 }
 
+
+{% for etcd in kraken_config.etcd %}
+resource "aws_security_group" "vpc_etcd_{{etcd.name}}_secgroup" {
+  name        = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_secgroup"
+  description = "Security group for {{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}} etcd clusters"
+  vpc_id      = "${aws_vpc.vpc.id}"
+
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Allow etcd peers to communicate, include etcd proxies
+  {% for peerPort in etcd.peerPorts %}
+  ingress {
+    from_port = {{peerPort}}
+    to_port = {{peerPorts}}
+    protocol = "tcp"
+    cidr_blocks = ["{{kraken_config.providerConfig.vpc}}"]
+  }
+  {% endfor %}
+
+  # Allow etcd clients to communicate
+  {% for clientPort in etcd.clientPorts %}
+  ingress {
+    from_port = {{clientPort}}
+    to_port = {{clientPort}}
+    protocol = "tcp"
+    cidr_blocks = ["{{kraken_config.providerConfig.vpc}}"]
+  }
+  {% endfor %}
+
+  # Allow SSH
+  ingress {
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    self = true
+  }
+}
+{% endfor %}
+
 resource "coreosbox_ami" "latest_ami" {
   channel        = "{{kraken_config.coreos.channel}}"
   virtualization = "hvm"
@@ -168,7 +213,11 @@ resource "coreosbox_ami" "latest_ami" {
 resource "aws_launch_configuration" "{{etcd.name}}_launch_config" {
   name                        = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{etcd.name}}_launch_config"
   image_id                    = "${coreosbox_ami.latest_ami.box_string}"
-  key_name                    = "{{etcd.nodepool.keypair.}}"
-
+  key_name                    = "${aws_key_pair.{{etcd.nodepool.keypair.name}}.key_name}"
+  instance_type               = "{{etcd.nodepool.providerConfig.type}}"
+  security_groups             = ["${aws_security_group.vpc_etcd_{{etcd.name}}_secgroup.id}"]
+  associate_public_ip_address = true
+  #TODO
+  user_data                   = ""
 }
 {% endfor %}
