@@ -338,6 +338,46 @@ resource "aws_elb" "master_elb" {
     Name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_master_elb"
   }
 }
+{% else %}
+# Launch configuration for master loadbalancer
+resource "aws_launch_configuration" "master_loadbalancer_launch_config" {
+  name                        = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_loadbalancer"
+  image_id                    = "${coreosbox_ami.latest_ami.box_string}"
+  key_name                    = "${aws_key_pair.{{kraken_config.master.nodepool.keypair.name}}.key_name}"
+  instance_type               = "{{kraken_config.master.nodepool.providerConfig.type}}"
+  security_groups             = ["${aws_security_group.vpc_kubernetes_secgroup.id}"]
+  associate_public_ip_address = true
+  #TODO
+  user_data                   = ""
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# Autoscaling group for master loadbalancer. 
+resource "aws_autoscaling_group" "master_loadbalancer_nodes" {
+  name                      = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_master_loadbalancer_asg"
+  vpc_zone_identifier       = [{% for subnet in kraken_config.master.nodepool.providerConfig.subnet %}{{ comma() }}"${aws_subnet.vpc_subnet_{{subnet}}.id}"{% endfor %}]
+  launch_configuration      = "${aws_launch_configuration.master_loadbalancer_launch_config.name}"
+  wait_for_capacity_timeout = "0"
+  force_delete              = true
+  health_check_grace_period = "30"
+  max_size                  = "1"
+  min_size                  = "1"
+  desired_capacity          = "1"
+  health_check_type         = "EC2"
+  
+  tag {
+    key                 = "Name"
+    value               = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_master_loadbalancer"
+    propagate_at_launch = true
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
 {% endif %} 
 
 # Autoscaling group for master. 
