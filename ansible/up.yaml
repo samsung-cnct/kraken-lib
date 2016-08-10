@@ -7,4 +7,5 @@
     - { role: 'roles/kraken.master/kraken.master.selector' }
     - { role: 'roles/kraken.apiserver/kraken.apiserver.selector' }
     - { role: 'roles/kraken.node/kraken.node.selector' }
+    - { role: 'roles/kraken.assembler' }
     - { role: 'roles/kraken.provider/kraken.provider.selector' }
