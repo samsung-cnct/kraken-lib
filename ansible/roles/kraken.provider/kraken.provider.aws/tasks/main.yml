@@ -1,3 +1,6 @@
 ---
 - name: Display provider_config
   debug: var=kraken_config.providerConfig
+
+- include: aws-action.yaml
+- include: setup-inventory.yaml

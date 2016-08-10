@@ -447,7 +447,6 @@ resource "aws_route53_zone" "private_zone" {
    name     = "kraken.io"
    comment  = "A VPC-only zone for {{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}} kubernetes cluster"
    vpc_id   = "${aws_vpc.vpc.id}"
-   
 
    tag {
     key                 = "Name"

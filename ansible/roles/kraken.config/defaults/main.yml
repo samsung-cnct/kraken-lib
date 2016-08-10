@@ -1,4 +1,5 @@
 ---
+kraken_action: up
 config_file: "{{ config_file | default('~/.kraken/config.yml' | expanduser) }}"
 deployment:
   cluster: krakenCluster
@@ -119,9 +120,9 @@ deployment:
   nodepool:
     -
       name: etcd
-      count: 3
+      count: 2
       providerConfig:
-        type: m3.xlarge
+        type: m3.medium
         subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
         tags:
           -
@@ -146,9 +147,9 @@ deployment:
       keypair: krakenTesting
     -
       name: etcdEvents
-      count: 3
+      count: 2
       providerConfig:
-        type: m3.xlarge
+        type: m3.medium
         subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
         tags:
           -
@@ -175,7 +176,7 @@ deployment:
       name: masterNodes
       count: 3
       providerConfig:
-        type: m3.xlarge
+        type: m3.medium
         subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
         tags:
           -
@@ -201,7 +202,7 @@ deployment:
       kubeConfig: allConfig
     -
       name: clusterNodes
-      count: 90
+      count: 3
       keypair: krakenTesting
       providerConfig:
         type: m3.medium
@@ -229,10 +230,10 @@ deployment:
       kubeConfig: allConfig
     -
       name: specialNodes
-      count: 10
+      count: 2
       keypair: krakenTesting
       providerConfig:
-        type: m3.large
+        type: m3.medium
         subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
         tags:
           -
