@@ -1,0 +1,5 @@
+---
+- hosts: localhost
+  roles:
+    - { role: 'kraken.config', config_file: "{{ config_path | default('') }}" }
+    - { role: 'roles/kraken.provider/kraken.provider.selector' }
