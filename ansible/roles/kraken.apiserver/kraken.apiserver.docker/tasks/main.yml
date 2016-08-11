@@ -1,3 +1,0 @@
----
-- name: Display docker apiServer config
-  debug: var=kraken_config.apiServer

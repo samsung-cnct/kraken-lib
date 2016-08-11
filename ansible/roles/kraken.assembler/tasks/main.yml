@@ -1,0 +1,5 @@
+---
+- name: Make sure generated folder for cloud init snippets is there
+  file: >
+    path="{{playbook_dir}}/../generated/configs"
+    state=directory

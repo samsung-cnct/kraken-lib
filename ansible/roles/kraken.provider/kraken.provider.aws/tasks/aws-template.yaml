@@ -1,0 +1,9 @@
+---
+- name: Create terraform folder
+  file: >
+    path="{{playbook_dir}}/../generated"
+    state=directory
+
+- name: Generate kraken.provider.aws.tf file
+  template: src=kraken.provider.aws.tf.jinja2
+            dest="{{playbook_dir}}/../generated/kraken.provider.aws.tf"

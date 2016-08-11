@@ -60,8 +60,6 @@ The snippet configuration for deployments depends on the provider.
       # master config
     node:
       # node config
-    apiServer:
-      # api server config
     clusterServices:
       # cluster services config
     etcd:

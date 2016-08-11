@@ -8,7 +8,7 @@ provider "aws" {
   profile     = "{{kraken_config.providerConfig.authentication.credentialsProfile}}"
   region      = "{{kraken_config.providerConfig.region}}"
   max_retries = "10"
-}
+} 
 
 # AWS VPC block
 resource "aws_vpc" "vpc" {
@@ -22,9 +22,22 @@ resource "aws_vpc" "vpc" {
   }
 }
 
-# DHCP options set
+# A VPC-only route53 zone and record
+resource "aws_route53_zone" "private_zone" {
+   name     = "{{kraken_config.cluster}}.internal"
+   comment  = "A VPC-only zone for {{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}} kubernetes cluster"
+   vpc_id   = "${aws_vpc.vpc.id}"
+
+   tag {
+    key                 = "Name"
+    value               = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_zone"
+    propagate_at_launch = true
+  }
+}
+
+# DHCP options sets
 resource "aws_vpc_dhcp_options" "vpc_dhcp" {
-  domain_name         = "{{kraken_config.providerConfig.region}}.compute.internal"
+  domain_name         = "{{kraken_config.cluster}}.internal"
   domain_name_servers = ["AmazonProvidedDNS"]
 
   tags {
@@ -301,10 +314,10 @@ resource "aws_launch_configuration" "master_launch_config" {
 }
 
 # if masters are load-balanced with a cloud loadbalancer, we need to define an ELB and a IAM cert to use for SSL
-{% if kraken_config.apiServer.loadbalancer == 'cloud'  %}
+{% if kraken_config.master.loadbalancer == 'cloud'  %}
 
 resource "aws_iam_server_certificate" "master_cert" {
-  name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_apiserver_cert"
+  name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_master_cert"
   
   #TODO 
   certificate_body = "${file("TODO")}"
@@ -338,6 +351,46 @@ resource "aws_elb" "master_elb" {
     Name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_master_elb"
   }
 }
+{% else %}
+# Launch configuration for master loadbalancer
+resource "aws_launch_configuration" "master_loadbalancer_launch_config" {
+  name                        = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_loadbalancer"
+  image_id                    = "${coreosbox_ami.latest_ami.box_string}"
+  key_name                    = "${aws_key_pair.{{kraken_config.master.nodepool.keypair.name}}.key_name}"
+  instance_type               = "{{kraken_config.master.nodepool.providerConfig.type}}"
+  security_groups             = ["${aws_security_group.vpc_kubernetes_secgroup.id}"]
+  associate_public_ip_address = true
+  #TODO
+  user_data                   = ""
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# Autoscaling group for master loadbalancer. 
+resource "aws_autoscaling_group" "master_loadbalancer_nodes" {
+  name                      = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_master_loadbalancer_asg"
+  vpc_zone_identifier       = [{% for subnet in kraken_config.master.nodepool.providerConfig.subnet %}{{ comma() }}"${aws_subnet.vpc_subnet_{{subnet}}.id}"{% endfor %}]
+  launch_configuration      = "${aws_launch_configuration.master_loadbalancer_launch_config.name}"
+  wait_for_capacity_timeout = "0"
+  force_delete              = true
+  health_check_grace_period = "30"
+  max_size                  = "1"
+  min_size                  = "1"
+  desired_capacity          = "1"
+  health_check_type         = "EC2"
+  
+  tag {
+    key                 = "Name"
+    value               = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_master_loadbalancer"
+    propagate_at_launch = true
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
 {% endif %} 
 
 # Autoscaling group for master. 
@@ -351,7 +404,7 @@ resource "aws_autoscaling_group" "master_nodes" {
   max_size                  = "{{kraken_config.master.nodepool.count}}"
   min_size                  = "{{kraken_config.master.nodepool.count}}"
   desired_capacity          = "{{kraken_config.master.nodepool.count}}"
-  {% if kraken_config.apiServer.loadbalancer == 'cloud'  %}
+  {% if kraken_config.master.loadbalancer == 'cloud'  %}
   wait_for_elb_capacity     =  "{{kraken_config.master.nodepool.count}}"
   load_balancers            = ["${aws_elb.master_elb.name}"]
   {% endif %}  
@@ -441,18 +494,4 @@ resource "aws_autoscaling_group" "{{node.nodepool.name}}_nodes" {
   }
 }
 {% endfor %}
-
-# A VPC-only route53 zone and record
-resource "aws_route53_zone" "private_zone" {
-   name     = "kraken.io"
-   comment  = "A VPC-only zone for {{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}} kubernetes cluster"
-   vpc_id   = "${aws_vpc.vpc.id}"
-   
-
-   tag {
-    key                 = "Name"
-    value               = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_zone"
-    propagate_at_launch = true
-  }
-}
 

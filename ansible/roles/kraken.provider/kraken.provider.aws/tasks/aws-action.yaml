@@ -1,0 +1,10 @@
+---
+- name: Run cluster {{kraken_action}}
+  shell: >
+    terraform apply -input=false {{playbook_dir}}/../generated/ chdir={{playbook_dir}}/../generated/
+  when: kraken_action == 'up'
+
+- name: Run terraform destroy
+  shell: >
+    terraform destroy -input=false -force {{playbook_dir}}/../generated/ chdir={{playbook_dir}}/../generated/
+  when: kraken_action == 'down'
