@@ -24,7 +24,7 @@ resource "aws_vpc" "vpc" {
 
 # A VPC-only route53 zone and record
 resource "aws_route53_zone" "private_zone" {
-   name     = "kraken.internal"
+   name     = "{{kraken_config.cluster}}.internal"
    comment  = "A VPC-only zone for {{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}} kubernetes cluster"
    vpc_id   = "${aws_vpc.vpc.id}"
 
@@ -37,7 +37,7 @@ resource "aws_route53_zone" "private_zone" {
 
 # DHCP options sets
 resource "aws_vpc_dhcp_options" "vpc_dhcp" {
-  domain_name         = "kraken.internal"
+  domain_name         = "{{kraken_config.cluster}}.internal"
   domain_name_servers = ["AmazonProvidedDNS"]
 
   tags {
@@ -314,10 +314,10 @@ resource "aws_launch_configuration" "master_launch_config" {
 }
 
 # if masters are load-balanced with a cloud loadbalancer, we need to define an ELB and a IAM cert to use for SSL
-{% if kraken_config.apiServer.loadbalancer == 'cloud'  %}
+{% if kraken_config.master.loadbalancer == 'cloud'  %}
 
 resource "aws_iam_server_certificate" "master_cert" {
-  name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_apiserver_cert"
+  name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_master_cert"
   
   #TODO 
   certificate_body = "${file("TODO")}"
@@ -404,7 +404,7 @@ resource "aws_autoscaling_group" "master_nodes" {
   max_size                  = "{{kraken_config.master.nodepool.count}}"
   min_size                  = "{{kraken_config.master.nodepool.count}}"
   desired_capacity          = "{{kraken_config.master.nodepool.count}}"
-  {% if kraken_config.apiServer.loadbalancer == 'cloud'  %}
+  {% if kraken_config.master.loadbalancer == 'cloud'  %}
   wait_for_elb_capacity     =  "{{kraken_config.master.nodepool.count}}"
   load_balancers            = ["${aws_elb.master_elb.name}"]
   {% endif %}  
