@@ -7,3 +7,7 @@
 - name: Generate kraken.provider.aws.tf file
   template: src=kraken.provider.aws.tf.jinja2
             dest="{{playbook_dir}}/../generated/kraken.provider.aws.tf"
+
+- name: Generate AWS lambda source archive used by the tf template
+  shell:>
+    zip {{playbook_dir}}/../generated/lambda-sns-etcd-service-discovery.zip {{ role_path }}/files/lambda-sns-etcd-service-discovery.py

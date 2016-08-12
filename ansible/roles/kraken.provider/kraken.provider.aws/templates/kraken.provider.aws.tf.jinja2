@@ -295,18 +295,10 @@ data "aws_iam_policy_document" "iam_lambda_etcd_role_policy_document" {
     effect = "Allow"
     actions = [
       "ec2:Describe*",
-      "autoscaling:CompleteLifecycleAction",
+      "ec2:CreateTags",
+      "autoscaling:Describe*",
+      "route53:*"
       
-    ]
-    resources = [
-      "*",
-    ]
-  }
-
-  statement {
-    effect = "Allow"
-    actions = [
-      "route53:*",
     ]
     resources = [
       "*",
@@ -353,17 +345,6 @@ resource "aws_iam_role" "iam_lambda_sns_role" {
 EOF
 }
 
-# SNS resources for etcd clusters
-{% for etcd in kraken_config.etcd %}
-resource "aws_sns_topic" "{{etcd.nodepool.name}}_up_events" {
-  name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{etcd.nodepool.name}}_asg_up"
-}
-
-resource "aws_sns_topic" "{{etcd.nodepool.name}}_down_events" {
-  name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{etcd.nodepool.name}}_asg_down"
-}
-{% endfor %}
-
 # IAM policy document for sns events publishing
 data "aws_iam_policy_document" "iam_sns_etcd_role_policy_document" {
   statement {
@@ -372,10 +353,7 @@ data "aws_iam_policy_document" "iam_sns_etcd_role_policy_document" {
       "sns:Publish",      
     ]
     resources = [
-{% for etcd in kraken_config.etcd %}
-      "${aws_sns_topic.{{etcd.nodepool.name}}_up_events.arn}",
-      "${aws_sns_topic.{{etcd.nodepool.name}}_down_events.arn}",
-{% endfor %}
+      "${aws_sns_topic.etcd_scaling_events.arn}"
     ]
   }
 }
@@ -385,6 +363,34 @@ resource "aws_iam_role_policy" "iam_sns_etcd_role_policy" {
   name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_iam_lambda_etcd_role_policy"
   role = "${aws_iam_role.iam_lambda_sns_role.id}"
   policy = "${data.aws_iam_policy_document.iam_sns_etcd_role_policy_document.json}"
+}
+
+# SNS resources for etcd clusters
+resource "aws_sns_topic" "etcd_scaling_events" {
+  name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{etcd.nodepool.name}}_etcd_events"
+}
+
+# Lambda function that will setup all dns records for etcd discovery
+resource "aws_lambda_function" "etcd_lambda" {
+  filename = "lambda-sns-etcd-service-discovery.zip"
+  function_name = "lambda_function_name"
+  role = "${aws_iam_role.iam_lambda_etcd_role.arn}"
+  handler = "lambda-sns-etcd-service-discovery.handler"
+  timeout = 600
+}
+
+resource "aws_lambda_permission" "etcd_scaling_events_lambda_permission" {
+  statement_id = "AllowExecutionFromSNS"
+  action = "lambda:InvokeFunction"
+  function_name = "${aws_lambda_function.etcd_lambda.arn}"
+  principal = "sns.amazonaws.com"
+  source_arn = "${aws_sns_topic.etcd_scaling_events.arn}"
+}
+
+resource "aws_sns_topic_subscription" "etcd_scaling_events_lambda_subscription" {
+  topic_arn = "${aws_sns_topic.etcd_scaling_events.arn}"
+  protocol  = "lambda"
+  endpoint  = "${aws_lambda_function.etcd_lambda.arn}"
 }
 
 # Autoscaling groups for all etcd clusters
@@ -419,27 +425,20 @@ resource "aws_autoscaling_group" "{{etcd.nodepool.name}}_nodes" {
     create_before_destroy = true
   }
 }
-
-resource "aws_autoscaling_lifecycle_hook" "{{etcd.nodepool.name}}_up_hook" {
-    name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{etcd.nodepool.name}}_asg_up_hook"
-    autoscaling_group_name = "${aws_autoscaling_group.{{etcd.nodepool.name}}_nodes.name}"
-    default_result = "CONTINUE"
-    heartbeat_timeout = 2000
-    lifecycle_transition = "autoscaling:EC2_INSTANCE_LAUNCHING"
-    notification_target_arn = "${aws_sns_topic.{{etcd.nodepool.name}}_up_events.arn}"
-    role_arn = "${aws_iam_role.iam_lambda_sns_role.arn}"
-}
-
-resource "aws_autoscaling_lifecycle_hook" "{{etcd.nodepool.name}}_down_hook" {
-    name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{etcd.nodepool.name}}_asg_down_hook"
-    autoscaling_group_name = "${aws_autoscaling_group.{{etcd.nodepool.name}}_nodes.name}"
-    default_result = "CONTINUE"
-    heartbeat_timeout = 2000
-    lifecycle_transition = "autoscaling:EC2_INSTANCE_TERMINATING"
-    notification_target_arn = "${aws_sns_topic.{{etcd.nodepool.name}}_down_events.arn}"
-    role_arn = "${aws_iam_role.iam_lambda_sns_role.arn}"
-}
 {% endfor %}
+
+resource "aws_autoscaling_notification" "etcd_notifications" {
+  group_names = [
+{% for etcd in kraken_config.etcd %}
+    "${aws_autoscaling_group.{{etcd.nodepool.name}}_nodes.name",
+{% endfor %}
+  ]
+  notifications  = [
+    "autoscaling:EC2_INSTANCE_LAUNCH", 
+    "autoscaling:EC2_INSTANCE_TERMINATE"
+  ]
+  topic_arn = "${aws_sns_topic.etcd_scaling_events.arn}"
+}
 
 
 # Launch configuration for master

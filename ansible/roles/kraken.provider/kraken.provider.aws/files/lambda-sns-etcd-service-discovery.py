@@ -70,9 +70,11 @@ class UpdaterClient(object):
             zone = route53.get_hosted_zone(Id=domain.zone)
             private = zone['HostedZone']['Config']['PrivateZone']
             name = '{}.'.format(self.instance_id)
+            
             if domain.prefix:
                 name = '{}{}.'.format(name, prefix)
             name = '{}{}.'.format(name, domain.name)
+            
             record_sets = route53.list_resource_record_sets(
                 HostedZoneId=domain.zone,
                 StartRecordName=name
@@ -99,23 +101,40 @@ class UpdaterClient(object):
                     ]
                 }
             yield domain.zone, record
+    
+    def srvs(self, action):
+        route53 = self.boto('route53')
+        for domain in self.domains():
+            zone = route53.get_hosted_zone(Id=domain.zone)
+            private = zone['HostedZone']['Config']['PrivateZone']
+            
+            if domain.srv:
+                srvValue = '{}.'.format(self.instance_id)
+                if domain.prefix:
+                    srvValue = '{}{}.'.format(srvValue, prefix)
+                srvValue = '0 0 {} {}{}'.format(domain.srvport, srvValue, domain.name)
+                srvName = '{}.'.format(domain.srv)
 
-    def update_tags(self):
-        ec2 = self.boto('ec2')
-        tags = []
-        for index, domain in enumerate(self.domains()):
-            server_name = '{}.{}'.format(self.instance_id, domain.name)
-            zone_tag = {
-                'Key': 'ZoneConfig-{}'.format(index),
-                'Value': ':'.join([domain.zone, domain.name, server_name])
-            }
-            tags.append(zone_tag)
-        name_tag = {'Key': 'Name', 'Value': tags[0]['Value'].split(':')[2]}
-        tags.append(name_tag)
-        kwargs = {'Resources': [self.instance_id], 'Tags': tags}
-        print('Updating EC2 instance tags: {}'.format(kwargs))
-        if not self.dry_run:
-            ec2.create_tags(**kwargs)
+                record_sets = route53.list_resource_record_sets(
+                    HostedZoneId=domain.zone,
+                    StartRecordName=srvName
+                )['ResourceRecordSets']
+                record = [x for x in record_sets if x['Type'] == 'SRV' and x['Name'] == srvName]
+
+                if record:
+                    record = record[0]
+                else:
+                    record = {
+                        'Name': srvName,
+                        'Type': 'SRV',
+                        'TTL': self.ttl,
+                        'ResourceRecords': []
+                    }
+                
+                record['ResourceRecords'][:] = [value for value in record['ResourceRecords'] if value.get('Value') != srvValue]
+                if action == 'UPSERT':
+                    record['ResourceRecords'].append({'Value':srvValue})
+                yield domain.zone, record
 
     def update_records(self, action):
         route53 = self.boto('route53')
@@ -136,6 +155,24 @@ class UpdaterClient(object):
             if not self.dry_run:
                 route53.change_resource_record_sets(**update)
 
+        # always 'upsert' for SRV records
+        for zone, record in self.srvs(action):
+            update = {
+                'HostedZoneId': zone,
+                'ChangeBatch': {
+                    'Comment': 'Automatically updated Route53 Record',
+                    'Changes': [
+                        {
+                            'Action': 'UPSERT',
+                            'ResourceRecordSet': record
+                        }
+                    ]
+                }
+            }
+            print('Executing Route53 update: {}'.format(update))
+            if not self.dry_run:
+                route53.change_resource_record_sets(**update)
+
 
 def handler(event, context):
 
@@ -145,7 +182,6 @@ def handler(event, context):
 
     if client.event_type == 'autoscaling:EC2_INSTANCE_LAUNCH':
         print('Launch event: {}'.format(client.event_type))
-        client.update_tags()
         client.update_records(action='UPSERT')
         print(context.get_remaining_time_in_millis())
 
