@@ -35,9 +35,24 @@ resource "aws_route53_zone" "private_zone" {
   }
 }
 
+# domains for etcd clusters
+{% for etcd in kraken_config.etcd %}
+resource "aws_route53_zone" "private_zone_{{etcd.name}}" {
+   name     = "{{etcd.name}}.{{kraken_config.cluster}}.internal"
+   comment  = "A VPC-only zone for {{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}} kubernetes cluster"
+   vpc_id   = "${aws_vpc.vpc.id}"
+
+   tag {
+    key                 = "Name"
+    value               = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_zone"
+    propagate_at_launch = true
+  }
+}
+{% endfor %}
+
 # DHCP options sets
 resource "aws_vpc_dhcp_options" "vpc_dhcp" {
-  domain_name         = "{{kraken_config.cluster}}.internal"
+  domain_name         = "{% for etcd in kraken_config.etcd %}{{etcd.name}}.{{kraken_config.cluster}}.internal {% endfor %}{{kraken_config.cluster}}.internal"
   domain_name_servers = ["AmazonProvidedDNS"]
 
   tags {
@@ -254,6 +269,130 @@ resource "aws_launch_configuration" "{{etcd.nodepool.name}}_launch_config" {
 }
 {% endfor %}
 
+# IAM role for lambda functions that will modify DNS records
+resource "aws_iam_role" "iam_lambda_etcd_role" {
+    name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_iam_lambda_etcd_role"
+    assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+# IAM policy document for lambda functions that will modify DNS records
+data "aws_iam_policy_document" "iam_lambda_etcd_role_policy_document" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "ec2:Describe*",
+      "ec2:CreateTags",
+      "autoscaling:Describe*",
+      "route53:*"
+      
+    ]
+    resources = [
+      "*",
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+    ]
+    resources = [
+      "arn:aws:logs:*:*:*",
+    ]
+  }
+}
+
+# IAM role policy for lambda functions that will modify DNS records
+resource "aws_iam_role_policy" "iam_lambda_etcd_role_policy" {
+    name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_iam_lambda_etcd_role_policy"
+    role = "${aws_iam_role.iam_lambda_etcd_role.id}"
+    policy = "${data.aws_iam_policy_document.iam_lambda_etcd_role_policy_document.json}"
+}
+
+# IAM role for SNS topic subscription
+resource "aws_iam_role" "iam_lambda_sns_role" {
+    name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_iam_lambda_sns_role"
+    assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "autoscaling.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+# IAM policy document for sns events publishing
+data "aws_iam_policy_document" "iam_sns_etcd_role_policy_document" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "sns:Publish",      
+    ]
+    resources = [
+      "${aws_sns_topic.etcd_scaling_events.arn}"
+    ]
+  }
+}
+
+# IAM role policy for for sns events publishing
+resource "aws_iam_role_policy" "iam_sns_etcd_role_policy" {
+  name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_iam_lambda_etcd_role_policy"
+  role = "${aws_iam_role.iam_lambda_sns_role.id}"
+  policy = "${data.aws_iam_policy_document.iam_sns_etcd_role_policy_document.json}"
+}
+
+# SNS resources for etcd clusters
+resource "aws_sns_topic" "etcd_scaling_events" {
+  name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{etcd.nodepool.name}}_etcd_events"
+}
+
+# Lambda function that will setup all dns records for etcd discovery
+resource "aws_lambda_function" "etcd_lambda" {
+  filename = "lambda-sns-etcd-service-discovery.zip"
+  function_name = "lambda_function_name"
+  role = "${aws_iam_role.iam_lambda_etcd_role.arn}"
+  handler = "lambda-sns-etcd-service-discovery.handler"
+  timeout = 600
+}
+
+resource "aws_lambda_permission" "etcd_scaling_events_lambda_permission" {
+  statement_id = "AllowExecutionFromSNS"
+  action = "lambda:InvokeFunction"
+  function_name = "${aws_lambda_function.etcd_lambda.arn}"
+  principal = "sns.amazonaws.com"
+  source_arn = "${aws_sns_topic.etcd_scaling_events.arn}"
+}
+
+resource "aws_sns_topic_subscription" "etcd_scaling_events_lambda_subscription" {
+  topic_arn = "${aws_sns_topic.etcd_scaling_events.arn}"
+  protocol  = "lambda"
+  endpoint  = "${aws_lambda_function.etcd_lambda.arn}"
+}
+
 # Autoscaling groups for all etcd clusters
 {% for etcd in kraken_config.etcd %}
 resource "aws_autoscaling_group" "{{etcd.nodepool.name}}_nodes" {
@@ -287,6 +426,20 @@ resource "aws_autoscaling_group" "{{etcd.nodepool.name}}_nodes" {
   }
 }
 {% endfor %}
+
+resource "aws_autoscaling_notification" "etcd_notifications" {
+  group_names = [
+{% for etcd in kraken_config.etcd %}
+    "${aws_autoscaling_group.{{etcd.nodepool.name}}_nodes.name",
+{% endfor %}
+  ]
+  notifications  = [
+    "autoscaling:EC2_INSTANCE_LAUNCH", 
+    "autoscaling:EC2_INSTANCE_TERMINATE"
+  ]
+  topic_arn = "${aws_sns_topic.etcd_scaling_events.arn}"
+}
+
 
 # Launch configuration for master
 resource "aws_launch_configuration" "master_launch_config" {
