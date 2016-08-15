@@ -4,4 +4,3 @@
 
 - include: aws-template.yaml
 - include: aws-action.yaml
-- include: setup-inventory.yaml

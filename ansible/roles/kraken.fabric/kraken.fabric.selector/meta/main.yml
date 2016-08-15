@@ -8,3 +8,10 @@ galaxy_info:
 dependencies:
   - { role: '{{ playbook_dir }}/roles/kraken.fabric/kraken.fabric.flannel', when: kraken_config.fabric.provider == 'flannel' }
   - { role: '{{ playbook_dir }}/roles/kraken.fabric/kraken.fabric.calico', when: kraken_config.fabric.provider == 'calico' }
+  - {
+      role: '{{ playbook_dir }}/roles/kraken.error',
+      kraken_component_type: fabric,
+      kraken_component_error: 'Unsupported provider',
+      kraken_component_name: '{{kraken_config.fabric.provider}}',
+      when: "kraken_config.fabric.provider not in ['flannel', 'calico']"
+    }

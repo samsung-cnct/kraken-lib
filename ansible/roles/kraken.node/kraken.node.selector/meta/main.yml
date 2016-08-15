@@ -12,5 +12,24 @@ dependencies:
     }
   - {
       role: '{{ playbook_dir }}/roles/kraken.node/kraken.node.docker',
-      when: "{{ kraken_config.node | selectattr('nodepool.kubeConfig.containerConfig.runtime', 'equalto', 'docker') | map(attribute='nodepool') | list | length }} > 0"
+      when:
+        "{{ kraken_config.node 
+          | selectattr('nodepool.kubeConfig.runMode', 'equalto', 'container') 
+          | selectattr('nodepool.kubeConfig.containerConfig.runtime', 'equalto', 'docker') 
+          | map(attribute='nodepool') 
+          | list 
+          | length }} > 0"
+    }
+  - {
+      role: '{{ playbook_dir }}/roles/kraken.error',
+      kraken_component_type: node,
+      kraken_component_error: 'Unsupported container runtime',
+      kraken_component_name: node,
+      when:
+        "{{ kraken_config.node 
+            | selectattr('nodepool.kubeConfig.runMode', 'equalto', 'container')
+            | map(attribute='nodepool.kubeConfig.containerConfig.runtime') 
+            | list 
+            | difference(['docker']) 
+            | length }} > 0"
     }

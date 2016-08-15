@@ -9,10 +9,19 @@ dependencies:
   - {
       role: '{{ playbook_dir }}/roles/kraken.master/kraken.master.docker',
       when:
-        (kraken_config.master.nodepool.kubeConfig.runMode == 'container') and
-        (kraken_config.master.nodepool.kubeConfig.containerConfig.runtime == 'docker')
+        "kraken_config.master.nodepool.kubeConfig.runMode == 'container' and
+        kraken_config.master.nodepool.kubeConfig.containerConfig.runtime == 'docker'"
     }
   - {
       role: '{{ playbook_dir }}/roles/kraken.master/kraken.master.binary',
       when: kraken_config.master.nodepool.kubeConfig.runMode == 'binary'
+    }
+  - {
+      role: '{{ playbook_dir }}/roles/kraken.error',
+      kraken_component_type: master,
+      kraken_component_error: 'Unsupported container runtime',
+      kraken_component_name: master,
+      when: 
+        "kraken_config.master.nodepool.kubeConfig.runMode == 'container' and
+        kraken_config.master.nodepool.kubeConfig.containerConfig.runtime not in ['docker']"
     }
