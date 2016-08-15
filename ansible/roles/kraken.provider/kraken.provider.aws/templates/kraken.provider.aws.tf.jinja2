@@ -35,24 +35,9 @@ resource "aws_route53_zone" "private_zone" {
   }
 }
 
-# domains for etcd clusters
-{% for etcd in kraken_config.etcd %}
-resource "aws_route53_zone" "private_zone_{{etcd.name}}" {
-   name     = "{{etcd.name}}.{{kraken_config.cluster}}.internal"
-   comment  = "A VPC-only zone for {{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}} kubernetes cluster"
-   vpc_id   = "${aws_vpc.vpc.id}"
-
-   tag {
-    key                 = "Name"
-    value               = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_zone"
-    propagate_at_launch = true
-  }
-}
-{% endfor %}
-
 # DHCP options sets
 resource "aws_vpc_dhcp_options" "vpc_dhcp" {
-  domain_name         = "{% for etcd in kraken_config.etcd %}{{etcd.name}}.{{kraken_config.cluster}}.internal {% endfor %}{{kraken_config.cluster}}.internal"
+  domain_name         = "{{kraken_config.cluster}}.internal"
   domain_name_servers = ["AmazonProvidedDNS"]
 
   tags {
@@ -263,6 +248,7 @@ resource "aws_launch_configuration" "{{etcd.nodepool.name}}_launch_config" {
   }
   {% endfor %}
 
+  
   lifecycle {
     create_before_destroy = true
   }
@@ -409,6 +395,12 @@ resource "aws_autoscaling_group" "{{etcd.nodepool.name}}_nodes" {
 
   tag {
     key                 = "Name"
+    value               = "${aws_route53_zone.private_zone.zone_id}:{{kraken_config.cluster}}.internal:{{etcd.nodepool.name}}:_etcd-client-ssl._tcp.example.com:{{etcd.peerPorts[0]}}"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "DomainConfig"
     value               = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{etcd.nodepool.name}}_node-autoscaled"
     propagate_at_launch = true
   }

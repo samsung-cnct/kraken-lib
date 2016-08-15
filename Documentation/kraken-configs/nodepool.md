@@ -22,7 +22,7 @@ We do not expect the same machine types to be used for each purpose, therefore e
 | keypair | Optional | String | Key name from list of keypairs in [deployment](deployment.md). Lack of setting this indicates nobody should be able to log in. |
 | providerConfig | __Required__ | Object | [Provider](nodepools/README.md) - specific node configuration |
 | kubeConfig | Optional | String | Name of one of the [Kubernetes configurations](kubernetes.md)|
-
+| kubeLabels | Optional | String | Name of one of the [Kubernetes label sets](kubelabels.md)|
 
 # Example
 ```yaml
@@ -54,4 +54,5 @@ nodepool:
     providerConfig:
       ...
     kubeConfig: nodeconfig
+    kubeLabels: masterlabels
 ```
