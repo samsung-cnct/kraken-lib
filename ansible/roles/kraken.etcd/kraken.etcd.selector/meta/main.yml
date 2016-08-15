@@ -10,3 +10,10 @@ dependencies:
       role: '{{ playbook_dir }}/roles/kraken.etcd/kraken.etcd.docker',
       when: "{{ kraken_config.etcd | selectattr('containerConfig.runtime', 'equalto', 'docker') | map(attribute='name') | list | length }} > 0"
     }
+  - {
+      role: '{{ playbook_dir }}/roles/kraken.error',
+      kraken_component_type: etcd,
+      kraken_component_error: 'Unsupported container runtime',
+      kraken_component_name: etcd,
+      when: "{{ kraken_config.etcd | map(attribute='containerConfig.runtime') | list | difference(['docker']) | length }} > 0"
+    }

@@ -1,0 +1,3 @@
+---
+- name: Trigger a fatal error
+  fail: "msg='Component {{kraken_component_name}}. Component type: {{kraken_component_type}}. Message: {{kraken_component_error}}'"
