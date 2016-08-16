@@ -27,6 +27,11 @@ resource "aws_route53_zone" "private_zone" {
   vpc_id   = "${aws_vpc.vpc.id}"
 }
 
+resource "aws_route53_zone_association" "private_zone_association" {
+  zone_id = "${aws_route53_zone.private_zone.zone_id}"
+  vpc_id = "${aws_vpc.vpc.id}"
+}
+
 # DHCP options sets
 resource "aws_vpc_dhcp_options" "vpc_dhcp" {
   domain_name         = "{{kraken_config.cluster}}.internal"
@@ -479,6 +484,15 @@ resource "aws_elb" "master_elb" {
     Name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_master_elb"
   }
 }
+
+resource "aws_route53_record" "master_record" {
+  zone_id = "${aws_route53_zone.private_zone.zone_id}"
+  name = "master.{{kraken_config.cluster}}.internal"
+  type = "A"
+  ttl = "300"
+  records = ["${aws_elb.master_elb.dns_name}"]
+}
+
 {% else %}
 # Launch configuration for master loadbalancer
 resource "aws_launch_configuration" "master_loadbalancer_launch_config" {
