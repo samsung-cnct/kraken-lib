@@ -119,6 +119,10 @@ deployment:
     -
       name: etcd
       count: 2
+      mounts:
+        - 
+          device: sdf
+          path: /var/lib/etcd2 
       providerConfig:
         type: m3.medium
         subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
@@ -127,12 +131,6 @@ deployment:
             key: comments
             value: "Cluster etcd"
         storage:
-          -
-            type: root_block_device
-            opts:
-              volume_type: gp2
-              volume_size: 50
-              delete_on_termination: false
           -
             type: ebs_block_device
             opts:
@@ -146,6 +144,10 @@ deployment:
     -
       name: etcdEvents
       count: 2
+      mounts:
+        - 
+          device: sdf
+          path: /var/lib/etcd2 
       providerConfig:
         type: m3.medium
         subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
@@ -154,12 +156,6 @@ deployment:
             key: comments
             value: "Cluster events etcd"
         storage:
-          -
-            type: root_block_device
-            opts:
-              volume_type: gp2
-              volume_size: 50
-              delete_on_termination: false
           -
             type: ebs_block_device
             opts:
@@ -173,6 +169,10 @@ deployment:
     -
       name: masterNodes
       count: 3
+      mounts:
+        - 
+          device: sdf
+          path: /var/lib/docker
       providerConfig:
         type: m3.medium
         subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
@@ -181,12 +181,6 @@ deployment:
             key: comments
             value: "Master instances"
         storage:
-          -
-            type: root_block_device
-            opts:
-              volume_type: gp2
-              volume_size: 50
-              delete_on_termination: false
           -
             type: ebs_block_device
             opts:
@@ -202,6 +196,10 @@ deployment:
       name: clusterNodes
       count: 3
       keypair: krakenKey
+      mounts:
+        - 
+          device: sdf
+          path: /var/lib/docker
       providerConfig:
         type: m3.medium
         subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
@@ -210,12 +208,6 @@ deployment:
             key: comments
             value: "Cluster plain nodes"
         storage:
-          -
-            type: root_block_device
-            opts:
-              volume_type: gp2
-              volume_size: 50
-              delete_on_termination: false
           -
             type: ebs_block_device
             opts:
@@ -229,6 +221,10 @@ deployment:
     -
       name: specialNodes
       count: 2
+      mounts:
+        - 
+          device: sdf
+          path: /var/lib/docker
       keypair: krakenKey
       providerConfig:
         type: m3.medium
@@ -238,12 +234,6 @@ deployment:
             key: comments
             value: "Cluster special nodes"
         storage:
-          -
-            type: root_block_device
-            opts:
-              volume_type: gp2
-              volume_size: 50
-              delete_on_termination: false
           -
             type: ebs_block_device
             opts:
