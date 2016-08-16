@@ -1,12 +1,12 @@
 ---
 - name: Create terraform folder
   file: >
-    path="{{playbook_dir}}/../generated"
+    path="{{playbook_dir}}/../generated/{{kraken_config.cluster}}"
     state=directory
 
 - name: Generate kraken.provider.aws.tf file
   template: src=kraken.provider.aws.tf.jinja2
-            dest="{{playbook_dir}}/../generated/kraken.provider.aws.tf"
+            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/kraken.provider.aws.tf"
 
 - name: Generate AWS lambda source archive used by the tf template
-  command: zip lambda-sns-etcd-service-discovery.zip {{ role_path }}/files/lambda-sns-etcd-service-discovery.py chdir={{playbook_dir}}/../generated
+  command: zip lambda-sns-etcd-service-discovery.zip {{ role_path }}/files/lambda-sns-etcd-service-discovery.py chdir={{playbook_dir}}/../generated/{{kraken_config.cluster}}

@@ -8,6 +8,7 @@
 | region | __Required__ | String | region you want your cluster to be created in.  Currently we only support one AWS region per cluster |
 | subnet | __Required__ | Object Array | Subnet describes the AWS subnets to be created per AZ |
 | authentication | Optional | Object | Authentication info for AWS |
+| cert | Optional | Object | Loadbalancer certificates info |
 | vpc | Required | String | VPC CIDR block |
 | ingressAcl | __Required__ | Object Array  | Array of VPC ingresses |
 | egressAcl | __Required__ | Object Array  | Array of VPC egresses |
@@ -43,6 +44,18 @@
 | accessSecret | Optional | String | AWS secret. Default is picked up from standart AWS evironment variables |
 | credentialsFile | Optional | String | This is the path to the shared credentials file. If this is not set and a profile is specified, ~/.aws/credentials will be used. |
 | credentialsProfile | Optional | String | AWS credentials profile |
+
+## cert options
+| Key Name | Required | Type | Description|
+| --- | --- | --- | --- |
+| certFile | Optional | String | path to certificate file |
+| privateKeyFile | Optional | String | path to private key file. |
+| certCountry | Optional | String | country for generated cert. |
+| certState | Optional | String | state for generated cert |
+| certLocality | Optional | String | locality for generated cert |
+| certOrg | Optional | String | org for generated cert |
+| certCommonName | Optional | String | common name for generated cert |
+
 
 ## ingressSecurity and egressSecurity options
 
@@ -106,5 +119,8 @@
         accessSecret: xyz789
         credentialsFile: 
         credentialsProfile:
+      certs:
+        certFile: /path/to/cert.pem
+        privateKeyFile: /path/to/private.key
 ```
 
