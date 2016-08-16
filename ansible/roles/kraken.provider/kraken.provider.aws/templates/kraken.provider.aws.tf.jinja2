@@ -25,12 +25,6 @@ resource "aws_route53_zone" "private_zone" {
   name     = "{{kraken_config.cluster}}.internal"
   comment  = "A VPC-only zone for {{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}} kubernetes cluster"
   vpc_id   = "${aws_vpc.vpc.id}"
-
-  tag {
-    key                 = "Name"
-    value               = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_zone"
-    propagate_at_launch = true
-  }
 }
 
 # DHCP options sets
@@ -456,12 +450,12 @@ resource "aws_iam_server_certificate" "master_cert" {
   name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_master_cert"
   
   #TODO 
-  certificate_body = "${file("TODO")}"
-  private_key = "${file("TODO")}"
+  certificate_body = "${file("{{playbook_dir}}/../generated/{{kraken_config.cluster}}/certs/cluster.pem")}"
+  private_key = "${file("{{playbook_dir}}/../generated/{{kraken_config.cluster}}/certs/cluster.key")}"
 }
 
 resource "aws_elb" "master_elb" {
-  name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_master_elb"
+  name = "{{kraken_config.cluster}}-master-elb"
   cross_zone_load_balancing = true
   subnets = [{% set comma = joiner(",") %}{% for subnet in kraken_config.master.nodepool.providerConfig.subnet %}{{ comma() }}"${aws_subnet.vpc_subnet_{{subnet}}.id}"{% endfor %}]
 
