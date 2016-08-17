@@ -3,7 +3,7 @@
   command: start
   content: |
     [Unit]
-    Description=Formats a drive
+    Description=Formats {{mount.device  | mapdevice}} drive as ext4
     [Service]
     Type=oneshot
     RemainAfterExit=yes
