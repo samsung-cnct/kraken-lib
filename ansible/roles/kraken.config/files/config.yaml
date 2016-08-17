@@ -2,9 +2,11 @@
 deployment:
   cluster: krakenCluster
   coreos:
-    version: latest
-    channel: stable
-    rebootStrategy: off
+    -
+      name: allNodes
+      version: latest
+      channel: stable
+      rebootStrategy: off
   keypair:
     -
       name: krakenKey
@@ -122,7 +124,7 @@ deployment:
       mounts:
         - 
           device: sdf
-          path: /var/lib/etcd2 
+          path: /var/lib/etcd 
       providerConfig:
         type: m3.medium
         subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
@@ -141,13 +143,14 @@ deployment:
               snapshot_id:
               encrypted: false
       keypair: krakenKey
+      coreos: allNodes
     -
       name: etcdEvents
       count: 2
       mounts:
         - 
           device: sdf
-          path: /var/lib/etcd2 
+          path: /var/lib/etcd 
       providerConfig:
         type: m3.medium
         subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
@@ -166,6 +169,7 @@ deployment:
               snapshot_id:
               encrypted: false
       keypair: krakenKey
+      coreos: allNodes
     -
       name: masterNodes
       count: 3
@@ -192,6 +196,7 @@ deployment:
               encrypted: false
       keypair: krakenKey
       kubeConfig: krakenKubeConfig
+      coreos: allNodes
     -
       name: clusterNodes
       count: 3
@@ -218,6 +223,7 @@ deployment:
               snapshot_id:
               encrypted: false
       kubeConfig: krakenKubeConfig
+      coreos: allNodes
     -
       name: specialNodes
       count: 2
@@ -244,8 +250,10 @@ deployment:
               snapshot_id:
               encrypted: false
       kubeConfig: krakenKubeConfig
+      coreos: allNodes
   etcd:
     -
+      name: etcd
       clientPorts: [2379, 4001]
       clusterToken: espouse-monger-rarely
       nodepool: etcd
@@ -254,6 +262,7 @@ deployment:
       version: 3.0.3
       containerConfig: dockerconfig
     -
+      name: etcdEvents
       clientPorts: [2381]
       clusterToken: animism-training-chastity
       nodepool: etcdEvents
@@ -265,8 +274,12 @@ deployment:
     nodepool: masterNodes
     loadbalancer: cloud
   node:
-    - nodepool: clusterNodes
-    - nodepool: specialNodes
+    - 
+      name: clusterNodes
+      nodepool: clusterNodes
+    - 
+      name: specialNodes 
+      nodepool: specialNodes
   clusterServices:
     namespaces:
       - kube-system

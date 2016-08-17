@@ -180,7 +180,7 @@ resource "aws_security_group" "vpc_kubernetes_secgroup" {
 }
 
 {% for etcd in kraken_config.etcd %}
-resource "aws_security_group" "vpc_etcd_{{etcd.nodepool.name}}_secgroup" {
+resource "aws_security_group" "vpc_etcd_{{etcd.name}}_secgroup" {
   name        = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_secgroup"
   description = "Security group for {{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}} etcd clusters"
   vpc_id      = "${aws_vpc.vpc.id}"
@@ -223,22 +223,24 @@ resource "aws_security_group" "vpc_etcd_{{etcd.nodepool.name}}_secgroup" {
 }
 {% endfor %}
 
-# information on CoreOS AMIs
-resource "coreosbox_ami" "latest_ami" {
-  channel        = "{{kraken_config.coreos.channel}}"
+# information on CoreOS AMIs for etcd nodepools
+{% for etcd in kraken_config.etcd %}
+resource "coreosbox_ami" "{{etcd.name}}_ami" {
+  channel        = "{{etcd.nodepool.coreos.channel}}"
   virtualization = "hvm"
   region         = "{{kraken_config.providerConfig.region}}"
-  version        = "{{kraken_config.coreos.version}}"
+  version        = "{{etcd.nodepool.coreos.version}}"
 }
+{% endfor %}
 
 # Launch configurations for all etcd clusters
 {% for etcd in kraken_config.etcd %}
-resource "aws_launch_configuration" "{{etcd.nodepool.name}}_launch_config" {
-  name                        = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{etcd.nodepool.name}}_launch_config"
-  image_id                    = "${coreosbox_ami.latest_ami.box_string}"
+resource "aws_launch_configuration" "{{etcd.name}}_launch_config" {
+  name                        = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{etcd.name}}_launch_config"
+  image_id                    = "${coreosbox_ami.{{etcd.name}}_ami.box_string}"
   key_name                    = "${aws_key_pair.{{etcd.nodepool.keypair.name}}.key_name}"
   instance_type               = "{{etcd.nodepool.providerConfig.type}}"
-  security_groups             = ["${aws_security_group.vpc_etcd_{{etcd.nodepool.name}}_secgroup.id}"]
+  security_groups             = ["${aws_security_group.vpc_etcd_{{etcd.name}}_secgroup.id}"]
   associate_public_ip_address = true
   #TODO
   user_data                   = ""
@@ -375,10 +377,10 @@ resource "aws_sns_topic_subscription" "etcd_scaling_events_lambda_subscription" 
 
 # Autoscaling groups for all etcd clusters
 {% for etcd in kraken_config.etcd %}
-resource "aws_autoscaling_group" "{{etcd.nodepool.name}}_nodes" {
-  name                      = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{etcd.nodepool.name}}_asg"
+resource "aws_autoscaling_group" "{{etcd.name}}_nodes" {
+  name                      = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{etcd.name}}_asg"
   vpc_zone_identifier       = [{% set comma = joiner(",") %}{% for subnet in etcd.nodepool.providerConfig.subnet %}{{ comma() }}"${aws_subnet.vpc_subnet_{{subnet}}.id}"{% endfor %}]
-  launch_configuration      = "${aws_launch_configuration.{{etcd.nodepool.name}}_launch_config.name}"
+  launch_configuration      = "${aws_launch_configuration.{{etcd.name}}_launch_config.name}"
   wait_for_capacity_timeout = "0"
   force_delete              = true
   health_check_grace_period = "30"
@@ -390,16 +392,16 @@ resource "aws_autoscaling_group" "{{etcd.nodepool.name}}_nodes" {
   tag {
     key                 = "DomainConfig"
 {% if etcd.ssl %}
-    value               = "${aws_route53_zone.private_zone.zone_id}:{{kraken_config.cluster}}.internal:{{etcd.nodepool.name}}:_etcd-client-ssl._tcp.example.com:{{etcd.peerPorts[0]}}"
+    value               = "${aws_route53_zone.private_zone.zone_id}:{{kraken_config.cluster}}.internal:{{etcd.name}}:_etcd-client-ssl._tcp.example.com:{{etcd.peerPorts[0]}}"
 {% else %}
-    value               = "${aws_route53_zone.private_zone.zone_id}:{{kraken_config.cluster}}.internal:{{etcd.nodepool.name}}:_etcd-client._tcp.example.com:{{etcd.peerPorts[0]}}"
+    value               = "${aws_route53_zone.private_zone.zone_id}:{{kraken_config.cluster}}.internal:{{etcd.name}}:_etcd-client._tcp.example.com:{{etcd.peerPorts[0]}}"
 {% endif %}
     propagate_at_launch = true
   }
 
   tag {
     key                 = "Name"
-    value               = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{etcd.nodepool.name}}_node-autoscaled"
+    value               = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{etcd.name}}_node-autoscaled"
     propagate_at_launch = true
   }
 
@@ -416,7 +418,7 @@ resource "aws_autoscaling_group" "{{etcd.nodepool.name}}_nodes" {
 resource "aws_autoscaling_notification" "etcd_notifications" {
   group_names = [
 {% set comma = joiner(",") %}{% for etcd in kraken_config.etcd %}
-    {{ comma() }}"${aws_autoscaling_group.{{etcd.nodepool.name}}_nodes.name}"
+    {{ comma() }}"${aws_autoscaling_group.{{etcd.name}}_nodes.name}"
 {% endfor %}
   ]
   notifications  = [
@@ -427,10 +429,18 @@ resource "aws_autoscaling_notification" "etcd_notifications" {
 }
 
 
+# information on CoreOS AMIs for master nodepool
+resource "coreosbox_ami" "master_ami" {
+  channel        = "{{kraken_config.master.nodepool.coreos.channel}}"
+  virtualization = "hvm"
+  region         = "{{kraken_config.providerConfig.region}}"
+  version        = "{{kraken_config.master.nodepool.coreos.version}}"
+}
+
 # Launch configuration for master
 resource "aws_launch_configuration" "master_launch_config" {
   name                        = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_master_launch_config"
-  image_id                    = "${coreosbox_ami.latest_ami.box_string}"
+  image_id                    = "${coreosbox_ami.master_ami.box_string}"
   key_name                    = "${aws_key_pair.{{kraken_config.master.nodepool.keypair.name}}.key_name}"
   instance_type               = "{{kraken_config.master.nodepool.providerConfig.type}}"
   security_groups             = ["${aws_security_group.vpc_kubernetes_secgroup.id}"]
@@ -497,7 +507,7 @@ resource "aws_route53_record" "master_record" {
 # Launch configuration for master loadbalancer
 resource "aws_launch_configuration" "master_loadbalancer_launch_config" {
   name                        = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_loadbalancer"
-  image_id                    = "${coreosbox_ami.latest_ami.box_string}"
+  image_id                    = "${coreosbox_ami.master_ami.box_string}"
   key_name                    = "${aws_key_pair.{{kraken_config.master.nodepool.keypair.name}}.key_name}"
   instance_type               = "{{kraken_config.master.nodepool.providerConfig.type}}"
   security_groups             = ["${aws_security_group.vpc_kubernetes_secgroup.id}"]
@@ -563,11 +573,22 @@ resource "aws_autoscaling_group" "master_nodes" {
 {% endfor %}
 }
 
+# information on CoreOS AMIs for node nodepools
+{% for node in kraken_config.node %}
+resource "coreosbox_ami" "{{node.name}}_ami" {
+  channel        = "{{node.nodepool.coreos.channel}}"
+  virtualization = "hvm"
+  region         = "{{kraken_config.providerConfig.region}}"
+  version        = "{{node.nodepool.coreos.version}}"
+}
+{% endfor %}
+
+
 # Launch configurations for all node pools
 {% for node in kraken_config.node %}
-resource "aws_launch_configuration" "{{node.nodepool.name}}_launch_config" {
-  name                        = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{node.nodepool.name}}_launch_config"
-  image_id                    = "${coreosbox_ami.latest_ami.box_string}"
+resource "aws_launch_configuration" "{{node.name}}_launch_config" {
+  name                        = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{node.name}}_launch_config"
+  image_id                    = "${coreosbox_ami.{{node.name}}_ami.box_string}"
   key_name                    = "${aws_key_pair.{{node.nodepool.keypair.name}}.key_name}"
   instance_type               = "{{node.nodepool.providerConfig.type}}"
   security_groups             = ["${aws_security_group.vpc_kubernetes_secgroup.id}"]
@@ -588,10 +609,10 @@ resource "aws_launch_configuration" "{{node.nodepool.name}}_launch_config" {
 
 # Autoscaling groups for all node pools
 {% for node in kraken_config.node %}
-resource "aws_autoscaling_group" "{{node.nodepool.name}}_nodes" {
-  name                      = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{node.nodepool.name}}_asg"
+resource "aws_autoscaling_group" "{{node.name}}_nodes" {
+  name                      = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{node.name}}_asg"
   vpc_zone_identifier       = [{% set comma = joiner(",") %}{% for subnet in node.nodepool.providerConfig.subnet %}{{ comma() }}"${aws_subnet.vpc_subnet_{{subnet}}.id}"{% endfor %}]
-  launch_configuration      = "${aws_launch_configuration.{{node.nodepool.name}}_launch_config.name}"
+  launch_configuration      = "${aws_launch_configuration.{{node.name}}_launch_config.name}"
   wait_for_capacity_timeout = "0"
   force_delete              = true
   health_check_grace_period = "30"
@@ -602,7 +623,7 @@ resource "aws_autoscaling_group" "{{node.nodepool.name}}_nodes" {
 
   tag {
     key                 = "Name"
-    value               = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{node.nodepool.name}}_node-autoscaled"
+    value               = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{node.name}}_node-autoscaled"
     propagate_at_launch = true
   }
 

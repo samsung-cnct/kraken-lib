@@ -1,3 +1,4 @@
 ---
-- name: Display docker etcd config
-  debug: var=kraken_config.etcd
+- include: generate-ca.yaml
+  when: "{{ kraken_config.etcd | selectattr('ssl', 'equalto', true) | map(attribute='nodepool') | list | length }} > 0"
+- include: render-templates.yaml

@@ -1,0 +1,32 @@
+---
+- name: Generate etcd .coreos.update.part files
+  template: src=etcd.coreos.update.part.jinja2
+            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/etcd.{{item.name}}.coreos.update.part"
+  with_items: kraken_config.etcd
+
+- name: Generate etcd .write-files.cert-authority.part files
+  template: src=etcd.write_files.cert-authority.part.jinja2
+            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/etcd.{{item.name}}.write-files.cert-authority.part"
+  with_items: 
+    - { name: 'ca', contents: "{{ lookup('file', '{{playbook_dir}}/../generated/{{kraken_config.cluster}}/certs/etcd/ca.pem') }}" }
+    - { name: 'ca-key', contents: "{{ lookup('file', '{{playbook_dir}}/../generated/{{kraken_config.cluster}}/certs/etcd/ca-key.pem') }}" }
+
+- name: Generate etcd .units.format-storage.part files
+  template: src=etcd.units.format-storage.part.jinja2
+            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/etcd.{{item.name}}.units.format-storage.part"
+  with_items: kraken_config.etcd
+
+- name: Generate etcd .units.mount.part files
+  template: src=etcd.units.mount.part.jinja2
+            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/etcd.{{item.name}}.units.mount.part"
+  with_items: kraken_config.etcd
+
+- name: Generate etcd .units.setup-network-environment.part files
+  template: src=etcd.units.setup-network-environment.part.jinja2
+            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/etcd.{{item.name}}.units.setup-network-environment.part"
+  with_items: kraken_config.etcd
+
+- name: Generate etcd .units.etcd.part files
+  template: src=etcd.units.etcd.part.jinja2
+            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/etcd.{{item.name}}.units.etcd.part"
+  with_items: kraken_config.etcd
