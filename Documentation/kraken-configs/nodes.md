@@ -4,17 +4,17 @@
 ## Root Options
 | Key Name | Required | Type | Description|
 | --- | --- | --- | --- |
-| node | __Required__ | Object array | Array of node objects |
-
-## workers Options
-| Key Name | Required | Type | Description|
-| --- | --- | --- | --- |
+| name | __Required__ | String | Name of this node collection |
 | nodepool | __Required__ | String | Name of the [nodepool](nodepool.md) to use for this node collection |
 
 
 #Example
 ```yaml
 node:
-  - nodepool: cluster_nodes
-  - nodepool: special_nodes
+  - 
+    name: cluster-nodes
+    nodepool: cluster_nodes
+  - 
+    name: herp-derp
+    nodepool: special_nodes
 ```

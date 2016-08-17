@@ -1,0 +1,4 @@
+- path: /var/lib/etcd/ssl/{{item.name}}.pem
+    content: |
+      ---
+        {{item.contents | indent(8)}}

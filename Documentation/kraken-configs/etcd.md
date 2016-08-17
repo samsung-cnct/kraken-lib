@@ -8,7 +8,7 @@ By default we have an array of etcd clusters that we want to configure
 
 | Name | Required | Type | Description |
 | --- | --- | --- | --- |
-| clusters | __TRUE__ | Object Array | array of etcd clusters |
+| name | __TRUE__ | string | name for this etcd cluster |
 | containerConfig | __TRUE__ | String | Name of a [Container runtime configuration](container.md)  |
 | clientPorts | __FALSE__ | Integer Array | Defaults to 2379 and 4001 - the client ports for etcd |
 | clusterToken | __FALSE__ | String | Defaults to _name_-cluster-token - the initial cluster token used |
@@ -22,6 +22,7 @@ By default we have an array of etcd clusters that we want to configure
 ```yaml
 - etcd:
   -
+    name: etcd
     clientPorts: [2379, 4001]
     clusterToken: etcd-cluster-token
     nodepool: etcd
@@ -30,6 +31,7 @@ By default we have an array of etcd clusters that we want to configure
     version: 3.0.3
     containerConfig: dockerconfig
   -
+    name: etcd-events
     clientPorts: [2381]
     clusterToken: etcd-events-cluster-token
     nodepool: etcd-events

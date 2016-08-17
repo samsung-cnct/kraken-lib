@@ -7,7 +7,7 @@ The snippet configuration for deployments depends on the provider.
 | Key Name | Required | Type | Description|
 | --- | --- | --- | --- |
 | cluster | __Required__ | String | Name to use for the cluster created by this deployment |
-| coreos | Optional | Object | CoreOS options |
+| coreos | Optional | Object array | named CoreOS options array|
 | keypair | Optional | Object Array | Array of key pairs to use in this deployment (in node pools and so on) |
 | kubeConfig | __Required__ | Object Array | Array of [Kubernetes configurations](kubernetes.md) |
 | containerConfig | __Required__ | Object Array | Array of [Container runtime configurations](container.md) |
@@ -23,6 +23,7 @@ The snippet configuration for deployments depends on the provider.
 
 | Key Name | Required | Type | Description|
 | --- | --- | --- | --- |
+| name | Required | String | Name of this configuration|
 | version | Optional | String | OS version. Specific version number or 'latest'. Defaults to latest |
 | channel | Optional | String | OS update channel. Stable, alpha, beta. Defaults to beta |
 | rebootStrategy | Optional | String | CoreOS reboot strategy values. etcd-lock, reboot, off. Defaults to off. |
@@ -41,9 +42,11 @@ The snippet configuration for deployments depends on the provider.
   deployment:
     cluster: myCluster
     coreos:
-      version: latest
-      channel: beta
-      rebootStrategy: off
+      -
+        name: allNodes
+        version: latest
+        channel: beta
+        rebootStrategy: off
     keypair:
       -
         name: kraken-testing
