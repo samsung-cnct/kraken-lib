@@ -1,7 +1,4 @@
 ---
-- name: Display provider_config
-  debug: var=kraken_config.providerConfig
-
 - include: aws-certs.yaml
 - include: aws-template.yaml
 - include: aws-action.yaml

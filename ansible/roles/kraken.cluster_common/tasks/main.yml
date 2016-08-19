@@ -1,0 +1,10 @@
+---
+- name: Make sure generated folder for cloud init snippets is there
+  file: >
+    path="{{playbook_dir}}/../generated/{{kraken_config.cluster}}"
+    state=directory
+
+- include: network_environment.yaml
+- include: certificate_authority.yaml
+- include: coreos_update.yaml
+- include: storage.yaml

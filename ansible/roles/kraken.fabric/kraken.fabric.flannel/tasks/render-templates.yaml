@@ -1,9 +1,0 @@
-- name: Generate etcd .coreos.etcd.part files
-  template: src=flanneld.coreos.flanneld.part.jinja2
-            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/flanneld.{{item.name}}.coreos.flanneld.part"
-  with_items: kraken_config.flanneld
-
-- name: Generate flanneld .units.flanneld.part files
-  template: src=flanneld.units.flanneld.part.jinja2
-            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/flanneld.{{item.name}}.units.flanneld.part"
-  with_items: kraken_config.flanneld
