@@ -1,4 +1,5 @@
 - path: /opt/kraken/ssl/ca-key.pem
-    content: |
-      ---
-        {{ lookup('file', '{{playbook_dir}}/../generated/{{kraken_config.cluster}}/certs/ca-key.pem') | gz | b64encode }}
+  encoding: "gz+b64"
+  content: |
+    ---
+      {{ lookup('file', '{{playbook_dir}}/../generated/{{kraken_config.cluster}}/certs/ca-key.pem') | gz | b64encode }}
