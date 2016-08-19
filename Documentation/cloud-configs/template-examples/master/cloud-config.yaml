@@ -47,43 +47,16 @@ coreos:
         Description=etcd
         After=docker.service
         After=ssl.service
-        After=networking.service
-        After=ephemeral.mount
         [Service]
-        EnvironmentFile=/etc/networking.env
         TimeoutStartSec=0
         KillMode=none
-        ExecStartPre=-/usr/bin/docker kill etcd_2379
-        ExecStartPre=-/usr/bin/docker rm etcd_2379
-        ExecStartPre=/usr/bin/mkdir -p /ephemeral/etcd
-        ExecStartPre=/usr/bin/mkdir -p /etcd/ssl/etcd
-        ExecStart=docker run -v /etc/ssl/etcd/:/etc/ssl/etcd -v /ephemeral/etcd:/ephemeral \
+        ExecStartPre=-/usr/bin/docker kill etcd
+        ExecStartPre=-/usr/bin/docker rm etcd
+        ExecStart=docker run -v /etc/etcd/:/etc/etcd \
          -p 2379:2379 -p 2380:2380 \
-         --name etcd_2379 quay.io/coreos/etcd:{ETCD_VERSION} \
-         --data-dir /ephemeral/etcd --proxy on --discovery-srv {ETCD_DNS_ENTRY}
-        ExecStartStop=/usr/bin/docker stop etcd_2379
-    - name: etcd2-kraken.service
-      command: start
-      content: |
-        [Unit]
-        Description=etcd
-        After=docker.service
-        After=ssl.service
-        After=networking.service
-        After=ephemeral.mount
-        [Service]
-        EnvironmentFile=/etc/networking.env
-        TimeoutStartSec=0
-        KillMode=none
-        ExecStartPre=-/usr/bin/docker kill etcd_2381
-        ExecStartPre=-/usr/bin/docker rm etcd_2381
-        ExecStartPre=/usr/bin/mkdir -p /ephemeral/etcd2
-        ExecStartPre=/usr/bin/mkdir -p /etcd/ssl/etcd
-        ExecStart=docker run -v /etc/ssl/etcd/:/etc/ssl/etcd -v /ephemeral/etcd2:/ephemeral \
-         -p 2381:2381 -p 2382:2382 \
-         --name etcd_2381 quay.io/coreos/etcd:{ETCD_VERSION} \
-         --data-dir /ephemeral/etcd --proxy on --discovery-srv {ETCD2_DNS_ENTRY}
-        ExecStartStop=/usr/bin/docker stop etcd_2381
+         --name etcd quay.io/coreos/etcd:{ETCD_VERSION} \
+         --proxy on --discovery-srv {ETCD_DNS_ENTRY}
+        ExecStartStop=/usr/bin/docker stop etcd
     - name: setup-network-environment.service
       runtime: true
       command: start

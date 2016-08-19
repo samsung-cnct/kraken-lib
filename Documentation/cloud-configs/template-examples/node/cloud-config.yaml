@@ -34,6 +34,23 @@ write_files:
       {CA_OUTPUT}
 coreos:
   units:
+    - name: etcd-kraken.service
+      command: start
+      content: |
+        [Unit]
+        Description=etcd
+        After=docker.service
+        After=ssl.service
+        [Service]
+        TimeoutStartSec=0
+        KillMode=none
+        ExecStartPre=-/usr/bin/docker kill etcd
+        ExecStartPre=-/usr/bin/docker rm etcd
+        ExecStart=docker run -v /etc/etcd/:/etc/etcd \
+         -p 2379:2379 -p 2380:2380 \
+         --name etcd quay.io/coreos/etcd:{ETCD_VERSION} \
+         --proxy on --discovery-srv {ETCD_DNS_ENTRY}
+        ExecStartStop=/usr/bin/docker stop etcd
     - name: setup-network-environment.service
       runtime: true
       command: start
