@@ -15,10 +15,9 @@ kubeConfig:
   - 
     name: masterconfig
     version: 1.3.2
-    runMode: container
     containerConfig: dockerconfig
   -
     name: nodeconfig
     version: 1.2.5
-    runMode: binary
+    containerConfig: dockerconfig
 ```

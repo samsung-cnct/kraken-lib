@@ -22,7 +22,6 @@ dependencies:
       kraken_component_name: node,
       when:
         "{{ kraken_config.node 
-            | selectattr('nodepool.kubeConfig.runMode', 'equalto', 'container')
             | map(attribute='nodepool.kubeConfig.containerConfig.runtime') 
             | list 
             | difference(['docker']) 

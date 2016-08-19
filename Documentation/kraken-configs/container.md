@@ -16,5 +16,5 @@ containerConfig:
     runtime: docker
   -
     name: old-docker
-    runMode: docker
+    runtime: docker
 ```
