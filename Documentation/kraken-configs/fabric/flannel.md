@@ -10,8 +10,8 @@ Options dictionary gets converted directly to flannel json options blob
   fabric:
     provider: flannel
     options:
-    	Network: 10.1.0.0/16
-		Backend:
-			Type: aws-vpc
+      Network: 10.1.0.0/16
+    Backend:
+      Type: aws-vpc
 ```
 
