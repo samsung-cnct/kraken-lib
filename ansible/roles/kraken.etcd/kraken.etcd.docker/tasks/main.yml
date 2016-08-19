@@ -1,4 +1,5 @@
 ---
-- include: generate-ca.yaml
-  when: "{{ kraken_config.etcd | selectattr('ssl', 'equalto', true) | map(attribute='nodepool') | list | length }} > 0"
-- include: render-templates.yaml
+- name: Generate etcd .units.etcd.part files
+  template: src=etcd.units.etcd.part.jinja2
+            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/etcd.{{item.name}}.units.etcd.part"
+  with_items: "{{kraken_config.etcd}}"

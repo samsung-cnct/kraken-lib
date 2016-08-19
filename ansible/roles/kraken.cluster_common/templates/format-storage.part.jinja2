@@ -4,6 +4,7 @@
   content: |
     [Unit]
     Description=Formats {{mount.device  | mapdevice}} drive as ext4
+    Before=setup-network-environment.service
     [Service]
     Type=oneshot
     RemainAfterExit=yes

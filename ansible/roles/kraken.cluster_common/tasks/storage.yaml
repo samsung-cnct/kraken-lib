@@ -1,0 +1,30 @@
+---
+- name: Generate etcd .units.format-storage.part files
+  template: src=format-storage.part.jinja2
+            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/etcd.{{item.name}}.units.format-storage.part"
+  with_items: "{{kraken_config.etcd}}"
+
+- name: Generate etcd .units.mount.part files
+  template: src=mount.part.jinja2
+            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/etcd.{{item.name}}.units.mount.part"
+  with_items: "{{kraken_config.etcd}}"
+
+- name: Generate master .units.format-storage.part files
+  template: src=format-storage.part.jinja2
+            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master.units.format-storage.part"
+  with_items: ["{{kraken_config.master}}"]
+
+- name: Generate master .units.mount.part files
+  template: src=mount.part.jinja2
+            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master.units.mount.part"
+  with_items: ["{{kraken_config.master}}"]
+
+- name: Generate node .units.format-storage.part files
+  template: src=format-storage.part.jinja2
+            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/node.{{item.name}}.units.format-storage.part"
+  with_items: "{{kraken_config.node}}"
+
+- name: Generate node .units.mount.part files
+  template: src=mount.part.jinja2
+            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/node.{{item.name}}.units.mount.part"
+  with_items: "{{kraken_config.node}}"

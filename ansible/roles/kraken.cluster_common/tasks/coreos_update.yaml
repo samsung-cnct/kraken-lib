@@ -1,0 +1,15 @@
+---
+- name: Generate etcd .coreos.update.part files
+  template: src=coreos.update.part.jinja2
+            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/etcd.{{item.name}}.coreos.update.part"
+  with_items: "{{kraken_config.etcd}}"
+
+- name: Generate master .coreos.update.part files
+  template: src=coreos.update.part.jinja2
+            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master.coreos.update.part"
+  with_items: ["{{kraken_config.master}}"]
+
+- name: Generate node .coreos.update.part files
+  template: src=coreos.update.part.jinja2
+            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/node.{{item.name}}.coreos.update.part"
+  with_items: "{{kraken_config.node}}"

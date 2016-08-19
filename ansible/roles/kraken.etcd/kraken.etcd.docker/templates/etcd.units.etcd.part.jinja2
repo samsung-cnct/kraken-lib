@@ -22,20 +22,19 @@
     ExecStartPre=-/usr/bin/docker rm etcd_{{item.name}}
     ExecStartPre=/usr/bin/mkdir -p /var/lib/etcd/ephemeral
 {% if item.ssl == true %}
-    ExecStartPre=/usr/bin/mkdir -p /var/lib/etcd/ssl
-    ExecStartPre=/usr/bin/docker run --rm=true -v /var/lib/etcd/ssl:/output \
-        -v /var/lib/etcd/ssl:/input -e HOST_IP:${DEFAULT_IPV4} quay.io/samsung_cnct/drunkensmee 
+    ExecStartPre=/usr/bin/docker run --rm=true -v /opt/kraken/ssl:/output \
+        -v /opt/kraken/ssl:/input -e HOST_IP:${DEFAULT_IPV4} quay.io/samsung_cnct/drunkensmee /assets/generate_etcd.sh
 {% endif %}
-    ExecStart=/usr/bin/docker run -v /var/lib/etcd/ephemeral:/ephemeral {% if item.ssl == true %}-v /var/lib/etcd/ssl:/etc/ssl/etcd{% endif %} \ 
+    ExecStart=/usr/bin/docker run -v /var/lib/etcd/ephemeral:/ephemeral {% if item.ssl == true %}-v /opt/kraken/ssl:/etc/ssl{% endif %} \ 
         {% for port in item.clientPorts %}-p {{port}}:{{port}} {% endfor %}{% for port in item.peerPorts %}-p {{port}}:{{port}} {% endfor %} \
         --name etcd_{{item.name}} quay.io/coreos/etcd:etcd_{{item.version}} \
         --data-dir /ephemeral
         --name etcd3 \
 {% if item.ssl == true %}
         --peer-client-cert-auth \
-        --peer-trusted-ca-file=/var/lib/etcd/ssl/etcd/ssl/ca.crt \
-        --peer-cert-file=/var/lib/etcd/ssl/etcd/ssl/client.crt \
-        --peer-key-file=/var/lib/etcd/ssl/etcd/ssl/client.key \
+        --peer-trusted-ca-file=/etc/ssl/ca.pem \
+        --peer-cert-file=/etc/ssl/etcd/ssl/server.pem \
+        --peer-key-file=/etc/ssl/etcd/ssl/server-key.pem \
 {% endif %}
         --discovery-srv {{kraken_config.cluster}}.internal \
         --initial-advertise-peer-urls {% if item.ssl == true %}https{% else %}http{% endif %}://${DEFAULT_IPV4}:2382 \

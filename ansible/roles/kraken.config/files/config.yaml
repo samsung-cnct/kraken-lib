@@ -25,7 +25,9 @@ deployment:
   fabric:
     provider: flannel
     options:
-      backend: aws-vpc
+      Network: 10.10.0.0/16
+      Backend: 
+        Type: aws-vpc
   provider: aws
   providerConfig:
     resourcePrefix: defaults
