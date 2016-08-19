@@ -6,7 +6,6 @@
 | --- | --- | --- | --- |
 | name | __Required__ | String | Configuration name |
 | version | __Required__ | String | Kubernetes version |
-| runMode | Optional | String | Run kubernetes components as 'binary' or 'container'. Defaults to 'container' |
 | containerConfig | Optional | String | Name of a [Container runtime configuration](container.md)  |
 
 

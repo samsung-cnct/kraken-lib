@@ -8,13 +8,7 @@ galaxy_info:
 dependencies:
   - {
       role: '{{ playbook_dir }}/roles/kraken.master/kraken.master.docker',
-      when:
-        "kraken_config.master.nodepool.kubeConfig.runMode == 'container' and
-        kraken_config.master.nodepool.kubeConfig.containerConfig.runtime == 'docker'"
-    }
-  - {
-      role: '{{ playbook_dir }}/roles/kraken.master/kraken.master.binary',
-      when: kraken_config.master.nodepool.kubeConfig.runMode == 'binary'
+      when: "kraken_config.master.nodepool.kubeConfig.containerConfig.runtime == 'docker'"
     }
   - {
       role: '{{ playbook_dir }}/roles/kraken.error',

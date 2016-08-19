@@ -7,14 +7,9 @@ galaxy_info:
 
 dependencies:
   - {
-      role: '{{ playbook_dir }}/roles/kraken.node/kraken.node.binary',
-      when: "{{ kraken_config.node | selectattr('nodepool.kubeConfig.runMode', 'equalto', 'binary') | map(attribute='nodepool') | list | length }} > 0"
-    }
-  - {
       role: '{{ playbook_dir }}/roles/kraken.node/kraken.node.docker',
       when:
-        "{{ kraken_config.node 
-          | selectattr('nodepool.kubeConfig.runMode', 'equalto', 'container') 
+        "{{ kraken_config.node  
           | selectattr('nodepool.kubeConfig.containerConfig.runtime', 'equalto', 'docker') 
           | map(attribute='nodepool') 
           | list 
