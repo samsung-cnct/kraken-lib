@@ -1,0 +1,5 @@
+- path: /opt/kraken/service-account.pem
+  encoding: "gz+b64"
+  content: |
+    ---
+      {{ lookup('file', '{{playbook_dir}}/../generated/{{kraken_config.cluster}}/certs/service-account.pem') | gz | b64encode }}
