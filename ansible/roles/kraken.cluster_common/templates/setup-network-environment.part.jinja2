@@ -3,12 +3,12 @@
   content: |
     [Unit]
     Description=Setup Network Environment
-    Requires=network-online.target
-    After=network-online.target
-    After=docker.service
-    Before=flanneld.service
+    Requires=early-docker.service
+    After=early-docker.service
+    Before=early-docker.target
 
     [Service]
-    ExecStart=/usr/bin/docker --net=host --rm=true -v /etc:/etc quay.io/samsung_cnct/setup-network-environment
+    Environment="DOCKER_HOST=unix:///var/run/early-docker.sock"
+    ExecStart=/usr/bin/docker run --net=host --rm=true -v /etc:/etc quay.io/samsung_cnct/setup-network-environment
     RemainAfterExit=yes
     Type=oneshot
