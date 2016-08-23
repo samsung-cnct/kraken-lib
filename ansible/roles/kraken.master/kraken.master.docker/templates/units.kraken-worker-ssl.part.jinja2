@@ -1,0 +1,14 @@
+- name: kraken-worker-ssl.service
+  command: start
+  content: |
+    [Unit]
+    After=ssl.service
+    After=docker.service
+    Requires=setup-network-environment.service
+    After=setup-network-environment.service
+    [Service]
+    EnvironmentFile=/etc/network-environment
+    ExecStart=/usr/bin/docker run --rm=true -v /opt/kraken:/output \
+      -v /opt/kraken:/input -e HOST_IP:${DEFAULT_IPV4} quay.io/samsung_cnct/drunkensmee /assets/generate_worker.sh
+    Restart=always
+    RestartSec=10

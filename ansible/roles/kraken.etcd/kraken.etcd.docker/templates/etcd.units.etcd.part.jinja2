@@ -1,4 +1,3 @@
-{% if item.containerConfig.runtime == 'docker' %}
 - name: etcd3.service
   command: start
   content: |
@@ -27,7 +26,7 @@
 {% endif %}
     ExecStart=/usr/bin/docker run -v /var/lib/etcd/ephemeral:/ephemeral {% if item.ssl == true %}-v /opt/kraken:/etc{% endif %} \ 
         {% for port in item.clientPorts %}-p {{port}}:{{port}} {% endfor %}{% for port in item.peerPorts %}-p {{port}}:{{port}} {% endfor %} \
-        --name etcd_{{item.name}} quay.io/coreos/etcd:etcd_{{item.version}} \
+        --name etcd_{{item.name}} quay.io/coreos/etcd:{{item.version}} \
         --data-dir /ephemeral
         --name etcd3 \
 {% if item.ssl == true %}
@@ -44,4 +43,3 @@
         --listen-client-urls {% if item.ssl == true %}https{% else %}http{% endif %}://${DEFAULT_IPV4}:2381 \
         --listen-peer-urls {% if item.ssl == true %}https{% else %}http{% endif %}://${DEFAULT_IPV4}:2382
     ExecStartStop=/usr/bin/docker stop etcd_{{item.name}}
-{% endif %}

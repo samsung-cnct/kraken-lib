@@ -1,0 +1,23 @@
+- name: Generate node api-server.yaml
+  template: src=api-server-manifest.yaml.jinja2
+    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master-api-server.yaml.manifest"
+
+- name: Generate node controller-manager.yaml
+  template: src=controller-manager-manifest.yaml.jinja2
+    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master-controller-manager.yaml.manifest"
+
+- name: Generate node kube-proxy.yaml
+  template: src=kube-proxy-manifest.yaml.jinja2
+    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master-kube-proxy.yaml.manifest"
+
+- name: Generate node scheduler.yaml
+  template: src=scheduler-manifest.yaml.jinja2
+    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master-scheduler.yaml.manifest"
+
+- name: Generate node service-account-secret.yaml
+  template: src=service-account-secret-manifest.yaml.jinja2
+    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master-service-account-secret.yaml.manifest"
+
+- name: Generate node system-namespace.yaml
+  template: src=service-account-secret-manifest.yaml.jinja2
+    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master-system-namespace.yaml.manifest"

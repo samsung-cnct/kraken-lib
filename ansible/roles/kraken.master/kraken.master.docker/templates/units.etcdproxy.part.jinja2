@@ -1,0 +1,18 @@
+- name: etcd-proxy.service
+  command: start
+  content: |
+    [Unit]
+    Description=etcd proxy
+    After=docker.service
+{% if kraken_config.master.nodepool.kubeConfig.clusterEtcd.etcd.ssl == true %}
+    After=ssl.service
+{% endif %}
+    [Service]
+    TimeoutStartSec=0
+    KillMode=none
+    ExecStartPre=-/usr/bin/docker kill etcdproxy
+    ExecStartPre=-/usr/bin/docker rm etcdproxy
+    ExecStart=docker run {% for port in kraken_config.master.nodepool.kubeConfig.clusterEtcd.etcd.clientPorts %}-p {{port}}:{{port}} {% endfor %}{% for port in kraken_config.master.nodepool.kubeConfig.clusterEtcd.etcd.peerPorts %}-p {{port}}:{{port}} {% endfor %} \
+     --name etcdproxy quay.io/coreos/etcd:{{kraken_config.master.nodepool.kubeConfig.clusterEtcd.etcd.version}} \
+     --proxy on --discovery-srv {{kraken_config.cluster}}.internal
+    ExecStartStop=/usr/bin/docker stop etcdproxy

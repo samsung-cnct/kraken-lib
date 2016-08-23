@@ -1,0 +1,14 @@
+- name: Generate writefiles kubeconfig
+  template: src=write_files.kubeconfig.part.jinja2
+    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master.write_files.kubeconfig.part"
+
+- name: Generate writefiles manifests
+  template: src=write_files.manifests.part.jinja2
+    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master.write_files.{{item.name}}.part"
+  with_items:
+    - { file: "{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master-system-namespace.yaml.manifest", name: 'system-namespace' }
+    - { file: "{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master-api-server.yaml.manifest", name: 'api-server' }
+    - { file: "{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master-controller-manager.yaml.manifest", name: 'controller-manager' }
+    - { file: "{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master-kube-proxy.yaml.manifest", name: 'kube-proxy' }
+    - { file: "{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master-scheduler.yaml.manifest", name: 'scheduler' }
+    - { file: "{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master-service-account-secret.yaml.manifest", name: 'account-secret' }

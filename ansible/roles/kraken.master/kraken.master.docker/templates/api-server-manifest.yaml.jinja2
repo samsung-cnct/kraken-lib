@@ -26,7 +26,7 @@ spec:
     - --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem
     - --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
     - --client-ca-file=/etc/ssl/ca.pem
-    - --service-account-key-file=/etc/ssl/service-account.pem
+    - --service-account-key-file=/etc/kubernetes/service-account/service-account-pub.pem
     - --cloud-provider={{kraken_kubernetes_cloudprovider}}
     - --logtostderr=true
     ports:
@@ -37,6 +37,9 @@ spec:
       hostPort: 8080
       name: local
     volumeMounts:
+    - mountPath: /etc/kubernetes/service-account
+      name: service-account-key
+      readOnly: true
     - mountPath: /etc/kubernetes/ssl
       name: ssl-certs-kubernetes
       readOnly: true
@@ -47,6 +50,9 @@ spec:
       name: ssl-certs-host
       readOnly: true
   volumes:
+  - secret:
+      secretName: service-account-key-file
+    name: service-account-key
   - hostPath:
       path: /opt/kraken/kubernetes/ssl
     name: ssl-certs-kubernetes
