@@ -16,9 +16,9 @@ spec:
 {% if kraken_config.master.nodepool.kubeConfig.eventsEtcd is defined %}
     - --etcd-servers-overrides=/events#{{kraken_config.master.nodepool.kubeConfig.eventsEtcd.etcd.clientPorts[0]}}
 {% endif %}
-    - --etcd-cafile=/etc/ssl/ca.pem
+    - --etcd-cafile=/etc/ca.pem
     - --etcd-certfile=/etc/etcd/ssl/client.pem
-    - --etcd-keyfile==/etc/etcd/ssl/client-key.pem
+    - --etcd-keyfile=/etc/etcd/ssl/client-key.pem
     - --allow-privileged=true
     - --service-cluster-ip-range={{kraken_config.network}}
     - --secure_port=443
@@ -26,7 +26,7 @@ spec:
     - --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem
     - --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
     - --client-ca-file=/etc/ssl/ca.pem
-    - --service-account-key-file=/etc/kubernetes/ssl/apiserver-key.pem
+    - --service-account-key-file=/etc/kubernetes/service-account/service-account-pub.pem
     - --cloud-provider={{kraken_kubernetes_cloudprovider}}
     - --logtostderr=true
     ports:
@@ -37,6 +37,9 @@ spec:
       hostPort: 8080
       name: local
     volumeMounts:
+    - mountPath: /etc/kubernetes/service-account
+      name: service-account-key
+      readOnly: true
     - mountPath: /etc/kubernetes/ssl
       name: ssl-certs-kubernetes
       readOnly: true
@@ -47,12 +50,15 @@ spec:
       name: ssl-certs-host
       readOnly: true
   volumes:
+  - secret:
+      secretName: service-account-key-file
+    name: service-account-key
   - hostPath:
-      path: /opt/kraken/ssl/kubernetes/ssl
+      path: /opt/kraken/kubernetes/ssl
     name: ssl-certs-kubernetes
   - hostPath:
-      path: /opt/kraken/ssl/etcd/ssl
+      path: /opt/kraken/etcd/ssl
     name: ssl-certs-etcd
   - hostPath:
-      path: /opt/kraken/ssl
+      path: /opt/kraken
     name: ssl-certs-host

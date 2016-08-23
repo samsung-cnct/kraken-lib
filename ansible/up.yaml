@@ -2,8 +2,8 @@
 - hosts: localhost
   roles:
     - { role: 'kraken.config', config_file: "{{ config_path | default('') }}" }
-    - { role: 'roles/kraken.fabric/kraken.fabric.selector' }
     - { role: 'roles/kraken.cluster_common' }
+    - { role: 'roles/kraken.fabric/kraken.fabric.selector' }
     - { role: 'roles/kraken.etcd/kraken.etcd.selector' }
     - { role: 'roles/kraken.master/kraken.master.selector' }
     - { role: 'roles/kraken.node/kraken.node.selector' }

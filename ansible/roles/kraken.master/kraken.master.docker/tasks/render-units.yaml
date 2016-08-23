@@ -1,0 +1,15 @@
+- name: Generate master.units.kraken-apiserver-ssl.part
+  template: src=units.kraken-apiserver-ssl.part.jinja2
+    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master.units.kraken-apiserver-ssl.part"
+
+- name: Generate master.units.kraken-worker-ssl.part
+  template: src=units.kraken-worker-ssl.part.jinja2
+    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master.units.kraken-worker-ssl.part"
+
+- name: Generate master.units.kubelet.part
+  template: src=units.kubelet.part.jinja2
+    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master.units.kubelet.part"
+
+- name: Generate master.units.etcdproxy.part
+  template: src=units.etcdproxy.part.jinja2
+    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master.units.etcdproxy.part"

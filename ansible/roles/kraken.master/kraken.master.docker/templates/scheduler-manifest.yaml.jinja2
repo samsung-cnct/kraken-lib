@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kube-scheduler
+  namespace: kube-system
+spec:
+  hostNetwork: true
+  containers:
+  - name: kube-scheduler
+    image: gcr.io/google_containers/hyperkube:{{kraken_config.master.nodepool.kubeConfig.version}}
+    command:
+    - /hyperkube
+    - scheduler
+    - --master=127.0.0.1:8080
+    - --v=2
+    - --leader-elect=true
+    - --log-dir=/var/log
+    terminationMessagePath: /dev/termination-log
+    volumeMounts:
+    - mountPath: /var/log
+      name: logdir
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: default-token-s8ejd
+      readOnly: true
+  volumes:
+  - hostPath:
+      path: /var/log
+    name: logdir

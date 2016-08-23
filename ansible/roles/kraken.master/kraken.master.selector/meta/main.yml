@@ -16,6 +16,5 @@ dependencies:
       kraken_component_error: 'Unsupported container runtime',
       kraken_component_name: master,
       when: 
-        "kraken_config.master.nodepool.kubeConfig.runMode == 'container' and
-        kraken_config.master.nodepool.kubeConfig.containerConfig.runtime not in ['docker']"
+        "kraken_config.master.nodepool.kubeConfig.containerConfig.runtime not in ['docker']"
     }
