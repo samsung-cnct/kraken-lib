@@ -35,7 +35,7 @@
         --peer-cert-file=/etc/etcd/ssl/server.pem \
         --peer-key-file=/etc/etcd/ssl/server-key.pem \
 {% endif %}
-        --discovery-srv {{kraken_config.cluster}}.internal \
+        --discovery-srv {{item.name}}.{{kraken_config.cluster}}.internal \
         --initial-advertise-peer-urls {% if item.ssl == true %}https{% else %}http{% endif %}://${DEFAULT_IPV4}:2382 \
         --initial-cluster-token {{item.clusterToken}} \
         --initial-cluster-state new \
