@@ -1,3 +1,0 @@
----
-- name: Display binary nodes configs
-  debug: msg="{{ kraken_config.node | selectattr('nodepool.kubeConfig.runMode', 'equalto', 'binary') | map(attribute='nodepool') | list}}"

@@ -7,6 +7,7 @@ The snippet configuration for deployments depends on the provider.
 | Key Name | Required | Type | Description|
 | --- | --- | --- | --- |
 | cluster | __Required__ | String | Name to use for the cluster created by this deployment |
+| network | __Required__ | String | Cluster ip range CIDR |
 | coreos | Optional | Object array | named CoreOS options array|
 | keypair | Optional | Object Array | Array of key pairs to use in this deployment (in node pools and so on) |
 | kubeConfig | __Required__ | Object Array | Array of [Kubernetes configurations](kubernetes.md) |

@@ -1,6 +1,7 @@
 ---
 deployment:
   cluster: krakenCluster
+  network: 10.0.0.0/16
   coreos:
     -
       name: allNodes
@@ -14,8 +15,11 @@ deployment:
   kubeConfig:
     -
       name: krakenKubeConfig
-      version: 1.3.4
-      runMode: container
+      version: v1.3.4
+      clusterEtcd:
+        etcd: etcd
+      eventsEtcd:
+        etcd: etcdEvents
       containerConfig: dockerconfig
   containerConfig:
     -

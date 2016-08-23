@@ -13,3 +13,13 @@
 - name: expand configuration and register the config fact
   set_fact:
     kraken_config: "{{ deployment | expand_config }}"
+
+- name: set the kubernetes cloud provider fact
+  set_fact:
+    kraken_kubernetes_cloudprovider: "{{kraken_config.provider}}"
+  when: "kraken_config.provider in ['aws', 'azure', 'cloudstack', 'gce', 'mesos', 'openstack', 'ovirt', 'rackspace', 'vsphere']"
+
+- name: set the kubernetes cloud provider fact
+  set_fact:
+    kraken_kubernetes_cloudprovider: ""
+  when: "kraken_config.provider not in ['aws', 'azure', 'cloudstack', 'gce', 'mesos', 'openstack', 'ovirt', 'rackspace', 'vsphere']"

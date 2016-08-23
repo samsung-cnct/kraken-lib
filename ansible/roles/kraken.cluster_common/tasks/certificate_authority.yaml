@@ -16,17 +16,17 @@
       -out {{playbook_dir}}/../generated/{{kraken_config.cluster}}/certs/ca.pem 
       -subj "/CN=kraken-ca"
 
-- name: Generate etcd .write-files.cert-authority.part files
+- name: Generate etcd .write_files.cert-authority.part files
   template: src=write_files.cert-authority.part.jinja2
-            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/etcd.{{item.name}}.write-files.cert-authority.part"
+            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/etcd.{{item.name}}.write_files.cert-authority.part"
   with_items: "{{kraken_config.etcd}}"
 
-- name: Generate node .write-files.cert-authority.part files
+- name: Generate node .write_files.cert-authority.part files
   template: src=write_files.cert-authority.part.jinja2
-            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/node.{{item.name}}.write-files.cert-authority.part"
+            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/node.{{item.name}}.write_files.cert-authority.part"
   with_items: "{{kraken_config.node}}"
 
-- name: Generate master .write-files.cert-authority.part files
+- name: Generate master .write_files.cert-authority.part files
   template: src=write_files.cert-authority.part.jinja2
-            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master.write-files.cert-authority.part"
+            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master.write_files.cert-authority.part"
   with_items: ["{{kraken_config.master}}"]
