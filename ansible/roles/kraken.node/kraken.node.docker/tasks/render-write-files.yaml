@@ -1,0 +1,9 @@
+- name: Generate writefiles kubeconfig
+  template: src=write_files.kubeconfig.part.jinja2
+    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/node.{{item.name}}.write_files.kubeconfig.part"
+  with_items: "{{kraken_config.node}}"
+
+- name: Generate writefiles manifests
+  template: src=write_files.kube-proxy.part.jinja2
+    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/node.{{item.name}}.write_files.kube-proxy.part"
+  with_items: "{{kraken_config.node}}"
