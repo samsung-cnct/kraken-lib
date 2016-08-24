@@ -3,11 +3,13 @@
   content: |
     [Unit]
     Description=etcd3
-    After=docker.service
 {% if item.ssl == true %}
-    After=ssl.service
+    After=kraken-etcd-ssl.service
+    Requires=kraken-etcd-ssl.service
+{% else %}
+    After=setup-network-environment.service
+    Requires=setup-network-environment.service
 {% endif %}
-    After=networking.service
 {% for mount in item.nodepool.mounts %}
     After={{mount.device | mapdevice}}.mount
 {% endfor %}
@@ -20,10 +22,6 @@
     ExecStartPre=-/usr/bin/docker kill etcd_{{item.name}}
     ExecStartPre=-/usr/bin/docker rm etcd_{{item.name}}
     ExecStartPre=/usr/bin/mkdir -p /var/lib/etcd/ephemeral
-{% if item.ssl == true %}
-    ExecStartPre=/usr/bin/docker run --rm=true -v /opt/kraken:/output \
-        -v /opt/kraken:/input -e HOST_IP:${DEFAULT_IPV4} quay.io/samsung_cnct/drunkensmee /assets/generate_etcd.sh
-{% endif %}
     ExecStart=/usr/bin/docker run -v /var/lib/etcd/ephemeral:/ephemeral {% if item.ssl == true %}-v /opt/kraken:/etc{% endif %} \ 
         {% for port in item.clientPorts %}-p {{port}}:{{port}} {% endfor %}{% for port in item.peerPorts %}-p {{port}}:{{port}} {% endfor %} \
         --name etcd_{{item.name}} quay.io/coreos/etcd:{{item.version}} \
