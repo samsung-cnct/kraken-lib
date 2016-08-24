@@ -40,15 +40,15 @@ coreos:
         ExecStartPre=/usr/bin/mkdir -p /ephemeral/etcd
         ExecStartPre=/usr/bin/mkdir -p /etc/etcd/ssl
         ExecStart=/usr/bin/docker run -v /etc/etcd/ssl:/etc/etcd/ssl -v /ephemeral/etcd:/ephemeral \
-         -p 2379:2379 -p 2380:2380 --net=host \
-         --name etcd_2379 quay.io/coreos/etcd:v3.0.3 etcd \
+         -p 2379:2379 -p 2380:2380 -p 4001:4001 --net=host \
+         --name etcd_2379 quay.io/coreos/etcd:v3.0.5 etcd \
          --data-dir /ephemeral/etcd \
          --name etcd2379 \
          --peer-client-cert-auth \
-         --peer-trusted-ca-file=/etc/etcd/ssl/ca.pem \
-         --peer-cert-file=/etc/etcd/ssl/server.pem \
-         --peer-key-file=/etc/etcd/ssl/server-key.pem \
-         --trusted-ca-file=/etc/etcd/ssl/ca.pem \
+         --peer-trusted-ca-file=/etc/etcd/ssl/peer-ca.pem \
+         --peer-cert-file=/etc/etcd/ssl/peer.pem \
+         --peer-key-file=/etc/etcd/ssl/peer-key.pem \
+         --trusted-ca-file=/etc/etcd/ssl/server-ca.pem \
          --cert-file=/etc/etcd/ssl/server.pem \
          --key-file=/etc/etcd/ssl/server-key.pem \
          --client-cert-auth \
@@ -57,7 +57,7 @@ coreos:
          --initial-cluster-token myClusterToken \
          --initial-cluster-state new \
          --advertise-client-urls https://${DEFAULT_IPV4}:2379 \
-         --listen-client-urls https://127.0.0.1:2379,https://${DEFAULT_IPV4}:2379 \
+         --listen-client-urls https://127.0.0.1:2379,https://127.0.0.1:4001,https://${DEFAULT_IPV4}:2379 \
          --listen-peer-urls https://127.0.0.1:2380,https://${DEFAULT_IPV4}:2380
         ExecStartStop=/usr/bin/docker stop etcd_2379
     - name: kraken-networking.service
@@ -66,8 +66,8 @@ coreos:
       content: |
         [Unit]
         Description=Setup Network Environment
-        Requires=docker.service
-        After=docker.service
+        Requires=early-docker.service
+        After=early-docker.service
         [Service]
         ExecStart=/usr/bin/docker run -v /etc:/etc --rm=true --net=host \
          quay.io/venezia/setup-network-environment:v1.0.1-mv
@@ -79,16 +79,17 @@ coreos:
       content: |
         [Unit]
         Description=Setup Network Environment
-        Requires=docker.service
+        Requires=early-docker.service
         Requires=kraken-networking.service
-        After=docker.service
+        After=early-docker.service
         After=kraken-networking.service
         [Service]
         EnvironmentFile=/etc/network-environment
         ExecStart=/usr/bin/docker run -v /etc/ssl:/input -v /etc:/output --rm=true \
          -e HOST_IP=${DEFAULT_IPV4} \
          -e SERVICE_DNS_NAME=etcd2379.etcd.testcluster.io \
-         quay.io/samsung_cnct/drunkensmee:v0.1 /assets/generate_etcd.sh
+         -e HOST_DNS_NAME=*.etcd2379.etcd.testcluster.io \
+         quay.io/samsung_cnct/drunkensmee:v0.2 /assets/generate_etcd.sh
         RemainAfterExit=yes
         Type=oneshot
     - name: format-ephemeral.service
@@ -101,8 +102,7 @@ coreos:
         [Service]
         Type=oneshot
         RemainAfterExit=yes
-        ExecStart=/usr/sbin/wipefs -f /dev/xvdf
-        ExecStart=/usr/sbin/mkfs.ext4 -F /dev/xvdf
+        ExecStart=/bin/bash -c '(/usr/sbin/blkid -t TYPE=ext4 | /usr/bin/grep /dev/xvdf) || (/usr/sbin/wipefs -fa /dev/xvdf && /usr/sbin/mkfs.ext4 /dev/xvdf)'
     - name: ephemeral.mount
       command: start
       content: |
@@ -114,6 +114,11 @@ coreos:
         What=/dev/xvdf
         Where=/ephemeral
         Type=ext4
+  locksmith:
+    endpoint: https://etcd2379.etcd.testcluster.io:2379
+    etcd_cafile: /etc/etcd/ssl/client-ca.pem
+    etcd_certfile: /etc/etcd/ssl/client.pem
+    etcd_keyfile: /etc/etcd/ssl/client-key.pem
   update:
     group: stable
-    reboot-strategy: best-effort
+    reboot-strategy: etcd-lock
