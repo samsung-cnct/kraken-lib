@@ -4,11 +4,12 @@
     - name: 50-network-config.conf
       content: |
         [Unit]
-        Requires=etcd3.service
-        Requires=setup-network-environment.service
-        After=setup-network-environment.service
+        Requires=etcd-proxy.service
         [Service]
         EnvironmentFile=/etc/network-environment
         Environment="FLANNELD_INTERFACE=${DEFAULT_IPV4}"
+{% if item.nodepool.kubeConfig.clusterEtcd.etcd.ssl == true %}
+        ExecStartPre=/usr/bin/etcdctl --ca-file /opt/kraken/ca.pem --key-file /opt/kraken/etcd/ssl/client-key.pem --cert-file /opt/kraken/etcd/ssl/client.pem set /coreos.com/network/config '{{ kraken_config.fabric.options | to_json }}'
+{% else %}
         ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{{ kraken_config.fabric.options | to_json }}'
-  command: start
+{% endif %}

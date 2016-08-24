@@ -7,3 +7,8 @@
   template: src=units.kubelet.part.jinja2
     dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/node.{{item.name}}.units.kubelet.part"
   with_items: "{{kraken_config.node}}"
+
+- name: Generate node units.etcdproxy.part
+  template: src=units.etcdproxy.part.jinja2
+    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/node.{{item.name}}.units.etcdproxy.part"
+  with_items: "{{kraken_config.node}}"

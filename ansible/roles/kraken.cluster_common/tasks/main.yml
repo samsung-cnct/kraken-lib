@@ -5,6 +5,8 @@
     state=directory
 
 - include: network_environment.yaml
+- include: etcd_certs.yaml
+  when: "{{kraken_config.etcd | selectattr('ssl', 'equalto', 'true') | map(attribute='name') | list | length }} > 0"
 - include: certificate_authority.yaml
 - include: coreos_update.yaml
 - include: storage.yaml
