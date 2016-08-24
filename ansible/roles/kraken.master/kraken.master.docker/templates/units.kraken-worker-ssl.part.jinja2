@@ -2,8 +2,6 @@
   command: start
   content: |
     [Unit]
-    After=ssl.service
-    After=docker.service
     Requires=setup-network-environment.service
     After=setup-network-environment.service
     [Service]

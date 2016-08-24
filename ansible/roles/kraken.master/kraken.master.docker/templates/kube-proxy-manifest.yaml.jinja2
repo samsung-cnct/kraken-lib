@@ -11,7 +11,7 @@ spec:
     command:
     - /hyperkube
     - proxy
-    - --master=127.0.0.1:8080
+    - --master=https://master.{{kraken_config.cluster}}.internal
     - --proxy-mode=iptables
     - --logtostderr=true
     securityContext:

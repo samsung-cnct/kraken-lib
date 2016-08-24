@@ -1,0 +1,29 @@
+- name: kubelet.service
+  command: start
+  content: |
+    [Unit]
+    After=kraken-worker-ssl.service
+    Requires=kraken-worker-ssl.service
+    [Service]
+    EnvironmentFile=/etc/network-environment
+    ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/{{item.nodepool.kubeConfig.version}}/bin/linux/amd64/kubelet
+    ExecStartPre=/usr/bin/chmod +x /opt/bin/kubelet
+    ExecStart=/opt/bin/kubelet \
+      --api_servers=https://master.{{kraken_config.cluster}}.internal \
+      --register-node=true \
+      --allow-privileged=true \
+      --config=/etc/kubernetes/manifests \
+      --hostname-override=${DEFAULT_IPV4} \
+      --cluster-dns=10.100.0.10 \
+      --cluster-domain=cluster.local \
+      --kubeconfig=/opt/kraken/kubeconfig \
+      --tls-cert-file=/opt/kraken/kubernetes/ssl/worker.pem \
+      --tls-private-key-file=/opt/kraken/kubernetes/ssl/worker-key.pem \
+      --network-plugin=cni \
+      --network-plugin-dir=/etc/cni/net.d \
+      --cloud-provider={{kraken_kubernetes_cloudprovider}} \
+      --logtostderr=true
+    Restart=always
+    RestartSec=10
+    [Install]
+    WantedBy=multi-user.target

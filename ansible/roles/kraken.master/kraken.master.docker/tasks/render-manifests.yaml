@@ -1,23 +1,23 @@
-- name: Generate node api-server.yaml
+- name: Generate master api-server.yaml
   template: src=api-server-manifest.yaml.jinja2
-    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master-api-server.yaml.manifest"
+    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master.api-server.yaml.manifest"
 
-- name: Generate node controller-manager.yaml
+- name: Generate master controller-manager.yaml
   template: src=controller-manager-manifest.yaml.jinja2
-    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master-controller-manager.yaml.manifest"
+    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master.controller-manager.yaml.manifest"
 
-- name: Generate node kube-proxy.yaml
+- name: Generate master kube-proxy.yaml
   template: src=kube-proxy-manifest.yaml.jinja2
-    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master-kube-proxy.yaml.manifest"
+    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master.kube-proxy.yaml.manifest"
 
-- name: Generate node scheduler.yaml
+- name: Generate master scheduler.yaml
   template: src=scheduler-manifest.yaml.jinja2
-    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master-scheduler.yaml.manifest"
+    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master.scheduler.yaml.manifest"
 
-- name: Generate node service-account-secret.yaml
+- name: Generate master service-account-secret.yaml
   template: src=service-account-secret-manifest.yaml.jinja2
-    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master-service-account-secret.yaml.manifest"
+    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master.service-account-secret.yaml.manifest"
 
-- name: Generate node system-namespace.yaml
+- name: Generate master system-namespace.yaml
   template: src=service-account-secret-manifest.yaml.jinja2
-    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master-system-namespace.yaml.manifest"
+    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master.system-namespace.yaml.manifest"
