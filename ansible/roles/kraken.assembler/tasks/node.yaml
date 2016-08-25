@@ -1,0 +1,16 @@
+- name: Create a list of file for nodes
+  find: >
+    paths="{{playbook_dir}}/../generated/{{kraken_config.cluster}}" 
+    patterns="node.{{item.name}}.*.part" 
+  register: node_list
+  with_items: "{{kraken_config.node}}"
+
+- name: Display file list
+  debug: var=node_list.results
+
+- name: Generate node cloud init
+  template: src=node.yaml.jinja2
+    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/cloud-config/node.{{item.0.name}}.cloud-config.yaml"
+  with_together: 
+    - "{{kraken_config.node}}"
+    - "{{node_list.results}}"

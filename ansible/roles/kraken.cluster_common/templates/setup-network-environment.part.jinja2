@@ -6,7 +6,6 @@
     Requires=early-docker.service
     After=early-docker.service
     Before=early-docker.target
-
     [Service]
     ExecStart=/usr/bin/docker --net=host --rm=true -v /etc:/etc quay.io/samsung_cnct/setup-network-environment
     RemainAfterExit=yes

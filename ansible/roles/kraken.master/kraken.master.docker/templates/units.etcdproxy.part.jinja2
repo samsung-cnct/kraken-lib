@@ -16,7 +16,7 @@
     ExecStartPre=-/usr/bin/docker kill etcdproxy
     ExecStartPre=-/usr/bin/docker rm etcdproxy
     ExecStart=docker run {% for port in kraken_config.master.nodepool.kubeConfig.clusterEtcd.etcd.clientPorts %}-p {{port}}:{{port}} {% endfor %}{% for port in kraken_config.master.nodepool.kubeConfig.clusterEtcd.etcd.peerPorts %}-p {{port}}:{{port}} {% endfor %} \
-      {% if kraken_config.master.nodepool.kubeConfig.clusterEtcd.etcd.ssl == true %}-v /opt/kraken:/etc{% endif %}
+      {% if kraken_config.master.nodepool.kubeConfig.clusterEtcd.etcd.ssl == true %}-v /opt/kraken:/etc{% endif %} \
       --name etcdproxy quay.io/coreos/etcd:{{kraken_config.master.nodepool.kubeConfig.clusterEtcd.etcd.version}} \
       --proxy on \
       --discovery-srv {{kraken_config.master.nodepool.kubeConfig.clusterEtcd.etcd.name}}.{{kraken_config.cluster}}.internal \

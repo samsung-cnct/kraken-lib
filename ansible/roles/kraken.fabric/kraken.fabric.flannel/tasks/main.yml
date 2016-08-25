@@ -2,6 +2,8 @@
 - name: Generate master .units.flanneld.part files
   template: src=units.flanneld.part.jinja2
             dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master.units.flanneld.part"
+  with_items: 
+    - "{{kraken_config.master}}"
 
 - name: Generate nodes .units.flanneld.part files
   template: src=units.flanneld.part.jinja2

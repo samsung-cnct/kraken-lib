@@ -1,0 +1,22 @@
+#cloud-config
+
+---
+write_files:
+{% for filedata in item.1.files %}
+{% if 'node.' + item.0.name + '.write_files.' in filedata.path %}
+  {{ lookup('file', filedata.path) | indent(2) }}
+{% endif %}
+{% endfor %}
+coreos:
+  units: 
+{% for filedata in item.1.files %}
+{% if 'node.' + item.0.name + '.units.' in filedata.path %}
+    {{ lookup('file', filedata.path) | indent(4) }}
+{% endif %}
+{% endfor %}
+  update:
+{% for filedata in item.1.files %}
+{% if 'node.' + item.0.name + '.update.' in filedata.path %}
+    {{ lookup('file', filedata.path) | indent(4) }}
+{% endif %}
+{% endfor %}
