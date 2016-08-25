@@ -14,6 +14,18 @@ write_files:
     encoding: "gz+b64"
     content: |
       H4sICHBTt1cAA2NhLnBlbQBlVEmvs0YQvPMrckdPBrMfcpiBAWMzmGGz4QY2uzcw+6+PX/J9UZTXt66uLpVUrf76+hREhmn/oSLXN3VTBT76Br8obJoqvaoqyI4FmEwICnMPHKflyQrz9c5jwBiq1xqemXIaQVCdAoAhmVENCCzskIIAY/XUL9Gpv6UVW0c+yPSJme0a8Nhv5qNGGKzB5IOt/2DkX+xbiPqt9FPo48ozJ41E+8MzNsvxYoOPA0iAVhTIAdpnTp4q9Wk+u1wzug7vFy3nweYxje5pfuNeXn33MF64fD8kPet4JN6kxrXqZwN1dM6sTpro1G33znev21MIJ+ut5cmcDSgT9krxSsJaOYXmfFbbNiGPlrhP/vbwlK4I+IX3IquPipihsvUFWPeCAz0A7XZeCk1Ze0uxdi+zESwkVczo7so07er6wD8HR+e3S1Nxec9JibuUDMV2Pmu793KZF/u6u/YktjuR20zrobZ9B4pyeXFV27zbFyliJVXptjdV5KqqLOaTJfsKNeaMcH/Eg5OxopSxNyzI1WJ6OB43Fn5pdKs4Qb31yUgS9i3ItrejX/RFLc/+0LyrY0tFemNd1rBRe2jCKib8O5066ChvtlHBhABIbIIRP+1IpIUuc4QwQrq5DDneCPmxOFFse20mdomTotE30wIxlA3ABldzIhGGCfgv+QcXTAb1TUYT0fHnvkAu/z9361fun6hbMZuZ5enMeXKPOx7ltKYFObVigZEmf0eLO7l9OVV0rEIGbZW4Cd1bbG8GG10eW36USD7o2b54rdZ2LuyHyDwV/YJTqtdO+IGAb1+NpeEtoIS0NV0nZUwmV0mDWTkOkco/FbN3a4Fz2eVscjroBt2TWpS2JiUew2AZDMQY/dHhUVQzaQ7T6LYXC9s/QDZ8PfXNJidiS+8rWo+B6Bmlp4+xtFFsWpeohKu1BqoRiR/XAQTnVrnfgLDkEtcr8HpjpE4Sz74X4UGwzsIUBodmkdkuiwR5YpI9pOT1qJRMzhXrozrX2+SU+FCnE/ZIG3FJX+pRhMuhXJCfuSyRX0Wn5d66msp+YnJpxn9Sf38FZGs/P8VfmGgAqUYEAAA=
+  - path: /etc/kubernetes/manifests/apiserver.yaml
+    owner: root
+    permissions: 0644
+    encoding: "gz+b64"
+    content: |
+      H4sICIE7v1cAA2FwaXNlcnZlci55YW1sAJ1UTW/bMAy951foB0R2snRbZ8CHYdut67oO2LVQZcYRIluGRDv1v58of9VNHGxDLhHJ9yi+J1pU6jdYp0yZsGa7OqoyS9iDyVYFoMgEimTFWCkKSNixfgYuKuXANmD7sKuEHHKudQjFylUgCXUwDu8BT8YeE4a2Bh+TpkShSt+RKvgSM2OqELnP5NJGysS5MbmGpwkdH9oKLOGSZhvtovcBJE1RCD9AOHA2FfWBeQvOOH/283KRZRacSzdR+I1JQJnxDuDSA2Llkjim4Lvdx08R/YkQHEpd+7npnnOkFHulISVEQMXO6VhqBSX6XFR5qeb1YHERcV5+hDZUX27gszOI0NqceGVV4zE5ZGlvSJelIZUE3o/CVcWtKHNIt5toS5rE2w+vimVt4akyFtObm93UIiuUo5fEySdrdHo/PJA7tQfZSg3rMfTtRTl06ztVKHykXnb9i4gVtl88HF7wK5Stj4WbfZbS1CWuH8GZ2kr4WRsUY2fULqjHJ/nIdVuC9yeoMjo/E4VwJIlAIMH+An6m6+jnMviN14PWohvp/xubOvO3N43KwKbi5MaUNjn63fNhO9lMdrlhM8ZFevDRhA0udjv7NtbtaHj/l+G3m9vNGf5VsCPQRgodIo3RdQHfafrxRgWdHgQeEnZBhxmRPwe3HZ+K+gILIvtR6nb83lyiHlZlgZTS/0IXLCbkAh9JssTXKdF/C4N2xNtXV1fVuKrFVbLZ/AvTLxLUzsbuICz4Zx0gaq+kGBy4NPsfQNl2lmIGAAA=
+  - path: /etc/kubernetes/manifests/kube-config.yaml
+    owner: root
+    permissions: 0644
+    encoding: "gz+b64"
+    content: |
+      H4sICEIrv1cAA2t1YmUtY29uZmlnLnlhbWwAdY/BDsIgEETvfAU/gMQrV//BO+JWN6XQLEujfy8gNq3R225m5mXGzngGShiDkctRjBiuRp5iGPAmnM+Ji2iEksFOYKSPznohZVdMOcsDxDigswzKZr5HQn4aqYGdHvMFKABD0il57exhhknktKNWkwcusCp0qEcIrDbs30Q7Y8ksQA28SY7wp8OaqJaWcjEwPLg16venxHvmurs33DTeLVA9LVwmavU77dvwArkGlfh2AQAA
 coreos:
   units:
     - name: flanneld.service
@@ -27,6 +39,10 @@ coreos:
             ExecStartPre=/usr/bin/etcdctl -D etcd2379.etcd.testcluster.io \
               --cert-file /etc/etcd/ssl/client.pem --ca-file /etc/etcd/ssl/client-ca.pem --key-file /etc/etcd/ssl/client-key.pem \
               set /coreos.com/network/config '{ "Network": "10.1.0.0/16" }'
+            ExecStartPre=-/usr/bin/mkdir -p /opt/cni
+            ExecStartPre=/usr/bin/wget -N -P /opt/cni https://storage.googleapis.com/kubernetes-release/network-plugins/cni-8a936732094c0941e1543ef5d292a1f4fffa1ac5.tar.gz
+            ExecStartPre=/usr/bin/tar -xzf /opt/cni/cni-8a936732094c0941e1543ef5d292a1f4fffa1ac5.tar.gz -C /opt/cni/
+            ExecStartPre=/usr/bin/rm /opt/cni/cni-8a936732094c0941e1543ef5d292a1f4fffa1ac5.tar.gz
       command: start
     - name: kraken-networking.service
       runtime: true
@@ -80,6 +96,35 @@ coreos:
         What=/dev/xvdf
         Where=/ephemeral
         Type=ext4
+    - name: kubelet.service
+      command: start
+      content: |
+        [Unit]
+        After=docker.service
+        Requires=docker.service
+        [Service]
+        EnvironmentFile=/etc/network-environment
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/v1.3.5/bin/linux/amd64/kubelet
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/kubelet
+        ExecStart=/opt/bin/kubelet \
+          --api_servers=http://127.0.0.1:8080 \
+          --register-node=false \
+          --allow-privileged=true \
+          --config=/etc/kubernetes/manifests \
+          --kubeconfig=/etc/kubernetes/manifests/kube-config.yaml \
+          --hostname-override=${DEAFULT_IPV4} \
+          --cluster-dns=10.1.0.10 \
+          --cluster-domain=cluster.local \
+          --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem \
+          --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem \
+          --network-plugin=cni \
+          --network-plugin-dir=/etc/cni/net.d \
+          --cloud-provider=aws \
+          --logtostderr=true
+        Restart=always
+        RestartSec=10
+        [Install]
+        WantedBy=multi-user.target
   flannel:
     etcd_endpoints: https://etcd2379.etcd.testcluster.io:2379
     etcd_cafile: /etc/etcd/ssl/client-ca.pem
