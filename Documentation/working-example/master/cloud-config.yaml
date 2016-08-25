@@ -117,8 +117,6 @@ coreos:
           --cluster-domain=cluster.local \
           --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem \
           --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem \
-          --network-plugin=cni \
-          --network-plugin-dir=/etc/cni/net.d \
           --cloud-provider=aws \
           --logtostderr=true
         Restart=always
