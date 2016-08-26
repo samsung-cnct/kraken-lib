@@ -1,5 +1,9 @@
 ---
-- name: Make sure generated folder for cloud init snippets is there
+- name: Make sure generated folder for full cloud configs is there
   file: >
-    path="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/configs"
+    path="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/cloud-config"
     state=directory
+
+- include: master.yaml
+- include: node.yaml
+- include: etcd.yaml

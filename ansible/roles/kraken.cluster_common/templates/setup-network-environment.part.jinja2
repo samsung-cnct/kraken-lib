@@ -6,7 +6,6 @@
     Requires=early-docker.service
     After=early-docker.service
     Before=early-docker.target
-
     [Service]
     Environment="DOCKER_HOST=unix:///var/run/early-docker.sock"
     ExecStart=/usr/bin/docker run --net=host --rm=true -v /etc:/etc quay.io/samsung_cnct/setup-network-environment

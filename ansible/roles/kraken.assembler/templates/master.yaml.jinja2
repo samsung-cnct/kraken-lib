@@ -1,0 +1,22 @@
+#cloud-config
+
+---
+write_files:
+{% for filename in kraken_master_parts %}
+{% if 'master.write_files.' in filename %}
+  {{ lookup('file', filename) | indent(2) }}
+{% endif %}
+{% endfor %}
+coreos:
+  units: 
+{% for filename in kraken_master_parts %}
+{% if 'master.units.' in filename %}
+    {{ lookup('file', filename) | indent(4) }}
+{% endif %}
+{% endfor %}
+  update:
+{% for filename in kraken_master_parts %}
+{% if 'master.update.' in filename %}
+    {{ lookup('file', filename) | indent(4) }}
+{% endif %}
+{% endfor %}
