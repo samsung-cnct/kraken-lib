@@ -14,36 +14,18 @@ write_files:
     encoding: "gz+b64"
     content: |
       H4sICHBTt1cAA2NhLnBlbQBlVEmvs0YQvPMrckdPBrMfcpiBAWMzmGGz4QY2uzcw+6+PX/J9UZTXt66uLpVUrf76+hREhmn/oSLXN3VTBT76Br8obJoqvaoqyI4FmEwICnMPHKflyQrz9c5jwBiq1xqemXIaQVCdAoAhmVENCCzskIIAY/XUL9Gpv6UVW0c+yPSJme0a8Nhv5qNGGKzB5IOt/2DkX+xbiPqt9FPo48ozJ41E+8MzNsvxYoOPA0iAVhTIAdpnTp4q9Wk+u1wzug7vFy3nweYxje5pfuNeXn33MF64fD8kPet4JN6kxrXqZwN1dM6sTpro1G33znev21MIJ+ut5cmcDSgT9krxSsJaOYXmfFbbNiGPlrhP/vbwlK4I+IX3IquPipihsvUFWPeCAz0A7XZeCk1Ze0uxdi+zESwkVczo7so07er6wD8HR+e3S1Nxec9JibuUDMV2Pmu793KZF/u6u/YktjuR20zrobZ9B4pyeXFV27zbFyliJVXptjdV5KqqLOaTJfsKNeaMcH/Eg5OxopSxNyzI1WJ6OB43Fn5pdKs4Qb31yUgS9i3ItrejX/RFLc/+0LyrY0tFemNd1rBRe2jCKib8O5066ChvtlHBhABIbIIRP+1IpIUuc4QwQrq5DDneCPmxOFFse20mdomTotE30wIxlA3ABldzIhGGCfgv+QcXTAb1TUYT0fHnvkAu/z9361fun6hbMZuZ5enMeXKPOx7ltKYFObVigZEmf0eLO7l9OVV0rEIGbZW4Cd1bbG8GG10eW36USD7o2b54rdZ2LuyHyDwV/YJTqtdO+IGAb1+NpeEtoIS0NV0nZUwmV0mDWTkOkco/FbN3a4Fz2eVscjroBt2TWpS2JiUew2AZDMQY/dHhUVQzaQ7T6LYXC9s/QDZ8PfXNJidiS+8rWo+B6Bmlp4+xtFFsWpeohKu1BqoRiR/XAQTnVrnfgLDkEtcr8HpjpE4Sz74X4UGwzsIUBodmkdkuiwR5YpI9pOT1qJRMzhXrozrX2+SU+FCnE/ZIG3FJX+pRhMuhXJCfuSyRX0Wn5d66msp+YnJpxn9Sf38FZGs/P8VfmGgAqUYEAAA=
-  - path: /etc/kubernetes/manifests/apiserver.yaml
-    owner: root
-    permissions: 0644
-    encoding: "gz+b64"
-    content: |
-      H4sICJJiwFcAA2FwaXNlcnZlci55YW1sAJ1UTW/bMAy951foB0R2snRbZ8CHYdut67oO2LVQZcYRIluGRDv1v58of9VNHGxDLhHJ9yi+J1pU6jdYp0yZsGa7OqoyS9iDyVYFoMgEimTFWCkKSNixfgYuKuXANmD7sKuEHHKudQjFylUgCXUwDu8BT8YeE4a2Bh+TpkShSt+RKvgSM2OqELnP5NJGysS5MbmGpwkdH9oKLOGSZhvtovcBJE1RCD9AOHA2FfWBeQvOOH/283KRZRacSzdR+I1JQJnxDuDSA2Llkjim4Lvdx08R/YkQHEpd+7npngkl5nAp9kpDSrAAjZ3TsdQKSvS5qPJ6zevB4iLivPwI7TK/T84QQmtz4pVVjYfkkKW9KV2WBlUSeD8OVxW3oswh3W6iLekSbz+8Kpa1hafKWExvbnZTi6xQjl4TJ6+s0en98Eju1B5kKzWsx9C3F+XQre9UofCRetn1LyJW2H7xcHjBr1C2PhZu9llKU5e4fgRnaivhZ21QjJ1RuyAen/Qg520J3qOgyuj+TBTCkSQCgQT7C/iZrqOdy+A3Vg9ai26k/29s6szf3jQqA5uKkxtT2uTo98+H7WQz2eWG7RiX6cFHEza42O3t21i3p2EHLsNvN7ebM/yrYEegjRQ6RBqj6wK+0/TjjQo6PQg8JOyCDjMifw5uOz4V9QUWRPaj1O34zblEPazKAiml/4UuWEzIBT6SZImvU6L/HgbtiLevrq6qcVWLq2Sz+RemXySonY3dQVjwzzpA1F5JMThwafY/fZ9OZGYGAAA=
   - path: /etc/kubernetes/manifests/kube-config.yaml
     owner: root
     permissions: 0644
     encoding: "gz+b64"
     content: |
-      H4sICEIrv1cAA2t1YmUtY29uZmlnLnlhbWwAdY/BDsIgEETvfAU/gMQrV//BO+JWN6XQLEujfy8gNq3R225m5mXGzngGShiDkctRjBiuRp5iGPAmnM+Ji2iEksFOYKSPznohZVdMOcsDxDigswzKZr5HQn4aqYGdHvMFKABD0il57exhhknktKNWkwcusCp0qEcIrDbs30Q7Y8ksQA28SY7wp8OaqJaWcjEwPLg16venxHvmurs33DTeLVA9LVwmavU77dvwArkGlfh2AQAA
+      H4sICGtpwFcAA2t1YmUtY29uZmlnLnlhbWwAdY9NEsIgDEb3nIILIOOWrXdwj5hqBgqdEPy5vZSi0zq6C/N9ebzYCY9AGVM08rYXHuPZyEOKA16ECyVzDY1QMtoRjAzJ2SCk7ImpY30AMQ7oLIOyha+JkJ9GamCnfTkBRWDIOuegnd1NMIqSN9S5FIArbA46NCBEViv2b+I9kQdq1NWahz8CS33O24pLkeHBzaXP7++XAz8Xd7eV68Zd9W3hClET77TvwgvBYoOAcAEAAA==
   - path: /etc/kubernetes/manifests/kube-proxy.yaml
     owner: root
     permissions: 0644
     encoding: "gz+b64"
     content: |
-      H4sICI5kwFcAA2t1YmUtcHJveHkueWFtbABtULtuwzAM3P0V/AFZcYuigYBMndtm6lowMmsLsR6QaDf++8q24iyFJh15Dx4G80UxGe8UTE11Na5VcPZtZYmxRUZVATi0pOA6XkiE6G9zgVJAfcfTnJhslQLphdH7xB/Evz5eFXAcKWPaO0bjstuyIf5TBTAWu4x2OtbGy877bqDvB1P2c6C4cNTU1M/1y0rS3lrMwdePgMdSAR7yAoSwmKPGU88clJTN02t9yK9Rx8PxsC+tFGF9SycTGC8DpX02+I7zfS3FeCq3ASTSYzQ8v+WsdOMtC2RrM5mBOmr3HgAmP4yW3v3oON1D2+V3Ru4VSGItUxqkpsipCG1tZVSsqFgaLqNI2H66Yd4dNv1S87K46t4TbR5jijL1GElqXCXNj9HI5cz/3P4ANr/RACsCAAA=
-  - path: /etc/kubernetes/manifests/kube-scheduler.yaml
-    owner: root
-    permissions: 0644
-    encoding: "gz+b64"
-    content: |
-      H4sICHBmwFcAA2t1YmUtc2NoZWR1bGVyLnlhbWwAdVDJasQwDL3nK/QDzjIldDDMrTC3MlDotaiOSMx4w1ZS0q+vk2YSeig66S3SkzDod4pJeydhaoq7dp2Em+8KS4wdMsoCwKElCffxk0RSA3WjobjBKaDauTkx2SIFUotr8Ilfib98vEvgOFLGlHeM2uWNi0L8NxlAW+wz06tYal/13veGPg53NcyB4uKTU1M+le1qUt5azAesjYBDtAF/VwgQwmKOHC8Dc5BV1ZyeyzpXI8/1ud5FhrCjKMiQ4st2CIDREzlK6RZ9TrFC+eY86Er8aH+fIGEfvOMBeZA5IaHh4fuAfVzk9al9SLXTrNG8kMH5jfIHupQF7caytuRHPogfJ+VQLtABAAA=
-  - path: /etc/kubernetes/manifests/kube-controller-manager.yaml
-    owner: root
-    permissions: 0644
-    encoding: "gz+b64"
-    content: |
-      H4sICGVmwFcAA2t1YmUtY29udHJvbGxlci1tYW5hZ2VyLnlhbWwAjVLLbtswELzrK/gDlGwHRgICvhXoqa2BAL0GW2pjEeZDWK5UKF8fUk8UjdJCF+3szCx3SGjNT6RogleiPxZ342slrqEuHDLUwKAKITw4VOLe/UKpg2cK1iJJBx5uSHM/tqAXUhwioytiizrLmxD5O/LvQHclmDpMWPYB49PozJD/HCGEcelXiZum0oTqFsLN4stmUzVDi5QNVH8sH8rzKNLBJY9ajYUUG2kGdmZJIVOdlqBLw9yqqjqeHstD+o7q6fB0WEkWoU5atKj5Mq82dSJSbzRK0Dp0nmVLpgdGecdBvhqLlwpZVzHaSkMGyzYltogpBJYJ34j5zOSRMc6alW9Njx5jvFJIu49Qijyd+ivyUk53oMS6xYq3wI1KuSBYbt42OFCmH07n04wZb9iA/YIWhmdMudUxEc5zl43D0PHWGPE+2M7ht7x/XK7A5eo6Tf17sdlueg2plhqJo9xIM4FS7j+8Hdb39JH1vt/W+V+jahTu2OVw9/ymDOZXnomjb/FH+js5fJrCp2Z7DhO+K+0iVbEBwvwms8K8Gg1L6h9t/Q4hZumLPwQAAA==
+      H4sICAdowFcAA2t1YmUtcHJveHkueWFtbABtUDtuwzAM3X0KXUAWgqSLgEyd22bqWjAyawuRLIGk3fj2lT9xlox85PsRsv9GYp96q8ZDdfN9Y9UlNVVEgQYEbKVUDxGtug1X1JnSfdogzuAeOE8sGCvO6GZGl1g+Uf4S3awSGrBgLvUCvi9u84V+paqUj9AWtHVU+2TalNqAP0+m6aaMNHPseKiP9dtCcilGKMGXQavn0QY85bXSOkKJSudOJLM1BrJnpBGpFmRxYZi3xdyeTsedsyjomBo8+yxwDcj7LqRWSt0Gic5bVaUY3UBepvcSHe+yRlMliR99wBab/S1KjSkMET/S0As/OsR5uoB0VhkUZ5iDcUjCm9D6vILqBdXzw7cVITRffZh2h1V/+/p8uOg+Eq0eA5PhDgiNg0XS/3oHstV85fYP9nO3EzoCAAA=
 coreos:
   units:
     - name: flanneld.service
@@ -89,8 +71,7 @@ coreos:
         EnvironmentFile=/etc/network-environment
         ExecStart=/usr/bin/docker run -v /etc/ssl:/input -v /etc:/output --rm=true \
          -e HOST_IP=${DEFAULT_IPV4} \
-         -e SERVICE_DNS_NAME=apiserver.testcluster.io \
-         quay.io/samsung_cnct/drunkensmee:v0.2 /assets/generate_apiserver.sh
+         quay.io/samsung_cnct/drunkensmee:v0.2 /assets/generate_worker.sh
         RemainAfterExit=yes
         Type=oneshot
     - name: format-ephemeral.service
@@ -126,16 +107,16 @@ coreos:
         ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/v1.3.5/bin/linux/amd64/kubelet
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kubelet
         ExecStart=/opt/bin/kubelet \
-          --api_servers=http://127.0.0.1:8080 \
-          --register-node=false \
+          --api_servers=https://apiserver.testcluster.io:443 \
+          --register-node=true \
           --allow-privileged=true \
           --config=/etc/kubernetes/manifests \
           --kubeconfig=/etc/kubernetes/manifests/kube-config.yaml \
           --hostname-override=${DEAFULT_IPV4} \
           --cluster-dns=10.1.0.10 \
           --cluster-domain=cluster.local \
-          --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem \
-          --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem \
+          --tls-cert-file=/etc/kubernetes/ssl/worker.pem \
+          --tls-private-key-file=/etc/kubernetes/ssl/worker-key.pem \
           --cloud-provider=aws \
           --logtostderr=true
         Restart=always

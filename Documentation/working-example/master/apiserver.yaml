@@ -12,10 +12,10 @@ spec:
     - /hyperkube
     - apiserver
     - --bind-address=0.0.0.0
-    - --etcd-servers=https://etcd2379.etcd.testcluster.io
+    - --etcd-servers=https://etcd2379.etcd.testcluster.io:2379
     - --etcd-cafile=/etc/etcd/ssl/client-ca.pem
     - --etcd-certfile=/etc/etcd/ssl/client.pem
-    - --etcd-keyfile==/etc/etcd/ssl/client-key.pem
+    - --etcd-keyfile=/etc/etcd/ssl/client-key.pem
     - --allow-privileged=true
     - --service-cluster-ip-range=10.1.0.0/16
     - --secure_port=443
