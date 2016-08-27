@@ -14,9 +14,9 @@ spec:
     - --bind-address=0.0.0.0
     - --etcd-servers={KUBERNETES_ETCD_ENDPOINT}
     - --etcd-servers-overrides=/events#{KUBERNETES_ETCD2_ENDPOINT}
-    - --etcd-cafile=/etc/etcd/ssl/ca.pem
+    - --etcd-cafile=/etc/etcd/ssl/client-ca.pem
     - --etcd-certfile=/etc/etcd/ssl/client.pem
-    - --etcd-keyfile==/etc/etcd/ssl/client-key.pem
+    - --etcd-keyfile=/etc/etcd/ssl/client-key.pem
     - --allow-privileged=true
     - --service-cluster-ip-range={CLUSTER_CIDR}
     - --secure_port=443

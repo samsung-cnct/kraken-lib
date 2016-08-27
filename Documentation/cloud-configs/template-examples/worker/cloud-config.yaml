@@ -14,12 +14,6 @@ write_files:
     encoding: "gz+b64"
     content: |
       {CA_OUTPUT}
-  - path: /etc/kubernetes/manifests/apiserver.yaml
-    owner: root
-    permissions: 0644
-    encoding: "gz+b64"
-    content: |
-      {APISERVER_YAML_OUTPUT}
   - path: /etc/kubernetes/kubeconfig.yaml
     owner: root
     permissions: 0644
@@ -32,24 +26,6 @@ write_files:
     encoding: "gz+b64"
     content: |
       {KUBE_PROXY_YAML_OUTPUT}
-  - path: /etc/kubernetes/manifests/kube-scheduler.yaml
-    owner: root
-    permissions: 0644
-    encoding: "gz+b64"
-    content: |
-      {KUBE_SCHEDULER_YAML_OUTPUT}
-  - path: /etc/kubernetes/manifests/kube-controller-manager.yaml
-    owner: root
-    permissions: 0644
-    encoding: "gz+b64"
-    content: |
-      {KUBE_CONTROLLER_MANAGER_YAML_OUTPUT}
-  - path: /etc/kubernetes/manifests/kube-system-namespace.yaml
-    owner: root
-    permissions: 0644
-    encoding: "gz+b64"
-    content: |
-      {KUBE_SYSTEM_NAMESPACE_YAML_OUTPUT}
 coreos:
   units:
     - name: flanneld.service
@@ -107,9 +83,8 @@ coreos:
          --mount volume=input,target=/input \
          --mount volume=output,target=/output \
          --set-env=HOST_IP=${DEFAULT_IPV4} \
-         --set-env=SERVICE_DNS_NAME=${APISERVER_DNS_NAME} \
          quay.io/samsung_cnct/drunkensmee:v0.2 \
-         --exec /assets/generate_apiserver.sh
+         --exec /assets/generate_worker.sh
         ExecStopPost=/usr/bin/rkt gc --mark-only
     - name: format-docker.service
       command: start
@@ -163,16 +138,16 @@ coreos:
         ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/${KUBERNETES_VERSION}/bin/linux/amd64/kubelet
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kubelet
         ExecStart=/opt/bin/kubelet \
-          --api_servers=http://127.0.0.1:8080 \
-          --register-schedulable=false \
+          --api_servers=${KUBERNETES_API_ENDPOINT} \
+          --register-node=true \
           --allow-privileged=true \
           --config=/etc/kubernetes/manifests \
           --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
-          --hostname-override=${DEAFULT_IPV4} \
+          --hostname-override=${DEFAULT_IPV4} \
           --cluster-dns=${KUBERNETES_DNS_SERVICE} \
           --cluster-domain=${KUBERNETES_DNS_NAME} \
-          --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem \
-          --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem \
+          --tls-cert-file=/etc/kubernetes/ssl/worker.pem \
+          --tls-private-key-file=/etc/kubernetes/ssl/worker-key.pem \
           --cloud-provider=aws \
           --logtostderr=true
         Restart=always
