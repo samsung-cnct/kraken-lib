@@ -21,11 +21,9 @@ coreos:
       content: |
         [Unit]
         Description=etcd2381
-        After=docker.service
         After=kraken-ssl.service
         After=kraken-networking.service
         After=ephemeral.mount
-        Requires=docker.service
         Requires=kraken-ssl.service
         Requires=kraken-networking.service
         Requires=ephemeral.mount
@@ -35,14 +33,18 @@ coreos:
         RestartSec=15
         Restart=always
         KillMode=none
-        ExecStartPre=-/usr/bin/docker kill etcd_2381
-        ExecStartPre=-/usr/bin/docker rm etcd_2381
-        ExecStartPre=/usr/bin/mkdir -p /ephemeral/etcd2381
-        ExecStartPre=/usr/bin/mkdir -p /etc/etcd/ssl
-        ExecStart=/usr/bin/docker run -v /etc/etcd/ssl:/etc/etcd/ssl -v /ephemeral/etcd2381:/ephemeral \
-         -p 2381:2381 -p 2382:2382 --net=host \
-         --name etcd_2381 quay.io/coreos/etcd:v3.0.5 etcd \
-         --data-dir /ephemeral/etcd \
+        ExecStart=/usr/bin/rkt run --net=host \
+         --stage1-path=/usr/lib/rkt/stage1-images/stage1-fly.aci \
+         --insecure-options=image \
+         --inherit-env=true \
+         --volume ssl,kind=host,source=/etc/etcd/ssl,readOnly=true \
+         --volume data,kind=host,source=/ephemeral/etcd2381,readOnly=false \
+         --volume resolv-conf,kind=host,source=/etc/resolv.conf \
+         --mount volume=ssl,target=/etc/etcd/ssl \
+         --mount volume=data,target=/ephemeral \
+         --mount volume=resolv-conf,target=/etc/resolv.conf \
+         quay.io/coreos/etcd:v3.0.5 \
+         -- --data-dir /ephemeral/etcd \
          --name etcd2381 \
          --peer-client-cert-auth \
          --peer-trusted-ca-file=/etc/etcd/ssl/peer-ca.pem \
@@ -58,40 +60,53 @@ coreos:
          --initial-cluster-state new \
          --advertise-client-urls https://${DEFAULT_IPV4}:2381 \
          --listen-client-urls https://127.0.0.1:2381,https://${DEFAULT_IPV4}:2381 \
-         --listen-peer-urls https://127.0.0.1:2382,https://${DEFAULT_IPV4}:2382
-        ExecStartStop=/usr/bin/docker stop etcd_2381
+         --listen-peer-urls https://127.0.0.1:2382,https://${DEFAULT_IPV4}:2382 \
+         ---
+        ExecStopPost=/usr/bin/rkt gc --mark-only
     - name: kraken-networking.service
       runtime: true
       command: start
       content: |
         [Unit]
         Description=Setup Network Environment
-        Requires=early-docker.service
-        After=early-docker.service
+        Requires=network-online.target
+        After=network-online.target
         [Service]
-        ExecStart=/usr/bin/docker run -v /etc:/etc --rm=true --net=host \
-         quay.io/venezia/setup-network-environment:v1.0.1-mv
         RemainAfterExit=yes
         Type=oneshot
+        ExecStart=/usr/bin/rkt run \
+         --insecure-options=image \
+         --net=host \
+         --inherit-env=true \
+         --volume etc,kind=host,source=/etc,readOnly=false \
+         --mount volume=etc,target=/etc \
+         quay.io/venezia/setup-network-environment:v1.0.1-mv
+        ExecStopPost=/usr/bin/rkt gc --mark-only
     - name: kraken-ssl.service
       runtime: true
       command: start
       content: |
         [Unit]
         Description=Setup Network Environment
-        Requires=early-docker.service
         Requires=kraken-networking.service
-        After=early-docker.service
         After=kraken-networking.service
         [Service]
         EnvironmentFile=/etc/network-environment
-        ExecStart=/usr/bin/docker run -v /etc/ssl:/input -v /etc:/output --rm=true \
-         -e HOST_IP=${DEFAULT_IPV4} \
-         -e SERVICE_DNS_NAME=etcd2381.etcd.testcluster.io \
-         -e HOST_DNS_NAME=*.etcd2381.etcd.testcluster.io \
-         quay.io/samsung_cnct/drunkensmee:v0.2 /assets/generate_etcd.sh
         RemainAfterExit=yes
         Type=oneshot
+        ExecStart=/usr/bin/rkt run \
+         --insecure-options=image \
+         --inherit-env=true \
+         --volume input,kind=host,source=/etc/ssl,readOnly=true \
+         --volume output,kind=host,source=/etc,readOnly=false \
+         --mount volume=input,target=/input \
+         --mount volume=output,target=/output \
+         --set-env=HOST_IP=${DEFAULT_IPV4} \
+         --set-env=SERVICE_DNS_NAME=etcd2381.etcd.testcluster.io \
+         --set-env=HOST_DNS_NAME=*.etcd2381.etcd.testcluster.io \
+         quay.io/samsung_cnct/drunkensmee:v0.2 \
+         --exec /assets/generate_etcd.sh
+        ExecStopPost=/usr/bin/rkt gc --mark-only
     - name: format-ephemeral.service
       command: start
       content: |

@@ -20,7 +20,7 @@ write_files:
     encoding: "gz+b64"
     content: |
       H4sICJJiwFcAA2FwaXNlcnZlci55YW1sAJ1UTW/bMAy951foB0R2snRbZ8CHYdut67oO2LVQZcYRIluGRDv1v58of9VNHGxDLhHJ9yi+J1pU6jdYp0yZsGa7OqoyS9iDyVYFoMgEimTFWCkKSNixfgYuKuXANmD7sKuEHHKudQjFylUgCXUwDu8BT8YeE4a2Bh+TpkShSt+RKvgSM2OqELnP5NJGysS5MbmGpwkdH9oKLOGSZhvtovcBJE1RCD9AOHA2FfWBeQvOOH/283KRZRacSzdR+I1JQJnxDuDSA2Llkjim4Lvdx08R/YkQHEpd+7npngkl5nAp9kpDSrAAjZ3TsdQKSvS5qPJ6zevB4iLivPwI7TK/T84QQmtz4pVVjYfkkKW9KV2WBlUSeD8OVxW3oswh3W6iLekSbz+8Kpa1hafKWExvbnZTi6xQjl4TJ6+s0en98Eju1B5kKzWsx9C3F+XQre9UofCRetn1LyJW2H7xcHjBr1C2PhZu9llKU5e4fgRnaivhZ21QjJ1RuyAen/Qg520J3qOgyuj+TBTCkSQCgQT7C/iZrqOdy+A3Vg9ai26k/29s6szf3jQqA5uKkxtT2uTo98+H7WQz2eWG7RiX6cFHEza42O3t21i3p2EHLsNvN7ebM/yrYEegjRQ6RBqj6wK+0/TjjQo6PQg8JOyCDjMifw5uOz4V9QUWRPaj1O34zblEPazKAiml/4UuWEzIBT6SZImvU6L/HgbtiLevrq6qcVWLq2Sz+RemXySonY3dQVjwzzpA1F5JMThwafY/fZ9OZGYGAAA=
-  - path: /etc/kubernetes/manifests/kube-config.yaml
+  - path: /etc/kubernetes/kubeconfig.yaml
     owner: root
     permissions: 0644
     encoding: "gz+b64"
@@ -44,6 +44,12 @@ write_files:
     encoding: "gz+b64"
     content: |
       H4sICGVmwFcAA2t1YmUtY29udHJvbGxlci1tYW5hZ2VyLnlhbWwAjVLLbtswELzrK/gDlGwHRgICvhXoqa2BAL0GW2pjEeZDWK5UKF8fUk8UjdJCF+3szCx3SGjNT6RogleiPxZ342slrqEuHDLUwKAKITw4VOLe/UKpg2cK1iJJBx5uSHM/tqAXUhwioytiizrLmxD5O/LvQHclmDpMWPYB49PozJD/HCGEcelXiZum0oTqFsLN4stmUzVDi5QNVH8sH8rzKNLBJY9ajYUUG2kGdmZJIVOdlqBLw9yqqjqeHstD+o7q6fB0WEkWoU5atKj5Mq82dSJSbzRK0Dp0nmVLpgdGecdBvhqLlwpZVzHaSkMGyzYltogpBJYJ34j5zOSRMc6alW9Njx5jvFJIu49Qijyd+ivyUk53oMS6xYq3wI1KuSBYbt42OFCmH07n04wZb9iA/YIWhmdMudUxEc5zl43D0PHWGPE+2M7ht7x/XK7A5eo6Tf17sdlueg2plhqJo9xIM4FS7j+8Hdb39JH1vt/W+V+jahTu2OVw9/ymDOZXnomjb/FH+js5fJrCp2Z7DhO+K+0iVbEBwvwms8K8Gg1L6h9t/Q4hZumLPwQAAA==
+  - path: /etc/kubernetes/manifests/kube-system-namespace.yaml
+    owner: root
+    permissions: 0644
+    encoding: "gz+b64"
+    content: |
+      H4sICCzCwFcAA2t1YmUtc3lzdGVtLW5hbWVzcGFjZS55YW1sAMvOzEuxUvBLzE0tLkhMTuVKLMgMSy0qzszPs1IoM+TKTS1JTEksSbTiUlDIAyqyUsguTUrVLa4sLknNBYrlJCal5hSDZLHIAwCSQLiQXAAAAA==
 coreos:
   units:
     - name: flanneld.service
@@ -68,32 +74,44 @@ coreos:
       content: |
         [Unit]
         Description=Setup Network Environment
-        Requires=early-docker.service
-        After=early-docker.service
+        Requires=network-online.target
+        After=network-online.target
         [Service]
-        ExecStart=/usr/bin/docker run -v /etc:/etc --rm=true --net=host \
-         quay.io/venezia/setup-network-environment:v1.0.1-mv
         RemainAfterExit=yes
         Type=oneshot
+        ExecStart=/usr/bin/rkt run \
+         --insecure-options=image \
+         --net=host \
+         --inherit-env=true \
+         --volume etc,kind=host,source=/etc,readOnly=false \
+         --mount volume=etc,target=/etc \
+         quay.io/venezia/setup-network-environment:v1.0.1-mv
+        ExecStopPost=/usr/bin/rkt gc --mark-only
     - name: kraken-ssl.service
       runtime: true
       command: start
       content: |
         [Unit]
         Description=Setup Network Environment
-        Requires=early-docker.service
         Requires=kraken-networking.service
-        After=early-docker.service
         After=kraken-networking.service
         [Service]
         EnvironmentFile=/etc/network-environment
-        ExecStart=/usr/bin/docker run -v /etc/ssl:/input -v /etc:/output --rm=true \
-         -e HOST_IP=${DEFAULT_IPV4} \
-         -e SERVICE_DNS_NAME=apiserver.testcluster.io \
-         quay.io/samsung_cnct/drunkensmee:v0.2 /assets/generate_apiserver.sh
         RemainAfterExit=yes
         Type=oneshot
-    - name: format-ephemeral.service
+        ExecStart=/usr/bin/rkt run \
+         --insecure-options=image \
+         --inherit-env=true \
+         --volume input,kind=host,source=/etc/ssl,readOnly=true \
+         --volume output,kind=host,source=/etc,readOnly=false \
+         --mount volume=input,target=/input \
+         --mount volume=output,target=/output \
+         --set-env=HOST_IP=${DEFAULT_IPV4} \
+         --set-env=SERVICE_DNS_NAME=apiserver.testcluster.io \
+         quay.io/samsung_cnct/drunkensmee:v0.2 \
+         --exec /assets/generate_apiserver.sh
+        ExecStopPost=/usr/bin/rkt gc --mark-only
+    - name: format-docker.service
       command: start
       content: |
         [Unit]
@@ -103,36 +121,55 @@ coreos:
         [Service]
         Type=oneshot
         RemainAfterExit=yes
-        ExecStart=/bin/bash -c '(/usr/sbin/blkid -t TYPE=ext4 | /usr/bin/grep /dev/xvdf) || (/usr/sbin/wipefs -fa /dev/xvdf && /usr/sbin/mkfs.ext4 /dev/xvdf)'
-    - name: ephemeral.mount
+        ExecStartPre=/usr/sbin/wipefs -fa /dev/xvdf
+        ExecStart=/usr/sbin/mkfs.ext4 /dev/xvdf
+    - name: var-lib-docker.mount
       command: start
       content: |
         [Unit]
-        Description=Mount ephemeral to /ephemeral
-        Requires=format-ephemeral.service
-        After=format-ephemeral.service
+        Description=Mount docker to /var/lib/docker
+        Requires=format-docker.service
+        After=format-docker.service
+        Before=early-docker.service
+        Before=docker.service
         [Mount]
         What=/dev/xvdf
-        Where=/ephemeral
+        Where=/var/lib/docker
         Type=ext4
+    - name: docker.service
+      drop-ins:
+        - name: 10-wait-docker.conf
+          content: |
+            [Unit]
+            After=var-lib-docker.mount
+            Requires=var-lib-docker.mount
+    - name: early-docker.service
+      drop-ins:
+        - name: 10-wait-early-docker.conf
+          content: |
+            [Unit]
+            After=var-lib-docker.mount
+            Requires=var-lib-docker.mount
     - name: kubelet.service
       command: start
       content: |
         [Unit]
         After=docker.service
+        After=kraken-ssl.service
         Requires=docker.service
+        Requires=kraken-ssl.service
         [Service]
         EnvironmentFile=/etc/network-environment
         ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/v1.3.5/bin/linux/amd64/kubelet
         ExecStartPre=/usr/bin/chmod +x /opt/bin/kubelet
         ExecStart=/opt/bin/kubelet \
           --api_servers=http://127.0.0.1:8080 \
-          --register-node=false \
+          --register-schedulable=false \
           --allow-privileged=true \
           --config=/etc/kubernetes/manifests \
-          --kubeconfig=/etc/kubernetes/manifests/kube-config.yaml \
+          --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
           --hostname-override=${DEAFULT_IPV4} \
-          --cluster-dns=10.1.0.10 \
+          --cluster-dns=10.1.0.2 \
           --cluster-domain=cluster.local \
           --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem \
           --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem \

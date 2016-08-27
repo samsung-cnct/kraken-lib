@@ -14,18 +14,18 @@ write_files:
     encoding: "gz+b64"
     content: |
       H4sICHBTt1cAA2NhLnBlbQBlVEmvs0YQvPMrckdPBrMfcpiBAWMzmGGz4QY2uzcw+6+PX/J9UZTXt66uLpVUrf76+hREhmn/oSLXN3VTBT76Br8obJoqvaoqyI4FmEwICnMPHKflyQrz9c5jwBiq1xqemXIaQVCdAoAhmVENCCzskIIAY/XUL9Gpv6UVW0c+yPSJme0a8Nhv5qNGGKzB5IOt/2DkX+xbiPqt9FPo48ozJ41E+8MzNsvxYoOPA0iAVhTIAdpnTp4q9Wk+u1wzug7vFy3nweYxje5pfuNeXn33MF64fD8kPet4JN6kxrXqZwN1dM6sTpro1G33znev21MIJ+ut5cmcDSgT9krxSsJaOYXmfFbbNiGPlrhP/vbwlK4I+IX3IquPipihsvUFWPeCAz0A7XZeCk1Ze0uxdi+zESwkVczo7so07er6wD8HR+e3S1Nxec9JibuUDMV2Pmu793KZF/u6u/YktjuR20zrobZ9B4pyeXFV27zbFyliJVXptjdV5KqqLOaTJfsKNeaMcH/Eg5OxopSxNyzI1WJ6OB43Fn5pdKs4Qb31yUgS9i3ItrejX/RFLc/+0LyrY0tFemNd1rBRe2jCKib8O5066ChvtlHBhABIbIIRP+1IpIUuc4QwQrq5DDneCPmxOFFse20mdomTotE30wIxlA3ABldzIhGGCfgv+QcXTAb1TUYT0fHnvkAu/z9361fun6hbMZuZ5enMeXKPOx7ltKYFObVigZEmf0eLO7l9OVV0rEIGbZW4Cd1bbG8GG10eW36USD7o2b54rdZ2LuyHyDwV/YJTqtdO+IGAb1+NpeEtoIS0NV0nZUwmV0mDWTkOkco/FbN3a4Fz2eVscjroBt2TWpS2JiUew2AZDMQY/dHhUVQzaQ7T6LYXC9s/QDZ8PfXNJidiS+8rWo+B6Bmlp4+xtFFsWpeohKu1BqoRiR/XAQTnVrnfgLDkEtcr8HpjpE4Sz74X4UGwzsIUBodmkdkuiwR5YpI9pOT1qJRMzhXrozrX2+SU+FCnE/ZIG3FJX+pRhMuhXJCfuSyRX0Wn5d66msp+YnJpxn9Sf38FZGs/P8VfmGgAqUYEAAA=
-  - path: /etc/kubernetes/manifests/kube-config.yaml
+  - path: /etc/kubernetes/kubeconfig.yaml
     owner: root
     permissions: 0644
     encoding: "gz+b64"
     content: |
-      H4sICGtpwFcAA2t1YmUtY29uZmlnLnlhbWwAdY9NEsIgDEb3nIILIOOWrXdwj5hqBgqdEPy5vZSi0zq6C/N9ebzYCY9AGVM08rYXHuPZyEOKA16ECyVzDY1QMtoRjAzJ2SCk7ImpY30AMQ7oLIOyha+JkJ9GamCnfTkBRWDIOuegnd1NMIqSN9S5FIArbA46NCBEViv2b+I9kQdq1NWahz8CS33O24pLkeHBzaXP7++XAz8Xd7eV68Zd9W3hClET77TvwgvBYoOAcAEAAA==
+      H4sICGtpwFcAA2t1YmVjb25maWcueWFtbAB1j00SwiAMRvecggsg45atd3CPmGoGCp0Q/Lm9lKLTOroL8315vNgJj0AZUzTythce49nIQ4oDXoQLJXMNjVAy2hGMDMnZIKTsialjfQAxDugsg7KFr4mQn0ZqYKd9OQFFYMg656Cd3U0wipI31LkUgCtsDjo0IERWK/Zv4j2RB2rU1ZqHPwJLfc7bikuR4cHNpc/v75cDPxd3t5Xrxl31beEKURPvtO/CC8Fig4BwAQAA
   - path: /etc/kubernetes/manifests/kube-proxy.yaml
     owner: root
     permissions: 0644
     encoding: "gz+b64"
     content: |
-      H4sICAdowFcAA2t1YmUtcHJveHkueWFtbABtUDtuwzAM3X0KXUAWgqSLgEyd22bqWjAyawuRLIGk3fj2lT9xlox85PsRsv9GYp96q8ZDdfN9Y9UlNVVEgQYEbKVUDxGtug1X1JnSfdogzuAeOE8sGCvO6GZGl1g+Uf4S3awSGrBgLvUCvi9u84V+paqUj9AWtHVU+2TalNqAP0+m6aaMNHPseKiP9dtCcilGKMGXQavn0QY85bXSOkKJSudOJLM1BrJnpBGpFmRxYZi3xdyeTsedsyjomBo8+yxwDcj7LqRWSt0Gic5bVaUY3UBepvcSHe+yRlMliR99wBab/S1KjSkMET/S0As/OsR5uoB0VhkUZ5iDcUjCm9D6vILqBdXzw7cVITRffZh2h1V/+/p8uOg+Eq0eA5PhDgiNg0XS/3oHstV85fYP9nO3EzoCAAA=
+      H4sICFPgwFcAA2t1YmUtcHJveHkueWFtbACNUktPwzAMvu9XRL2nEUJcKu3EGdiJK/JS00ZLmih2y/rvSbKt5TXgaH8Pf3YCwTxjJOOHRkw3m4MZ2kbsfLtxyNACQ7MRYgCHjTiMe5Qh+uN8blEAfenTTIxuQwF1VvSe+BH5zcdDIziOmHraDwxmSNMyQ/7kKoRx0KVup2NtvOq87yy+rErVzwFj1jTTTX1b3xWR9s5BCl4KKVbSubHaSyGlgxQ1bnvmQI1SEAxhnDDWjMTajhlNwxd+NkoJXk23Vcha5ToOmNhqheoZnF0kZaB0vsWtCQx7i1QwQj1Gw/N9WgiPfAosUj4zGYsdtsuxhJi8HR0++HFguhClcLneAfeNKGGIrNIYmc6My2NVCZAFqK5q/1jkg9kKVwsUEdqnwc4fIv8xJEX6apwY8vR/yP5ifboFXR742or515XRi1MoQSo1UlTUQ0SloWjMq9GQQlWfLb8vet3z9xN+Mf5p0X9bZ807tgvMDKkDAAA=
 coreos:
   units:
     - name: flanneld.service
@@ -50,31 +50,43 @@ coreos:
       content: |
         [Unit]
         Description=Setup Network Environment
-        Requires=early-docker.service
-        After=early-docker.service
+        Requires=network-online.target
+        After=network-online.target
         [Service]
-        ExecStart=/usr/bin/docker run -v /etc:/etc --rm=true --net=host \
-         quay.io/venezia/setup-network-environment:v1.0.1-mv
         RemainAfterExit=yes
         Type=oneshot
+        ExecStart=/usr/bin/rkt run \
+         --insecure-options=image \
+         --net=host \
+         --inherit-env=true \
+         --volume etc,kind=host,source=/etc,readOnly=false \
+         --mount volume=etc,target=/etc \
+         quay.io/venezia/setup-network-environment:v1.0.1-mv
+        ExecStopPost=/usr/bin/rkt gc --mark-only
     - name: kraken-ssl.service
       runtime: true
       command: start
       content: |
         [Unit]
         Description=Setup Network Environment
-        Requires=early-docker.service
         Requires=kraken-networking.service
-        After=early-docker.service
         After=kraken-networking.service
         [Service]
         EnvironmentFile=/etc/network-environment
-        ExecStart=/usr/bin/docker run -v /etc/ssl:/input -v /etc:/output --rm=true \
-         -e HOST_IP=${DEFAULT_IPV4} \
-         quay.io/samsung_cnct/drunkensmee:v0.2 /assets/generate_worker.sh
         RemainAfterExit=yes
         Type=oneshot
-    - name: format-ephemeral.service
+        ExecStart=/usr/bin/rkt run \
+         --insecure-options=image \
+         --inherit-env=true \
+         --volume input,kind=host,source=/etc/ssl,readOnly=true \
+         --volume output,kind=host,source=/etc,readOnly=false \
+         --mount volume=input,target=/input \
+         --mount volume=output,target=/output \
+         --set-env=HOST_IP=${DEFAULT_IPV4} \
+         quay.io/samsung_cnct/drunkensmee:v0.2 \
+         --exec /assets/generate_worker.sh
+        ExecStopPost=/usr/bin/rkt gc --mark-only
+    - name: format-docker.service
       command: start
       content: |
         [Unit]
@@ -84,24 +96,43 @@ coreos:
         [Service]
         Type=oneshot
         RemainAfterExit=yes
-        ExecStart=/bin/bash -c '(/usr/sbin/blkid -t TYPE=ext4 | /usr/bin/grep /dev/xvdf) || (/usr/sbin/wipefs -fa /dev/xvdf && /usr/sbin/mkfs.ext4 /dev/xvdf)'
-    - name: ephemeral.mount
+        ExecStartPre=/usr/sbin/wipefs -fa /dev/xvdf
+        ExecStart=/usr/sbin/mkfs.ext4 /dev/xvdf
+    - name: var-lib-docker.mount
       command: start
       content: |
         [Unit]
-        Description=Mount ephemeral to /ephemeral
-        Requires=format-ephemeral.service
-        After=format-ephemeral.service
+        Description=Mount docker to /var/lib/docker
+        Requires=format-docker.service
+        After=format-docker.service
+        Before=early-docker.service
+        Before=docker.service
         [Mount]
         What=/dev/xvdf
-        Where=/ephemeral
+        Where=/var/lib/docker
         Type=ext4
+    - name: docker.service
+      drop-ins:
+        - name: 10-wait-docker.conf
+          content: |
+            [Unit]
+            After=var-lib-docker.mount
+            Requires=var-lib-docker.mount
+    - name: early-docker.service
+      drop-ins:
+        - name: 10-wait-early-docker.conf
+          content: |
+            [Unit]
+            After=var-lib-docker.mount
+            Requires=var-lib-docker.mount
     - name: kubelet.service
       command: start
       content: |
         [Unit]
         After=docker.service
+        After=kraken-ssl.service
         Requires=docker.service
+        Requires=kraken-ssl.service
         [Service]
         EnvironmentFile=/etc/network-environment
         ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/v1.3.5/bin/linux/amd64/kubelet
@@ -111,9 +142,9 @@ coreos:
           --register-node=true \
           --allow-privileged=true \
           --config=/etc/kubernetes/manifests \
-          --kubeconfig=/etc/kubernetes/manifests/kube-config.yaml \
+          --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
           --hostname-override=${DEAFULT_IPV4} \
-          --cluster-dns=10.1.0.10 \
+          --cluster-dns=10.1.0.2 \
           --cluster-domain=cluster.local \
           --tls-cert-file=/etc/kubernetes/ssl/worker.pem \
           --tls-private-key-file=/etc/kubernetes/ssl/worker-key.pem \

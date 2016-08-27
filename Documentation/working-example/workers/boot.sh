@@ -1,5 +1,5 @@
 #!/bin/sh
-aws ec2 run-instances --count 1 --image-id ami-6d138f7a \
+aws ec2 run-instances --count 4 --image-id ami-6d138f7a \
       --subnet-id subnet-d90f3df3 \
       --security-group-ids sg-09cbdc72 \
       --region us-east-1 \
