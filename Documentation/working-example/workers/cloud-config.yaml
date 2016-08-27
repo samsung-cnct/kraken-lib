@@ -61,7 +61,7 @@ coreos:
          --inherit-env=true \
          --volume etc,kind=host,source=/etc,readOnly=false \
          --mount volume=etc,target=/etc \
-         quay.io/venezia/setup-network-environment:v1.0.1-mv
+         quay.io/samsung_cnct/setup-network-environment:v1.0.1-mv
         ExecStopPost=/usr/bin/rkt gc --mark-only
     - name: kraken-ssl.service
       runtime: true
