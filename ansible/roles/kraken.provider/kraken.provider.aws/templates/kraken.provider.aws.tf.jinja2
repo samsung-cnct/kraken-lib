@@ -23,14 +23,10 @@ resource "aws_vpc" "vpc" {
 
 # A VPC-only route53 zone and record
 resource "aws_route53_zone" "private_zone" {
-  name     = "{{kraken_config.cluster}}.internal"
-  comment  = "A VPC-only zone for {{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}} kubernetes cluster"
-  vpc_id   = "${aws_vpc.vpc.id}"
-}
-
-resource "aws_route53_zone_association" "private_zone_association" {
-  zone_id = "${aws_route53_zone.private_zone.zone_id}"
-  vpc_id = "${aws_vpc.vpc.id}"
+  name          = "{{kraken_config.cluster}}.internal"
+  comment       = "A VPC-only zone for {{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}} kubernetes cluster"
+  vpc_id        = "${aws_vpc.vpc.id}"
+  force_destroy = true
 }
 
 # DHCP options sets
@@ -269,9 +265,12 @@ data "aws_iam_policy_document" "iam_lambda_etcd_role_doc" {
     actions = [
       "sts:AssumeRole",
     ]
-    principals = [
-      "lambda.amazonaws.com",
-    ]
+
+    principals {
+      type = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+
     effect = "Allow"
   }
 }
@@ -319,9 +318,10 @@ data "aws_iam_policy_document" "iam_lambda_sns_role_doc" {
     actions = [
       "sts:AssumeRole",
     ]
-    principals = [
-      "autoscaling.amazonaws.com",
-    ]
+    principals {
+      type = "Service"
+      identifiers = ["autoscaling.amazonaws.com"]
+    }
     effect = "Allow"
   }
 }
@@ -356,10 +356,11 @@ resource "aws_sns_topic" "etcd_scaling_events" {
 # Lambda function that will setup all dns records for etcd discovery
 resource "aws_lambda_function" "etcd_lambda" {
   filename = "lambda-sns-etcd-service-discovery.zip"
-  function_name = "lambda_function_name"
+  function_name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_etcd_srv"
   role = "${aws_iam_role.iam_lambda_etcd_role.arn}"
   handler = "lambda-sns-etcd-service-discovery.handler"
-  timeout = 600
+  timeout = 300
+  runtime = "python2.7"
 }
 
 resource "aws_lambda_permission" "etcd_scaling_events_lambda_permission" {
@@ -458,7 +459,7 @@ data "aws_iam_policy_document" "kubernetes_master_role_doc" {
 }
 resource "aws_iam_role" "kubernetes_master_role" {
   name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_kubernetes_master_role"
-  assume_role_policy = ${data.aws_iam_policy_document.kubernetes_master_role_doc.json}
+  assume_role_policy = "${data.aws_iam_policy_document.kubernetes_master_role_doc.json}"
 }
 data "aws_iam_policy_document" "kubernetes_master_policy_doc" {
   statement {
@@ -486,7 +487,7 @@ data "aws_iam_policy_document" "kubernetes_master_policy_doc" {
 resource "aws_iam_role_policy" "kubernetes_master_policy" {
   name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_kubernetes_master_policy"
   role = "${aws_iam_role.kubernetes_master_role.id}"
-  policy = ${data.aws_iam_policy_document.kubernetes_master_policy_doc.json}
+  policy = "${data.aws_iam_policy_document.kubernetes_master_policy_doc.json}"
 }
 resource "aws_iam_instance_profile" "kubernetes_master_profile" {
   name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_kubernetes_master_profile"
@@ -506,7 +507,7 @@ data "aws_iam_policy_document" "kubernetes_node_role_doc" {
 }
 resource "aws_iam_role" "kubernetes_node_role" {
   name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_kubernetes_node_role"
-  assume_role_policy = ${data.aws_iam_policy_document.kubernetes_node_role_doc.json}
+  assume_role_policy = "${data.aws_iam_policy_document.kubernetes_node_role_doc.json}"
 }
 data "aws_iam_policy_document" "kubernetes_node_policy_doc" {
   statement {
@@ -542,7 +543,7 @@ data "aws_iam_policy_document" "kubernetes_node_policy_doc" {
 resource "aws_iam_role_policy" "kubernetes_node_policy" {
   name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_kubernetes_node_policy"
   role = "${aws_iam_role.kubernetes_node_role.id}"
-  policy = ${data.aws_iam_policy_document.kubernetes_node_policy_doc.json}
+  policy = "${data.aws_iam_policy_document.kubernetes_node_policy_doc.json}"
 }
 resource "aws_iam_instance_profile" "kubernetes_node_profile" {
   name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_kubernetes_node_profile"

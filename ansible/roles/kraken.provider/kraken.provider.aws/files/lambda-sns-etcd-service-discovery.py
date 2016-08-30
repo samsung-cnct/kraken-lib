@@ -2,7 +2,8 @@
 """
 Update Route53 Records based on Autoscaling event notifications sent via SNS.
 To configure your domain you need to specify:
-1) a tag per Auto Scaling Group (ASG) 'DomainConfig' such as <Route53Zone:domain.com:prefix:SrvUrl:SrvPort>.
+1) Tags per Auto Scaling Group (ASG) :
+   'srvconfig' such as <Route53Zone:domain.com:prefix:SRV Client:SRV Server:SrvPort>.
 A Route53 entry will be created with the AWS generated EC2 Instance Id .e.g i-abc123456.domain.com. 
 
 When the server is terminated it will be removed from the Route53 zone you specified in the ASG tag.
@@ -11,11 +12,12 @@ When the server is terminated it will be removed from the Route53 zone you speci
 import json
 
 from collections import namedtuple
+from itertools import chain
 
 import boto3
 
 
-DomainEntry = namedtuple('DomainEntry', ['zone', 'name', 'prefix', 'srv', 'srvport'])
+DomainEntry = namedtuple('DomainEntry', ['zone', 'name', 'prefix', 'srvclient', 'srvserver', 'srvport'])
 
 
 class Error(Exception):
@@ -24,7 +26,8 @@ class Error(Exception):
 
 class UpdaterClient(object):
 
-  domain_config_tag = 'DomainConfig'
+  srv_config_tag = 'srvconfig'
+
   ttl = 300
   dry_run = False
 
@@ -47,11 +50,13 @@ class UpdaterClient(object):
     asg = self.boto('autoscaling').describe_auto_scaling_groups(
       AutoScalingGroupNames=[self.autoscaling_group_name]
     )['AutoScalingGroups'][0]
-    tags = [x for x in asg['Tags'] if x['Key'] == self.domain_config_tag]
+    
+    tags = [x for x in asg['Tags'] if x['Key'] == self.srv_config_tag]
+
     if len(tags) != 1:
       raise Error(
         'You must specify the {} tag in your autoscaling group {}'.format(
-          self.domain_config_tag, self.autoscaling_group_name
+          self.srv_config_tag, self.autoscaling_group_name
         )
       )
     for entry in tags[0]['Value'].split(','):
@@ -72,7 +77,7 @@ class UpdaterClient(object):
       name = '{}.'.format(self.instance_id)
       
       if domain.prefix:
-        name = '{}{}.'.format(name, prefix)
+        name = '{}{}.'.format(name, domain.prefix)
       name = '{}{}.'.format(name, domain.name)
       
       record_sets = route53.list_resource_record_sets(
@@ -102,17 +107,23 @@ class UpdaterClient(object):
         }
       yield domain.zone, record
   
-  def srvs(self, action):
+  def srvsClient(self, action):
     route53 = self.boto('route53')
     for domain in self.domains():
       zone = route53.get_hosted_zone(Id=domain.zone)
       private = zone['HostedZone']['Config']['PrivateZone']
-      
-      if domain.srv:
-        ip_address = self.instance()['NetworkInterfaces'][0]['PrivateIpAddress']
-        srvValue = '0 0 {} {}'.format(domain.srvport, ip_address)
-        srvName = '{}.'.format(domain.srv)
+        
+      if domain.srvclient:
+        srvValue = '0 0 {} {}'.format(domain.srvport, self.instance_id)
+        srvName = '{}'.format(domain.srvclient)
 
+        if domain.prefix:
+          srvValue = '{}.{}.{}.'.format(srvValue, domain.prefix, domain.name)
+          srvName = '{}.{}.{}.'.format(srvName, domain.prefix, domain.name)
+        else:
+          srvValue = '{}.{}.'.format(srvValue, domain.name)
+          srvName = '{}.{}.'.format(srvName, domain.name)
+        
         record_sets = route53.list_resource_record_sets(
           HostedZoneId=domain.zone,
           StartRecordName=srvName
@@ -134,42 +145,139 @@ class UpdaterClient(object):
           record['ResourceRecords'].append({'Value':srvValue})
         yield domain.zone, record
 
+  def srvsServer(self, action):
+    route53 = self.boto('route53')
+    for domain in self.domains():
+      zone = route53.get_hosted_zone(Id=domain.zone)
+      private = zone['HostedZone']['Config']['PrivateZone']
+        
+      if domain.srvserver:
+        srvValue = '0 0 {} {}'.format(domain.srvport, self.instance_id)
+        srvName = '{}'.format(domain.srvserver)
+
+        if domain.prefix:
+          srvValue = '{}.{}.{}.'.format(srvValue, domain.prefix, domain.name)
+          srvName = '{}.{}.{}.'.format(srvName, domain.prefix, domain.name)
+        else:
+          srvValue = '{}.{}.'.format(srvValue, domain.name)
+          srvName = '{}.{}.'.format(srvName, domain.name)
+        
+        record_sets = route53.list_resource_record_sets(
+          HostedZoneId=domain.zone,
+          StartRecordName=srvName
+        )['ResourceRecordSets']
+        record = [x for x in record_sets if x['Type'] == 'SRV' and x['Name'] == srvName]
+
+        if record:
+          record = record[0]
+        else:
+          record = {
+            'Name': srvName,
+            'Type': 'SRV',
+            'TTL': self.ttl,
+            'ResourceRecords': []
+          }
+        
+        record['ResourceRecords'][:] = [value for value in record['ResourceRecords'] if value.get('Value') != srvValue]
+        if action == 'UPSERT':
+          record['ResourceRecords'].append({'Value':srvValue})
+        yield domain.zone, record
+
+  def roundrobin(self, action):
+    route53 = self.boto('route53')
+    for domain in self.domains():
+      zone = route53.get_hosted_zone(Id=domain.zone)
+      private = zone['HostedZone']['Config']['PrivateZone']
+        
+      if domain.prefix:
+        recordName = '{}.{}.'.format(domain.prefix, domain.name)
+        recordValue = ''
+        
+        record_sets = route53.list_resource_record_sets(
+          HostedZoneId=domain.zone,
+          StartRecordName=recordName
+        )['ResourceRecordSets']
+
+        if action == 'DELETE':
+          # on delete, lookup the old private ip address from a pre-existing individual A record
+          # since the instance is already terminated
+          individualARecord = '{}.{}.{}.'.format(self.instance_id, domain.prefix, domain.name)
+          record = [x for x in record_sets if x['Type'] == 'A' and x['Name'] == individualARecord]
+          recordValue = record[0]['ResourceRecords'][0]['Value']
+        else:
+          # otherwise we can just grab the private ip from NIC
+          recordValue = self.instance()['NetworkInterfaces'][0]['PrivateIpAddress']
+
+        record = [x for x in record_sets if x['Type'] == 'A' and x['Name'] == recordName]
+
+        if record:
+          record = record[0]
+        else:
+          record = {
+            'Name': recordName,
+            'Type': 'A',
+            'TTL': self.ttl,
+            'ResourceRecords': []
+          }
+        
+        record['ResourceRecords'][:] = [value for value in record['ResourceRecords'] if value.get('Value') != recordValue]
+        if action == 'UPSERT':
+          record['ResourceRecords'].append({'Value':recordValue})
+        yield domain.zone, record
+
   def update_records(self, action):
     route53 = self.boto('route53')
-    for zone, record in self.records():
-      update = {
-        'HostedZoneId': zone,
-        'ChangeBatch': {
-          'Comment': 'Automatically updated Route53 Record',
-          'Changes': [
-            {
-              'Action': action,
-              'ResourceRecordSet': record
-            }
-          ]
+    comment = 'Automatically updated Route53 Record'
+    updates = []
+
+    # grouped records that only upsert
+    upserts = chain(self.roundrobin(action), self.srvsClient(action), self.srvsServer(action))
+    for zone, record in upserts:      
+      if (not updates) or (not filter(lambda sameZone: sameZone['HostedZoneId'] == zone, updates)): 
+        newUpdate = {
+          'HostedZoneId': zone,
+          'ChangeBatch': {
+            'Comment': comment,
+            'Changes': [
+              {
+                'Action': 'UPSERT',
+                'ResourceRecordSet': record
+              }
+            ]
+          }
         }
-      }
-      print('Executing Route53 update: {}'.format(update))
-      if not self.dry_run:
+        updates.append(newUpdate)
+      else:
+        existingUpdate = filter(lambda sameZone: sameZone['HostedZoneId'] == zone, updates)
+        if not record['ResourceRecords']:
+          existingUpdate[0]['ChangeBatch']['Changes'].append({'Action': 'DELETE', 'ResourceRecordSet': record})
+        else:
+          existingUpdate[0]['ChangeBatch']['Changes'].append({'Action': 'UPSERT', 'ResourceRecordSet': record})
+
+
+    for zone, record in self.records():      
+      if (not updates) or (not filter(lambda sameZone: sameZone['HostedZoneId'] == zone, updates)): 
+        newUpdate = {
+          'HostedZoneId': zone,
+          'ChangeBatch': {
+            'Comment': comment,
+            'Changes': [
+              {
+                'Action': action,
+                'ResourceRecordSet': record
+              }
+            ]
+          }
+        }
+        updates.append(newUpdate)
+      else:
+        existingUpdate = filter(lambda sameZone: sameZone['HostedZoneId'] == zone, updates)
+        existingUpdate[0]['ChangeBatch']['Changes'].append({'Action': action, 'ResourceRecordSet': record})
+
+    if not self.dry_run:
+      for update in updates:
         route53.change_resource_record_sets(**update)
 
-    # always 'upsert' for SRV records
-    for zone, record in self.srvs(action):
-      update = {
-        'HostedZoneId': zone,
-        'ChangeBatch': {
-          'Comment': 'Automatically updated Route53 Record',
-          'Changes': [
-            {
-              'Action': 'UPSERT',
-              'ResourceRecordSet': record
-            }
-          ]
-        }
-      }
-      print('Executing Route53 update: {}'.format(update))
-      if not self.dry_run:
-        route53.change_resource_record_sets(**update)
 
 def handler(event, context):
 

@@ -124,7 +124,7 @@ In addition to the calico-setup.env (appropriate for SSL/non-SSL etcd) we need t
         name: policy-controller
         namespace: kube-system 
         labels:
-          version: "latest"
+          version: current
           projectcalico.org/app: "policy-controller"
       spec:
         hostNetwork: true
