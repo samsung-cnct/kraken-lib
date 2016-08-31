@@ -202,8 +202,8 @@ resource "aws_autoscaling_group" "lambda_test_nodes" {
   health_check_type         = "EC2"
 
   tag {
-    key                 = "DomainConfig"
-    value               = "${aws_route53_zone.private_zone.zone_id}:lambda-test.internal:prefix:_etcd-client-ssl._tcp:_etcd-server-ssl._tcp:2380"
+    key                 = "srvconfig"
+    value               = "${aws_route53_zone.private_zone.zone_id}:lambda-test.internal:prefix:_etcd-client-ssl._tcp:_etcd-server-ssl._tcp:2379:2380"
     propagate_at_launch = true
   }
 
