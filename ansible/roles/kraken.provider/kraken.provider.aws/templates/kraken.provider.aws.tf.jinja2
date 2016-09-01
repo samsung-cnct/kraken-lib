@@ -392,11 +392,11 @@ resource "aws_autoscaling_group" "{{etcd.name}}_nodes" {
   health_check_type         = "EC2"
 
   tag {
-    key                 = "DomainConfig"
+    key                 = "srvconfig"
 {% if etcd.ssl %}
-    value               = "${aws_route53_zone.private_zone.zone_id}:{{kraken_config.cluster}}.internal:{{etcd.name}}:_etcd-server-ssl._tcp.{{etcd.name}}.{{kraken_config.cluster}}.internal:{{etcd.peerPorts[0]}}"
+    value               = "${aws_route53_zone.private_zone.zone_id}:{{kraken_config.cluster}}.internal:{{etcd.name}}:_etcd-client-ssl._tcp:_etcd-server-ssl._tcp:{{etcd.clientPorts[0]}}:{{etcd.peerPorts[0]}}"
 {% else %}
-    value               = "${aws_route53_zone.private_zone.zone_id}:{{kraken_config.cluster}}.internal:{{etcd.name}}:_etcd-server._tcp.{{etcd.name}}.{{kraken_config.cluster}}.internal:{{etcd.peerPorts[0]}}"
+    value               = "${aws_route53_zone.private_zone.zone_id}:{{kraken_config.cluster}}.internal:{{etcd.name}}:_etcd-client._tcp:_etcd-server._tcp:{{etcd.clientPorts[0]}}:{{etcd.peerPorts[0]}}"
 {% endif %}
     propagate_at_launch = true
   }
