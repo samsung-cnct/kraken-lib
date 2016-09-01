@@ -5,7 +5,7 @@ deployment:
   coreos:
     -
       name: allNodes
-      version: latest
+      version: current
       channel: stable
       rebootStrategy: off
   keypair:
