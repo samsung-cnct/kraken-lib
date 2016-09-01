@@ -10,10 +10,7 @@ When the server is terminated it will be removed from the Route53 zone you speci
 """
 
 import json
-
 from collections import namedtuple
-from itertools import chain
-
 import boto3
 
 
@@ -69,156 +66,85 @@ class UpdaterClient(object):
       domain = DomainEntry(*entry.split(':'))
       yield domain
 
-
-  def query_existing_a_record(self, domain):
+  def get_a_record_name(self, domain):
     a_record_name = '{}.'.format(self.instance_id)
-    
+
     if domain.prefix:
       a_record_name = '{}{}.'.format(
-          a_record_name, 
-          domain.prefix
-        )
+        a_record_name, 
+        domain.prefix
+      )
 
     a_record_name = '{}{}.'.format(
       a_record_name, 
       domain.name
     )
 
+    return a_record_name
+
+  def get_srv_record_name(self, domain, isclient):
+    if isclient:
+      srv_record_name = '{}'.format(domain.srvclient)
+    else:
+      srv_record_name = '{}'.format(domain.srvserver)
+
+    srv_record_name = '{}.{}.{}.'.format(
+      srv_record_name, 
+      domain.prefix,
+      domain.name
+    )
+
+    return srv_record_name
+
+  def get_roundrobin_record_name(self, domain):
+
+    rr_record_name = '{}.{}.'.format(
+      domain.prefix, 
+      domain.name
+    )
+
+    return rr_record_name
+
+  def get_a_record(self, domain):
     record_sets = self.route53.list_resource_record_sets(
       HostedZoneId=domain.zone
     )['ResourceRecordSets']
-    a_record = [rc for rc in record_sets if rc['Name'] == a_record_name and rc['Type'] == 'A']
     
-    ip_address = ''
+    a_record = [rc for rc in record_sets if rc['Name'] == self.get_a_record_name(domain) and rc['Type'] == 'A']
     if a_record:
-      a_record = a_record[0]
-      if a_record['ResourceRecords']:
-        ip_address = a_record['ResourceRecords'][0]['Value']
+      return a_record[0] 
+    else:
+      return None
 
-    return ip_address
+  def get_srv_record(self, domain, isclient):
+
+    record_sets = self.route53.list_resource_record_sets(
+      HostedZoneId=domain.zone
+    )['ResourceRecordSets']
+    
+    srv_record = [rc for rc in record_sets if rc['Name'] == self.get_srv_record_name(domain, isclient) and rc['Type'] == 'SRV']
+    if srv_record:
+      return srv_record[0] 
+    else:
+      return None
+
+  def get_roundrobin_record(self, domain):
+    record_sets = self.route53.list_resource_record_sets(
+      HostedZoneId=domain.zone
+    )['ResourceRecordSets']
+    
+    rr_record = [rc for rc in record_sets if rc['Name'] == self.get_roundrobin_record_name(domain) and rc['Type'] == 'A']
+    if rr_record:
+      return rr_record[0] 
+    else:
+      return None
 
   def update_records(self, action):
 
-    print('ASG: {}'.format(self.asg))
-
     for domain in self.domains():
-      zone = self.route53.get_hosted_zone(Id=domain.zone) 
-      
-      if action == 'DELETE':
-        ip_address = self.query_existing_a_record(domain)
-      elif action == 'UPSERT':
-        if zone['HostedZone']['Config']['PrivateZone']:
-          ip_address = self.instance['NetworkInterfaces'][0]['PrivateIpAddress']
-        else:
-          ip_address = self.instance['PublicIp']
-      
-    
-      a_record_name = '{}.'.format(self.instance_id)
-      a_record_value = ip_address
 
-      srv_client_record_name = '{}'.format(domain.srvclient)
-      srv_client_record_value = '0 0 {} {}'.format(domain.srvclientport, self.instance_id)
-
-      srv_server_record_name = '{}'.format(domain.srvserver)
-      srv_server_record_value = '0 0 {} {}'.format(domain.srvserverport, self.instance_id)
-
-      roundrobin_record_name = ''
-      roundrobin_record_value = ip_address
-      
-      if domain.prefix:
-        a_record_name = '{}{}.'.format(
-          a_record_name, 
-          domain.prefix
-        )
-
-        srv_client_record_name = '{}.{}'.format(
-          srv_client_record_name, 
-          domain.prefix
-        )
-        srv_client_record_value = '{}.{}'.format(
-          srv_client_record_value, 
-          domain.prefix
-        )
-
-        srv_server_record_name = '{}.{}'.format(
-          srv_server_record_name, 
-          domain.prefix
-        )
-        srv_server_record_value = '{}.{}'.format(
-          srv_server_record_value, 
-          domain.prefix
-        )
-
-        roundrobin_record_name = '{}.{}.'.format(
-          domain.prefix, 
-          domain.name
-        )
-      
-      a_record_name = '{}{}.'.format(
-        a_record_name, 
-        domain.name
-      )
-
-      srv_client_record_name = '{}.{}.'.format(
-        srv_client_record_name, 
-        domain.name
-      )
-      srv_client_record_value = '{}.{}.'.format(
-        srv_client_record_value, 
-        domain.name
-      )
-
-      srv_server_record_name = '{}.{}.'.format(
-        srv_server_record_name, 
-        domain.name
-      )
-      srv_server_record_value = '{}.{}.'.format(
-        srv_server_record_value, 
-        domain.name
-      )
-
-      record_sets = self.route53.list_resource_record_sets(
-        HostedZoneId=domain.zone
-      )['ResourceRecordSets']
-
-      records_to_process = [ 
-        {'Name': a_record_name, 'Value': a_record_value, 'Type': 'A', 'Multiline': False}, 
-        {'Name': srv_client_record_name, 'Value': srv_client_record_value, 'Type': 'SRV', 'Multiline': True}, 
-        {'Name': srv_server_record_name, 'Value': srv_server_record_value, 'Type': 'SRV', 'Multiline': True}
-      ]
-      if roundrobin_record_name:
-        records_to_process.append(
-          {
-            'Name': roundrobin_record_name, 
-            'Value': roundrobin_record_value, 
-            'Type': 'A', 
-            'Multiline': True
-          }
-        )
-
-      upsert_recordset = []
-      delete_recordset = []
-
-      for item in records_to_process:
-        record_to_update = {
-          'Name': item['Name'],
-          'Type': item['Type'],
-          'TTL': self.ttl,
-          'ResourceRecords': [{ 'Value': item['Value'] }]
-        }          
-
-        print('{}-ing item {} in record {}'.format(action, item, record_to_update))
-
-        # remove the line record 
-        if action == 'DELETE':
-          delete_recordset.append(record_to_update)
-        elif action == 'UPSERT':
-          upsert_recordset.append(record_to_update)
-        else:
-          raise Error('Unknown action {}'.format(action))
-
-      print('delete recordset: {}  upser recordset: {}'.format(delete_recordset, upsert_recordset))
-      newUpdate = {
+      # build up a DNS update request
+      dns_update = {
         'HostedZoneId': domain.zone,
         'ChangeBatch': {
           'Comment': self.comment,
@@ -226,31 +152,84 @@ class UpdaterClient(object):
         }
       } 
 
-      for item in upsert_recordset:
-        newUpdate['ChangeBatch']['Changes'].append(
-          {
-            'Action': 'UPSERT',
-            'ResourceRecordSet': item
-          }
-        )
+      # first delete requests for all current records if thoes exist
+      records_to_delete = [
+        self.get_a_record(domain),
+        self.get_srv_record(domain, True),
+        self.get_srv_record(domain, False),
+        self.get_roundrobin_record(domain)
+      ]
+      
+      for deletion in records_to_delete:
+        if deletion:
+          dns_update['ChangeBatch']['Changes'].append(
+            {
+              'Action': 'DELETE',
+              'ResourceRecordSet': deletion
+            }
+          )
 
-      for item in delete_recordset:
-        newUpdate['ChangeBatch']['Changes'].append(
-          {
-            'Action': 'DELETE',
-            'ResourceRecordSet': item
-          }
-        )
+      # Now collect all asg instances
+      aws_instances = [
+        aws_instance for aws_instance in self.asg['Instances'] 
+          if aws_instance['LifecycleState'] == 'InService'
+      ]
 
-      if newUpdate['ChangeBatch']['Changes']:
-        print('Route 53 update: {}'.format(newUpdate))
-        self.route53.change_resource_record_sets(**newUpdate)
+      aws_instance_ids = [aws_instance['InstanceId'] for aws_instance in aws_instances]
+
+      # build up upsert requests
+      self.boto('ec2').describe_instances(InstanceIds=[self.instance_id])['Reservations'][0]['Instances'][0]
+
+      srv_client_record_values = [
+        '0 0 {} {}.{}.{}.'.format(domain.srvclientport, instance['InstanceId'], domain.prefix, domain.name) for instance in aws_instances
+      ]
+
+      srv_server_record_values = [
+        '0 0 {} {}.{}.{}.'.format(domain.srvserverport, instance['InstanceId'], domain.prefix, domain.name) for instance in aws_instances
+      ]
+
+      roundrobin_record_values = [
+        instance['NetworkInterfaces'][0]['PrivateIpAddress'] for instance in self.boto('ec2').describe_instances(InstanceIds=aws_instance_ids)['Reservations'][0]['Instances'] 
+      ]
+
+      # on DELETE, don't try to re-create the A record 
+      if action == 'DELETE':
+        records_to_upsert = [  
+          {'Name': self.get_srv_record_name(domain, True), 'Value': srv_client_record_values, 'Type': 'SRV'}, 
+          {'Name': self.get_srv_record_name(domain, False), 'Value': srv_server_record_values, 'Type': 'SRV'},
+          {'Name': self.get_roundrobin_record_name(domain), 'Value': roundrobin_record_values, 'Type': 'A'}
+        ]
       else:
-        raise Error('Empty change set!')
+        a_record_value = self.instance['NetworkInterfaces'][0]['PrivateIpAddress']
+        records_to_upsert = [ 
+          {'Name': self.get_a_record_name(domain), 'Value': [a_record_value], 'Type': 'A'}, 
+          {'Name': self.get_srv_record_name(domain, True), 'Value': srv_client_record_values, 'Type': 'SRV'}, 
+          {'Name': self.get_srv_record_name(domain, False), 'Value': srv_server_record_values, 'Type': 'SRV'},
+          {'Name': self.get_roundrobin_record_name(domain), 'Value': roundrobin_record_values, 'Type': 'A'}
+        ]
+
+      # add DNS requests
+      for upsert in records_to_upsert:
+
+        record_to_upsert = {
+          'Name': upsert['Name'],
+          'Type': upsert['Type'],
+          'TTL': self.ttl,
+          'ResourceRecords': [{'Value':val} for val in upsert['Value']]
+        } 
+
+        if record_to_upsert['ResourceRecords']:
+          dns_update['ChangeBatch']['Changes'].append(
+            {
+              'Action': 'UPSERT',
+              'ResourceRecordSet': record_to_upsert
+            }
+          )
+
+      print('updte: {}'.format(dns_update))
+      self.route53.change_resource_record_sets(**dns_update)
 
 def handler(event, context):
-
-  print('event: {}'.format(event))
   client = UpdaterClient(event)
 
   if client.event_type == 'autoscaling:EC2_INSTANCE_LAUNCH':
