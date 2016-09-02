@@ -8,7 +8,12 @@ write_files:
 {% endif %}
 {% endfor %}
 coreos:
-  units: 
+{% for filename in kraken_master_parts %}
+{% if 'master.coreos.' in filename %}
+    {{ lookup('file', filename) | indent(4) }}
+  {% endif %}
+  {% endfor %}
+  units:
 {% for filename in kraken_master_parts %}
 {% if 'master.units.' in filename %}
     {{ lookup('file', filename) | indent(4) }}

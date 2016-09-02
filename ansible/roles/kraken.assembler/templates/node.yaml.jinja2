@@ -8,7 +8,12 @@ write_files:
 {% endif %}
 {% endfor %}
 coreos:
-  units: 
+{% for filedata in item.1.files %}
+{% if 'node.' + item.0.name + '.coreos.' in filedata.path %}
+    {{ lookup('file', filedata.path) | indent(4) }}
+{% endif %}
+{% endfor %}
+  units:
 {% for filedata in item.1.files %}
 {% if 'node.' + item.0.name + '.units.' in filedata.path %}
     {{ lookup('file', filedata.path) | indent(4) }}
