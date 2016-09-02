@@ -8,3 +8,13 @@
   shell: >
     terraform destroy -input=false -force {{playbook_dir}}/../generated/{{kraken_config.cluster}} chdir={{playbook_dir}}/../generated/{{kraken_config.cluster}}
   when: kraken_action == 'down'
+
+- name: clean the terraform state generated prefix and other misc files.
+  file:
+    path: "{{playbook_dir}}/../generated/{{kraken_config.cluster}}/{{item}}"
+    state: absent
+  when: kraken_action == 'down'
+  with_items:
+    - aws_prefix
+    - terraform.tfstate
+    - terraform.tfstate.backup

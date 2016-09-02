@@ -16,15 +16,15 @@ resource "aws_vpc" "vpc" {
   enable_dns_hostnames = true
 
   tags {
-    Name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_vpc",
-    KubernetesCluster = "{{kraken_config.cluster}}"
+    Name = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_vpc",
+    KubernetesCluster = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}"
   }
 }
 
 # A VPC-only route53 zone and record
 resource "aws_route53_zone" "private_zone" {
   name          = "{{kraken_config.cluster}}.internal"
-  comment       = "A VPC-only zone for {{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}} kubernetes cluster"
+  comment       = "A VPC-only zone for {{kraken_config.cluster}}_{{kraken_aws_prefix}} kubernetes cluster"
   vpc_id        = "${aws_vpc.vpc.id}"
   force_destroy = true
 }
@@ -35,8 +35,8 @@ resource "aws_vpc_dhcp_options" "vpc_dhcp" {
   domain_name_servers = ["AmazonProvidedDNS"]
 
   tags {
-    Name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_dhcp",
-    KubernetesCluster = "{{kraken_config.cluster}}"
+    Name = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_dhcp",
+    KubernetesCluster = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}"
   }
 }
 
@@ -51,8 +51,8 @@ resource "aws_internet_gateway" "vpc_gateway" {
   vpc_id = "${aws_vpc.vpc.id}"
 
   tags {
-    Name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_gateway",
-    KubernetesCluster = "{{kraken_config.cluster}}"
+    Name = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_gateway",
+    KubernetesCluster = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}"
   }
 }
 
@@ -66,8 +66,8 @@ resource "aws_route_table" "vpc_rt" {
   }
 
   tags {
-    Name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_routetable",
-    KubernetesCluster = "{{kraken_config.cluster}}"
+    Name = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_routetable",
+    KubernetesCluster = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}"
   }
 }
 
@@ -92,15 +92,15 @@ resource "aws_network_acl" "vpc_acl" {
 {% endfor %}
 
   tags {
-    Name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_acl",
-    KubernetesCluster = "{{kraken_config.cluster}}"
+    Name = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_acl",
+    KubernetesCluster = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}"
   }
 }
 
 # all defined keypairs
 {% for keypair in kraken_config.keypair %}
 resource "aws_key_pair" "{{keypair.name}}" {
-  key_name   = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{keypair.name}}"
+  key_name   = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_{{keypair.name}}"
 {% if keypair.publickey is defined  %}
   public_key = "{{keypair.publickey}}"
 {% elif keypair.publickeyFile is defined %}
@@ -118,8 +118,8 @@ resource "aws_subnet" "vpc_subnet_{{subnet.name}}" {
   map_public_ip_on_launch = true
 
   tags {
-    Name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_subnet",
-    KubernetesCluster = "{{kraken_config.cluster}}"
+    Name = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_{{subnet.name}}_subnet",
+    KubernetesCluster = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}"
   }
 }
 {% endfor %}
@@ -132,8 +132,8 @@ resource "aws_route_table_association" "vpc_subnet_asg_rt_association_{{subnet.n
 {% endfor %}
 
 resource "aws_security_group" "vpc_kubernetes_secgroup" {
-  name        = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_secgroup"
-  description = "Security group for {{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}} cluster"
+  name        = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_secgroup"
+  description = "Security group for {{kraken_config.cluster}}_{{kraken_aws_prefix}} cluster"
   vpc_id      = "${aws_vpc.vpc.id}"
 
 {% for ingress in kraken_config.providerConfig.ingressSecurity %}
@@ -179,12 +179,17 @@ resource "aws_security_group" "vpc_kubernetes_secgroup" {
 {% endfor %}
   }
 {% endfor %}
+
+  tags {
+    Name = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_vpc_secgroup",
+    KubernetesCluster = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}"
+  }
 }
 
 {% for etcd in kraken_config.etcd %}
 resource "aws_security_group" "vpc_etcd_{{etcd.name}}_secgroup" {
-  name        = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_secgroup"
-  description = "Security group for {{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}} etcd clusters"
+  name        = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_{{etcd.name}}_secgroup"
+  description = "Security group for {{kraken_config.cluster}}_{{kraken_aws_prefix}} {{etcd.name}} etcd cluster"
   vpc_id      = "${aws_vpc.vpc.id}"
 
   egress {
@@ -238,13 +243,13 @@ resource "coreosbox_ami" "{{etcd.name}}_ami" {
 # Launch configurations for all etcd clusters
 {% for etcd in kraken_config.etcd %}
 resource "aws_launch_configuration" "{{etcd.name}}_launch_config" {
-  name                        = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{etcd.name}}_launch_config"
+  name                        = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_{{etcd.name}}_launch_config"
   image_id                    = "${coreosbox_ami.{{etcd.name}}_ami.box_string}"
   key_name                    = "${aws_key_pair.{{etcd.nodepool.keypair.name}}.key_name}"
   instance_type               = "{{etcd.nodepool.providerConfig.type}}"
   security_groups             = ["${aws_security_group.vpc_etcd_{{etcd.name}}_secgroup.id}"]
   associate_public_ip_address = true
-  user_data                   = "${file({{playbook_dir}}/../generated/{{kraken_config.cluster}}/cloud-config/etcd.{{etcd.name}}.cloud-config.yaml)}"
+  user_data                   = "${file("{{playbook_dir}}/../generated/{{kraken_config.cluster}}/cloud-config/etcd.{{etcd.name}}.cloud-config.yaml")}"
 
   # storage 
 {% for storage in etcd.nodepool.providerConfig.storage %} 
@@ -274,8 +279,8 @@ data "aws_iam_policy_document" "iam_lambda_etcd_role_doc" {
   }
 }
 resource "aws_iam_role" "iam_lambda_etcd_role" {
-    name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_iam_lambda_etcd_role"
-    assume_role_policy = ${data.aws_iam_policy_document.iam_lambda_etcd_role_doc.json}
+    name = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_iam_lambda_etcd_role"
+    assume_role_policy = "${data.aws_iam_policy_document.iam_lambda_etcd_role_doc.json}"
 }
 
 # IAM role policy for lambda functions that will modify DNS records
@@ -306,9 +311,9 @@ data "aws_iam_policy_document" "iam_lambda_etcd_role_policy_doc" {
   }
 }
 resource "aws_iam_role_policy" "iam_lambda_etcd_role_policy" {
-  name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_iam_lambda_etcd_role_policy"
+  name = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_iam_lambda_etcd_role_policy"
   role = "${aws_iam_role.iam_lambda_etcd_role.id}"
-  policy = ${data.aws_iam_policy_document.iam_lambda_etcd_role_policy_doc.json}
+  policy = "${data.aws_iam_policy_document.iam_lambda_etcd_role_policy_doc.json}"
 }
 
 # IAM role for SNS topic subscription
@@ -325,8 +330,8 @@ data "aws_iam_policy_document" "iam_lambda_sns_role_doc" {
   }
 }
 resource "aws_iam_role" "iam_lambda_sns_role" {
-  name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_iam_lambda_sns_role"
-  assume_role_policy = ${data.aws_iam_policy_document.iam_lambda_sns_role.json}
+  name = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_iam_lambda_sns_role"
+  assume_role_policy = "${data.aws_iam_policy_document.iam_lambda_sns_role_doc.json}"
 }
 
 # IAM role policy for for sns events publishing
@@ -342,20 +347,20 @@ data "aws_iam_policy_document" "iam_sns_etcd_role_policy_doc" {
   }
 }
 resource "aws_iam_role_policy" "iam_sns_etcd_role_policy" {
-  name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_iam_lambda_etcd_role_policy"
+  name = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_iam_lambda_etcd_role_policy"
   role = "${aws_iam_role.iam_lambda_sns_role.id}"
-  policy = ${data.aws_iam_policy_document.iam_sns_etcd_role_policy_doc.json}
+  policy = "${data.aws_iam_policy_document.iam_sns_etcd_role_policy_doc.json}"
 }
 
 # SNS resources for etcd clusters
 resource "aws_sns_topic" "etcd_scaling_events" {
-  name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_etcd_events"
+  name = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_etcd_events"
 }
 
 # Lambda function that will setup all dns records for etcd discovery
 resource "aws_lambda_function" "etcd_lambda" {
   filename = "lambda-sns-etcd-service-discovery.zip"
-  function_name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_etcd_srv"
+  function_name = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_etcd_srv"
   role = "${aws_iam_role.iam_lambda_etcd_role.arn}"
   handler = "lambda-sns-etcd-service-discovery.handler"
   timeout = 300
@@ -379,7 +384,7 @@ resource "aws_sns_topic_subscription" "etcd_scaling_events_lambda_subscription" 
 # Autoscaling groups for all etcd clusters
 {% for etcd in kraken_config.etcd %}
 resource "aws_autoscaling_group" "{{etcd.name}}_nodes" {
-  name                      = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{etcd.name}}_asg"
+  name                      = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_{{etcd.name}}_asg"
   vpc_zone_identifier       = [{% set comma = joiner(",") %}{% for subnet in etcd.nodepool.providerConfig.subnet %}{{ comma() }}"${aws_subnet.vpc_subnet_{{subnet}}.id}"{% endfor %}]
   launch_configuration      = "${aws_launch_configuration.{{etcd.name}}_launch_config.name}"
   wait_for_capacity_timeout = "0"
@@ -402,13 +407,13 @@ resource "aws_autoscaling_group" "{{etcd.name}}_nodes" {
 
   tag {
     key                 = "Name"
-    value               = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{etcd.name}}_node-autoscaled"
+    value               = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_{{etcd.name}}_node-autoscaled"
     propagate_at_launch = true
   }
 
   tag {
     key                 = "KubernetesCluster"
-    value               = "{{kraken_config.cluster}}"
+    value               = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}"
     propagate_at_launch = true
   }
 
@@ -450,14 +455,15 @@ data "aws_iam_policy_document" "kubernetes_master_role_doc" {
     actions = [
       "sts:AssumeRole",
     ]
-    principals = [
-      "ec2.amazonaws.com",
-    ]
+    principals = {
+      type = "Service"
+      identifiers = ["ec2.amazonaws.com"],
+    }
     effect = "Allow"
   }
 }
 resource "aws_iam_role" "kubernetes_master_role" {
-  name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_kubernetes_master_role"
+  name = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_kubernetes_master_role"
   assume_role_policy = "${data.aws_iam_policy_document.kubernetes_master_role_doc.json}"
 }
 data "aws_iam_policy_document" "kubernetes_master_policy_doc" {
@@ -484,12 +490,12 @@ data "aws_iam_policy_document" "kubernetes_master_policy_doc" {
   }
 }
 resource "aws_iam_role_policy" "kubernetes_master_policy" {
-  name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_kubernetes_master_policy"
+  name = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_kubernetes_master_policy"
   role = "${aws_iam_role.kubernetes_master_role.id}"
   policy = "${data.aws_iam_policy_document.kubernetes_master_policy_doc.json}"
 }
 resource "aws_iam_instance_profile" "kubernetes_master_profile" {
-  name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_kubernetes_master_profile"
+  name = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_kubernetes_master_profile"
   roles = ["${aws_iam_role.kubernetes_master_role.name}"]
 }
 
@@ -498,14 +504,15 @@ data "aws_iam_policy_document" "kubernetes_node_role_doc" {
     actions = [
       "sts:AssumeRole",
     ]
-    principals = [
-      "ec2.amazonaws.com",
-    ]
+    principals = {
+      type = "Service"
+      identifiers = ["ec2.amazonaws.com"],
+    }
     effect = "Allow"
   }
 }
 resource "aws_iam_role" "kubernetes_node_role" {
-  name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_kubernetes_node_role"
+  name = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_kubernetes_node_role"
   assume_role_policy = "${data.aws_iam_policy_document.kubernetes_node_role_doc.json}"
 }
 data "aws_iam_policy_document" "kubernetes_node_policy_doc" {
@@ -540,26 +547,26 @@ data "aws_iam_policy_document" "kubernetes_node_policy_doc" {
   }
 }
 resource "aws_iam_role_policy" "kubernetes_node_policy" {
-  name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_kubernetes_node_policy"
+  name = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_kubernetes_node_policy"
   role = "${aws_iam_role.kubernetes_node_role.id}"
   policy = "${data.aws_iam_policy_document.kubernetes_node_policy_doc.json}"
 }
 resource "aws_iam_instance_profile" "kubernetes_node_profile" {
-  name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_kubernetes_node_profile"
+  name = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_kubernetes_node_profile"
   roles = ["${aws_iam_role.kubernetes_node_role.name}"]
 }
 
 
 # Launch configuration for master
 resource "aws_launch_configuration" "master_launch_config" {
-  name                        = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_master_launch_config"
+  name                        = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_master_launch_config"
   image_id                    = "${coreosbox_ami.master_ami.box_string}"
   key_name                    = "${aws_key_pair.{{kraken_config.master.nodepool.keypair.name}}.key_name}"
   instance_type               = "{{kraken_config.master.nodepool.providerConfig.type}}"
   security_groups             = ["${aws_security_group.vpc_kubernetes_secgroup.id}"]
   associate_public_ip_address = true
-  aws_iam_instance_profile    = "${aws_iam_instance_profile.kubernetes_master_profile.name}"
-  user_data                   = "${file({{playbook_dir}}/../generated/{{kraken_config.cluster}}/cloud-config/master.cloud-config.yaml)}"
+  iam_instance_profile        = "${aws_iam_instance_profile.kubernetes_master_profile.name}"
+  user_data                   = "${file("{{playbook_dir}}/../generated/{{kraken_config.cluster}}/cloud-config/master.cloud-config.yaml")}"
 
   # storage 
 {% for storage in kraken_config.master.nodepool.providerConfig.storage %}
@@ -575,7 +582,7 @@ resource "aws_launch_configuration" "master_launch_config" {
 {% if kraken_config.master.loadbalancer == 'cloud'  %}
 
 resource "aws_iam_server_certificate" "master_cert" {
-  name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_master_cert"
+  name = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_master_cert"
   certificate_body = "${file("{{playbook_dir}}/../generated/{{kraken_config.cluster}}/certs/cluster.pem")}"
   private_key = "${file("{{playbook_dir}}/../generated/{{kraken_config.cluster}}/certs/cluster.key")}"
 }
@@ -602,8 +609,8 @@ resource "aws_elb" "master_elb" {
   }
 
   tags {
-    Name = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_master_elb",
-    KubernetesCluster = "{{kraken_config.cluster}}"
+    Name = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_master_elb",
+    KubernetesCluster = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}"
   }
 }
 
@@ -618,7 +625,7 @@ resource "aws_route53_record" "master_record" {
 {% else %}
 # Launch configuration for master loadbalancer
 resource "aws_launch_configuration" "master_loadbalancer_launch_config" {
-  name                        = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_loadbalancer"
+  name                        = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_loadbalancer"
   image_id                    = "${coreosbox_ami.master_ami.box_string}"
   key_name                    = "${aws_key_pair.{{kraken_config.master.nodepool.keypair.name}}.key_name}"
   instance_type               = "{{kraken_config.master.nodepool.providerConfig.type}}"
@@ -630,7 +637,7 @@ resource "aws_launch_configuration" "master_loadbalancer_launch_config" {
 
 # Autoscaling group for master loadbalancer. 
 resource "aws_autoscaling_group" "master_loadbalancer_nodes" {
-  name                      = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_master_loadbalancer_asg"
+  name                      = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_master_loadbalancer_asg"
   vpc_zone_identifier       = [{% set comma = joiner(",") %}{% for subnet in kraken_config.master.nodepool.providerConfig.subnet %}{{ comma() }}"${aws_subnet.vpc_subnet_{{subnet}}.id}"{% endfor %}]
   launch_configuration      = "${aws_launch_configuration.master_loadbalancer_launch_config.name}"
   wait_for_capacity_timeout = "0"
@@ -643,13 +650,13 @@ resource "aws_autoscaling_group" "master_loadbalancer_nodes" {
   
   tag {
     key                 = "Name"
-    value               = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_master_loadbalancer"
+    value               = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_master_loadbalancer"
     propagate_at_launch = true
   }
 
   tag {
     key                 = "KubernetesCluster"
-    value               = "{{kraken_config.cluster}}"
+    value               = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}"
     propagate_at_launch = true
   }
 }
@@ -657,7 +664,7 @@ resource "aws_autoscaling_group" "master_loadbalancer_nodes" {
 
 # Autoscaling group for master. 
 resource "aws_autoscaling_group" "master_nodes" {
-  name                      = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_master_asg"
+  name                      = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_master_asg"
   vpc_zone_identifier       = [{% set comma = joiner(",") %}{% for subnet in kraken_config.master.nodepool.providerConfig.subnet %}{{ comma() }}"${aws_subnet.vpc_subnet_{{subnet}}.id}"{% endfor %}]
   launch_configuration      = "${aws_launch_configuration.master_launch_config.name}"
   wait_for_capacity_timeout = "0"
@@ -678,13 +685,13 @@ resource "aws_autoscaling_group" "master_nodes" {
   
   tag {
     key                 = "Name"
-    value               = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_master_node-autoscaled"
+    value               = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_master_node-autoscaled"
     propagate_at_launch = true
   }
 
   tag {
     key                 = "KubernetesCluster"
-    value               = "{{kraken_config.cluster}}"
+    value               = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}"
     propagate_at_launch = true
   }
 
@@ -711,14 +718,14 @@ resource "coreosbox_ami" "{{node.name}}_ami" {
 # Launch configurations for all node pools
 {% for node in kraken_config.node %}
 resource "aws_launch_configuration" "{{node.name}}_launch_config" {
-  name                        = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{node.name}}_launch_config"
+  name                        = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_{{node.name}}_launch_config"
   image_id                    = "${coreosbox_ami.{{node.name}}_ami.box_string}"
   key_name                    = "${aws_key_pair.{{node.nodepool.keypair.name}}.key_name}"
   instance_type               = "{{node.nodepool.providerConfig.type}}"
   security_groups             = ["${aws_security_group.vpc_kubernetes_secgroup.id}"]
   associate_public_ip_address = true
-  aws_iam_instance_profile    = "${aws_iam_instance_profile.kubernetes_node_profile.name}"
-  user_data                   = "${file({{playbook_dir}}/../generated/{{kraken_config.cluster}}/cloud-config/node.{{node.name}}.cloud-config.yaml)}"
+  iam_instance_profile        = "${aws_iam_instance_profile.kubernetes_node_profile.name}"
+  user_data                   = "${file("{{playbook_dir}}/../generated/{{kraken_config.cluster}}/cloud-config/node.{{node.name}}.cloud-config.yaml")}"
 
   # storage 
 {% for storage in node.nodepool.providerConfig.storage %} 
@@ -734,7 +741,7 @@ resource "aws_launch_configuration" "{{node.name}}_launch_config" {
 # Autoscaling groups for all node pools
 {% for node in kraken_config.node %}
 resource "aws_autoscaling_group" "{{node.name}}_nodes" {
-  name                      = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{node.name}}_asg"
+  name                      = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_{{node.name}}_asg"
   vpc_zone_identifier       = [{% set comma = joiner(",") %}{% for subnet in node.nodepool.providerConfig.subnet %}{{ comma() }}"${aws_subnet.vpc_subnet_{{subnet}}.id}"{% endfor %}]
   launch_configuration      = "${aws_launch_configuration.{{node.name}}_launch_config.name}"
   wait_for_capacity_timeout = "0"
@@ -747,13 +754,13 @@ resource "aws_autoscaling_group" "{{node.name}}_nodes" {
 
   tag {
     key                 = "Name"
-    value               = "{{kraken_config.cluster}}_{{kraken_config.providerConfig.resourcePrefix}}_{{node.name}}_node-autoscaled"
+    value               = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_{{node.name}}_node-autoscaled"
     propagate_at_launch = true
   }
 
   tag {
     key                 = "KubernetesCluster"
-    value               = "{{kraken_config.cluster}}"
+    value               = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}"
     propagate_at_launch = true
   }
 
