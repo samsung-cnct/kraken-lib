@@ -4,12 +4,21 @@
     - name: 50-network-config.conf
       content: |
         [Unit]
-        Requires=etcd-proxy.service
+        Requires=kraken-ssl.service
+        After=kraken-ssl.service
+
         [Service]
         EnvironmentFile=/etc/network-environment
         Environment="FLANNELD_INTERFACE=${DEFAULT_IPV4}"
 {% if item.nodepool.kubeConfig.clusterEtcd.etcd.ssl == true %}
-        ExecStartPre=/usr/bin/etcdctl --ca-file /opt/kraken/ca.pem --key-file /opt/kraken/etcd/ssl/client-key.pem --cert-file /opt/kraken/etcd/ssl/client.pem set /coreos.com/network/config '{{ kraken_config.fabric.options | to_json }}'
-{% else %}
-        ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{{ kraken_config.fabric.options | to_json }}'
+        Environment="ETCD_SSL_DIR=/opt/kraken/etcd/ssl"
 {% endif %}
+        ExecStartPre=/usr/bin/etcdctl -D ${DEFAULT_ETCD_SVC_NAME} \
+{% if item.nodepool.kubeConfig.clusterEtcd.etcd.ssl == true %}
+        --cert-file /etc/etcd/ssl/client.pem --ca-file /etc/etcd/ssl/client-ca.pem --key-file /etc/etcd/ssl/client-key.pem \
+{% endif %}
+        set /coreos.com/network/config '{ "Network": "${KUBERNETES_CIDR}" }'
+        ExecStartPre=-/usr/bin/mkdir -p /opt/cni
+        ExecStartPre=/usr/bin/wget -N -P /opt/cni https://storage.googleapis.com/kubernetes-release/network-plugins/cni-8a936732094c0941e1543ef5d292a1f4fffa1ac5.tar.gz
+        ExecStartPre=/usr/bin/tar -xzf /opt/cni/cni-8a936732094c0941e1543ef5d292a1f4fffa1ac5.tar.gz -C /opt/cni/
+        ExecStartPre=/usr/bin/rm /opt/cni/cni-8a936732094c0941e1543ef5d292a1f4fffa1ac5.tar.gz
