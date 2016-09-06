@@ -34,22 +34,22 @@ deployment:
         Type: aws-vpc
   provider: aws
   providerConfig:
-    resourcePrefix: defaults
+    resourcePrefix:
     vpc: 10.0.0.0/16
     region: us-west-2
     subnet:
       -
         name: uwswest2a
         az: us-west-2a
-        cidr: 10.0.1.0/22
+        cidr: 10.0.0.0/18
       -
         name: uwswest2b
         az: us-west-2b
-        cidr: 10.0.2.0/22
+        cidr: 10.0.64.0/18
       -
         name: uwswest2c
         az: us-west-2c
-        cidr: 10.0.3.0/22
+        cidr: 10.0.128.0/17
     egressAcl:
       -
         protocol: "-1"
