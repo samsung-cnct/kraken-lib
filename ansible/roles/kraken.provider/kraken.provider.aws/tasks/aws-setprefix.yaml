@@ -1,0 +1,12 @@
+---
+- name: Set prefix variable if required
+  set_fact: 
+    kraken_aws_prefix: "{{ kraken_config.providerConfig.resourcePrefix }}"
+
+- name: Generate random prefix if required
+  set_fact: 
+    kraken_aws_prefix: "{{ lookup('password', playbook_dir + '/../generated/' + kraken_config.cluster + '/aws_prefix' + ' chars=ascii_letters length=7') }}"
+  when: 
+    "(kraken_config.providerConfig.resourcePrefix is undefined) or 
+     (kraken_config.providerConfig.resourcePrefix is none) or 
+     (kraken_config.providerConfig.resourcePrefix|trim == '')"
