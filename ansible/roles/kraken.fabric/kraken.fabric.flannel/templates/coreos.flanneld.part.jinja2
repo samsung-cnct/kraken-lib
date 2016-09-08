@@ -1,0 +1,7 @@
+flannel:
+  etcd_endpoints: {{kraken_config.master.infra.etcd.name}}.{{kraken_config.cluster}}.internal
+{% if item.nodepool.kubeConfig.clusterEtcd.etcd.ssl == true %}
+  etcd_cafile: /opt/kraken/etcd/ssl/client-ca.pem
+  etcd_certfile: /opt/kraken/etcd/ssl/client.pem
+  etcd_keyfile: /opt/kraken/etcd/ssl/client-key.pem
+{% endif %}
