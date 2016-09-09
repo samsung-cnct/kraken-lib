@@ -30,7 +30,7 @@ deployment:
     provider: flannel
     options:
       Network: 10.10.0.0/16
-      Backend: 
+      Backend:
         Type: aws-vpc
   provider: aws
   providerConfig:
@@ -72,53 +72,53 @@ deployment:
       credentialsFile:
       credentialsProfile:
     ingressSecurity:
-      - 
+      -
         from_port: 22
         to_port: 22
         protocol: "TCP"
         cidr_blocks: ["0.0.0.0/0"]
-      - 
+      -
         from_port: 8080
         to_port: 8080
         protocol: "TCP"
         cidr_blocks: ["0.0.0.0/0"]
-      - 
+      -
         from_port: 443
         to_port: 443
         protocol: "TCP"
         cidr_blocks: ["0.0.0.0/0"]
-      - 
+      -
         from_port: 8094
         to_port: 8094
         protocol: "TCP"
         cidr_blocks: ["0.0.0.0/0"]
-      - 
+      -
         from_port: 10250
         to_port: 10250
         protocol: "TCP"
         cidr_blocks: ["0.0.0.0/0"]
-      - 
+      -
         from_port: 10251
         to_port: 10251
         protocol: "TCP"
         cidr_blocks: ["0.0.0.0/0"]
-      - 
+      -
         from_port: 10252
         to_port: 10252
         protocol: "TCP"
         cidr_blocks: ["0.0.0.0/0"]
-      - 
+      -
         from_port: 10254
         to_port: 10254
         protocol: "TCP"
         cidr_blocks: ["0.0.0.0/0"]
-      - 
+      -
         from_port: 30000
         to_port: 32767
         protocol: "TCP"
         cidr_blocks: ["0.0.0.0/0"]
     egressSecurity:
-      - 
+      -
         from_port: 0
         to_port: 0
         protocol: "-1"
@@ -128,9 +128,9 @@ deployment:
       name: etcd
       count: 2
       mounts:
-        - 
+        -
           device: sdf
-          path: /var/lib/etcd 
+          path: /var/lib/etcd
       providerConfig:
         type: m3.medium
         subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
@@ -154,9 +154,9 @@ deployment:
       name: etcdEvents
       count: 2
       mounts:
-        - 
+        -
           device: sdf
-          path: /var/lib/etcd 
+          path: /var/lib/etcd
       providerConfig:
         type: m3.medium
         subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
@@ -180,7 +180,7 @@ deployment:
       name: masterNodes
       count: 3
       mounts:
-        - 
+        -
           device: sdf
           path: /var/lib/docker
       providerConfig:
@@ -208,7 +208,7 @@ deployment:
       count: 3
       keypair: krakenKey
       mounts:
-        - 
+        -
           device: sdf
           path: /var/lib/docker
       providerConfig:
@@ -234,7 +234,7 @@ deployment:
       name: specialNodes
       count: 2
       mounts:
-        - 
+        -
           device: sdf
           path: /var/lib/docker
       keypair: krakenKey
@@ -279,12 +279,16 @@ deployment:
   master:
     nodepool: masterNodes
     loadbalancer: cloud
+    infra:
+      etcd: etcd
+    events:
+      etcd: etcdEvents
   node:
-    - 
+    -
       name: clusterNodes
       nodepool: clusterNodes
-    - 
-      name: specialNodes 
+    -
+      name: specialNodes
       nodepool: specialNodes
   clusterServices:
     namespaces:
