@@ -13,7 +13,9 @@ spec:
     - /hyperkube
     - apiserver
     - --etcd-servers={% if kraken_config.master.infra.etcd.ssl == true %}https{% else %}http{% endif %}://{{kraken_config.master.infra.etcd.name}}.{{kraken_config.cluster}}.internal:{{kraken_config.master.infra.etcd.clientPorts[0]}}
+{% if kraken_config.master.events is defined %}
     - --etcd-servers-overrides=/events#{% if kraken_config.master.events.etcd.ssl == true %}https{% else %}http{% endif %}://{{kraken_config.master.events.etcd.name}}.{{kraken_config.cluster}}.internal:{{kraken_config.master.events.etcd.clientPorts[0]}}
+{% endif %}
     - --bind-address=0.0.0.0
     - --etcd-cafile=/etc/etcd/ssl/client-ca.pem
     - --etcd-certfile=/etc/etcd/ssl/client.pem

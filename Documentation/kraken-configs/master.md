@@ -7,7 +7,7 @@
 | nodepool | __Required__ | String | Name of the [nodepool](nodepool.md) to use for master |
 | loadbalancer | __Required__ | String | Type of loadbalancer to use. cloud or nginx. Some loadbalncers might not be compatible with some providers |
 | infra | __Required__ | String | infra etcd cluster configuration |
-| events | __Required__ | String | events etcd cluster configuration |
+| events | Optional | String | events etcd cluster configuration |
 
 
 ## infra options
