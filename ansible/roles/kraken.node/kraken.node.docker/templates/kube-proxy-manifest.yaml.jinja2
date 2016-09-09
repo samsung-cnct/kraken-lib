@@ -11,15 +11,15 @@ spec:
     command:
     - /hyperkube
     - proxy
-    - --master=https://master.{{kraken_config.cluster}}.internal
-    - --kubeconfig=/etc/kubernetes/kubeconfig
+    - --master=https://apiserver.{{kraken_config.cluster}}.internal
+    - --kubeconfig=/etc/kubernetes/kubeconfig.yaml
     - --proxy-mode=iptables
     securityContext:
       privileged: true
     volumeMounts:
-      - mountPath: /etc/ssl
+      - mountPath: /etc/ssl/certs
         name: "ssl-certs"
-      - mountPath: /etc/kubernetes/kubeconfig
+      - mountPath: /etc/kubernetes/kubeconfig.yaml
         name: "kubeconfig"
         readOnly: true
       - mountPath: /etc/kubernetes/ssl
@@ -28,10 +28,10 @@ spec:
   volumes:
     - name: "ssl-certs"
       hostPath:
-        path: "/opt/kraken"
+        path: "/usr/share/ca-certificates"
     - name: "kubeconfig"
       hostPath:
-        path: "/opt/kraken/kubeconfig"
+        path: "/etc/kubernetes/kubeconfig.yaml"
     - name: "etc-kube-ssl"
       hostPath:
-        path: "/opt/kraken/kubernetes/ssl"
+        path: "/etc/kubernetes/ssl"
