@@ -14,7 +14,8 @@ spec:
     - apiserver
     - --etcd-servers={% if kraken_config.master.infra.etcd.ssl == true %}https{% else %}http{% endif %}://{{kraken_config.master.infra.etcd.name}}.{{kraken_config.cluster}}.internal:{{kraken_config.master.infra.etcd.clientPorts[0]}}
     - --etcd-servers-overrides=/events#{% if kraken_config.master.events.etcd.ssl == true %}https{% else %}http{% endif %}://{{kraken_config.master.events.etcd.name}}.{{kraken_config.cluster}}.internal:{{kraken_config.master.events.etcd.clientPorts[0]}}
-    - --etcd-cafile=/etc/ca.pem
+    - --bind-address=0.0.0.0
+    - --etcd-cafile=/etc/etcd/ssl/client-ca.pem
     - --etcd-certfile=/etc/etcd/ssl/client.pem
     - --etcd-keyfile=/etc/etcd/ssl/client-key.pem
     - --allow-privileged=true
@@ -23,7 +24,7 @@ spec:
     - --admission-control=NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota
     - --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem
     - --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
-    - --client-ca-file=/etc/ssl/ca.pem
+    - --client-ca-file=/etc/kubernetes/ssl/ca.pem
     - --service-account-key-file=/etc/kubernetes/service-account/service-account-pub.pem
     - --cloud-provider={{kraken_kubernetes_cloudprovider}}
     - --logtostderr=true
@@ -52,11 +53,11 @@ spec:
       secretName: service-account-key-file
     name: service-account-key
   - hostPath:
-      path: /opt/kraken/kubernetes/ssl
+      path: /etc/kubernetes/ssl
     name: ssl-certs-kubernetes
   - hostPath:
-      path: /opt/kraken/etcd/ssl
+      path: /etc/etcd/ssl
     name: ssl-certs-etcd
   - hostPath:
-      path: /opt/kraken
-    name: ssl-certs-host
+      path: /etc/ssl
+    name: ssl-certs

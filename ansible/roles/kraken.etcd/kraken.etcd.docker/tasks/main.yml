@@ -3,3 +3,8 @@
   template: src=etcd.units.etcd.part.jinja2
             dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/etcd.{{item.name}}.units.etcd.part"
   with_items: "{{kraken_config.etcd}}"
+
+- name: Generate kraken-ssl .units.etcd.part files
+  template: src=etcd.units.kraken-etcd-ssl.part.jinja2
+            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/etcd.{{item.name}}.units.kraken-etcd-ssl.part"
+  with_items: "{{kraken_config.etcd}}"

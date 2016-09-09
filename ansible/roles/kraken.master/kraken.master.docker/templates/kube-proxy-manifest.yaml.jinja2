@@ -11,16 +11,16 @@ spec:
     command:
     - /hyperkube
     - proxy
-    - --master=https://master.{{kraken_config.cluster}}.internal
+    - --master=http://127.0.0.1:8080
     - --proxy-mode=iptables
     - --logtostderr=true
     securityContext:
       privileged: true
     volumeMounts:
-    - mountPath: /etc/ssl
+    - mountPath: /etc/ssl/certs
       name: ssl-certs-host
       readOnly: true
   volumes:
   - hostPath:
-      path: /opt/kraken
+      path: /usr/share/ca-certificates
     name: ssl-certs-host
