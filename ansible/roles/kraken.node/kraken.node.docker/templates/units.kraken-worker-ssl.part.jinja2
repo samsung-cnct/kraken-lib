@@ -1,14 +1,23 @@
-- name: kraken-worker-ssl.service
+- name: kraken-ssl.service
+  runtime: true
   command: start
   content: |
     [Unit]
-    After=ssl.service
-    After=docker.service
-    Requires=setup-network-environment.service
-    After=setup-network-environment.service
+    Description=Setup Network Environment
+    Requires=kraken-networking.service
+    After=kraken-networking.service
     [Service]
     EnvironmentFile=/etc/network-environment
-    ExecStart=/usr/bin/docker run --rm=true -v /opt/kraken:/output \
-      -v /opt/kraken:/input -e HOST_IP:${DEFAULT_IPV4} quay.io/samsung_cnct/drunkensmee /assets/generate_worker.sh
-    Restart=always
-    RestartSec=10
+    RemainAfterExit=yes
+    Type=oneshot
+    ExecStart=/usr/bin/rkt run \
+     --insecure-options=image \
+     --inherit-env=true \
+     --volume input,kind=host,source=/etc/ssl,readOnly=true \
+     --volume output,kind=host,source=/etc,readOnly=false \
+     --mount volume=input,target=/input \
+     --mount volume=output,target=/output \
+     --set-env=HOST_IP=${DEFAULT_IPV4} \
+     quay.io/samsung_cnct/drunkensmee:v0.2 \
+     --exec /assets/generate_worker.sh
+    ExecStopPost=/usr/bin/rkt gc --mark-only

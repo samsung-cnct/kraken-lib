@@ -2,25 +2,25 @@
   command: start
   content: |
     [Unit]
-    After=kraken-worker-ssl.service
-    Requires=kraken-worker-ssl.service
-    After=kraken-apiserver-ssl.service
-    Requires=kraken-apiserver-ssl.service
+    After=docker.service
+    After=kraken-ssl.service
+    Requires=docker.service
+    Requires=kraken-ssl.service
     [Service]
     EnvironmentFile=/etc/network-environment
-    ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/{{kraken_config.master.nodepool.kubeConfig.version}}/bin/linux/amd64/kubelet
+    ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/v1.3.5/bin/linux/amd64/kubelet
     ExecStartPre=/usr/bin/chmod +x /opt/bin/kubelet
     ExecStart=/opt/bin/kubelet \
-      --api_servers=https://master.{{kraken_config.cluster}}.internal \
-      --register-node=true \
+      --api_servers=http://127.0.0.1:8080 \
+      --register-schedulable=false \
       --allow-privileged=true \
       --config=/etc/kubernetes/manifests \
-      --hostname-override=${DEFAULT_IPV4} \
-      --cluster-dns=10.100.0.10 \
+      --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
+      --hostname-override=${DEAFULT_IPV4} \
+      --cluster-dns=10.1.0.2 \
       --cluster-domain=cluster.local \
-      --kubeconfig=/opt/kraken/kubeconfig \
-      --tls-cert-file=/opt/kraken/kubernetes/ssl/worker.pem \
-      --tls-private-key-file=/opt/kraken/kubernetes/ssl/worker-key.pem \
+      --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem \
+      --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem \
       --network-plugin=cni \
       --network-plugin-dir=/etc/cni/net.d \
       --cloud-provider={{kraken_kubernetes_cloudprovider}} \
