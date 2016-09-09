@@ -45,11 +45,11 @@
      --client-cert-auth \
 {% endif %}
      --discovery-srv {{item.name}}.{{kraken_config.cluster}}.internal \
-     --initial-advertise-peer-urls {% if item.ssl == true %}https{% else %}http{% endif %}://${DEFAULT_IPV4}:2380 \
+     --initial-advertise-peer-urls {% if item.ssl == true %}https{% else %}http{% endif %}://${DEFAULT_IPV4}:{{item.peerPorts[0]}} \
      --initial-cluster-token {{item.clusterToken}} \
      --initial-cluster-state new \
      --advertise-client-urls {% for port in item.clientPorts %}{% if item.ssl == true %}https{% else %}http{% endif %}://${DEFAULT_IPV4}:{{port}},{% endfor %} \
-     --listen-client-urls {% for port in item.clientPorts %}{% if item.ssl == true %}https{% else %}http{% endif %}://127.0.0.1:{{port}},{% if item.ssl == true %}https{% else %}http{% endif %}://${DEFAULT_IPV4}:{{port}},{% endfor %} \
-     --listen-peer-urls {% for port in item.peerPorts %}{% if item.ssl == true %}https{% else %}http{% endif %}://${DEFAULT_IPV4}:{{port}},{% endfor %} \
+     --listen-client-urls {% for port in item.clientPorts %}{% if loop.index > 1 %},{% endif %}{% if item.ssl == true %}https{% else %}http{% endif %}://127.0.0.1:{{port}},{% if item.ssl == true %}https{% else %}http{% endif %}://${DEFAULT_IPV4}:{{port}}{% endfor %} \
+     --listen-peer-urls {% for port in item.peerPorts %}{% if loop.index > 1 %},{% endif %}{% if item.ssl == true %}https{% else %}http{% endif %}://${DEFAULT_IPV4}:{{port}}{% endfor %} \
      ---
     ExecStopPost=/usr/bin/rkt gc --mark-only
