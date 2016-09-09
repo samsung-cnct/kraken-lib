@@ -1,13 +1,18 @@
-- name: setup-network-environment.service
+- name: kraken-networking.service
   command: start
   content: |
     [Unit]
     Description=Setup Network Environment
-    Requires=early-docker.service
-    After=early-docker.service
-    Before=early-docker.target
+    Requires=network-online.target
+    After=network-online.target
     [Service]
-    Environment="DOCKER_HOST=unix:///var/run/early-docker.sock"
-    ExecStart=/usr/bin/docker run --net=host --rm=true -v /etc:/etc quay.io/samsung_cnct/setup-network-environment
     RemainAfterExit=yes
     Type=oneshot
+    ExecStart=/usr/bin/rkt run \
+     --insecure-options=image \
+     --net=host \
+     --inherit-env=true \
+     --volume etc,kind=host,source=/etc,readOnly=false \
+     --mount volume=etc,target=/etc \
+     quay.io/samsung_cnct/setup-network-environment:v1.0.1-mv
+    ExecStopPost=/usr/bin/rkt gc --mark-only

@@ -3,7 +3,7 @@
   command: start
   content: |
     [Unit]
-    Description=Formats {{mount.device | mapdevice}} drive as ext4 {% if mount.forceFormat == false %}if not already formatted {% endif %}
+    Description=Formats {{mount.device | mapdevice}} drive as ext4 {% if mount.forceFormat == false %}if not already formatted {% endif %}.
     After=dev-{{mount.device | mapdevice}}.device
     Requires=dev-{{mount.device | mapdevice}}.device
     [Service]

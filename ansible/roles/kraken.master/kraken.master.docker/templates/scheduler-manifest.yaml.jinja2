@@ -11,18 +11,12 @@ spec:
     command:
     - /hyperkube
     - scheduler
-    - --master=https://master.{{kraken_config.cluster}}.internal
-    - --v=2
+    - --master=http://127.0.0.1:8080
     - --leader-elect=true
-    - --log-dir=/var/log
-    terminationMessagePath: /dev/termination-log
-    volumeMounts:
-    - mountPath: /var/log
-      name: logdir
-    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-      name: default-token-s8ejd
-      readOnly: true
-  volumes:
-  - hostPath:
-      path: /var/log
-    name: logdir
+    livenessProbe:
+      httpGet:
+        host: 127.0.0.1
+        path: /healthz
+        port: 10251
+      initialDelaySeconds: 15
+      timeoutSeconds: 1
