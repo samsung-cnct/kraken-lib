@@ -131,6 +131,7 @@ deployment:
         -
           device: sdf
           path: /var/lib/etcd
+          forceFormat: false
       providerConfig:
         type: m3.medium
         subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
@@ -157,6 +158,7 @@ deployment:
         -
           device: sdf
           path: /var/lib/etcd
+          forceFormat: false
       providerConfig:
         type: m3.medium
         subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
@@ -183,6 +185,7 @@ deployment:
         -
           device: sdf
           path: /var/lib/docker
+          forceFormat: true
       providerConfig:
         type: m3.medium
         subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
@@ -211,6 +214,7 @@ deployment:
         -
           device: sdf
           path: /var/lib/docker
+          forceFormat: true
       providerConfig:
         type: m3.medium
         subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
@@ -237,6 +241,7 @@ deployment:
         -
           device: sdf
           path: /var/lib/docker
+          forceFormat: true
       keypair: krakenKey
       providerConfig:
         type: m3.medium
