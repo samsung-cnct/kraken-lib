@@ -25,3 +25,9 @@ coreos:
     {{ lookup('file', filedata.path) | indent(4) }}
 {% endif %}
 {% endfor %}
+  locksmith:
+{% for filedata in item.1.files %}
+{% if 'node.' + item.0.name + '.locksmith.' in filedata.path %}
+    {{ lookup('file', filedata.path) | indent(4) }}
+{% endif %}
+{% endfor %}

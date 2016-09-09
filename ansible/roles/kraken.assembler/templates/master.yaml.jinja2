@@ -25,3 +25,9 @@ coreos:
     {{ lookup('file', filename) | indent(4) }}
 {% endif %}
 {% endfor %}
+  locksmith:
+{% for filename in kraken_master_parts %}
+{% if 'master.locksmith.' in filename %}
+    {{ lookup('file', filename) | indent(4) }}
+{% endif %}
+{% endfor %}

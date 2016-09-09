@@ -1,0 +1,4 @@
+endpoint: {% if item.infra.etcd.containerConfig.ssl == true %}https{% else %}http{% endif %}://etcd2379.etcd.testcluster.io:2379
+etcd_cafile: /etc/etcd/ssl/client-ca.pem
+etcd_certfile: /etc/etcd/ssl/client.pem
+etcd_keyfile: /etc/etcd/ssl/client-key.pem

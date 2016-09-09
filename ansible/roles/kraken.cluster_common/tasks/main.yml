@@ -10,3 +10,4 @@
 - include: certificate_authority.yaml
 - include: coreos_update.yaml
 - include: storage.yaml
+- include: locksmith.yaml
