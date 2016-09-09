@@ -16,10 +16,6 @@ deployment:
     -
       name: krakenKubeConfig
       version: v1.3.4
-      clusterEtcd:
-        etcd: etcd
-      eventsEtcd:
-        etcd: etcdEvents
       containerConfig: dockerconfig
   containerConfig:
     -

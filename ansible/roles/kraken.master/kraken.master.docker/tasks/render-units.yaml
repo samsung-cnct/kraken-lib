@@ -9,7 +9,3 @@
 - name: Generate master.units.kubelet.part
   template: src=units.kubelet.part.jinja2
     dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master.units.kubelet.part"
-
-- name: Generate master.units.etcdproxy.part
-  template: src=units.etcdproxy.part.jinja2
-    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master.units.etcdproxy.part"

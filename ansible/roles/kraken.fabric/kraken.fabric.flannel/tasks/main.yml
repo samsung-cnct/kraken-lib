@@ -13,8 +13,6 @@
 - name: Generate master .cores.flanneld.part files
   template: src=coreos.flanneld.part.jinja2
             dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master.coreos.flanneld.part"
-  with_items:
-    - "{{kraken_config.master}}"
 
 - name: Generate nodes .coreos.flanneld.part files
   template: src=coreos.flanneld.part.jinja2

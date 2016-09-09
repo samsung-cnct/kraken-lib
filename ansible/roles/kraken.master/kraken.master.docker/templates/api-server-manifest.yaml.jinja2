@@ -12,10 +12,8 @@ spec:
     command:
     - /hyperkube
     - apiserver
-    - --etcd-servers=127.0.0.1:{{kraken_config.master.nodepool.kubeConfig.clusterEtcd.etcd.clientPorts[0]}}
-{% if kraken_config.master.nodepool.kubeConfig.eventsEtcd is defined %}
-    - --etcd-servers-overrides=/events#{{kraken_config.master.nodepool.kubeConfig.eventsEtcd.etcd.clientPorts[0]}}
-{% endif %}
+    - --etcd-servers={% if kraken_config.master.infra.etcd.ssl == true %}https{% else %}http{% endif %}://{{kraken_config.master.infra.etcd.name}}.{{kraken_config.cluster}}.internal:{{kraken_config.master.infra.etcd.clientPorts[0]}}
+    - --etcd-servers-overrides=/events#{% if kraken_config.master.events.etcd.ssl == true %}https{% else %}http{% endif %}://{{kraken_config.master.events.etcd.name}}.{{kraken_config.cluster}}.internal:{{kraken_config.master.events.etcd.clientPorts[0]}}
     - --etcd-cafile=/etc/ca.pem
     - --etcd-certfile=/etc/etcd/ssl/client.pem
     - --etcd-keyfile=/etc/etcd/ssl/client-key.pem
