@@ -1,13 +1,13 @@
 - name: Generate etcd .units.kraken-apiserver-ssl.part
   template: src=units.kraken-apiserver-ssl.part.jinja2
-    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/etcd.{{item.name}}.units.kraken-etcd-ssl.part"
+    dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/etcd.{{item.name}}.units.kraken-etcd-ssl.part"
   with_items: "{{kraken_config.etcd}}"
 
 - name: Generate master .units.kraken-apiserver-ssl.part
   template: src=units.kraken-apiserver-ssl.part.jinja2
-    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master.units.kraken-etcd-ssl.part"
+    dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/master.units.kraken-etcd-ssl.part"
 
 - name: Generate node .units.kraken-apiserver-ssl.part
   template: src=units.kraken-apiserver-ssl.part.jinja2
-    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/node.{{item.name}}.units.kraken-etcd-ssl.part"
+    dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/node.{{item.name}}.units.kraken-etcd-ssl.part"
   with_items: "{{kraken_config.node}}"

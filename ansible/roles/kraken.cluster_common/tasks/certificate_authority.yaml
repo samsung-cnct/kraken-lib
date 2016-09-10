@@ -1,32 +1,34 @@
 ---
 - name: Make sure generated folder for cloud init snippets is there
   file: >
-    path="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/certs"
+    path="{{ config_base | expanduser }}/{{kraken_config.cluster}}/certs"
     state=directory
 
 - name: Generate self-signed CA key
   command: >
-    openssl genrsa -out {{playbook_dir}}/../generated/{{kraken_config.cluster}}/certs/ca-key.pem 2048
+    openssl genrsa -out {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/ca-key.pem 2048
+    creates={{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/ca-key.pem
 
 - name: Generate self-signed CA
   command: >
     openssl req -x509 -new -nodes 
-      -key {{playbook_dir}}/../generated/{{kraken_config.cluster}}/certs/ca-key.pem 
+      -key {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/ca-key.pem 
       -days 7300 
-      -out {{playbook_dir}}/../generated/{{kraken_config.cluster}}/certs/ca.pem 
+      -out {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/ca.pem 
       -subj "/CN=kraken-ca"
+    creates={{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/ca.pem
 
 - name: Generate etcd .write_files.cert-authority.part files
   template: src=write_files.cert-authority.part.jinja2
-            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/etcd.{{item.name}}.write_files.cert-authority.part"
+            dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/etcd.{{item.name}}.write_files.cert-authority.part"
   with_items: "{{kraken_config.etcd}}"
 
 - name: Generate node .write_files.cert-authority.part files
   template: src=write_files.cert-authority.part.jinja2
-            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/node.{{item.name}}.write_files.cert-authority.part"
+            dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/node.{{item.name}}.write_files.cert-authority.part"
   with_items: "{{kraken_config.node}}"
 
 - name: Generate master .write_files.cert-authority.part files
   template: src=write_files.cert-authority.part.jinja2
-            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master.write_files.cert-authority.part"
+            dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/master.write_files.cert-authority.part"
   with_items: ["{{kraken_config.master}}"]

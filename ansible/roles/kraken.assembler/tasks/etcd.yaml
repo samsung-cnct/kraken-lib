@@ -1,16 +1,13 @@
 - name: Create a list of file for nodes
   find: >
-    paths="{{playbook_dir}}/../generated/{{kraken_config.cluster}}" 
+    paths="{{ config_base | expanduser }}/{{kraken_config.cluster}}" 
     patterns="etcd.{{item.name}}.*.part" 
   register: etcd_list
   with_items: "{{kraken_config.etcd}}"
 
-- name: Display file list
-  debug: var=etcd_list.results
-
 - name: Generate etcd cloud init
   template: src=etcd.yaml.jinja2
-    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/cloud-config/etcd.{{item.0.name}}.cloud-config.yaml"
+    dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/cloud-config/etcd.{{item.0.name}}.cloud-config.yaml"
   with_together: 
     - "{{kraken_config.etcd}}"
     - "{{etcd_list.results}}"

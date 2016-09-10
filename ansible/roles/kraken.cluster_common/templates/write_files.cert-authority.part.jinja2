@@ -1,8 +1,8 @@
 - path: /opt/kraken/ca.pem
   encoding: "gz+b64"
   content: |
-    {{ lookup('file', '{{playbook_dir}}/../generated/{{kraken_config.cluster}}/certs/ca.pem') | gz | b64encode }}
+    {{ lookup('file', '{{config_base}}/{{kraken_config.cluster}}/certs/ca.pem' | expanduser) | gz | b64encode }}
 - path: /opt/kraken/ca-key.pem
   encoding: "gz+b64"
   content: |
-    {{ lookup('file', '{{playbook_dir}}/../generated/{{kraken_config.cluster}}/certs/ca-key.pem') | gz | b64encode }}
+    {{ lookup('file', '{{config_base}}/{{kraken_config.cluster}}/certs/ca-key.pem' | expanduser) | gz | b64encode }}

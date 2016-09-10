@@ -1,6 +1,6 @@
 - name: Create a list of file for master
   find: >
-    paths="{{playbook_dir}}/../generated/{{kraken_config.cluster}}" 
+    paths="{{ config_base | expanduser }}/{{kraken_config.cluster}}" 
     patterns="master.*.part" 
   register: master_list
 
@@ -8,9 +8,6 @@
   set_fact:
     kraken_master_parts: "{{master_list.files | map(attribute='path') | list}}"
 
-- name: Display file list
-  debug: var=kraken_master_parts
-
 - name: Generate node master cloud init
   template: src=master.yaml.jinja2
-    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/cloud-config/master.cloud-config.yaml"
+    dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/cloud-config/master.cloud-config.yaml"
