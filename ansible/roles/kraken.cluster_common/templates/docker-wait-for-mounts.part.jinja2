@@ -1,0 +1,18 @@
+- name: docker.service
+  drop-ins:
+    - name: 10-wait-docker.conf
+      content: |
+        [Unit]
+{% for mount in item.nodepool.mounts %}
+        After={{mount.device | mapdevice}}.mount
+        Requires={{mount.device | mapdevice}}.mount
+{% endfor %}
+- name: early-docker.service
+  drop-ins:
+    - name: 10-wait-early-docker.conf
+      content: |
+        [Unit]
+{% for mount in item.nodepool.mounts %}
+        After={{mount.device | mapdevice}}.mount
+        Requires={{mount.device | mapdevice}}.mount
+{% endfor %}

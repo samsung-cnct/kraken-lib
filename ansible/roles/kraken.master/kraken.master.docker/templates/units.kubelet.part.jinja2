@@ -17,8 +17,8 @@
       --config=/etc/kubernetes/manifests \
       --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
       --hostname-override=${DEAFULT_IPV4} \
-      --cluster-dns=10.1.0.2 \
-      --cluster-domain=cluster.local \
+      --cluster-dns={{kraken_config.serviceDNS}} \
+      --cluster-domain={{kraken_config.cluster}}.local \
       --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem \
       --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem \
       --network-plugin=cni \

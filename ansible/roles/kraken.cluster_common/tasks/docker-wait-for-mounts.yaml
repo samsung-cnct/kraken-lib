@@ -1,0 +1,14 @@
+- name: Generate etcd .units.docker-wait-for-mounts.part files
+  template: src=docker-wait-for-mounts.part.jinja2
+            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/etcd.{{item.name}}.units.docker-wait-for-mounts.part"
+  with_items: "{{kraken_config.etcd}}"
+
+- name: Generate master .units.docker-wait-for-mounts.part files
+  template: src=docker-wait-for-mounts.part.jinja2
+            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master.units.docker-wait-for-mounts.part"
+  with_items: ["{{kraken_config.master}}"]
+
+- name: Generate node .units.docker-wait-for-mounts.part files
+  template: src=docker-wait-for-mounts.part.jinja2
+            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/node.{{item.name}}.units.docker-wait-for-mounts.part"
+  with_items: "{{kraken_config.node}}"

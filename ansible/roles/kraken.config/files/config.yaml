@@ -1,7 +1,8 @@
 ---
 deployment:
   cluster: krakenCluster
-  network: 10.0.0.0/16
+  serviceCidr: 10.32.0.0/12
+  serviceDNS: 10.32.0.2
   coreos:
     -
       name: allNodes
@@ -25,9 +26,12 @@ deployment:
   fabric:
     provider: flannel
     options:
-      Network: 10.10.0.0/16
+      Network: 10.128.0.0/10
+      SubnetLen: 22
+      SubnetMin: 10.128.0.0
+      SubnetMax: 10.191.255.255
       Backend:
-        Type: aws-vpc
+        Type: vxlan
   provider: aws
   providerConfig:
     resourcePrefix:
@@ -126,7 +130,11 @@ deployment:
       mounts:
         -
           device: sdf
-          path: /var/lib/etcd
+          path: /var/lib/docker
+          forceFormat: true
+        -
+          device: sdg
+          path: /ephemeral
           forceFormat: false
       providerConfig:
         type: m3.medium
@@ -145,6 +153,15 @@ deployment:
               delete_on_termination: true
               snapshot_id:
               encrypted: false
+          -
+            type: ebs_block_device
+            opts:
+              device_name: sdg
+              volume_type: gp2
+              volume_size: 10
+              delete_on_termination: true
+              snapshot_id:
+              encrypted: false
       keypair: krakenKey
       coreos: allNodes
     -
@@ -153,7 +170,11 @@ deployment:
       mounts:
         -
           device: sdf
-          path: /var/lib/etcd
+          path: /var/lib/docker
+          forceFormat: true
+        -
+          device: sdg
+          path: /ephemeral
           forceFormat: false
       providerConfig:
         type: m3.medium
@@ -169,6 +190,15 @@ deployment:
               device_name: sdf
               volume_type: gp2
               volume_size: 100
+              delete_on_termination: true
+              snapshot_id:
+              encrypted: false
+          -
+            type: ebs_block_device
+            opts:
+              device_name: sdg
+              volume_type: gp2
+              volume_size: 10
               delete_on_termination: true
               snapshot_id:
               encrypted: false
