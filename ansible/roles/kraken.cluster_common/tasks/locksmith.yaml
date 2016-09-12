@@ -1,15 +1,15 @@
 ---
 - name: Generate etcd .locksmith.part files
   template: src=locksmith.part.jinja2
-            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/etcd.{{item.name}}.locksmith.part"
+            dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/etcd.{{item.name}}.locksmith.part"
   with_items: "{{kraken_config.etcd}}"
 
 - name: Generate master .locksmith.part files
   template: src=locksmith.part.jinja2
-            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master.locksmith.part"
+            dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/master.locksmith.part"
   with_items: ["{{kraken_config.master}}"]
 
 - name: Generate node .locksmith.part files
   template: src=locksmith.part.jinja2
-            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/node.{{item.name}}.locksmith.part"
+            dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/node.{{item.name}}.locksmith.part"
   with_items: "{{kraken_config.node}}"

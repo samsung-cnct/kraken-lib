@@ -249,7 +249,7 @@ resource "aws_launch_configuration" "{{etcd.name}}_launch_config" {
   instance_type               = "{{etcd.nodepool.providerConfig.type}}"
   security_groups             = ["${aws_security_group.vpc_etcd_{{etcd.name}}_secgroup.id}"]
   associate_public_ip_address = true
-  user_data                   = "${file("{{playbook_dir}}/../generated/{{kraken_config.cluster}}/cloud-config/etcd.{{etcd.name}}.cloud-config.yaml")}"
+  user_data                   = "${file("{{ config_base | expanduser }}/{{kraken_config.cluster}}/cloud-config/etcd.{{etcd.name}}.cloud-config.yaml")}"
 
   # storage 
 {% for storage in etcd.nodepool.providerConfig.storage %} 
@@ -566,7 +566,7 @@ resource "aws_launch_configuration" "master_launch_config" {
   security_groups             = ["${aws_security_group.vpc_kubernetes_secgroup.id}"]
   associate_public_ip_address = true
   iam_instance_profile        = "${aws_iam_instance_profile.kubernetes_master_profile.name}"
-  user_data                   = "${file("{{playbook_dir}}/../generated/{{kraken_config.cluster}}/cloud-config/master.cloud-config.yaml")}"
+  user_data                   = "${file("{{ config_base | expanduser }}/{{kraken_config.cluster}}/cloud-config/master.cloud-config.yaml")}"
 
   # storage 
 {% for storage in kraken_config.master.nodepool.providerConfig.storage %}
@@ -583,8 +583,8 @@ resource "aws_launch_configuration" "master_launch_config" {
 
 resource "aws_iam_server_certificate" "master_cert" {
   name = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_master_cert"
-  certificate_body = "${file("{{playbook_dir}}/../generated/{{kraken_config.cluster}}/certs/cluster.pem")}"
-  private_key = "${file("{{playbook_dir}}/../generated/{{kraken_config.cluster}}/certs/cluster.key")}"
+  certificate_body = "${file("{{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/cluster.pem")}"
+  private_key = "${file("{{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/cluster.key")}"
 }
 
 resource "aws_elb" "master_elb" {
@@ -725,7 +725,7 @@ resource "aws_launch_configuration" "{{node.name}}_launch_config" {
   security_groups             = ["${aws_security_group.vpc_kubernetes_secgroup.id}"]
   associate_public_ip_address = true
   iam_instance_profile        = "${aws_iam_instance_profile.kubernetes_node_profile.name}"
-  user_data                   = "${file("{{playbook_dir}}/../generated/{{kraken_config.cluster}}/cloud-config/node.{{node.name}}.cloud-config.yaml")}"
+  user_data                   = "${file("{{ config_base | expanduser }}/{{kraken_config.cluster}}/cloud-config/node.{{node.name}}.cloud-config.yaml")}"
 
   # storage 
 {% for storage in node.nodepool.providerConfig.storage %} 
