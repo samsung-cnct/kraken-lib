@@ -17,7 +17,7 @@
 {% if kraken_config.master.infra.etcd.ssl == true %}
         --cert-file /etc/etcd/ssl/client.pem --ca-file /opt/kraken/etcd/ssl/client-ca.pem --key-file /opt/kraken/etcd/ssl/client-key.pem \
 {% endif %}
-        set /coreos.com/network/config '{ "Network": "{{kraken_config.fabric.options.network}}", "SubnetLen": {{kraken_config.fabric.options.subnetLen}}, "SubnetMin": "{{kraken_config.fabric.options.subnetMin}}", "SubnetMax": "{{kraken_config.fabric.options.subnetMax}}"}'
+        set /coreos.com/network/config '{{ kraken_config.fabric.options | to_json }}'
         ExecStartPre=-/usr/bin/mkdir -p /opt/cni
         ExecStartPre=/usr/bin/wget -N -P /opt/cni https://storage.googleapis.com/kubernetes-release/network-plugins/cni-8a936732094c0941e1543ef5d292a1f4fffa1ac5.tar.gz
         ExecStartPre=/usr/bin/tar -xzf /opt/cni/cni-8a936732094c0941e1543ef5d292a1f4fffa1ac5.tar.gz -C /opt/cni/

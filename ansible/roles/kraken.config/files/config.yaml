@@ -30,12 +30,12 @@ deployment:
   fabric:
     provider: flannel
     options:
-      network: 10.128.0.0/10
-      subnetLen: 22
-      subnetMin: 10.128.0.0
-      subnetMax: 10.191.255.255
-      backend:
-        type: vxlan
+      Network: 10.128.0.0/10
+      SubnetLen: 22
+      SubnetMin: 10.128.0.0
+      SubnetMax: 10.191.255.255
+      Backend:
+        Type: vxlan
   provider: aws
   providerConfig:
     resourcePrefix:
