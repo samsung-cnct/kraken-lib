@@ -21,7 +21,7 @@ spec:
     - --etcd-certfile=/etc/etcd/ssl/client.pem
     - --etcd-keyfile=/etc/etcd/ssl/client-key.pem
     - --allow-privileged=true
-    - --service-cluster-ip-range={{kraken_config.network}}
+    - --service-cluster-ip-range={{kraken_config.serviceCidr}}
     - --secure_port=443
     - --admission-control=NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota
     - --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem

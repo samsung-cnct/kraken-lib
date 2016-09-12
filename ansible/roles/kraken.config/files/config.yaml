@@ -1,7 +1,8 @@
 ---
 deployment:
   cluster: krakenCluster
-  network: 10.0.0.0/16
+  serviceCidr: 10.32.0.0/12
+  serviceDNS: 10.32.0.2
   coreos:
     -
       name: allNodes
@@ -12,11 +13,6 @@ deployment:
     -
       name: krakenKey
       publickeyFile: "{{ '~/.ssh/id_rsa.pub' | expanduser}}"
-  kubernetes:
-    serviceCidr: 10.32.0.0/12
-    services:
-      dns:
-        ip: 10.32.0.2
   kubeConfig:
     -
       name: krakenKubeConfig
