@@ -13,9 +13,6 @@ spec:
     - controller-manager
     - --master=http://127.0.0.1:8080
     - --leader-elect=true
-    - --cluster-name={{kraken_config.cluster}}
-    - --cluster-cidr={{kraken_config.kubernetes.serviceCidr}}
-    - --allocate-node-cidrs=true
     - --cloud-provider={{kraken_kubernetes_cloudprovider}}
     - --service-account-private-key-file=/etc/kubernetes/service-account/service-account.pem
     - --root-ca-file=/etc/kubernetes/ssl/ca.pem
