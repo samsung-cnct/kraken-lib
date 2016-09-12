@@ -1,0 +1,9 @@
+- name: Make sure generated folder for kubenetes services is there
+  file: >
+    path="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/kube-services"
+    state=directory
+
+- name: Generate dns service file
+  template: src=kube-services-dns.yaml.jinja2
+            dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/kube-services/dns.yaml"
+  with_items: "{{kraken_config.etcd}}"

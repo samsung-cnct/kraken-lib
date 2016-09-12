@@ -10,3 +10,4 @@
 - include: storage.yaml
 - include: locksmith.yaml
 - include: docker-wait-for-mounts.yaml
+- include: dns.yaml
