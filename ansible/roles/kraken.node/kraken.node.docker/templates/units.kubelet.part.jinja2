@@ -17,7 +17,7 @@
       --config=/etc/kubernetes/manifests \
       --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
       --hostname-override=${DEFAULT_IPV4} \
-      --cluster-dns=10.1.0.2 \
+      --cluster-dns={{kraken_config.kubernetes.services.dns.ip}} \
       --cluster-domain=cluster.local \
       --tls-cert-file=/etc/kubernetes/ssl/worker.pem \
       --tls-private-key-file=/etc/kubernetes/ssl/worker-key.pem \

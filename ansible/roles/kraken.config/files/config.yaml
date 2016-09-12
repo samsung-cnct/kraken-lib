@@ -12,6 +12,11 @@ deployment:
     -
       name: krakenKey
       publickeyFile: "{{ '~/.ssh/id_rsa.pub' | expanduser}}"
+  kubernetes:
+    serviceCidr: 10.32.0.0/12
+    services:
+      dns:
+        ip: 10.32.0.2
   kubeConfig:
     -
       name: krakenKubeConfig
@@ -25,9 +30,12 @@ deployment:
   fabric:
     provider: flannel
     options:
-      Network: 10.10.0.0/16
-      Backend:
-        Type: aws-vpc
+      network: 10.128.0.0/10
+      subnetLen: 22
+      subnetMin: 10.128.0.0
+      subnetMax: 10.191.255.255
+      backend:
+        type: vxlan
   provider: aws
   providerConfig:
     resourcePrefix:
