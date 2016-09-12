@@ -17,12 +17,6 @@ deployment:
     services:
       dns:
         ip: 10.32.0.2
-        etcd:
-          version: 2.2.1
-        kube2sky:
-          version: 1.14
-        skydns:
-          version: 2015-10-13-8c72f8c
   kubeConfig:
     -
       name: krakenKubeConfig
