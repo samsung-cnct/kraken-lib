@@ -1,3 +1,4 @@
 ---
 kraken_action: up
-config_file: "{{ config_file | default('~/.kraken/config.yml' | expanduser) }}"
+config_base: "~/.kraken"
+config_file: "{{ config_file | default('{{config_base}}/config.yml' | expanduser) }}"

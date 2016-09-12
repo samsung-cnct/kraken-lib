@@ -1,7 +1,7 @@
 - name: Generate master.units.kraken-apiserver-ssl.part
   template: src=units.kraken-apiserver-ssl.part.jinja2
-    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master.units.kraken-apiserver-ssl.part"
+    dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/master.units.kraken-apiserver-ssl.part"
 
 - name: Generate master.units.kubelet.part
   template: src=units.kubelet.part.jinja2
-    dest="{{playbook_dir}}/../generated/{{kraken_config.cluster}}/master.units.kubelet.part"
+    dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/master.units.kubelet.part"
