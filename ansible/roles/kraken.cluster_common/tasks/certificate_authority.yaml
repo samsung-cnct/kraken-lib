@@ -1,5 +1,5 @@
 ---
-- name: Make sure generated folder for cloud init snippets is there
+- name: Make sure generated folder for certs is there
   file: >
     path="{{ config_base | expanduser }}/{{kraken_config.cluster}}/certs"
     state=directory
