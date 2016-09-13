@@ -1,5 +1,5 @@
 {% for mount in item.nodepool.mounts %}
-- name: {{mount.device | mapdevice}}.mount
+- name: {{mount.path | replace('/', '-') | replace('-', '', 1)}}.mount
   command: start
   content: |
     [Unit]
@@ -7,7 +7,7 @@
     Requires=format-storage-{{mount.device | mapdevice}}.service
     After=format-storage-{{mount.device | mapdevice}}.service
     [Mount]
-    What={{mount.device | mapdevice}}
+    What=/dev/{{mount.device | mapdevice}}
     Where={{mount.path}}
     Type=ext4
 {% endfor %}

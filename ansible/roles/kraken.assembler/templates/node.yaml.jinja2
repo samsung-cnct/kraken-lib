@@ -10,7 +10,7 @@ write_files:
 coreos:
 {% for filedata in item.1.files %}
 {% if 'node.' + item.0.name + '.coreos.' in filedata.path %}
-    {{ lookup('file', filedata.path) | indent(2) }}
+  {{ lookup('file', filedata.path) | indent(2) }}
 {% endif %}
 {% endfor %}
   units:

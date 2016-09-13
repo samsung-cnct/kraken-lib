@@ -4,8 +4,8 @@
       content: |
         [Unit]
 {% for mount in item.nodepool.mounts %}
-        After={{mount.device | mapdevice}}.mount
-        Requires={{mount.device | mapdevice}}.mount
+        After={{mount.path | replace('/', '-') | replace('-', '', 1)}}.mount
+        Requires={{mount.path | replace('/', '-') | replace('-', '', 1)}}.mount
 {% endfor %}
 - name: early-docker.service
   drop-ins:
@@ -13,6 +13,6 @@
       content: |
         [Unit]
 {% for mount in item.nodepool.mounts %}
-        After={{mount.device | mapdevice}}.mount
-        Requires={{mount.device | mapdevice}}.mount
+        After={{mount.path | replace('/', '-') | replace('-', '', 1)}}.mount
+        Requires={{mount.path | replace('/', '-') | replace('-', '', 1)}}.mount
 {% endfor %}
