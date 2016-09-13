@@ -1,0 +1,4 @@
+---
+- include: generate-admin-cert.yaml
+- include: generate-admin-kubeconfig.yaml
+- include: run-services.yaml
