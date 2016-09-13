@@ -8,8 +8,8 @@
     Requires=kraken-ssl.service
 {% endif %}
 {% for mount in item.nodepool.mounts %}
-    After={{mount.device | mapdevice}}.mount
-    Requires={{mount.device | mapdevice}}.mount
+    After={{mount.path | replace('/', '-') | replace('-', '', 1)}}.mount
+    Requires={{mount.path | replace('/', '-') | replace('-', '', 1)}}.mount
 {% endfor %}
     After=kraken-networking.service
     Requires=kraken-networking.service
@@ -19,6 +19,7 @@
     RestartSec=15
     Restart=always
     KillMode=none
+    ExecPre=
     ExecStart=/usr/bin/rkt run --net=host \
      --stage1-path=/usr/lib/rkt/stage1-images/stage1-fly.aci \
      --insecure-options=image \
@@ -48,7 +49,7 @@
      --initial-advertise-peer-urls {% if item.ssl == true %}https{% else %}http{% endif %}://${DEFAULT_IPV4}:{{item.peerPorts[0]}} \
      --initial-cluster-token {{item.clusterToken}} \
      --initial-cluster-state new \
-     --advertise-client-urls {% for port in item.clientPorts %}{% if item.ssl == true %}https{% else %}http{% endif %}://${DEFAULT_IPV4}:{{port}},{% endfor %} \
+     --advertise-client-urls {% for port in item.clientPorts %}{% if loop.index > 1 %},{% endif %}{% if item.ssl == true %}https{% else %}http{% endif %}://${DEFAULT_IPV4}:{{port}}{% endfor %} \
      --listen-client-urls {% for port in item.clientPorts %}{% if loop.index > 1 %},{% endif %}{% if item.ssl == true %}https{% else %}http{% endif %}://127.0.0.1:{{port}},{% if item.ssl == true %}https{% else %}http{% endif %}://${DEFAULT_IPV4}:{{port}}{% endfor %} \
      --listen-peer-urls {% for port in item.peerPorts %}{% if loop.index > 1 %},{% endif %}{% if item.ssl == true %}https{% else %}http{% endif %}://${DEFAULT_IPV4}:{{port}}{% endfor %} \
      ---
