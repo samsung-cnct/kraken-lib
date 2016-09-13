@@ -1,54 +1,43 @@
-## snippet structure
+# Kubernetes cluster services configuration
 
-Under snippets are generated under 'generated' folder, with following structure:
+Cluster services are helm charts to be installed on cluster startup
+
+# Options
+## Root Options
+| Key Name | Required | Type | Description|
+| --- | --- | --- | --- |
+| repos | __Required__ | Object array | Array of helm repositories |
+| services | __Required__ | Object array | Array of helm charts |
+| namespaces | Optional | String array | Array namespaces to be created prior to installing services |
+
+## repos Options
+| Key Name | Required | Type | Description|
+| --- | --- | --- | --- |
+| name | __Required__ | String | Repository name |
+| url | __Required__ | String | Repository address |
+
+# services Options
+| Key Name | Required | Type | Description|
+| --- | --- | --- | --- |
+| name | __Required__ | String | Chart release name |
+| repo | __Required__ | String | Repository name for the chart |
+| chart | __Required__ | String | Chart name with version |
+| values | Optional | Object | Chart values |
+
+# Example
+```yaml
+clusterServices:
+    repos:
+      -
+        name: atlas
+        url: http://atlas.cnct.io
+    services:
+      -
+        name: kubedns
+        repo: atlas
+        chart: kubedns-0.1.0
+        values:
+          cluster_ip: 10.32.0.2
+          dns_domain: krakenCluster.local
 
 ```
-generated:
-  cluster name:
-    master.units.unitname.part
-    master.write_files.writefilename.part
-    master.ssh_authorized_keys.key.part
-    master.coreos.etcd.part
-    master.coreos.flannel.part
-    master.coreos.update.part
-
-    etcd.etcdcluster.units.unitname.part
-    etcd.etcdcluster.write_files.writefilename.part
-    etcd.etcdcluster.ssh_authorized_keys.key.part
-    etcd.etcdcluster.coreos.etcd.part
-    etcd.etcdcluster.coreos.flannel.part
-    etcd.etcdcluster.coreos.update.part
-    
-    node.nodepool.units.unitname.part
-    node.nodepool.write_files.writefilename.part
-    node.nodepool.ssh_authorized_keys.key.part
-    node.nodepool.coreos.etcd.part
-    node.nodepool.coreos.flannel.part
-    node.nodepool.coreos.update.part
-```
-
-Then assembled into a cloud config user data files, like so:
-
-
-[master | etcd | node].[nodepool name | etcd cluster name].yaml
-
-Contents:
-
-```
-#cloud-config
----
-write_files:
-  {{[master | etcd | node].[nodepool name | etcd cluster name].units.*}}
-ssh_authorized_keys:
-  {{[master | etcd | node].[nodepool name | etcd cluster name].ssh_authorized_keys.*}}
-coreos:
-  units:
-    {{[master | etcd | node].[nodepool name | etcd cluster name].units.*}}
-  etcd:
-    {{[master | etcd | node].[nodepool name | etcd cluster name].coreos.etcd.part}}
-  [flannel:]
-    {{[master | etcd | node].[nodepool name | etcd cluster name].coreos.flannel.part}}
-  update:
-    {{[master | etcd | node].[nodepool name | etcd cluster name].coreos.update.part}}
-```
-

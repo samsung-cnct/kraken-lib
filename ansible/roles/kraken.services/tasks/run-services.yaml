@@ -1,0 +1,86 @@
+---
+- name: Create Helm home
+  file: >
+    path={{ helm_home }}
+    state=directory
+
+- name: See if tiller rc if present
+  shell: >
+    kubectl --kubeconfig={{ kubeconfig }} get rc {{ tiller_rc }}
+  register: tiller_present
+  ignore_errors: yes
+
+- name: Clean up releases
+  command: >
+    docker run --rm
+    -v {{ helm_home }}:/helm-home
+    -v {{ kubeconfig }}:/.kube/config
+    -e KUBECONFIG=/.kube/config {{ helm_image }}
+    delete --purge {{ item.name }}
+  with_items: "{{ kraken_config.clusterServices.services }}"
+  ignore_errors: yes
+  when: tiller_present|success
+
+- name: Clean up tiller rc if present
+  command: >
+    kubectl --kubeconfig={{ kubeconfig }} delete rc {{ tiller_rc }}
+  when: tiller_present|success
+
+- name: Delete all service namespaces
+  command: >
+    kubectl --kubeconfig={{ kubeconfig }} delete namespace {{ item }}
+  with_items: "{{ kraken_config.clusterServices.namespaces }}"
+  ignore_errors: yes
+  when: kraken_config.clusterServices.namespaces is defined
+
+- name: Create all service namespaces
+  command: >
+    kubectl --kubeconfig={{ kubeconfig | expanduser }} create namespace {{ item }}
+  with_items: "{{ kraken_config.clusterServices.namespaces }}"
+  when: kraken_config.clusterServices.namespaces is defined
+
+- name: Init helm
+  command: >
+    docker run --rm
+    -v {{ helm_home }}:/helm-home
+    -v {{ kubeconfig }}:/.kube/config
+    -e KUBECONFIG=/.kube/config {{ helm_image }}
+    init --tiller-image {{ tiller_image }}
+
+- name: Give tiller rc a chance to fully init
+  pause: seconds=5
+
+- name: Remove helm repositories
+  command: >
+    docker run --rm
+    -v {{ helm_home }}:/helm-home
+    -v {{ kubeconfig }}:/.kube/config
+    -e KUBECONFIG=/.kube/config {{ helm_image }}
+    repo remove {{ item.name }}
+  with_items: "{{ kraken_config.clusterServices.repos }}"
+  ignore_errors: yes
+
+- name: Add helm repositories
+  command: >
+    docker run --rm
+    -v {{ helm_home }}:/helm-home
+    -v {{ kubeconfig }}:/.kube/config
+    -e KUBECONFIG=/.kube/config {{ helm_image }}
+    repo add {{ item.name }} {{ item.url }}
+  with_items: "{{ kraken_config.clusterServices.repos }}"
+
+- name: Save all config values to files
+  template: src=service-values.yaml.jinja2
+    dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/{{ item.repo }}-{{ item.name }}.helmvalues"
+  with_items: "{{ kraken_config.clusterServices.services }}"
+
+- name: Install charts
+  command: >
+    docker run --rm
+    -v {{ helm_home }}:/helm-home
+    -v {{ kubeconfig }}:/.kube/config
+    -e KUBECONFIG=/.kube/config {{ helm_image }}
+    install {{ item.repo }}/{{ item.chart }}
+    --name {{ item.name }}
+    --values {{ config_base | expanduser }}/{{kraken_config.cluster}}/{{ item.repo }}-{{ item.name }}.helmvalues
+  with_items: "{{ kraken_config.clusterServices.services }}"
