@@ -9,3 +9,4 @@
     - { role: 'roles/kraken.node/kraken.node.selector' }
     - { role: 'roles/kraken.assembler' }
     - { role: 'roles/kraken.provider/kraken.provider.selector' }
+    - { role: 'roles/kraken.provider/kraken.services', when: kraken_config.clusterServices is defined}

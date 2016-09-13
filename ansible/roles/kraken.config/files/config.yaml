@@ -322,8 +322,6 @@ deployment:
       name: specialNodes
       nodepool: specialNodes
   clusterServices:
-    namespaces:
-      - kube-system
     repos:
       -
         name: atlas
@@ -333,7 +331,6 @@ deployment:
         name: kubedns
         repo: atlas
         chart: kubedns-0.1.0
-      -
-        name: kubedns
-        repo: atlas
-        chart: kubedns-0.1.0
+        values:
+          cluster_ip: 10.32.0.2
+          dns_domain: krakenCluster.local
