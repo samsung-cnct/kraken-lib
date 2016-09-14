@@ -23,7 +23,7 @@
 - name: Get kraken aws_route53_zone.private_zone.zone_id
   shell: > 
     terraform output kraken_private_zone_id chdir={{ config_base | expanduser }}/{{kraken_config.cluster}}
-  register:  
+  register: zone_result 
   when: zone_present|success
   ignore_errors: yes
 
@@ -35,7 +35,7 @@
 - name: Kill off the hosted zone using cli53 (THANKS, TERRAFORM)
   command: >
     cli53 delete --purge {{ zone_result.stdout }}
-  when: zone_present|success and kraken_action == 'down'
+  when: zone_present|success and kraken_action == 'down' and zone_result|success
 
 - name: clean the terraform state generated prefix and other misc files.
   file:
