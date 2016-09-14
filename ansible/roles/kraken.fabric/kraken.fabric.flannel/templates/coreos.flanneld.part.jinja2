@@ -1,7 +1,7 @@
 flannel:
   etcd_endpoints: {% if kraken_config.master.infra.etcd.ssl == true %}https{% else %}http{% endif %}://{{kraken_config.master.infra.etcd.name}}.{{kraken_config.cluster}}.internal:{{kraken_config.master.infra.etcd.clientPorts[0]}}
 {% if kraken_config.master.infra.etcd.ssl == true %}
-  etcd_cafile: /opt/kraken/etcd/ssl/client-ca.pem
-  etcd_certfile: /opt/kraken/etcd/ssl/client.pem
-  etcd_keyfile: /opt/kraken/etcd/ssl/client-key.pem
+  etcd_cafile: /etc/etcd/ssl/client-ca.pem
+  etcd_certfile: /etc/etcd/ssl/client.pem
+  etcd_keyfile: /etc/etcd/ssl/client-key.pem
 {% endif %}
