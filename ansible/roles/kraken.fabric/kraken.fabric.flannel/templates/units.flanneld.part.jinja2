@@ -11,11 +11,11 @@
         EnvironmentFile=/etc/network-environment
         Environment="FLANNELD_INTERFACE=${DEFAULT_IPV4}"
 {% if kraken_config.master.infra.etcd.ssl == true %}
-        Environment="ETCD_SSL_DIR=/opt/kraken/etcd/ssl"
+        Environment="ETCD_SSL_DIR=/etc/etcd/ssl"
 {% endif %}
         ExecStartPre=/usr/bin/etcdctl -D {{kraken_config.master.infra.etcd.name}}.{{kraken_config.cluster}}.internal \
 {% if kraken_config.master.infra.etcd.ssl == true %}
-        --cert-file /etc/etcd/ssl/client.pem --ca-file /opt/kraken/etcd/ssl/client-ca.pem --key-file /opt/kraken/etcd/ssl/client-key.pem \
+        --cert-file /etc/etcd/ssl/client.pem --ca-file /etc/etcd/ssl/client-ca.pem --key-file /etc/etcd/ssl/client-key.pem \
 {% endif %}
         set /coreos.com/network/config '{{ kraken_config.fabric.options | to_json }}'
         ExecStartPre=-/usr/bin/mkdir -p /opt/cni
