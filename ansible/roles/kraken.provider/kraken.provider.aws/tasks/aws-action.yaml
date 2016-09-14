@@ -1,13 +1,40 @@
 ---
 - name: Run cluster {{kraken_action}}
-  shell: >
+  command: >
     terraform apply -input=false {{ config_base | expanduser }}/{{kraken_config.cluster}} chdir={{ config_base | expanduser }}/{{kraken_config.cluster}}
   when: kraken_action == 'up'
 
+- name: Get kraken endpoint
+  shell: > 
+    terraform output kraken_endpoint chdir={{ config_base | expanduser }}/{{kraken_config.cluster}}
+  register: endpoint_result
+
+- name: Set the kraken end point fact
+  set_fact:
+    kraken_endpoint: "{{ endpoint_result.stdout }}"
+
+- name: Remove the route 53 zone from state (THANKS, TERRAFORM)
+  command: >
+    terraform state rm aws_route53_zone.private_zone chdir={{ config_base | expanduser }}/{{kraken_config.cluster}}
+  when: kraken_action == 'down'
+  register: zone_present
+  ignore_errors: yes
+
+- name: Get kraken aws_route53_zone.private_zone.zone_id
+  shell: > 
+    terraform output kraken_private_zone_id chdir={{ config_base | expanduser }}/{{kraken_config.cluster}}
+  register: zone_result
+  when: zone_present|success
+
 - name: Run terraform destroy
-  shell: >
+  command: >
     terraform destroy -input=false -force {{ config_base | expanduser }}/{{kraken_config.cluster}} chdir={{ config_base | expanduser }}/{{kraken_config.cluster}}
   when: kraken_action == 'down'
+
+- name: Kill off the hosted zone using cli53 (THANKS, TERRAFORM)
+  command: >
+    cli53 delete --purge {{ zone_result.stdout }}
+  when: zone_present|success
 
 - name: clean the terraform state generated prefix and other misc files.
   file:
