@@ -8,10 +8,12 @@
   shell: > 
     terraform output kraken_endpoint chdir={{ config_base | expanduser }}/{{kraken_config.cluster}}
   register: endpoint_result
+  when: kraken_action == 'up'
 
 - name: Set the kraken end point fact
   set_fact:
     kraken_endpoint: "{{ endpoint_result.stdout }}"
+  when: kraken_action == 'up'
 
 - name: Remove the route 53 zone from state (THANKS, TERRAFORM)
   command: >
