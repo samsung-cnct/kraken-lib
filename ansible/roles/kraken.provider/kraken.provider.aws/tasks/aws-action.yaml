@@ -23,8 +23,9 @@
 - name: Get kraken aws_route53_zone.private_zone.zone_id
   shell: > 
     terraform output kraken_private_zone_id chdir={{ config_base | expanduser }}/{{kraken_config.cluster}}
-  register: zone_result
+  register:  
   when: zone_present|success
+  ignore_errors: yes
 
 - name: Run terraform destroy
   command: >
