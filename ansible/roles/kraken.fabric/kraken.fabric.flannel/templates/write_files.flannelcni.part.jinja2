@@ -1,0 +1,4 @@
+- path: /etc/cni/net.d/10-cninet.conf
+  encoding: "gz+b64"
+  content: |
+    {{ lookup('file', role_path + '/files/10-cninet.conf') | gz | b64encode }}

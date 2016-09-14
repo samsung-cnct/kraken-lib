@@ -624,10 +624,10 @@ resource "aws_elb" "master_elb" {
 
   health_check {
     healthy_threshold = 2
-    unhealthy_threshold = 2
-    timeout = 5
+    unhealthy_threshold = 10
+    timeout = 60
     target = "SSL:443"
-    interval = 30
+    interval = 300
   }
 
   tags {
