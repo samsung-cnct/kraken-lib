@@ -34,7 +34,7 @@
 - name: Kill off the hosted zone using cli53 (THANKS, TERRAFORM)
   command: >
     cli53 delete --purge {{ zone_result.stdout }}
-  when: zone_present|success
+  when: zone_present|success and kraken_action == 'down'
 
 - name: clean the terraform state generated prefix and other misc files.
   file:
