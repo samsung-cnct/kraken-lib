@@ -168,7 +168,7 @@ coreos:
           --allow-privileged=true \
           --config=/etc/kubernetes/manifests \
           --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
-          --hostname-override=${DEAFULT_IPV4} \
+          --hostname-override=${DEFAULT_IPV4} \
           --cluster-dns=${KUBERNETES_DNS_SERVICE} \
           --cluster-domain=${KUBERNETES_DNS_NAME} \
           --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem \

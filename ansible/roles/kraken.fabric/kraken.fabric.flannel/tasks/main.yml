@@ -1,4 +1,8 @@
 ---
+- name: Generate master writefiles flannel cni
+  template: src=write_files.flannelcni.part.jinja2
+            dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/master.write_files.flannelcni.part"
+
 - name: Generate master .units.flanneld.part files
   template: src=units.flanneld.part.jinja2
             dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/master.units.flanneld.part"
