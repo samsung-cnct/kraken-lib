@@ -243,13 +243,17 @@ resource "coreosbox_ami" "{{etcd.name}}_ami" {
 # Launch configurations for all etcd clusters
 {% for etcd in kraken_config.etcd %}
 resource "aws_launch_configuration" "{{etcd.name}}_launch_config" {
-  name                        = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_{{etcd.name}}_launch_config"
+  name_prefix                 = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_{{etcd.name}}"
   image_id                    = "${coreosbox_ami.{{etcd.name}}_ami.box_string}"
   key_name                    = "${aws_key_pair.{{etcd.nodepool.keypair.name}}.key_name}"
   instance_type               = "{{etcd.nodepool.providerConfig.type}}"
   security_groups             = ["${aws_security_group.vpc_etcd_{{etcd.name}}_secgroup.id}"]
   associate_public_ip_address = true
   user_data                   = "${file("{{ config_base | expanduser }}/{{kraken_config.cluster}}/cloud-config/etcd.{{etcd.name}}.cloud-config.yaml")}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
   # storage 
 {% for storage in etcd.nodepool.providerConfig.storage %} 
@@ -394,6 +398,10 @@ resource "aws_autoscaling_group" "{{etcd.name}}_nodes" {
   min_size                  = "{{etcd.nodepool.count}}"
   desired_capacity          = "{{etcd.nodepool.count}}"
   health_check_type         = "EC2"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
   tag {
     key                 = "srvconfig"
@@ -569,7 +577,7 @@ resource "aws_iam_instance_profile" "kubernetes_node_profile" {
 
 # Launch configuration for master
 resource "aws_launch_configuration" "master_launch_config" {
-  name                        = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_master_launch_config"
+  name_prefix                 = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_master"
   image_id                    = "${coreosbox_ami.master_ami.box_string}"
   key_name                    = "${aws_key_pair.{{kraken_config.master.nodepool.keypair.name}}.key_name}"
   instance_type               = "{{kraken_config.master.nodepool.providerConfig.type}}"
@@ -577,6 +585,10 @@ resource "aws_launch_configuration" "master_launch_config" {
   associate_public_ip_address = true
   iam_instance_profile        = "${aws_iam_instance_profile.kubernetes_master_profile.name}"
   user_data                   = "${file("{{ config_base | expanduser }}/{{kraken_config.cluster}}/cloud-config/master.cloud-config.yaml")}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
   # storage 
 {% for storage in kraken_config.master.nodepool.providerConfig.storage %}
@@ -635,12 +647,17 @@ resource "aws_route53_record" "master_record" {
 {% else %}
 # Launch configuration for master loadbalancer
 resource "aws_launch_configuration" "master_loadbalancer_launch_config" {
-  name                        = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_loadbalancer"
+  name_prefix                 = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_loadbalancer"
   image_id                    = "${coreosbox_ami.master_ami.box_string}"
   key_name                    = "${aws_key_pair.{{kraken_config.master.nodepool.keypair.name}}.key_name}"
   instance_type               = "{{kraken_config.master.nodepool.providerConfig.type}}"
   security_groups             = ["${aws_security_group.vpc_kubernetes_secgroup.id}"]
   associate_public_ip_address = true
+
+  lifecycle {
+    create_before_destroy = true
+  }
+  
   #TODO
   user_data                   = ""
 }
@@ -657,6 +674,10 @@ resource "aws_autoscaling_group" "master_loadbalancer_nodes" {
   min_size                  = "1"
   desired_capacity          = "1"
   health_check_type         = "EC2"
+
+  lifecycle {
+    create_before_destroy = true
+  }
   
   tag {
     key                 = "Name"
@@ -692,6 +713,10 @@ resource "aws_autoscaling_group" "master_nodes" {
 {% else %}
   health_check_type         = "EC2"
 {% endif %}
+
+  lifecycle {
+    create_before_destroy = true
+  }
   
   tag {
     key                 = "Name"
@@ -728,7 +753,7 @@ resource "coreosbox_ami" "{{node.name}}_ami" {
 # Launch configurations for all node pools
 {% for node in kraken_config.node %}
 resource "aws_launch_configuration" "{{node.name}}_launch_config" {
-  name                        = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_{{node.name}}_launch_config"
+  name_prefix                 = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_{{node.name}}"
   image_id                    = "${coreosbox_ami.{{node.name}}_ami.box_string}"
   key_name                    = "${aws_key_pair.{{node.nodepool.keypair.name}}.key_name}"
   instance_type               = "{{node.nodepool.providerConfig.type}}"
@@ -736,6 +761,10 @@ resource "aws_launch_configuration" "{{node.name}}_launch_config" {
   associate_public_ip_address = true
   iam_instance_profile        = "${aws_iam_instance_profile.kubernetes_node_profile.name}"
   user_data                   = "${file("{{ config_base | expanduser }}/{{kraken_config.cluster}}/cloud-config/node.{{node.name}}.cloud-config.yaml")}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
   # storage 
 {% for storage in node.nodepool.providerConfig.storage %} 
@@ -761,6 +790,10 @@ resource "aws_autoscaling_group" "{{node.name}}_nodes" {
   min_size                  = "{{node.nodepool.count}}"
   desired_capacity          = "{{node.nodepool.count}}"
   health_check_type         = "EC2"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
   tag {
     key                 = "Name"
