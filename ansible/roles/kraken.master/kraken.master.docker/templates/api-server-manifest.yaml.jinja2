@@ -27,6 +27,7 @@ spec:
     - --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem
     - --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
     - --client-ca-file=/etc/kubernetes/ssl/ca.pem
+    - --basic-auth-file=/etc/kubernetes/basicauth.csv
     - --service-account-key-file=/etc/kubernetes/service-account/service-account-pub.pem
     - --cloud-provider={{kraken_kubernetes_cloudprovider}}
     - --logtostderr=true

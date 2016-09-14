@@ -2,6 +2,14 @@
   template: src=write_files.kubeconfig.part.jinja2
     dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/master.write_files.kubeconfig.part"
 
+- name: Generate master basc auth csv
+  template: src=basicauth.csv.jinja2
+    dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/basicauth.csv"
+
+- name: Generate master writefiles basicauth
+  template: src=write_files.basicauth.part.jinja2
+    dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/master.write_files.basicauth.part"
+
 - name: Generate master writefiles manifests
   template: src=write_files.manifests.part.jinja2
     dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/master.write_files.{{item.name}}.part"
