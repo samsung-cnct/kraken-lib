@@ -5,7 +5,7 @@ provider "aws" {
   shared_credentials_file = "{{kraken_config.providerConfig.authentication.credentialsFile}}"
   profile     = "{{kraken_config.providerConfig.authentication.credentialsProfile}}"
   region      = "{{kraken_config.providerConfig.region}}"
-  max_retries = "10"
+  max_retries = "100"
 } 
 
 # AWS VPC block
@@ -243,13 +243,17 @@ resource "coreosbox_ami" "{{etcd.name}}_ami" {
 # Launch configurations for all etcd clusters
 {% for etcd in kraken_config.etcd %}
 resource "aws_launch_configuration" "{{etcd.name}}_launch_config" {
-  name                        = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_{{etcd.name}}_launch_config"
+  name_prefix                 = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_{{etcd.name}}"
   image_id                    = "${coreosbox_ami.{{etcd.name}}_ami.box_string}"
   key_name                    = "${aws_key_pair.{{etcd.nodepool.keypair.name}}.key_name}"
   instance_type               = "{{etcd.nodepool.providerConfig.type}}"
   security_groups             = ["${aws_security_group.vpc_etcd_{{etcd.name}}_secgroup.id}"]
   associate_public_ip_address = true
   user_data                   = "${file("{{ config_base | expanduser }}/{{kraken_config.cluster}}/cloud-config/etcd.{{etcd.name}}.cloud-config.yaml")}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
   # storage 
 {% for storage in etcd.nodepool.providerConfig.storage %} 
@@ -395,6 +399,10 @@ resource "aws_autoscaling_group" "{{etcd.name}}_nodes" {
   desired_capacity          = "{{etcd.nodepool.count}}"
   health_check_type         = "EC2"
 
+  lifecycle {
+    create_before_destroy = true
+  }
+
   tag {
     key                 = "srvconfig"
 {% if etcd.ssl %}
@@ -497,6 +505,11 @@ resource "aws_iam_role_policy" "kubernetes_master_policy" {
 resource "aws_iam_instance_profile" "kubernetes_master_profile" {
   name = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_kubernetes_master_profile"
   roles = ["${aws_iam_role.kubernetes_master_role.name}"]
+
+  # let profile propagate https://github.com/hashicorp/terraform/issues/7198 and https://github.com/hashicorp/terraform/pull/8813
+  provisioner "local-exec" {
+    command = "sleep 10"
+  }
 }
 
 data "aws_iam_policy_document" "kubernetes_node_role_doc" {
@@ -554,12 +567,17 @@ resource "aws_iam_role_policy" "kubernetes_node_policy" {
 resource "aws_iam_instance_profile" "kubernetes_node_profile" {
   name = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_kubernetes_node_profile"
   roles = ["${aws_iam_role.kubernetes_node_role.name}"]
+
+  # let profile propagate https://github.com/hashicorp/terraform/issues/7198 and https://github.com/hashicorp/terraform/pull/8813
+  provisioner "local-exec" {
+    command = "sleep 10"
+  }
 }
 
 
 # Launch configuration for master
 resource "aws_launch_configuration" "master_launch_config" {
-  name                        = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_master_launch_config"
+  name_prefix                 = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_master"
   image_id                    = "${coreosbox_ami.master_ami.box_string}"
   key_name                    = "${aws_key_pair.{{kraken_config.master.nodepool.keypair.name}}.key_name}"
   instance_type               = "{{kraken_config.master.nodepool.providerConfig.type}}"
@@ -567,6 +585,10 @@ resource "aws_launch_configuration" "master_launch_config" {
   associate_public_ip_address = true
   iam_instance_profile        = "${aws_iam_instance_profile.kubernetes_master_profile.name}"
   user_data                   = "${file("{{ config_base | expanduser }}/{{kraken_config.cluster}}/cloud-config/master.cloud-config.yaml")}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
   # storage 
 {% for storage in kraken_config.master.nodepool.providerConfig.storage %}
@@ -617,7 +639,7 @@ resource "aws_elb" "master_elb" {
 resource "aws_route53_record" "master_record" {
   zone_id = "${aws_route53_zone.private_zone.zone_id}"
   name = "master.{{kraken_config.cluster}}.internal"
-  type = "A"
+  type = "CNAME"
   ttl = "300"
   records = ["${aws_elb.master_elb.dns_name}"]
 }
@@ -625,12 +647,17 @@ resource "aws_route53_record" "master_record" {
 {% else %}
 # Launch configuration for master loadbalancer
 resource "aws_launch_configuration" "master_loadbalancer_launch_config" {
-  name                        = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_loadbalancer"
+  name_prefix                 = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_loadbalancer"
   image_id                    = "${coreosbox_ami.master_ami.box_string}"
   key_name                    = "${aws_key_pair.{{kraken_config.master.nodepool.keypair.name}}.key_name}"
   instance_type               = "{{kraken_config.master.nodepool.providerConfig.type}}"
   security_groups             = ["${aws_security_group.vpc_kubernetes_secgroup.id}"]
   associate_public_ip_address = true
+
+  lifecycle {
+    create_before_destroy = true
+  }
+  
   #TODO
   user_data                   = ""
 }
@@ -647,6 +674,10 @@ resource "aws_autoscaling_group" "master_loadbalancer_nodes" {
   min_size                  = "1"
   desired_capacity          = "1"
   health_check_type         = "EC2"
+
+  lifecycle {
+    create_before_destroy = true
+  }
   
   tag {
     key                 = "Name"
@@ -682,6 +713,10 @@ resource "aws_autoscaling_group" "master_nodes" {
 {% else %}
   health_check_type         = "EC2"
 {% endif %}
+
+  lifecycle {
+    create_before_destroy = true
+  }
   
   tag {
     key                 = "Name"
@@ -718,7 +753,7 @@ resource "coreosbox_ami" "{{node.name}}_ami" {
 # Launch configurations for all node pools
 {% for node in kraken_config.node %}
 resource "aws_launch_configuration" "{{node.name}}_launch_config" {
-  name                        = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_{{node.name}}_launch_config"
+  name_prefix                 = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_{{node.name}}"
   image_id                    = "${coreosbox_ami.{{node.name}}_ami.box_string}"
   key_name                    = "${aws_key_pair.{{node.nodepool.keypair.name}}.key_name}"
   instance_type               = "{{node.nodepool.providerConfig.type}}"
@@ -726,6 +761,10 @@ resource "aws_launch_configuration" "{{node.name}}_launch_config" {
   associate_public_ip_address = true
   iam_instance_profile        = "${aws_iam_instance_profile.kubernetes_node_profile.name}"
   user_data                   = "${file("{{ config_base | expanduser }}/{{kraken_config.cluster}}/cloud-config/node.{{node.name}}.cloud-config.yaml")}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
   # storage 
 {% for storage in node.nodepool.providerConfig.storage %} 
@@ -752,6 +791,10 @@ resource "aws_autoscaling_group" "{{node.name}}_nodes" {
   desired_capacity          = "{{node.nodepool.count}}"
   health_check_type         = "EC2"
 
+  lifecycle {
+    create_before_destroy = true
+  }
+
   tag {
     key                 = "Name"
     value               = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_{{node.name}}_node-autoscaled"
@@ -773,4 +816,12 @@ resource "aws_autoscaling_group" "{{node.name}}_nodes" {
 {% endfor %}
 }
 {% endfor %}
+
+output "kraken_endpoint" {
+  value = "${aws_elb.master_elb.dns_name}"
+}
+
+output "kraken_private_zone_id" {
+  value = "${aws_route53_zone.private_zone.zone_id}"
+}
 

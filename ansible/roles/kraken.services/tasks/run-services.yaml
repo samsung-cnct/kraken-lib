@@ -4,6 +4,16 @@
     path={{ helm_home }}
     state=directory
 
+- name: Set cluster services fact
+  set_fact:
+    cluster_services: "{{ kraken_config.clusterServices.services | default([]) }}" 
+- name: Set cluster repos fact
+  set_fact:
+    cluster_repos: "{{ kraken_config.clusterServices.repos | default([]) }}" 
+- name: Set cluster namespaces fact
+  set_fact:
+    cluster_namespaces: "{{ kraken_config.clusterServices.namespaces | default([]) }}" 
+
 - name: See if tiller rc if present
   shell: >
     kubectl --kubeconfig={{ kubeconfig }} get rc {{ tiller_rc }}
@@ -17,7 +27,7 @@
     -v {{ kubeconfig }}:/.kube/config
     -e KUBECONFIG=/.kube/config {{ helm_image }}
     delete --purge {{ item.name }}
-  with_items: "{{ kraken_config.clusterServices.services }}"
+  with_items: "{{cluster_services}}"
   ignore_errors: yes
   when: tiller_present|success
 
@@ -29,15 +39,15 @@
 - name: Delete all service namespaces
   command: >
     kubectl --kubeconfig={{ kubeconfig }} delete namespace {{ item }}
-  with_items: "{{ kraken_config.clusterServices.namespaces }}"
+  with_items: "{{ cluster_namespaces }}"
+  when: cluster_namespaces is defined
   ignore_errors: yes
-  when: kraken_config.clusterServices.namespaces is defined
 
 - name: Create all service namespaces
   command: >
     kubectl --kubeconfig={{ kubeconfig | expanduser }} create namespace {{ item }}
-  with_items: "{{ kraken_config.clusterServices.namespaces }}"
-  when: kraken_config.clusterServices.namespaces is defined
+  with_items: "{{ cluster_namespaces }}"
+  when: cluster_namespaces is defined
 
 - name: Init helm
   command: >
@@ -57,7 +67,8 @@
     -v {{ kubeconfig }}:/.kube/config
     -e KUBECONFIG=/.kube/config {{ helm_image }}
     repo remove {{ item.name }}
-  with_items: "{{ kraken_config.clusterServices.repos }}"
+  with_items: "{{ cluster_repos }}"
+  when: cluster_repos is defined
   ignore_errors: yes
 
 - name: Add helm repositories
@@ -67,12 +78,14 @@
     -v {{ kubeconfig }}:/.kube/config
     -e KUBECONFIG=/.kube/config {{ helm_image }}
     repo add {{ item.name }} {{ item.url }}
-  with_items: "{{ kraken_config.clusterServices.repos }}"
+  with_items: "{{ cluster_repos }}"
+  when: cluster_repos is defined
 
 - name: Save all config values to files
   template: src=service-values.yaml.jinja2
     dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/{{ item.repo }}-{{ item.name }}.helmvalues"
-  with_items: "{{ kraken_config.clusterServices.services }}"
+  with_items: "{{ cluster_services }}"
+  when: cluster_services is defined
 
 - name: Install charts
   command: >
@@ -83,4 +96,5 @@
     install {{ item.repo }}/{{ item.chart }}
     --name {{ item.name }}
     --values {{ config_base | expanduser }}/{{kraken_config.cluster}}/{{ item.repo }}-{{ item.name }}.helmvalues
-  with_items: "{{ kraken_config.clusterServices.services }}"
+  with_items: "{{ cluster_services }}"
+  when: cluster_services is defined
