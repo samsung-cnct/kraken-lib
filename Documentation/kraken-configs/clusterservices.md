@@ -27,6 +27,8 @@ Cluster services are helm charts to be installed on cluster startup
 # Example
 ```yaml
 clusterServices:
+    namespaces:
+      - kube-system
     repos:
       -
         name: atlas

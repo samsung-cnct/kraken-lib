@@ -28,7 +28,7 @@ spec:
     - --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
     - --client-ca-file=/etc/kubernetes/ssl/ca.pem
     - --basic-auth-file=/etc/kubernetes/basicauth.csv
-    - --service-account-key-file=/etc/kubernetes/service-account/service-account-pub.pem
+    - --service-account-key-file=/etc/kubernetes/ssl/service-account-key.pem
     - --cloud-provider={{kraken_kubernetes_cloudprovider}}
     - --v=7
     - --logtostderr=true
@@ -40,11 +40,11 @@ spec:
       hostPort: 8080
       name: local
     volumeMounts:
-    - mountPath: /etc/kubernetes/service-account
-      name: service-account-key
-      readOnly: true
     - mountPath: /etc/kubernetes/ssl
       name: ssl-certs-kubernetes
+      readOnly: true
+    - mountPath: /etc/kubernetes/basicauth.csv
+      name: basic-auth-kubernetes
       readOnly: true
     - mountPath: /etc/etcd/ssl
       name: ssl-certs-etcd
@@ -53,9 +53,9 @@ spec:
       name: ssl-certs-host
       readOnly: true
   volumes:
-  - secret:
-      secretName: service-account-key-file
-    name: service-account-key
+  - hostPath:
+      path: /etc/kubernetes/basicauth.csv
+    name: basic-auth-kubernetes
   - hostPath:
       path: /etc/kubernetes/ssl
     name: ssl-certs-kubernetes
@@ -63,5 +63,5 @@ spec:
       path: /etc/etcd/ssl
     name: ssl-certs-etcd
   - hostPath:
-      path: /etc/ssl
-    name: ssl-certs
+      path: /usr/share/ca-certificates
+    name: ssl-certs-host
