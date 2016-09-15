@@ -613,6 +613,7 @@ resource "aws_elb" "master_elb" {
   name = "{{kraken_config.cluster}}-master-elb"
   cross_zone_load_balancing = true
   subnets = [{% set comma = joiner(",") %}{% for subnet in kraken_config.master.nodepool.providerConfig.subnet %}{{ comma() }}"${aws_subnet.vpc_subnet_{{subnet}}.id}"{% endfor %}]
+  security_groups = ["${aws_security_group.vpc_kubernetes_secgroup.id}"]
 
   listener {
     instance_port = 443
@@ -638,7 +639,7 @@ resource "aws_elb" "master_elb" {
 
 resource "aws_route53_record" "master_record" {
   zone_id = "${aws_route53_zone.private_zone.zone_id}"
-  name = "master.{{kraken_config.cluster}}.internal"
+  name = "apiserver.{{kraken_config.cluster}}.internal"
   type = "CNAME"
   ttl = "300"
   records = ["${aws_elb.master_elb.dns_name}"]
