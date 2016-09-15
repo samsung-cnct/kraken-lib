@@ -24,6 +24,7 @@
       --network-plugin=cni \
       --network-plugin-dir=/etc/cni/net.d \
       --cloud-provider={{kraken_kubernetes_cloudprovider}} \
+      --v=7 \
       --logtostderr=true
     Restart=always
     RestartSec=10
