@@ -14,7 +14,7 @@ spec:
     - --master=http://127.0.0.1:8080
     - --leader-elect=true
     - --cloud-provider={{kraken_kubernetes_cloudprovider}}
-    - --service-account-private-key-file=/etc/kubernetes/ssl/account-secret.pem
+    - --service-account-private-key-file=/etc/kubernetes/ssl/service-account-key.pem
     - --root-ca-file=/etc/kubernetes/ssl/ca.pem
     livenessProbe:
       httpGet:
