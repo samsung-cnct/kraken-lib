@@ -16,7 +16,7 @@ deployment:
   kubeConfig:
     -
       name: krakenKubeConfig
-      version: v1.3.4
+      version: v1.3.5
       containerConfig: dockerconfig
   containerConfig:
     -
@@ -322,6 +322,8 @@ deployment:
       name: specialNodes
       nodepool: specialNodes
   clusterServices:
+    namespaces:
+      - kube-system
     repos:
       -
         name: atlas

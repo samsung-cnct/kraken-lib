@@ -14,7 +14,7 @@ spec:
     - --master=http://127.0.0.1:8080
     - --leader-elect=true
     - --cloud-provider={{kraken_kubernetes_cloudprovider}}
-    - --service-account-private-key-file=/etc/kubernetes/service-account/service-account.pem
+    - --service-account-private-key-file=/etc/kubernetes/ssl/account-secret.pem
     - --root-ca-file=/etc/kubernetes/ssl/ca.pem
     livenessProbe:
       httpGet:
@@ -24,9 +24,6 @@ spec:
       initialDelaySeconds: 15
       timeoutSeconds: 1
     volumeMounts:
-    - mountPath: /etc/kubernetes/service-account
-      name: service-account-key
-      readOnly: true
     - mountPath: /etc/kubernetes/ssl
       name: ssl-certs-kubernetes
       readOnly: true
@@ -37,9 +34,6 @@ spec:
       name: ssl-certs-host
       readOnly: true
   volumes:
-  - secret:
-      secretName: service-account-key-file
-    name: service-account-key
   - hostPath:
       path: /etc/kubernetes/ssl
     name: ssl-certs-kubernetes
