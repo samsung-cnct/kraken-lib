@@ -30,6 +30,7 @@ spec:
     - --basic-auth-file=/etc/kubernetes/basicauth.csv
     - --service-account-key-file=/etc/kubernetes/service-account/service-account-pub.pem
     - --cloud-provider={{kraken_kubernetes_cloudprovider}}
+    - --v=7
     - --logtostderr=true
     ports:
     - containerPort: 443

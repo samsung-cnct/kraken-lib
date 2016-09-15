@@ -15,9 +15,9 @@
     dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/master.scheduler.yaml.manifest"
 
 - name: Generate master service-account-secret.yaml
-  template: src=system-namespace-manifest.yaml.jinja2
+  template: src=service-account-secret-manifest.yaml.jinja2
     dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/master.service-account-secret.yaml.manifest"
 
 - name: Generate master system-namespace.yaml
-  template: src=service-account-secret-manifest.yaml.jinja2
+  template: src=system-namespace-manifest.yaml.jinja2
     dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/master.system-namespace.yaml.manifest"

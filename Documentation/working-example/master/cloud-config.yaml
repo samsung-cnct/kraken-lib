@@ -168,12 +168,13 @@ coreos:
           --allow-privileged=true \
           --config=/etc/kubernetes/manifests \
           --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
-          --hostname-override=${DEAFULT_IPV4} \
+          --hostname-override=${DEFAULT_IPV4} \
           --cluster-dns=10.1.0.2 \
           --cluster-domain=cluster.local \
           --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem \
           --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem \
           --cloud-provider=aws \
+          --v=7 \
           --logtostderr=true
         Restart=always
         RestartSec=10

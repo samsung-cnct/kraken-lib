@@ -174,6 +174,7 @@ coreos:
           --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem \
           --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem \
           --cloud-provider=aws \
+          --v=7 \
           --logtostderr=true
         Restart=always
         RestartSec=10
