@@ -16,7 +16,7 @@
 
 - name: See if tiller rc if present
   shell: >
-    kubectl --kubeconfig={{ kubeconfig }} get rc {{ tiller_rc }}
+    kubectl --kubeconfig={{ kubeconfig }} get rc {{ tiller_rc }} --insecure-skip-tls-verify
   register: tiller_present
   ignore_errors: yes
 
@@ -33,19 +33,19 @@
 
 - name: Clean up tiller rc if present
   command: >
-    kubectl --kubeconfig={{ kubeconfig }} delete rc {{ tiller_rc }}
+    kubectl --kubeconfig={{ kubeconfig }} delete rc {{ tiller_rc }} --insecure-skip-tls-verify
   when: tiller_present|success
 
 - name: Delete all service namespaces
   command: >
-    kubectl --kubeconfig={{ kubeconfig }} delete namespace {{ item }}
+    kubectl --kubeconfig={{ kubeconfig }} delete namespace {{ item }} --insecure-skip-tls-verify
   with_items: "{{ cluster_namespaces }}"
   when: cluster_namespaces is defined
   ignore_errors: yes
 
 - name: Create all service namespaces
   command: >
-    kubectl --kubeconfig={{ kubeconfig | expanduser }} create namespace {{ item }}
+    kubectl --kubeconfig={{ kubeconfig | expanduser }} create namespace {{ item }} --insecure-skip-tls-verify
   with_items: "{{ cluster_namespaces }}"
   when: cluster_namespaces is defined
 
