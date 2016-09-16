@@ -11,15 +11,27 @@
 
 - name: Generate APIServer Loadbalancer key
   command: >
-    openssl genrsa -out {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/apiserver-loadbalancer-key.pem 2048
+    openssl genrsa
+      -out {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/apiserver-loadbalancer-key.pem 2048
 
 - name: Generate APIServer Loadbalancer CSR
   command: >
-    openssl req -new -key {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/apiserver-loadbalancer-key.pem -out {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/apiserver-loadbalancer.csr -subj "/CN=kube-apiserver" -config {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/apiserver-loadbalancer-ssl-certificate-options.conf
+    openssl req -new
+      -key {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/apiserver-loadbalancer-key.pem
+      -out {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/apiserver-loadbalancer.csr
+      -subj "/CN=kube-apiserver"
+      -config {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/apiserver-loadbalancer-ssl-certificate-options.conf
 
 - name: Sign APIServer Loadbalancer CSR
   command: >
-    openssl x509 -req -in {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/apiserver-loadbalancer.csr -CA {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/ca.pem -CAkey {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/ca-key.pem -CAcreateserial -out {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/apiserver-loadbalancer.pem -days 3650 -extensions v3_req -extfile {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/apiserver-loadbalancer-ssl-certificate-options.conf
+    openssl x509 -req
+      -in {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/apiserver-loadbalancer.csr
+      -CA {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/ca.pem
+      -CAkey {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/ca-key.pem
+      -CAcreateserial
+      -out {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/apiserver-loadbalancer.pem
+      -days 3650 -extensions v3_req
+      -extfile {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/apiserver-loadbalancer-ssl-certificate-options.conf
 
 
 - name: Generate Generic Cluster key
