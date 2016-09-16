@@ -26,20 +26,3 @@
   command: >
     openssl genrsa -out {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/cluster.key 2048
     creates={{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/cluster.key
-
-#- name: Generate CSR
-#  command: >
-#    openssl req -new -sha256
-#      -subj '/C={{kraken_aws_certs.certCountry | default('US')}}/ST={{kraken_aws_certs.certState | default('WA')}}/L={{kraken_aws_certs.certLocality | default('Seattle')}}/O={{kraken_aws_certs.certOrg | default('Kubernetes')}}/CN={{kraken_aws_certs.certCommonName | default(ssl_cert_common_name)}}'
-#      -key {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/cluster.key
-#      -out {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/cluster.csr
-#      creates={{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/cluster.csr
-
-#- name: Generate self-signed SSL certificate
-#  command: >
-#    openssl req -nodes -x509 -days 365
-#      -in {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/cluster.csr
-#      -key {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/cluster.key
-#      -out {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/cluster.pem
-#      -extensions v3_ca
-#      creates={{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/cluster.pem

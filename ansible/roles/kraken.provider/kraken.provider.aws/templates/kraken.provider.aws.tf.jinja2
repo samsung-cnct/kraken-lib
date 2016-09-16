@@ -603,12 +603,13 @@ resource "aws_launch_configuration" "master_launch_config" {
 # if masters are load-balanced with a cloud loadbalancer, we need to define an ELB and a IAM cert to use for SSL
 {% if kraken_config.master.loadbalancer == 'cloud'  %}
 
-resource "aws_iam_server_certificate" "master_cert" {
-  name = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_master_cert"
-  certificate_chain = "${file("{{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/ca.pem")}"
-  certificate_body = "${file("{{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/apiserver-loadbalancer.pem")}"
-  private_key = "${file("{{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/apiserver-loadbalancer-key.pem")}"
-}
+# Client Auth doesn't work right in amazon ELB
+#resource "aws_iam_server_certificate" "master_cert" {
+#  name = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_master_cert"
+#  certificate_chain = "${file("{{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/ca.pem")}"
+#  certificate_body = "${file("{{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/apiserver-loadbalancer.pem")}"
+#  private_key = "${file("{{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/apiserver-loadbalancer-key.pem")}"
+#}
 
 resource "aws_elb" "master_elb" {
   name = "{{kraken_config.cluster}}-master-elb"
@@ -618,17 +619,16 @@ resource "aws_elb" "master_elb" {
 
   listener {
     instance_port = 443
-    instance_protocol = "ssl"
+    instance_protocol = "tcp"
     lb_port = 443
-    lb_protocol = "ssl"
-    ssl_certificate_id = "${aws_iam_server_certificate.master_cert.arn}"
+    lb_protocol = "tcp"
   }
 
   health_check {
     healthy_threshold = 2
     unhealthy_threshold = 10
     timeout = 10
-    target = "SSL:443"
+    target = "TCP:443"
     interval = 20
   }
 
