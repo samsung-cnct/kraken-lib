@@ -18,6 +18,7 @@ The snippet configuration for deployments depends on the provider.
 | node | __Required__ | Object | [Nodes](nodes.md) - specific configuration section |
 | clusterServices | __Required__ | Object | [Cluster services](clusterservices.md) - specific configuration section |
 | etcd | __Required__ | Object | [etcd](nodes.md) - specific configuration section |
+| readiness | __Required__ | Object | When is cluster considered to be ready. Defaults to 'exact' with 600 second total wait. |
 
 
 ## coreos Options
@@ -37,6 +38,12 @@ The snippet configuration for deployments depends on the provider.
 | publicKeyFile | Optional | String | Path to public key material. |
 | publickey | Optional | String | Public key material. |
 
+## readiness Options
+| Key Name | Required | Type | Description|
+| --- | --- | --- | --- |
+| type | __Required__ | String | Type of check: 'exact' 'percent' 'delta' |
+| value | Optional | Integer | For percent - what percentage of nodes currently up from total node count is a healthy cluster (Default - 100). For delta - allowed difference between expected and current node count (default 0) |
+| wait | Optional | Integer | Wait for how many seconds total |
 
 # Prototype
 ```yaml
