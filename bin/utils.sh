@@ -55,7 +55,7 @@ if [ -z ${KRAKEN_CONFIG+x} ]; then
 fi
 
 if [ -z ${KRAKEN_TAGS+x} ]; then
-  KRAKEN_TAGS="" 
+  KRAKEN_TAGS="all" 
 fi
 
 KRAKEN_EXTRA_VARS="config_path=${KRAKEN_CONFIG} "

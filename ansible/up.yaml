@@ -1,13 +1,13 @@
 ---
 - hosts: localhost
   roles:
-    - { role: 'kraken.config', config_file: "{{ config_path | default('') }}", tags: [ 'dryrun' ] }
-    - { role: 'roles/kraken.cluster_common', tags: [ 'dryrun' ] }
-    - { role: 'roles/kraken.fabric/kraken.fabric.selector', tags: [ 'dryrun' ] }
-    - { role: 'roles/kraken.etcd/kraken.etcd.selector', tags: [ 'dryrun' ] }
-    - { role: 'roles/kraken.master/kraken.master.selector', tags: [ 'dryrun' ] }
-    - { role: 'roles/kraken.node/kraken.node.selector', tags: [ 'dryrun' ] }
-    - { role: 'roles/kraken.assembler', tags: [ 'dryrun' ] }
-    - { role: 'roles/kraken.provider/kraken.provider.selector' }
-    - { role: 'roles/kraken.readiness', tags: [ 'dryrun' ] }
-    - { role: 'roles/kraken.services', when: "kraken_config.clusterServices is defined"  }
+    - { role: 'kraken.config', config_file: "{{ config_path | default('') }}", tags: [ 'dryrun', 'all' ] }
+    - { role: 'roles/kraken.cluster_common', tags: [ 'dryrun', 'all' ] }
+    - { role: 'roles/kraken.fabric/kraken.fabric.selector', tags: [ 'dryrun', 'all' ] }
+    - { role: 'roles/kraken.etcd/kraken.etcd.selector', tags: [ 'dryrun', 'all' ] }
+    - { role: 'roles/kraken.master/kraken.master.selector', tags: [ 'dryrun', 'all' ] }
+    - { role: 'roles/kraken.node/kraken.node.selector', tags: [ 'dryrun', 'all' ] }
+    - { role: 'roles/kraken.assembler', tags: [ 'dryrun', 'all' ] }
+    - { role: 'roles/kraken.provider/kraken.provider.selector', tags: [ 'all' ] }
+    - { role: 'roles/kraken.readiness', tags: [ 'dryrun', 'all' ] }
+    - { role: 'roles/kraken.services', when: "kraken_config.clusterServices is defined", tags: [ 'all' ] }
