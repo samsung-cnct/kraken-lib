@@ -336,3 +336,7 @@ deployment:
         values:
           cluster_ip: 10.32.0.2
           dns_domain: krakenCluster.local
+  readiness:
+    type: exact
+    value: 0
+    wait: 600
