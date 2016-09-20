@@ -40,8 +40,6 @@
       --cluster-domain={{kraken_config.cluster}}.local \
       --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem \
       --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem \
-      --network-plugin=cni \
-      --network-plugin-dir=/etc/cni/net.d \
       --cloud-provider={{kraken_kubernetes_cloudprovider}} \
       --logtostderr=true
     Restart=always
