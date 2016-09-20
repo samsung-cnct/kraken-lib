@@ -27,6 +27,7 @@
       --insecure-options=image \
       --stage1-from-dir=stage1-fly.aci \
       docker://gcr.io/google_containers/hyperkube:{{item.nodepool.kubeConfig.version}} \
+      --exec=/hyperkube -- kubelet \
       --api_servers=https://apiserver.{{kraken_config.cluster}}.internal \
       --register-node=true \
       --allow-privileged=true \
