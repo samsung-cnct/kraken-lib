@@ -16,7 +16,7 @@
 
 - name: See if tiller rc if present
   shell: >
-    kubectl --kubeconfig={{ kubeconfig }} get rc {{ tiller_rc }}
+    kubectl --kubeconfig={{ kubeconfig }} get deployment {{ tiller }} --namespace=kube-system
   register: tiller_present
   ignore_errors: yes
 
@@ -30,9 +30,9 @@
   ignore_errors: yes
   when: tiller_present|success
 
-- name: Clean up tiller rc if present
+- name: Clean up tiller if present
   command: >
-    kubectl --kubeconfig={{ kubeconfig }} delete rc {{ tiller_rc }}
+    kubectl --kubeconfig={{ kubeconfig }} delete deployment {{ tiller }} --namespace=kube-system
   when: tiller_present|success
 
 - name: Delete all service namespaces

@@ -15,18 +15,27 @@
     kraken_endpoint: "{{ endpoint_result.stdout }}"
   when: kraken_action == 'up'
 
-- name: Remove the route 53 zone from state (THANKS, TERRAFORM)
-  command: >
-    terraform state rm aws_route53_zone.private_zone chdir={{ config_base | expanduser }}/{{kraken_config.cluster}}
-  when: kraken_action == 'down'
-  register: zone_present
-  ignore_errors: yes
-
 - name: Get kraken aws_route53_zone.private_zone.zone_id
   shell: > 
     terraform output kraken_private_zone_id chdir={{ config_base | expanduser }}/{{kraken_config.cluster}}
   register: zone_result 
-  when: zone_present|success
+  when: kraken_action == 'up'
+
+- name: Write zone id to file (THANKS, TERRAFORM)
+  copy: >
+    content={{ zone_result.stdout }} dest={{ config_base | expanduser }}/{{kraken_config.cluster}}/route53_zone
+  when: kraken_action == 'up'
+
+- name: Kill off the hosted zone using cli53 (THANKS, TERRAFORM)
+  command: >
+    cli53 delete --purge {{ lookup('file', '{{config_base}}/{{kraken_config.cluster}}/route53_zone') }}
+  when: kraken_action == 'down'
+  ignore_errors: yes
+
+- name: Remove the route 53 zone from state (THANKS, TERRAFORM)
+  command: >
+    terraform state rm aws_route53_zone.private_zone chdir={{ config_base | expanduser }}/{{kraken_config.cluster}}
+  when: kraken_action == 'down'
   ignore_errors: yes
 
 - name: Run terraform destroy
@@ -34,17 +43,13 @@
     terraform destroy -input=false -force {{ config_base | expanduser }}/{{kraken_config.cluster}} chdir={{ config_base | expanduser }}/{{kraken_config.cluster}}
   when: kraken_action == 'down'
 
-- name: Kill off the hosted zone using cli53 (THANKS, TERRAFORM)
-  command: >
-    cli53 delete --purge {{ zone_result.stdout }}
-  when: zone_present|success and kraken_action == 'down' and zone_result|success
-
 - name: clean the terraform state generated prefix and other misc files.
   file:
     path: "{{ config_base | expanduser }}/{{kraken_config.cluster}}/{{item}}"
     state: absent
   when: kraken_action == 'down'
   with_items:
+    - route53_zone
     - aws_prefix
     - terraform.tfstate
     - terraform.tfstate.backup
