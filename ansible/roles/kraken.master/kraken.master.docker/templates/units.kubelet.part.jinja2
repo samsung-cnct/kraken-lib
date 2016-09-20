@@ -10,6 +10,7 @@
     EnvironmentFile=/etc/network-environment
     ExecStartPre=/usr/bin/mkdir -p /var/lib/kubelet
     ExecStart=/usr/bin/rkt run \
+      --volume etc-resolv-conf,kind=host,source=/etc/resolv.conf \
       --volume etc-cni,kind=host,source=/etc/cni \
       --volume etc-kubernetes,kind=host,source=/etc/kubernetes \
       --volume etc-ssl-certs,kind=host,source=/usr/share/ca-certificates \
@@ -17,6 +18,7 @@
       --volume var-lib-kubelet,kind=host,source=/var/lib/kubelet \
       --volume os-release,kind=host,source=/usr/lib/os-release \
       --volume run,kind=host,source=/run \
+      --mount volume=etc-resolv-conf,target=/etc/resolv.conf \
       --mount volume=etc-cni,target=/etc/cni \
       --mount volume=etc-kubernetes,target=/etc/kubernetes \
       --mount volume=etc-ssl-certs,target=/etc/ssl/certs \
