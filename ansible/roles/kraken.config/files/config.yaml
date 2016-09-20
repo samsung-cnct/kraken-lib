@@ -322,8 +322,6 @@ deployment:
       name: specialNodes
       nodepool: specialNodes
   clusterServices:
-    namespaces:
-      - kube-system
     repos:
       -
         name: atlas
