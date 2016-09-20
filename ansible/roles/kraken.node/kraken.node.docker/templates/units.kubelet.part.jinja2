@@ -8,9 +8,25 @@
     Requires=kraken-ssl.service
     [Service]
     EnvironmentFile=/etc/network-environment
-    ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/{{item.nodepool.kubeConfig.version}}/bin/linux/amd64/kubelet
-    ExecStartPre=/usr/bin/chmod +x /opt/bin/kubelet
-    ExecStart=/opt/bin/kubelet \
+    ExecStartPre=/usr/bin/mkdir -p /var/lib/kubelet
+    ExecStart=/usr/bin/rkt run \
+      --volume etc-cni,kind=host,source=/etc/cni \
+      --volume etc-kubernetes,kind=host,source=/etc/kubernetes \
+      --volume etc-ssl-certs,kind=host,source=/usr/share/ca-certificates \
+      --volume var-lib-docker,kind=host,source=/var/lib/docker \
+      --volume var-lib-kubelet,kind=host,source=/var/lib/kubelet \
+      --volume os-release,kind=host,source=/usr/lib/os-release \
+      --volume run,kind=host,source=/run \
+      --mount volume=etc-cni,target=/etc/cni \
+      --mount volume=etc-kubernetes,target=/etc/kubernetes \
+      --mount volume=etc-ssl-certs,target=/etc/ssl/certs \
+      --mount volume=var-lib-docker,target=/var/lib/docker \
+      --mount volume=var-lib-kubelet,target=/var/lib/kubelet \
+      --mount volume=os-release,target=/etc/os-release \
+      --mount volume=run,target=/run \
+      --insecure-options=image \
+      --stage1-from-dir=stage1-fly.aci \
+      docker://gcr.io/google_containers/hyperkube:{{item.nodepool.kubeConfig.version}} \
       --api_servers=https://apiserver.{{kraken_config.cluster}}.internal \
       --register-node=true \
       --allow-privileged=true \
