@@ -22,4 +22,9 @@
   set_fact:
     readiness_wait: "{{kraken_config.readiness.wait | default(600)}}"
 
+- include: generate-admin-cert.yaml
+
+- include: generate-admin-kubeconfig.yaml
+  when: kraken_endpoint is defined
+
 - include: do-wait.yaml

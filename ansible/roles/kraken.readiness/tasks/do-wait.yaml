@@ -1,1 +1,27 @@
 ---
+- name: Get needed number of nodes
+  set_fact: 
+    needed_nodes: "{{ kraken_config | expected_nodes(readiness_type, readiness_value) }}"
+
+- name: Get timestamp before api server wait
+  set_fact: 
+    wait_api_start_timestamp: "{{ lookup('pipe','date +%Y%m%d%H%M%S') }}"
+
+- name: Wait for api server to become available
+  wait_for: host={{ kraken_endpoint }} port=443 timeout={{ readiness_wait }}
+
+- name: Get timestamp after api server wait
+  set_fact: 
+    wait_api_end_timestamp: "{{lookup('pipe','date +%Y%m%d%H%M%S') }}"
+
+- name: Set remaining time fact
+  set_fact: 
+    remaining_time: "{{ readiness_wait | int - (wait_api_end_timestamp | int - wait_api_start_timestamp | int ) }}"
+
+- name: Get all nodes
+  command: >
+    kubectl --kubeconfig={{ kubeconfig | expanduser }} get nodes --no-headers=true
+  register: job_get_nodes_result
+  until: "{{job_get_nodes_result.stdout_lines | length }} >= needed_nodes | int"
+  retries: "{{ remaining_time }}"
+  delay: 1
