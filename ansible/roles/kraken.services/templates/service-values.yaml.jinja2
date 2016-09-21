@@ -1,4 +1,6 @@
 ---
+{% if 'values' in item %}
 {% for key, value in item['values'].iteritems() %}
 {{ key }}: {{ value }}
 {% endfor %}
+{% endif %}
