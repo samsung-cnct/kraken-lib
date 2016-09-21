@@ -12,7 +12,7 @@
     cluster_repos: "{{ kraken_config.clusterServices.repos | default([]) }}" 
 - name: Set cluster namespaces fact
   set_fact:
-    cluster_namespaces: "{{ kraken_config.clusterServices.namespaces | default([]) }}" 
+    cluster_namespaces: "{{ kraken_config.clusterServices.namespaces | default([]) }}"
 
 - name: See if tiller rc if present
   shell: >
@@ -54,9 +54,18 @@
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
+  when: (tiller_image is undefined) or (tiller_image is none) or (tiller_image|trim == '')
+
+- name: Init helm
+  command: >
+    helm init --tiller-image {{ tiller_image }}
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+    HELM_HOME: "{{ helm_home }}"
+  when: (tiller_image is defined) and (tiller_image|trim != '')
 
 - name: Give tiller rc a chance to fully init
-  pause: seconds=5
+  pause: seconds=10
 
 - name: Remove helm repositories
   command: >
