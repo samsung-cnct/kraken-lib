@@ -18,7 +18,7 @@ deployment:
     -
       name: krakenKubeConfig
       version: v1.3.7
-      hyperkubeLocation: gcr.io/google_contianers/hyperkube
+      hyperkubeLocation: gcr.io/google_containers/hyperkube
       containerConfig: dockerconfig
   containerConfig:
     -
