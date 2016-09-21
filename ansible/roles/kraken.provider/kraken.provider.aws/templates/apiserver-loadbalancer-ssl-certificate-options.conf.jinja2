@@ -14,3 +14,4 @@ DNS.4 = kubernetes.default.svc.cluster.local
 DNS.5 = apiserver.{{kraken_config.cluster}}.internal
 DNS.6 = {{kraken_aws_certs.certCommonName | default(ssl_cert_common_name)}}
 IP.1 = 127.0.0.1
+IP.2 = {{ kraken_config.serviceCidr | ipaddr('1') | ipaddr('address') }}

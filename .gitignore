@@ -2,3 +2,4 @@ generated/
 **/*.retry
 .idea
 **/.DS_Store
+.tgz
