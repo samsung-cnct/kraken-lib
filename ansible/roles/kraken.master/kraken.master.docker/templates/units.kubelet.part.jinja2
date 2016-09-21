@@ -18,6 +18,7 @@
       --volume var-lib-kubelet,kind=host,source=/var/lib/kubelet \
       --volume os-release,kind=host,source=/usr/lib/os-release \
       --volume run,kind=host,source=/run \
+      --volume opt-cni,kind=host,source=/opt/cni \
       --mount volume=etc-resolv-conf,target=/etc/resolv.conf \
       --mount volume=etc-cni,target=/etc/cni \
       --mount volume=etc-kubernetes,target=/etc/kubernetes \
@@ -26,6 +27,7 @@
       --mount volume=var-lib-kubelet,target=/var/lib/kubelet \
       --mount volume=os-release,target=/etc/os-release \
       --mount volume=run,target=/run \
+      --mount volume=opt-cni,target=/opt/cni \
       --insecure-options=image \
       --stage1-from-dir=stage1-fly.aci \
       docker://gcr.io/google_containers/hyperkube:{{kraken_config.master.nodepool.kubeConfig.version}} \
@@ -40,6 +42,8 @@
       --cluster-domain={{kraken_config.cluster}}.local \
       --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem \
       --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem \
+      --network-plugin=cni \
+      --network-plugin-dir=/etc/cni/net.d \
       --cloud-provider={{kraken_kubernetes_cloudprovider}} \
       --logtostderr=true
     Restart=always

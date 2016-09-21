@@ -16,7 +16,7 @@ deployment:
   kubeConfig:
     -
       name: krakenKubeConfig
-      version: v1.3.5
+      version: v1.3.7
       containerConfig: dockerconfig
   containerConfig:
     -
