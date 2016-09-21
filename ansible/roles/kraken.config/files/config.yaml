@@ -333,7 +333,7 @@ deployment:
         chart: kubedns-0.1.0
         values:
           cluster_ip: 10.32.0.2
-          dns_domain: krakenCluster.local
+          dns_domain: krakencluster.local
   readiness:
     type: exact
     value: 0
