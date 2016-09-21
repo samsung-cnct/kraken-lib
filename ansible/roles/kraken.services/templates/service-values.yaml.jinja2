@@ -1,2 +1,4 @@
 ---
-{{item.values}}
+{% for key, value in item['values'].iteritems() %}
+{{ key }}: {{ value }}
+{% endfor %}
