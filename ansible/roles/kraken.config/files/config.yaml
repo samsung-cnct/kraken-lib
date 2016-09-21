@@ -3,6 +3,7 @@ deployment:
   cluster: krakenCluster
   serviceCidr: 10.32.0.0/12
   serviceDNS: 10.32.0.2
+  clusterDomain: cluster.local
   coreos:
     -
       name: allNodes
@@ -17,6 +18,7 @@ deployment:
     -
       name: krakenKubeConfig
       version: v1.3.7
+      hyperkubeLocation: gcr.io/google_contianers/hyperkube
       containerConfig: dockerconfig
   containerConfig:
     -
@@ -78,43 +80,8 @@ deployment:
         protocol: "TCP"
         cidr_blocks: ["0.0.0.0/0"]
       -
-        from_port: 8080
-        to_port: 8080
-        protocol: "TCP"
-        cidr_blocks: ["0.0.0.0/0"]
-      -
         from_port: 443
         to_port: 443
-        protocol: "TCP"
-        cidr_blocks: ["0.0.0.0/0"]
-      -
-        from_port: 8094
-        to_port: 8094
-        protocol: "TCP"
-        cidr_blocks: ["0.0.0.0/0"]
-      -
-        from_port: 10250
-        to_port: 10250
-        protocol: "TCP"
-        cidr_blocks: ["0.0.0.0/0"]
-      -
-        from_port: 10251
-        to_port: 10251
-        protocol: "TCP"
-        cidr_blocks: ["0.0.0.0/0"]
-      -
-        from_port: 10252
-        to_port: 10252
-        protocol: "TCP"
-        cidr_blocks: ["0.0.0.0/0"]
-      -
-        from_port: 10254
-        to_port: 10254
-        protocol: "TCP"
-        cidr_blocks: ["0.0.0.0/0"]
-      -
-        from_port: 30000
-        to_port: 32767
         protocol: "TCP"
         cidr_blocks: ["0.0.0.0/0"]
     egressSecurity:
@@ -126,7 +93,7 @@ deployment:
   nodepool:
     -
       name: etcd
-      count: 2
+      count: 5
       mounts:
         -
           device: sdf
@@ -137,7 +104,7 @@ deployment:
           path: /ephemeral
           forceFormat: false
       providerConfig:
-        type: m3.medium
+        type: t2.small
         subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
         tags:
           -
@@ -166,7 +133,7 @@ deployment:
       coreos: allNodes
     -
       name: etcdEvents
-      count: 2
+      count: 5
       mounts:
         -
           device: sdf
@@ -177,7 +144,7 @@ deployment:
           path: /ephemeral
           forceFormat: false
       providerConfig:
-        type: m3.medium
+        type: t2.small
         subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
         tags:
           -
@@ -242,7 +209,7 @@ deployment:
           path: /var/lib/docker
           forceFormat: true
       providerConfig:
-        type: m3.medium
+        type: c4.large
         subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
         tags:
           -
@@ -333,7 +300,7 @@ deployment:
         chart: kubedns-0.1.0
         values:
           cluster_ip: 10.32.0.2
-          dns_domain: krakenCluster.local
+          dns_domain: cluster.local
   readiness:
     type: exact
     value: 0
