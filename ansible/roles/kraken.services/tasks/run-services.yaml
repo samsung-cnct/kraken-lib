@@ -48,7 +48,7 @@
   with_items: "{{ cluster_namespaces }}"
   when: cluster_namespaces is defined
 
-- name: Init helm
+- name: Init helm with default tiller
   command: >
     helm init
   environment:
@@ -56,7 +56,7 @@
     HELM_HOME: "{{ helm_home }}"
   when: (tiller_image is undefined) or (tiller_image is none) or (tiller_image|trim == '')
 
-- name: Init helm
+- name: Init helm with overriden tiller
   command: >
     helm init --tiller-image {{ tiller_image }}
   environment:
@@ -65,7 +65,7 @@
   when: (tiller_image is defined) and (tiller_image|trim != '')
 
 - name: Give tiller rc a chance to fully init
-  pause: seconds=10
+  pause: seconds=15
 
 - name: Remove helm repositories
   command: >
