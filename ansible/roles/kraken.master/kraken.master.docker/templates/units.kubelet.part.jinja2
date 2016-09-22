@@ -30,7 +30,7 @@
       --mount volume=opt-cni,target=/opt/cni \
       --insecure-options=image \
       --stage1-from-dir=stage1-fly.aci \
-      docker://gcr.io/google_containers/hyperkube:{{kraken_config.master.nodepool.kubeConfig.version}} \
+      docker://{{kraken_config.master.nodepool.kubeConfig.hyperkubeLocation}}:{{kraken_config.master.nodepool.kubeConfig.version}} \
       --exec=/hyperkube -- kubelet \
       --api_servers=http://127.0.0.1:8080 \
       --register-schedulable=false \
@@ -39,7 +39,7 @@
       --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
       --hostname-override=${DEFAULT_IPV4} \
       --cluster-dns={{kraken_config.serviceDNS}} \
-      --cluster-domain={{kraken_config.cluster}}.local \
+      --cluster-domain={{kraken_config.clusterDomain}} \
       --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem \
       --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem \
       --network-plugin=cni \
