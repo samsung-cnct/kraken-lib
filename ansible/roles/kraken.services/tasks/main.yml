@@ -1,2 +1,25 @@
 ---
+- name: Create Helm home
+  file: >
+    path={{ helm_home }}
+    state=directory
+
+- name: Set cluster services fact
+  set_fact:
+    cluster_services: "{{ kraken_config.clusterServices.services | default([]) }}" 
+- name: Set cluster repos fact
+  set_fact:
+    cluster_repos: "{{ kraken_config.clusterServices.repos | default([]) }}" 
+- name: Set cluster namespaces fact
+  set_fact:
+    cluster_namespaces: "{{ kraken_config.clusterServices.namespaces | default([]) }}"
+
+- name: See if tiller rc if present
+  shell: >
+    kubectl --kubeconfig={{ kubeconfig }} get deployment {{ tiller }} --namespace=kube-system
+  register: tiller_present
+  ignore_errors: yes
+
+- include: kill-services.yaml
 - include: run-services.yaml
+  when: kraken_action == 'up'

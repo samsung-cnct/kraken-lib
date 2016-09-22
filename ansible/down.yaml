@@ -2,5 +2,6 @@
 - hosts: localhost
   roles:
     - { role: 'kraken.config', config_file: "{{ config_path | default('') }}", tags: [ 'dryrun', 'all' ] }
+    - { role: 'roles/kraken.services', when: "kraken_config.clusterServices is defined", tags: [ 'services', 'all' ] }
     - { role: 'roles/kraken.provider/kraken.provider.selector', tags: [ 'all' ] }
     - { role: 'roles/kraken.clean', tags: [ 'dryrun', 'all' ] }

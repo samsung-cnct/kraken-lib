@@ -1,0 +1,22 @@
+---
+- name: Clean up releases
+  command: >
+    helm delete --purge {{ item.name }}
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+    HELM_HOME: "{{ helm_home }}"
+  with_items: "{{cluster_services}}"
+  ignore_errors: yes
+  when: tiller_present|success
+
+- name: Clean up tiller if present
+  command: >
+    kubectl --kubeconfig={{ kubeconfig }} delete deployment {{ tiller }} --namespace=kube-system
+  when: tiller_present|success
+
+- name: Delete all service namespaces
+  command: >
+    kubectl --kubeconfig={{ kubeconfig }} delete namespace {{ item }}
+  with_items: "{{ cluster_namespaces }}"
+  when: cluster_namespaces is defined
+  ignore_errors: yes
