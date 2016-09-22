@@ -38,6 +38,10 @@ case $key in
   KRAKEN_CONFIG="$2"
   shift
   ;;
+  --output)
+  KRAKEN_BASE="$2"
+  shift
+  ;;
   --tags)
   KRAKEN_TAGS="$2"
   shift
@@ -54,8 +58,13 @@ if [ -z ${KRAKEN_CONFIG+x} ]; then
   KRAKEN_CONFIG="~/.kraken/config.yml"
 fi
 
+if [ -z ${KRAKEN_BASE+x} ]; then
+  warn "--output not specified. Using ~/.kraken as location"
+  KRAKEN_BASE="~/.kraken"
+fi
+
 if [ -z ${KRAKEN_TAGS+x} ]; then
   KRAKEN_TAGS="all" 
 fi
 
-KRAKEN_EXTRA_VARS="config_path=${KRAKEN_CONFIG} "
+KRAKEN_EXTRA_VARS="config_path=${KRAKEN_CONFIG} config_base=${KRAKEN_BASE} "
