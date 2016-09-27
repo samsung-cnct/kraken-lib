@@ -4,4 +4,5 @@ RUN 	apk update && \
 	apk add git && \
 	git clone --branch master --depth 1 https://github.com/samsung-cnct/k2.git /kraken && apk del git
 
-CMD	/kraken/docker/up.sh
+WORKDIR "/kraken"
+CMD ["./up.sh"]
