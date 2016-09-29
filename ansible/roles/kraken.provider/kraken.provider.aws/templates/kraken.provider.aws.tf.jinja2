@@ -612,7 +612,7 @@ resource "aws_launch_configuration" "master_launch_config" {
 #}
 
 resource "aws_elb" "master_elb" {
-  name = "{{kraken_config.cluster}}-master-elb"
+  name = "{{kraken_config.cluster}}-{{kraken_aws_prefix}}-master-elb"
   cross_zone_load_balancing = true
   subnets = [{% set comma = joiner(",") %}{% for subnet in kraken_config.master.nodepool.providerConfig.subnet %}{{ comma() }}"${aws_subnet.vpc_subnet_{{subnet}}.id}"{% endfor %}]
   security_groups = ["${aws_security_group.vpc_kubernetes_secgroup.id}"]
