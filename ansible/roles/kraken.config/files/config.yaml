@@ -301,6 +301,10 @@ deployment:
         values:
           cluster_ip: 10.32.0.2
           dns_domain: cluster.local
+      -
+        name: heapster
+        repo: atlas
+        chart: heapster-0.1.0
   readiness:
     type: exact
     value: 0
