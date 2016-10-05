@@ -3,6 +3,10 @@
   command: >
     terraform apply -input=false {{ config_base | expanduser }}/{{kraken_config.cluster}} chdir={{ config_base | expanduser }}/{{kraken_config.cluster}}
   when: kraken_action == 'up'
+  register: up_result
+  until: up_result.rc == 0
+  retries: "{{action_retries}}"
+  delay: 15
 
 - name: Get kraken endpoint
   shell: > 
@@ -47,6 +51,10 @@
   command: >
     terraform destroy -input=false -force {{ config_base | expanduser }}/{{kraken_config.cluster}} chdir={{ config_base | expanduser }}/{{kraken_config.cluster}}
   when: (kraken_action == 'down') and (tfstate.stat.exists)
+  register: down_result
+  until: down_result.rc == 0
+  retries: "{{action_retries}}"
+  delay: 15
 
 - name: clean the terraform state generated prefix and other misc files.
   file:
