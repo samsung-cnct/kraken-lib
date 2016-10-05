@@ -55,7 +55,7 @@ mv kubectl /usr/local/bin/
 
 And to use it, you would type in a command similar to:
 
-`kubectl --kubeconfig ~/.kraken/venezia1/admin.kubeconfig get nodes`
+`kubectl --kubeconfig ~/.kraken/foo/admin.kubeconfig get nodes`
 
 #### Using kubectl from the built in container
 
@@ -63,7 +63,7 @@ _This step is optional if you want to download your own kubectl_
 
 To use the kubectl shipped with k2, run a command similar to:
 
-`docker run -v ~/:/root -it --rm=true quay.io/samsung_cnct/k2:latest bash -c 'kubectl --kubeconfig ~/.kraken/venezia1/admin.kubeconfig get nodes'`
+`docker run -v ~/:/root -it --rm=true quay.io/samsung_cnct/k2:latest bash -c 'kubectl --kubeconfig ~/.kraken/foo/admin.kubeconfig get nodes'`
 
 ## Configure your Kubernetes Cluster
 
@@ -226,7 +226,7 @@ Some changes to the cluster can be done with K2
 
 If you change these settings, a manual step may be needed.  For example you may need to terminate existing nodes to have new nodes spun up with updated configurations
 
-### Things that should note be changed right now
+### Things that should not be changed right now
 
 - cluster name (`cluster` value in configuration)
 - etcd settings (beyond machine type)
