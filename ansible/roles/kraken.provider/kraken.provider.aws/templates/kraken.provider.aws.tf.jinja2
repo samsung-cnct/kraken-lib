@@ -676,6 +676,8 @@ resource "aws_autoscaling_group" "master_loadbalancer_nodes" {
   min_size                  = "1"
   desired_capacity          = "1"
   health_check_type         = "EC2"
+  depends_on = [{% for etcd in kraken_config.etcd %}{% if loop.index > 1 %},{% endif %}"aws_autoscaling_group.{{etcd.name}}_nodes"{% endfor %}]
+
 
   lifecycle {
     create_before_destroy = true
@@ -715,6 +717,7 @@ resource "aws_autoscaling_group" "master_nodes" {
 {% else %}
   health_check_type         = "EC2"
 {% endif %}
+  depends_on = [{% for etcd in kraken_config.etcd %}{% if loop.index > 1 %},{% endif %}"aws_autoscaling_group.{{etcd.name}}_nodes"{% endfor %}]
 
   lifecycle {
     create_before_destroy = true
@@ -792,6 +795,7 @@ resource "aws_autoscaling_group" "{{node.name}}_nodes" {
   min_size                  = "{{node.nodepool.count}}"
   desired_capacity          = "{{node.nodepool.count}}"
   health_check_type         = "EC2"
+  depends_on = [{% for etcd in kraken_config.etcd %}{% if loop.index > 1 %},{% endif %}"aws_autoscaling_group.{{etcd.name}}_nodes"{% endfor %}]
 
   lifecycle {
     create_before_destroy = true
