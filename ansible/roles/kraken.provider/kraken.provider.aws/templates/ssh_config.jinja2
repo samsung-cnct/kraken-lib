@@ -1,0 +1,41 @@
+{% for instance in ec2_results_etcd.instances %}
+Host {{instance.tags.k2-inventory-type}}-{{instance.tags.k2-inventory-name}}-{{loop.index}}
+  HostName {{instance.public_dns_name}}
+  Port 22
+  User core
+{% for etcdcluster in kraken_config.etcd %}
+{% if etcdcluster.nodepool.keypair.name == instance.tags.k2-keypair %}
+  IdentityFile {{etcdcluster.nodepool.keypair.privatekeyFile}}
+{% endif %}
+{% endfor %}
+{% endfor %}
+
+{% for instance in ec2_results_master.instances %}
+Host {{instance.tags.k2-inventory-type}}-{{loop.index}}
+  HostName {{instance.public_dns_name}}
+  Port 22
+  User core
+  IdentityFile {{kraken_config.master.nodepool.keypair.privatekeyFile}}
+{% endfor %}
+
+{% if kraken_config.master.loadbalancer != 'cloud'%}
+{% for instance in ec2_results_masterlb.instances %}
+Host {{instance.tags.k2-inventory-type}}-{{loop.index}}
+  HostName {{instance.public_dns_name}}
+  Port 22
+  User core
+  IdentityFile {{kraken_config.master.nodepool.keypair.privatekeyFile}}
+{% endfor %}
+{% endif %}
+
+{% for instance in ec2_results_node.instances %}
+Host {{instance.tags.k2-inventory-type}}-{{instance.tags.k2-inventory-name}}-{{loop.index}}
+  HostName {{instance.public_dns_name}}
+  Port 22
+  User core
+{% for nodetype in kraken_config.node %}
+{% if nodetype.nodepool.keypair.name == instance.tags.k2-keypair %}
+  IdentityFile {{nodetype.nodepool.keypair.privatekeyFile}}
+{% endif %}
+{% endfor %}
+{% endfor %}

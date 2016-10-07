@@ -420,8 +420,26 @@ resource "aws_autoscaling_group" "{{etcd.name}}_nodes" {
   }
 
   tag {
+    key                 = "k2-inventory"
+    value               = "true"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "k2-inventory-type"
+    value               = "etcd"
+    propagate_at_launch = true
+  }
+
+  tag {
     key                 = "k2-inventory-name"
-    value               = "etcd-{{etcd.name}}"
+    value               = "{{etcd.name}}"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "k2-keypair"
+    value               = "{{etcd.nodepool.keypair.name}}"
     propagate_at_launch = true
   }
 
@@ -696,8 +714,20 @@ resource "aws_autoscaling_group" "master_loadbalancer_nodes" {
   }
 
   tag {
-    key                 = "k2-inventory-name"
+    key                 = "k2-inventory"
+    value               = "true"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "k2-inventory-type"
     value               = "master-loadbalancer"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "k2-keypair"
+    value               = "{{kraken_config.master.nodepool.keypair.name}}"
     propagate_at_launch = true
   }
 
@@ -742,8 +772,20 @@ resource "aws_autoscaling_group" "master_nodes" {
   }
 
   tag {
-    key                 = "k2-inventory-name"
+    key                 = "k2-inventory"
+    value               = "true"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "k2-inventory-type"
     value               = "master"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "k2-keypair"
+    value               = "{{kraken_config.master.nodepool.keypair.name}}"
     propagate_at_launch = true
   }
 
@@ -826,8 +868,26 @@ resource "aws_autoscaling_group" "{{node.name}}_nodes" {
   }
 
   tag {
+    key                 = "k2-inventory"
+    value               = "true"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "k2-inventory-type"
+    value               = "node"
+    propagate_at_launch = true
+  }
+
+  tag {
     key                 = "k2-inventory-name"
-    value               = "node-{{node.name}}"
+    value               = "{{node.name}}"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "k2-keypair"
+    value               = "{{node.nodepool.keypair.name}}"
     propagate_at_launch = true
   }
 
