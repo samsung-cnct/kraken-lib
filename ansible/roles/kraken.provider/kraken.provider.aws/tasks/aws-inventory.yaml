@@ -41,7 +41,7 @@
     filters:
       instance-state-name: running
       "tag:k2-inventory": "true"
-      "tag:k2-inventory-type": "master"
+      "tag:k2-inventory-type": "node"
   register: ec2_results_node
 
 - name: Generate ssh inventory
