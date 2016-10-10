@@ -39,6 +39,7 @@ The snippet configuration for deployments depends on the provider.
 | name | __Required__ | String | Keypair name |
 | publicKeyFile | Optional | String | Path to public key material. |
 | publickey | Optional | String | Public key material. |
+| privatekeyFile | Optional | String | Path to private key. |
 
 ## readiness Options
 | Key Name | Required | Type | Description|

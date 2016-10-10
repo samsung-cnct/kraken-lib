@@ -420,26 +420,8 @@ resource "aws_autoscaling_group" "{{etcd.name}}_nodes" {
   }
 
   tag {
-    key                 = "k2-inventory"
-    value               = "true"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "k2-inventory-type"
-    value               = "etcd"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "k2-inventory-name"
+    key                 = "k2-nodepool"
     value               = "{{etcd.name}}"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "k2-keypair"
-    value               = "{{etcd.nodepool.keypair.name}}"
     propagate_at_launch = true
   }
 
@@ -714,24 +696,6 @@ resource "aws_autoscaling_group" "master_loadbalancer_nodes" {
   }
 
   tag {
-    key                 = "k2-inventory"
-    value               = "true"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "k2-inventory-type"
-    value               = "master-loadbalancer"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "k2-keypair"
-    value               = "{{kraken_config.master.nodepool.keypair.name}}"
-    propagate_at_launch = true
-  }
-
-  tag {
     key                 = "KubernetesCluster"
     value               = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}"
     propagate_at_launch = true
@@ -772,20 +736,8 @@ resource "aws_autoscaling_group" "master_nodes" {
   }
 
   tag {
-    key                 = "k2-inventory"
-    value               = "true"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "k2-inventory-type"
-    value               = "master"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "k2-keypair"
-    value               = "{{kraken_config.master.nodepool.keypair.name}}"
+    key                 = "k2-nodepool"
+    value               = "{{kraken_config.master.nodepool.name}}"
     propagate_at_launch = true
   }
 
@@ -866,28 +818,10 @@ resource "aws_autoscaling_group" "{{node.name}}_nodes" {
     value               = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_{{node.name}}_node-autoscaled"
     propagate_at_launch = true
   }
-
+  
   tag {
-    key                 = "k2-inventory"
-    value               = "true"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "k2-inventory-type"
-    value               = "node"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "k2-inventory-name"
+    key                 = "k2-nodepool"
     value               = "{{node.name}}"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "k2-keypair"
-    value               = "{{node.nodepool.keypair.name}}"
     propagate_at_launch = true
   }
 

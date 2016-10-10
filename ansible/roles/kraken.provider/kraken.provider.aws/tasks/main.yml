@@ -4,5 +4,3 @@
   when: kraken_action == 'up'
 - include: aws-template.yaml
 - include: aws-action.yaml
-- include: aws-inventory.yaml
-  when: kraken_action == 'up'
