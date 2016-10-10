@@ -1,0 +1,15 @@
+---
+- name: Gather inventory of etcds
+  ec2_remote_facts:
+    region: "{{kraken_config.providerConfig.region}}"
+    aws_access_key: "{{kraken_config.providerConfig.authentication.accessKey}}"
+    aws_secret_key: "{{kraken_config.providerConfig.authentication.accessSecret}}"
+    filters:
+      instance-state-name: running
+      "tag:k2-nodepool": "{{item.name}}"
+  with_items: "{{kraken_config.nodepool}}"
+  register: ec2_results
+
+- name: Generate ssh inventory
+  template: src=ssh_config.jinja2
+    dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/ssh_config"

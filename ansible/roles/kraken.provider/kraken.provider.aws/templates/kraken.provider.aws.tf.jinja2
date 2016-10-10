@@ -420,6 +420,12 @@ resource "aws_autoscaling_group" "{{etcd.name}}_nodes" {
   }
 
   tag {
+    key                 = "k2-nodepool"
+    value               = "{{etcd.name}}"
+    propagate_at_launch = true
+  }
+
+  tag {
     key                 = "KubernetesCluster"
     value               = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}"
     propagate_at_launch = true
@@ -730,6 +736,12 @@ resource "aws_autoscaling_group" "master_nodes" {
   }
 
   tag {
+    key                 = "k2-nodepool"
+    value               = "{{kraken_config.master.nodepool.name}}"
+    propagate_at_launch = true
+  }
+
+  tag {
     key                 = "KubernetesCluster"
     value               = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}"
     propagate_at_launch = true
@@ -804,6 +816,12 @@ resource "aws_autoscaling_group" "{{node.name}}_nodes" {
   tag {
     key                 = "Name"
     value               = "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_{{node.name}}_node-autoscaled"
+    propagate_at_launch = true
+  }
+  
+  tag {
+    key                 = "k2-nodepool"
+    value               = "{{node.name}}"
     propagate_at_launch = true
   }
 

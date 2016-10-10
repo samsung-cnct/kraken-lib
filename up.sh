@@ -11,4 +11,9 @@ set -o pipefail
 my_dir=$(dirname "${BASH_SOURCE}")
 source "${my_dir}/bin/utils.sh"
 
-ansible-playbook -i ansible/inventory/localhost ansible/up.yaml --extra-vars "${KRAKEN_EXTRA_VARS}kraken_action=up" --tags "${KRAKEN_TAGS}"
+# setup a sigint trap
+trap control_c SIGINT
+
+DISPLAY_SKIPPED_HOSTS=0 ansible-playbook -i ansible/inventory/localhost ansible/up.yaml --extra-vars "${KRAKEN_EXTRA_VARS}kraken_action=up" --tags "${KRAKEN_TAGS}" || show_post_cluster_error
+
+show_post_cluster

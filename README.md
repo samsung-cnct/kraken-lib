@@ -1,28 +1,13 @@
-# Kraken
+# K2
 
 [![Docker Repository on Quay](https://quay.io/repository/samsung_cnct/k2/status "Docker Repository on Quay")](https://quay.io/repository/samsung_cnct/k2)
 
-## Overview
-Deploy a __Kubernetes__ cluster to AWS or Virtualbox using __Terraform__  and __Ansible__ on top of __CoreOS__.
+## Docs
+Deploy a __Kubernetes__ cluster on top of __CoreOS__ using __Terraform__  and __Ansible__.
 
-## Tools setup
-Install [Docker](https://www.docker.com/products/overview)
-Then:
+[kraken documentation](Documentation/README.md)
 
-    git clone https://github.com/samsung-cnct/kraken.git
-    cd kraken
 
-## Variables setup
-
-TBD
-
-## Create cluster
-
-TBD
-
-## Destroy Cluster
-
-TBD
 
 
 

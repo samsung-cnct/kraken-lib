@@ -7,6 +7,13 @@
   until: up_result.rc == 0
   retries: "{{action_retries}}"
   delay: 15
+  ignore_errors: yes
+
+- include: aws-inventory.yaml
+  when: kraken_action == 'up'
+
+- fail: msg="Run cluster {{kraken_action}} failed!"
+  when: up_result.rc != 0
 
 - name: Get kraken endpoint
   shell: > 

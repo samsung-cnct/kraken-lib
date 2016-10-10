@@ -14,7 +14,7 @@ The snippet configuration for deployments depends on the provider.
 | keypair | Optional | Object Array | Array of key pairs to use in this deployment (in node pools and so on) |
 | kubeConfig | __Required__ | Object Array | Array of [Kubernetes configurations](kubernetes.md) |
 | containerConfig | __Required__ | Object Array | Array of [Container runtime configurations](container.md) |
-| provider | __Required__ | String | Type of cluster provider, e.g. aws, vagrant, etc |
+| provider | __Required__ | String | Type of cluster provider, e.g. aws, etc |
 | providerConfig | __Required__ | Object | [Provider](deployments/README.md) - specific configuration section |
 | master | __Required__ | Object | [Master](master.md) - specific configuration section |
 | node | __Required__ | Object | [Nodes](nodes.md) - specific configuration section |
@@ -39,6 +39,7 @@ The snippet configuration for deployments depends on the provider.
 | name | __Required__ | String | Keypair name |
 | publicKeyFile | Optional | String | Path to public key material. |
 | publickey | Optional | String | Public key material. |
+| privatekeyFile | Optional | String | Path to private key. |
 
 ## readiness Options
 | Key Name | Required | Type | Description|

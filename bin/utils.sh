@@ -47,6 +47,29 @@ function show_help {
   inf "[up|down].sh --config ~/.kraken/myclusterconfig.yaml"
 }
 
+function show_post_cluster {
+  inf "To use kubectl: "
+  inf "kubectl --kubeconfig=${KRAKEN_BASE}/<cluster name>/admin.kubeconfig <kubctl command>\n"
+  inf "For example: \nkubectl --kubeconfig=${KRAKEN_BASE}/krakenCluster/admin.kubeconfig get services --all-namespaces"
+  inf "To use helm:"
+  inf "KUBECONFIG=${KRAKEN_BASE}/<cluster name>/admin.kubeconfig; helm <helm command> --home ${KRAKEN_BASE}/<cluster name>/.helm"
+  inf "For example: \nKUBECONFIG=${KRAKEN_BASE}/krakenCluster/admin.kubeconfig; helm list --home ${KRAKEN_BASE}/krakenCluster/.helm\n"
+  inf "To ssh:"
+  inf "ssh <node pool name>-<number> -F ${KRAKEN_BASE}/<cluster name>/ssh_config"
+  inf "For example: \nssh masterNodes-3 -F ${KRAKEN_BASE}/krakenCluster/ssh_config"
+}
+
+function show_post_cluster_error {
+  warn "Some of the cluster state MAY be available:"
+  show_post_cluster
+  exit 1
+}
+
+function control_c() {
+  warn "Interrupted!"
+  show_post_cluster_error
+}
+
 while [[ $# -gt 0 ]]
 do
 key="$1"

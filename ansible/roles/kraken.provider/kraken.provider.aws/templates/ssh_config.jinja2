@@ -1,0 +1,12 @@
+{% for result in ec2_results.results %}
+{% for instance in result.instances %}
+{% set privateKeyPath = kraken_config.nodepool | selectattr("name", "equalto", instance.tags['k2-nodepool']) | map(attribute='keypair.privatekeyFile') | list %}
+{% if privateKeyPath|length > 0 %}
+Host {{instance.tags['k2-nodepool']}}-{{loop.index}}
+  HostName {{instance.public_dns_name}}
+  Port 22
+  User core
+  IdentityFile {{privateKeyPath[0]}}
+{% endif %}
+{% endfor %}
+{% endfor %}

@@ -1,4 +1,4 @@
 # Documentation
 
-* [rendered machine configuration](cloud-configs/README.md)
+* [getting started](getting_started.md)
 * [kraken configuration](kraken-configs/README.md)
