@@ -12,8 +12,8 @@
 - include: aws-inventory.yaml
   when: kraken_action == 'up'
 
-- fail: msg="Run cluster {{kraken_action}} failed!"
-  when: up_result.rc != 0
+- fail: "msg='Run cluster {{kraken_action}} failed!'"
+  when: kraken_action == 'up' and up_result.rc != 0
 
 - name: Get kraken endpoint
   shell: > 
