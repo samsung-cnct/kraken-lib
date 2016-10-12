@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: central-fluentd-deployment
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: log-app
+    spec:
+      containers:
+      - name: central-fluentd-deployment
+        image: quay.io/leahnp/fluentd
+        ports:
+        - containerPort: 80
