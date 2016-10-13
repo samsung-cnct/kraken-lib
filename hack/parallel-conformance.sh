@@ -37,13 +37,14 @@ function run_hack_e2e_go() {
   common_test_args=()
   common_test_args+=("--ginkgo.v=true")
   common_test_args+=("--ginkgo.noColor=true")
+  #common_test_args+=("--provider=${KUBERNETES_PROVIDER}")
 
   test_args=()
   test_args+=("--ginkgo.focus=\[Conformance\]")
   test_args+=("--ginkgo.skip=\[Serial\]")
   test_args+=("--e2e-output-dir=${KUBE_CONFORMANCE_OUTPUT_DIR}")
   test_args+=("--report-dir=${KUBE_CONFORMANCE_OUTPUT_DIR}")
-
+  
   # run everything that we can in parallel
   GINKGO_PARALLEL=y go run hack/e2e.go --v --test --test_args="${common_test_args[*]} ${test_args[*]}" --check_version_skew=false
 }
