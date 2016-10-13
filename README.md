@@ -89,7 +89,7 @@ While all configuration options are available for a reason, some are more import
 - `nodepool[x].providerConfig.type`
 - `clusterServices.services`
 
-For a detailed explanation of all configuration variables, please consult [our configuration documentation](kraken-configs/README.md)
+For a detailed explanation of all configuration variables, please consult [our configuration documentation](Documentation/kraken-configs/README.md)
 
 ## Starting your own Kubernetes Cluster
 
