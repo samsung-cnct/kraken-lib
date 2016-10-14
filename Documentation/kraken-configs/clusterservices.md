@@ -21,7 +21,8 @@ Cluster services are helm charts to be installed on cluster startup
 | --- | --- | --- | --- |
 | name | __Required__ | String | Chart release name |
 | repo | __Required__ | String | Repository name for the chart |
-| chart | __Required__ | String | Chart name with version |
+| chart | __Required__ | String | Chart name |
+| version | __Required__ | String | Chart version |
 | values | Optional | Object | Chart values |
 
 # Example
@@ -37,7 +38,8 @@ clusterServices:
       -
         name: kubedns
         repo: atlas
-        chart: kubedns-0.1.0
+        chart: kubedns
+        version: 0.1.0
         values:
           cluster_ip: 10.32.0.2
           dns_domain: krakenCluster.local

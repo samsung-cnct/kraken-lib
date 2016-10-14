@@ -53,6 +53,7 @@
   command: >
     helm install {{ item.repo }}/{{ item.chart }}
       --name {{ item.name }}
+      --version {{ item.version }}
       --values {{ config_base | expanduser }}/{{kraken_config.cluster}}/{{ item.repo }}-{{ item.name }}.helmvalues
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
