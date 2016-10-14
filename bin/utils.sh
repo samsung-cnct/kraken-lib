@@ -40,11 +40,11 @@ function show_help {
   inf "[up|down].sh --output <path to cluster state output> --config <path to cluster config file> --tags <only run roles tagged with>"
 
   inf "\nFor example:"
-  inf "[up|down].sh --generate"
-  inf "[up|down].sh --generate ~/.kraken/myconfig.yaml"
+  inf "[up].sh --generate"
+  inf "[up].sh --generate ~/.kraken/myconfig.yaml"
   inf ""
-  inf "[up|down].sh --output ~/.kraken/myclusterstate --config ~/.kraken/myclusterconfig.yaml --tags config"
-  inf "[up|down].sh --config ~/.kraken/myclusterconfig.yaml"
+  inf "[up].sh --output ~/.kraken/myclusterstate --config ~/.kraken/myclusterconfig.yaml --tags config,services"
+  inf "[up].sh --config ~/.kraken/myclusterconfig.yaml"
 }
 
 function show_post_cluster {

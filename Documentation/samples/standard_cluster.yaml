@@ -215,10 +215,16 @@ deployment:
       -
         name: kubedns
         repo: atlas
-        chart: kubedns-0.1.0
+        chart: kubedns
+        version: 0.1.0
         values:
           cluster_ip: 10.32.0.2
           dns_domain: cluster.local
+      -
+        name: heapster
+        repo: atlas
+        chart: heapster
+        version: 0.1.0
   readiness:
     type: exact
     value: 0

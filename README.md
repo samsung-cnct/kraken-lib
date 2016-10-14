@@ -1,8 +1,7 @@
-# K2
+# K2  
 Deploy a __Kubernetes__ cluster on top of __CoreOS__ using __Terraform__  and __Ansible__.
 
 [![Docker Repository on Quay](https://quay.io/repository/samsung_cnct/k2/status "Docker Repository on Quay")](https://quay.io/repository/samsung_cnct/k2)
-
 
 # Getting Started with K2
 
@@ -20,6 +19,26 @@ You will need to have the following:
   - Create Route 53 Records
   - Create IAM roles for EC2 instances
 
+### Running without tools docker image
+
+You will need the following installed on your machine:
+
+- Python 2.x 
+ - pip
+ - boto
+ - netaddr 
+- Ansible 2.1.x
+- Cloud SDKs
+ - aws cli
+ - cli53 (https://github.com/barnybug/cli53/releases)
+ - gcloud SDK
+- Terraform and providers
+ - Terraform 0.7.x
+ - Terraform execute provider 0.0.3 (https://github.com/samsung-cnct/terraform-provider-execute/releases)  
+ - Terraform coreosbox provider 0.0.2 (https://github.com/samsung-cnct/terraform-provider-coreosbox/releases) 
+- kubectl 1.3.x 
+- helm alpha.5 or later 
+
 ## The K2 image
 
 The easiest way to get started with K2 is to use a K2 container image
@@ -29,11 +48,25 @@ The easiest way to get started with K2 is to use a K2 container image
 ## Preparing the environment  
   
 ### Initial K2 Directory
-If this is your first time using kraken, please create a `.kraken` directory in your home directory
+If this is your first time using kraken, use k2 docker image to generate a 'sensible defaults' configuration:
 
-`mkdir ~/.kraken`
+With docker container:
 
-For ease of use, please copy our [sample configuration](https://raw.githubusercontent.com/venezia/k2/master/Documentation/samples/standard_cluster.yaml) into the `~/.kraken` directory
+```bash
+docker run -v ~:/root --rm=true -it quay.io/samsung_cnct/k2:latest ./up.sh --generate
+```
+
+With cloned repo:
+
+```bash
+./up.sh --generate
+```
+
+This will generate a config.yaml file at 
+
+```
+~/.kraken/config.yaml
+```
 
 ### Preparing AWS credentials
 
@@ -41,35 +74,96 @@ _If you already have configured your machine to be able to use AWS, you can skip
 
 To setup AWS credentials, please run the following command
 
-`docker run -v ~/:/root -it --rm=true quay.io/samsung_cnct/k2:latest bash -c 'aws configure'`
+With docker container:
+
+```bash
+docker run -v ~/:/root -it --rm=true quay.io/samsung_cnct/k2:latest bash -c 'aws configure'
+```
+
+with local awscli:
+
+```bash
+ aws configure
+```
 
 This will allow you to configure the environment with your AWS credentials
 
 ### kubectl
 
-#### Downloading kubectl for mac
-
-_This step is optional if you want to use the kubectl shipped with the container_
-
-To download the latest kubectl for mac, please do the following:
-
-```bash
-curl -O https://storage.googleapis.com/kubernetes-release/release/v1.4.0/bin/darwin/amd64/kubectl
-chmod a+x kubectl
-mv kubectl /usr/local/bin/
-```
-
-And to use it, you would type in a command similar to:
-
-`kubectl --kubeconfig ~/.kraken/foo/admin.kubeconfig get nodes`
-
-#### Using kubectl from the built in container
-
-_This step is optional if you want to download your own kubectl_
-
 To use the kubectl shipped with k2, run a command similar to:
 
-`docker run -v ~/:/root -it --rm=true quay.io/samsung_cnct/k2:latest bash -c 'kubectl --kubeconfig ~/.kraken/foo/admin.kubeconfig get nodes'`
+```bash
+docker run -v ~/:/root -it --rm=true quay.io/samsung_cnct/k2:latest kubectl --kubeconfig ~/.kraken/YOURCLUSTER/admin.kubeconfig get nodes
+```
+
+with locally installed kubectl:
+
+```bash
+`kubectl --kubeconfig ~/.kraken/YOURCLUSTER/admin.kubeconfig get nodes`
+```
+
+### helm
+
+To use the helm shipped with k2, run a command similar to:
+
+```bash
+docker run -v ~/:/root -it --rm=true -e HELM_HOME=/root/.kraken/YOURCLUSTER/.helm -e KUBECONFIG=/root/.kraken/YOURCLUSTER/admin.kubeconfig quay.io/samsung_cnct/k2:latest helm list
+```
+
+with locally installed kubectl:
+
+```bash
+export KUBECONFIG=~/.kraken/YOURCLUSTER/admin.kubeconfig
+`helm list --home ~/.kraken/YOURCLUSTER/.helm`
+```
+
+### ssh
+
+After creating a cluster you should be able to ssh to various cluster nodes
+
+```bash
+ssh master-3 -F ~/.kraken/YOURCLUSTER/ssh_config
+```
+
+Cluster creating process generates an ssh config file at
+
+```bash
+ ~/.kraken/YOURCLUSTER/ssh_config
+```
+
+Host names are based on node pool names from your config file. I.e. if you had a config file with nodepool section like so:
+
+```
+nodepool:
+  -
+    name: etcd
+    count: 5
+    ...
+  -
+    name: etcdEvents
+    count: 5
+    ...
+  -
+    name: masterNodes
+    count: 3
+    ...
+  -
+    name: clusterNodes
+    count: 3
+    ...
+  -
+    name: specialNodes
+    count: 2
+    ...
+```
+
+Then the ssh hostnames available will be:
+
+- etcd-1 through etcd-5
+- etcdEvents-1 through etcdEvents-5
+- masterNodes-1 through masterNodes-3
+- clusterNodes-1 through clusterNodes-3
+- specialNodes-1 through specialNodes-2
 
 ## Configure your Kubernetes Cluster
 
@@ -97,11 +191,13 @@ For a detailed explanation of all configuration variables, please consult [our c
 
 To boot up a cluster per your configuration, please execute the following command:
 
-`docker run --rm=true -it -v ~/:/root quay.io/samsung_cnct/k2:latest bash -c 'cd /kraken && ./up.sh --config foo.yaml'`
+```bash
+docker run --rm=true -it -v ~/:/root quay.io/samsung_cnct/k2:latest ./up.sh --config /root/.kraken/foo.yaml
+```
 
-Replace `foo.yaml` with the name of the configuration file you intended to use (which should be in `~/.kraken`)
+Replace `foo.yaml` with the name of the configuration file you intended to use 
 
-Normally K2 will take a look at your configuration, generate artifacts like cloud-config files, and deploy VMs that will become your cluster.
+Normally K2 will take a look at your configuration, generate artefacts like cloud-config files, and deploy VMs that will become your cluster.
 
 During this time errors can happen if the configuration file is not as expected.  Please look at the errors and restart the cluster deployment if needed.
 
@@ -115,7 +211,9 @@ In all cases, assumption is made that `cluster` value in your configuration was 
 
 #### Getting K8s Nodes
 
-`docker run -v ~/:/root -it --rm=true quay.io/samsung_cnct/k2:latest bash -c 'kubectl --kubeconfig ~/.kraken/foo/admin.kubeconfig get nodes'`
+```bash
+docker run -v ~/:/root -it --rm=true quay.io/samsung_cnct/k2:latest kubectl --kubeconfig ~/.kraken/foo/admin.kubeconfig get nodes
+```
 
 This should result in the following:
 
@@ -133,7 +231,9 @@ ip-10-0-65-77.us-west-2.compute.internal     Ready                      2m
 
 #### Getting K8s Deployments
 
-`docker run -v ~/:/root -it --rm=true quay.io/samsung_cnct/k2:latest bash -c 'kubectl --kubeconfig ~/.kraken/foo/admin.kubeconfig get deployments --all-namespaces'`
+```bash
+docker run -v ~/:/root -it --rm=true quay.io/samsung_cnct/k2:latest kubectl --kubeconfig ~/.kraken/foo/admin.kubeconfig get deployments --all-namespaces
+```
 
 ```bash
 NAMESPACE     NAME            DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
@@ -149,17 +249,19 @@ In order to feel a bit more confident things are working, try having helm instal
 
 ##### Find Kubernetes Dashboard Version
 
-`docker run -v ~/:/root -it --rm=true -e HELM_HOME=/root/.kraken/foo/.helm -e KUBECONFIG=/root/.kraken/foo/admin.kubeconfig quay.io/samsung_cnct/k2:latest bash -c 'helm search kubernetes'`
-
 ```bash
-atlas/kubernetes-dashboard-0.1.0.tgz
+docker run -v ~/:/root -it --rm=true -e HELM_HOME=/root/.kraken/foo/.helm -e KUBECONFIG=/root/.kraken/foo/admin.kubeconfig quay.io/samsung_cnct/k2:latest helm search kubernetes
+
+$ atlas/kubernetes-dashboard-0.1.0.tgz
 ```
 
 Now we know that we want `atlas/kubernetes-dashboard-0.1.0`
 
 ##### Install Kubernetes Dashboard
 
-`docker run -v ~/:/root -it --rm=true -e HELM_HOME=/root/.kraken/foo/.helm -e KUBECONFIG=/root/.kraken/foo/admin.kubeconfig quay.io/samsung_cnct/k2:latest bash -c 'helm install atlas/kubernetes-dashboard-0.1.0'`
+```bash
+docker run -v ~/:/root -it --rm=true -e HELM_HOME=/root/.kraken/foo/.helm -e KUBECONFIG=/root/.kraken/foo/admin.kubeconfig quay.io/samsung_cnct/k2:latest helm install atlas/kubernetes-dashboard-0.1.0
+```
 
 ```bash
 Fetched atlas/kubernetes-dashboard-0.1.0 to /kraken/kubernetes-dashboard-0.1.0.tgz
@@ -182,25 +284,27 @@ The chart has been installed.  It will take a moment for AWS ELB DNS to propagat
 
 ##### Finding DNS name for Kubernetes Dashboard
 
-`docker run -v ~/:/root -it --rm=true quay.io/samsung_cnct/k2:latest bash -c 'kubectl --kubeconfig ~/.kraken/foo/admin.kubeconfig describe service kubernetes-dashboard --namespace kube-system'`
+```bash
+docker run -v ~/:/root -it --rm=true quay.io/samsung_cnct/k2:latest kubectl --kubeconfig ~/.kraken/foo/admin.kubeconfig describe service kubernetes-dashboard --namespace kube-system
+```
 
 ```bash
-Name:			kubernetes-dashboard
-Namespace:		kube-system
-Labels:			app=kubernetes-dashboard
-Selector:		app=kubernetes-dashboard
-Type:			LoadBalancer
-IP:			10.37.204.191
-LoadBalancer Ingress:	aa95470398b1711e6b3a706da4d1c1f9-1324035908.us-west-2.elb.amazonaws.com
-Port:			<unset>	80/TCP
-NodePort:		<unset>	31638/TCP
-Endpoints:		10.128.36.2:9090
-Session Affinity:	None
+Name:     kubernetes-dashboard
+Namespace:    kube-system
+Labels:     app=kubernetes-dashboard
+Selector:   app=kubernetes-dashboard
+Type:     LoadBalancer
+IP:     10.37.204.191
+LoadBalancer Ingress: aa95470398b1711e6b3a706da4d1c1f9-1324035908.us-west-2.elb.amazonaws.com
+Port:     <unset> 80/TCP
+NodePort:   <unset> 31638/TCP
+Endpoints:    10.128.36.2:9090
+Session Affinity: None
 Events:
-  FirstSeen	LastSeen	Count	From			SubobjectPath	Type		Reason			Message
-  ---------	--------	-----	----			-------------	--------	------			-------
-  6m		6m		1	{service-controller }			Normal		CreatingLoadBalancer	Creating load balancer
-  6m		6m		1	{service-controller }			Normal		CreatedLoadBalancer	Created load balancer
+  FirstSeen LastSeen  Count From      SubobjectPath Type    Reason      Message
+  --------- --------  ----- ----      ------------- --------  ------      -------
+  6m    6m    1 {service-controller }     Normal    CreatingLoadBalancer  Creating load balancer
+  6m    6m    1 {service-controller }     Normal    CreatedLoadBalancer Created load balancer
 ```
 
 After a few minutes, we should feel comfortable going to http://aa95470398b1711e6b3a706da4d1c1f9-1324035908.us-west-2.elb.amazonaws.com and viewing the kubernetes dashboard
@@ -241,18 +345,21 @@ In order to effect these changes, make appropriate adjustments to the configurat
 
 In other words:
 
-`docker run --rm=true -it -v ~/:/root quay.io/samsung_cnct/k2:latest bash -c 'cd /kraken && ./up.sh --config foo.yaml'`
+```bash
+docker run --rm=true -it -v ~/:/root quay.io/samsung_cnct/k2:latest ./up.sh --config /root/.kraken/foo.yaml
+```
 
-Replace `foo.yaml` with the name of the configuration file you intended to use (which should be in `~/.kraken`)
+Replace `foo.yaml` with the name of the configuration file you intended to use 
 
 ## Destroying a Kubernetes Cluster
 
 How zen of you - everything must come to end, including kubernetes clusters.  To destroy a cluster created with K2, please do the following:
 
-`docker run --rm=true -it -v ~/:/root quay.io/samsung_cnct/k2:latest bash -c 'cd /kraken && ./down.sh --config foo.yaml'`
+```bash
+docker run --rm=true -it -v ~/:/root quay.io/samsung_cnct/k2:latest ./down.sh --config /root/.kraken/foo.yaml
+```
 
-Replace `foo.yaml` with the name of the configuration file you intended to use (which should be in `~/.kraken`)
-
+Replace `foo.yaml` with the name of the configuration file you intended to use 
 
 # Docs
 Further reading can be found here: 

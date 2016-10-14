@@ -1,12 +1,12 @@
 ---
-- name: Gather inventory of etcds
+- name: Gather inventory of all cluster nodes
   ec2_remote_facts:
     region: "{{kraken_config.providerConfig.region}}"
     aws_access_key: "{{kraken_config.providerConfig.authentication.accessKey}}"
     aws_secret_key: "{{kraken_config.providerConfig.authentication.accessSecret}}"
     filters:
-      instance-state-name: running
       "tag:k2-nodepool": "{{item.name}}"
+      "tag:Name": "{{kraken_config.cluster}}_{{kraken_aws_prefix}}_{{item.name}}_node-autoscaled"
   with_items: "{{kraken_config.nodepool}}"
   register: ec2_results
 
