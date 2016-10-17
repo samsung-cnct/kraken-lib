@@ -3,3 +3,4 @@ generated/
 .idea
 **/.DS_Store
 *.tgz
+.env/
