@@ -38,13 +38,13 @@
       password: Dfae4@3dAF#SF;;O
       username: adm1n
       nodepool: defaultPool
-      proejct: my-gce-project
+      project: my-gce-project
       region: us-central1 
       authentication:
         serviceAccount: serviceaccount@my-gce-project.iam.gserviceaccount.com
         serviceAccountKeyFile: /path/to/serviceaccount-key.json
       zone:
-        zone: us-central1-a
+        primaryZone: us-central1-a
         additionalZones: 
           - us-central1-b
           - us-central1-c

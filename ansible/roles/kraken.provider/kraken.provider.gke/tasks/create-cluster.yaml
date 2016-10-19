@@ -1,0 +1,4 @@
+---
+- name: Render a deployment manager template
+  template: src=deploymentmanager.yaml.jinja2
+   dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/deploymentmanager.yaml"

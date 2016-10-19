@@ -15,7 +15,7 @@ The snippet configuration for deployments depends on the provider.
 | kubeConfig | __Required__ | Object Array | Array of [Kubernetes configurations](kubernetes.md) |
 | containerConfig | __Required__ | Object Array | Array of [Container runtime configurations](container.md) |
 | provider | __Required__ | String | Type of cluster provider, e.g. aws, etc |
-| providerConfig | __Required__ | Object | [Provider](deployments/README.md) - specific configuration section |
+| providerConfig | __Required__ | Object | provider configuration section |
 | master | __Required__ | Object | [Master](master.md) - specific configuration section |
 | node | __Required__ | Object | [Nodes](nodes.md) - specific configuration section |
 | clusterServices | __Required__ | Object | [Cluster services](clusterservices.md) - specific configuration section |
@@ -48,6 +48,12 @@ The snippet configuration for deployments depends on the provider.
 | value | Optional | Integer | For percent - what percentage of nodes currently up from total node count is a healthy cluster (Default - 100). For delta - allowed difference between expected and current node count (default 0) |
 | wait | Optional | Integer | Wait for how many seconds total |
 
+## providerConfig Options
+| Key Name | Required | Type | Description|
+| --- | --- | --- | --- |
+| type | Optional | String | Type of provider. cloudinit or autonomous. Autonomous providers do not require cloud init configuration. Defaults to cloudinit |
+| ... | __Required__ | Object | [Provider](deployments/README.md) - specific configuration section |
+
 # Prototype
 ```yaml
   deployment:
@@ -72,6 +78,7 @@ The snippet configuration for deployments depends on the provider.
       # container runtime configurations
     provider: aws
     providerConfig:
+      type: cloudinit
       # Provider-Specific Configuration Data
     master:
       # master config

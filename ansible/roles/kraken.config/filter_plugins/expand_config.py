@@ -54,7 +54,8 @@ def get_named_section(key, value, all_data):
   # get key'ed value from all data
   top_level_category = all_data[key]
   if isinstance(top_level_category, list):
-    return filter(lambda x: x['name'] == value, top_level_category)[0]
+    named_sections = filter(lambda x: x['name'] == value, top_level_category)
+    return named_sections[0] if len(named_sections) > 0 else None
   else:
     return value
 

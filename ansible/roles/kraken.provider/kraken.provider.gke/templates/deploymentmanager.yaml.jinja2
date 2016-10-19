@@ -1,0 +1,51 @@
+resources:
+  - name: k2-cluster-{{ kraken_config.cluster }}
+    type: container.v1.cluster
+    properties:
+      name: {{ kraken_config.cluster }}
+      description: {{ kraken_config.cluster }} managed by k2
+      masterAuth:
+        username: {{ kraken_config.providerConfig.username | default('admin') }}
+{% if kraken_config.providerConfig.password is defined %}
+        password: {{ kraken_config.providerConfig.password }}
+{% else %}
+        password: {{ lookup('password', config_base + '/' + kraken_config.cluster + '/kraken_password' + ' chars=ascii_letters length=11') }}
+{% endif %}
+      nodePools:
+{% for nodepool in kraken_config.nodepool %}     
+        -
+          name: {{ nodepool.name }} 
+          initialNodeCount: {{ nodepool.count }}
+          config:
+            machineType: {{ nodepool.providerConfig.machineType }}
+            diskSizeGb: {{ nodepool.providerConfig.diskSize }}
+            localSsdCount: {{ nodepool.providerConfig.localSsdCount }}
+            oauthScopes:
+{% for scope in nodepool.providerConfig.scopes %}
+              - {{ scope }}     
+{% endfor %}
+            serviceAccount: {{ nodepool.providerConfig.serviceAccount }}
+            imageType: {{ nodepool.providerConfig.imageType }}
+            labels: 
+{% for label in nodepool.providerConfig.label %}
+              {{ label.name }}: {{ label.value }}
+{% endfor %}
+            metadata:
+{% for metadata in nodepool.providerConfig.metadata %}
+              {{ metadata.name }}: {{ metadata.value }}
+{% endfor %}
+            tags:
+{% for tag in nodepool.providerConfig.tags %}
+              - {{ tag }}
+{% endfor %}
+            preemptible: {{ nodepool.providerConfig.preemptible }}
+{% if nodepool.providerConfig.autoscaling is defined %}
+          autoscaling:
+            enabled: true
+            minNodeCount: {{ nodepool.providerConfig.autoscaling.minNodeCount }}
+            maxNodeCount: {{ nodepool.providerConfig.autoscaling.maxNodeCount }}
+{% else }
+          autoscaling:
+            enabled: false
+{% endif %}
+{% endfor %}

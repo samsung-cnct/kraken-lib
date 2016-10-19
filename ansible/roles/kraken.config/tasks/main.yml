@@ -4,26 +4,43 @@
   register: config_stat
 
 - name: Include configuration variables from defaults file
-  include_vars: "{{ role_path }}/files/config.yaml"
+  include_vars: 
+    file: "{{ role_path }}/files/config.yaml"
+    name: kraken_config_defaults
 
 - name: Include configuration variables
-  include_vars: "{{config_file}}"
+  include_vars: 
+    file: "{{config_file}}"
+    name: kraken_config_user
   when: config_stat.stat.exists == True
 
-- name: expand configuration and register the config fact
+- name: expand default configuration and register the config fact
   set_fact:
-    kraken_config: "{{ deployment | expand_config }}"
+    kraken_config: "{{ kraken_config_defaults.deployment | expand_config }}"
+  when: config_stat.stat.exists != True
+
+- name: Non-recursively combine defaults and user config expand configuration and register the config fact
+  set_fact:
+    kraken_config: "{{ kraken_config_defaults.deployment | combine(kraken_config_user.deployment) | expand_config }}"
+  when: config_stat.stat.exists == True
+
+#- name: Display config
+#  debug: var=kraken_config
 
 - name: set the kubernetes cloud provider fact
   set_fact:
     kraken_kubernetes_cloudprovider: "{{kraken_config.provider}}"
-  when: "kraken_config.provider in ['aws', 'azure', 'cloudstack', 'gce', 'mesos', 'openstack', 'ovirt', 'rackspace', 'vsphere']"
+  when: "kraken_config.provider in ['aws', 'gke', 'cloudstack', 'gce', 'mesos', 'openstack', 'ovirt', 'rackspace', 'vsphere']"
 
 - name: set the kubernetes cloud provider fact
   set_fact:
-    kraken_kubernetes_cloudprovider: ""
+    kraken_provider_type: ""
   when: "kraken_config.provider not in ['aws', 'azure', 'cloudstack', 'gce', 'mesos', 'openstack', 'ovirt', 'rackspace', 'vsphere']"
 
 - name: set the kraken password fact
   set_fact:
     kraken_password: "{{ lookup('password', config_base + '/' + kraken_config.cluster + '/kraken_password' + ' chars=ascii_letters length=11') }}"
+
+- name: set the provider type
+  set_fact:
+    kraken_provider_type: "{{kraken_config.providerConfig.type | default('cloudinit') }}"
