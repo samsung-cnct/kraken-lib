@@ -21,7 +21,14 @@ The snippet configuration for deployments depends on the provider.
 | clusterServices | __Required__ | Object | [Cluster services](clusterservices.md) - specific configuration section |
 | etcd | __Required__ | Object | [etcd](nodes.md) - specific configuration section |
 | readiness | __Required__ | Object | When is cluster considered to be ready. Defaults to 'exact' with 600 second total wait. |
+| auth | Optional | Object | Master admin authentication. Defaults to admin:<random character string> |
 
+
+## auth Options
+| --- | --- | --- | --- |
+| name | Required | String | Name of this configuration|
+| user | Optional | String | Username. Defaults to 'admin' |
+| password | Optional | String | Password. Defaults to a random character string 11 characters long. |
 
 ## coreos Options
 

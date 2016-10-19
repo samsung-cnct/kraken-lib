@@ -290,6 +290,9 @@ deployment:
     -
       name: specialNodes
       nodepool: specialNodes
+  auth:
+    user: admin
+    password:
   clusterServices:
     repos:
       -

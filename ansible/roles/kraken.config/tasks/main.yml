@@ -24,23 +24,30 @@
     kraken_config: "{{ kraken_config_defaults.deployment | combine(kraken_config_user.deployment) | expand_config }}"
   when: config_stat.stat.exists == True
 
-#- name: Display config
-#  debug: var=kraken_config
-
-- name: set the kubernetes cloud provider fact
+- name: set the kubernetes cloud provider to {{ kraken_config.provider }}
   set_fact:
-    kraken_kubernetes_cloudprovider: "{{kraken_config.provider}}"
+    kraken_config: "{{ kraken_config | combine({'kubernetes_cloudprovider':kraken_config.provider}) }}"
   when: "kraken_config.provider in ['aws', 'gke', 'cloudstack', 'gce', 'mesos', 'openstack', 'ovirt', 'rackspace', 'vsphere']"
 
-- name: set the kubernetes cloud provider fact
+- name: set the kubernetes cloud provider to none
   set_fact:
-    kraken_provider_type: ""
+    kraken_config: "{{ kraken_config | combine({'kubernetes_cloudprovider':''}) }}"
   when: "kraken_config.provider not in ['aws', 'azure', 'cloudstack', 'gce', 'mesos', 'openstack', 'ovirt', 'rackspace', 'vsphere']"
 
-- name: set the kraken password fact
+- name: Generate kubernetes master user name
   set_fact:
-    kraken_password: "{{ lookup('password', config_base + '/' + kraken_config.cluster + '/kraken_password' + ' chars=ascii_letters length=11') }}"
+    kraken_config: "{{ kraken_config | combine({'auth': {'user': 'admin'}}, recursive=True) }}"
+  when: (kraken_config.auth.user is undefined) or (kraken_config.auth.user is none) or (kraken_config.auth.user|trim == '')
+
+- name: Generate kubernetes master password
+  set_fact:
+    kraken_config: "{{ kraken_config | combine({'auth': {'password': lookup('password', config_base + '/' + kraken_config.cluster + '/k8spassword' + ' chars=ascii_letters length=11')}}, recursive=True) }}"
+  when: (kraken_config.auth.password is undefined) or (kraken_config.auth.password is none) or (kraken_config.auth.password|trim == '')
 
 - name: set the provider type
   set_fact:
-    kraken_provider_type: "{{kraken_config.providerConfig.type | default('cloudinit') }}"
+    kraken_config: "{{ kraken_config | combine({'providerConfig': {'type': 'cloudinit'}}, recursive=True)) }}"
+    when: (kraken_config.providerConfig.type is undefined)
+
+- name: Display config
+  debug: var=kraken_config
