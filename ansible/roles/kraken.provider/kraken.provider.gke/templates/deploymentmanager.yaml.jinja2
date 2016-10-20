@@ -88,6 +88,3 @@ resources:
           - {{ location }}
 {% endfor %}
 {% endif %}
-outputs:
-  - name: kraken_endpoint
-    value: $(ref.{{ kraken_config.cluster }}.endpoint)
