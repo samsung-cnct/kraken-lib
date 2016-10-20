@@ -10,13 +10,13 @@
 
 - name: Authenticate with {{kraken_config.providerConfig.authentication.serviceAccount}}
   command: >
-    gcloud auth activate-service-account {{kraken_config.providerConfig.authentication.serviceAccount}} 
-      --key-file {{kraken_config.providerConfig.authentication.serviceAccountKeyFile}}
-  when: kraken_config.providerConfig.authentication.serviceAccountPasswordFile is not defined
+    gcloud auth activate-service-account {{kraken_config.providerConfig.keypair.providerConfig.serviceAccount}} 
+      --key-file {{kraken_config.providerConfig.keypair.providerConfig.serviceAccountKeyFile}}
+  when: kraken_config.providerConfig.keypair.providerConfig.serviceAccountPasswordFile is not defined
 
 - name: Authenticate with {{kraken_config.providerConfig.authentication.serviceAccount}}
   command: >
-    gcloud auth activate-service-account {{kraken_config.providerConfig.authentication.serviceAccount}} 
-      --key-file {{kraken_config.providerConfig.authentication.serviceAccountKeyFile}}
-      --password-file {{kraken_config.providerConfig.authentication.serviceAccountPasswordFile}}
-  when: kraken_config.providerConfig.authentication.serviceAccountPasswordFile is defined
+    gcloud auth activate-service-account {{kraken_config.providerConfig.keypair.providerConfig.serviceAccount}} 
+      --key-file {{kraken_config.providerConfig.keypair.providerConfig.serviceAccountKeyFile}}
+      --password-file {{kraken_config.providerConfig.keypair.providerConfig.serviceAccountPasswordFile}}
+  when: kraken_config.providerConfig.keypair.providerConfig.serviceAccountPasswordFile is defined

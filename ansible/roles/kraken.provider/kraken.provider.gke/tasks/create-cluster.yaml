@@ -2,3 +2,29 @@
 - name: Render a deployment manager template
   template: src=deploymentmanager.yaml.jinja2
    dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/deploymentmanager.yaml"
+
+- name: Query all deployments
+  shell: gcloud deployment-manager deployments list --project {{ kraken_config.providerConfig.project }} --simple-list | grep {{kraken_config.cluster}}
+  register: deployment_check 
+  ignore_errors: yes
+
+- name: Deploy cluster
+  command: >
+    gcloud deployment-manager deployments create {{ kraken_config.cluster }}
+      --config {{ config_base | expanduser }}/{{kraken_config.cluster}}/deploymentmanager.yaml 
+      --project {{ kraken_config.providerConfig.project }}
+  when: deployment_check|failed
+
+- name: Update cluster
+  command: >
+    gcloud deployment-manager deployments update {{ kraken_config.cluster }}
+      --config {{ config_base | expanduser }}/{{kraken_config.cluster}}/deploymentmanager.yaml 
+      --project {{ kraken_config.providerConfig.project }}
+  when: deployment_check|success
+
+- name: Get kubeconfig
+  command: >
+    gcloud container clusters get-credentials {{ kraken_config.cluster }} 
+       --project {{ kraken_config.providerConfig.project }}
+  environment:
+    KUBECONFIG: "{{ config_base | expanduser }}/{{kraken_config.cluster}}/admin.kubeconfig"

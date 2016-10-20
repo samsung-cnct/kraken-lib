@@ -46,8 +46,8 @@
 
 - name: set the provider type
   set_fact:
-    kraken_config: "{{ kraken_config | combine({'providerConfig': {'type': 'cloudinit'}}, recursive=True)) }}"
-    when: (kraken_config.providerConfig.type is undefined)
+    kraken_config: "{{ kraken_config | combine({'providerConfig': {'type': 'cloudinit'}}, recursive=True) }}"
+  when: (kraken_config.providerConfig.type is undefined) or (kraken_config.providerConfig.type is none) or (kraken_config.providerConfig.type|trim == '')
 
-- name: Display config
-  debug: var=kraken_config
+#- name: Display config
+#  debug: var=kraken_config

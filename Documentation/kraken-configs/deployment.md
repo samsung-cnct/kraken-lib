@@ -44,9 +44,10 @@ The snippet configuration for deployments depends on the provider.
 | Key Name | Required | Type | Description|
 | --- | --- | --- | --- |
 | name | __Required__ | String | Keypair name |
-| publicKeyFile | Optional | String | Path to public key material. |
+| publickeyFile | Optional | String | Path to public key material. |
 | publickey | Optional | String | Public key material. |
 | privatekeyFile | Optional | String | Path to private key. |
+| providerConfig | Optional | Object | [Provider](keypair/README.md)-specific configuration. |
 
 ## readiness Options
 | Key Name | Required | Type | Description|

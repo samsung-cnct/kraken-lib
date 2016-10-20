@@ -1,0 +1,6 @@
+---
+- name: Delete the deployment (cluster)
+  command: >
+    gcloud deployment-manager deployments delete {{ kraken_config.cluster }}
+      --project {{ kraken_config.providerConfig.project }}
+      -q

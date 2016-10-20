@@ -15,7 +15,6 @@
 | label | Optional | Object Array | Node k8s labels. |
 | metadata | Optional | Object Array | Node gce metadata. |
 | tags | Optional | String Array | List of RFC1035 compliant node tags. |
-| preemptible | Optional | Boolean | Use [preemptible](https://cloud.google.com/compute/docs/instances/preemptible) VMs |
 
 ## autoscaling options
 | Key Name | Required | Type | Description|
