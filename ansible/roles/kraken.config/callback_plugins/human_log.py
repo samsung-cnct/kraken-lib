@@ -33,7 +33,7 @@ class CallbackModule(CallbackBase):
         if type(data) == dict:
             for field in FIELDS:
                 if field in data.keys() and data[field]:
-                    output = self._format_output(data[field])
+                    output = str(self._format_output(data[field]))
                     print("\n{0}: {1}".format(field, output.replace("\\n","\n")))
 
     def _format_output(self, output):
