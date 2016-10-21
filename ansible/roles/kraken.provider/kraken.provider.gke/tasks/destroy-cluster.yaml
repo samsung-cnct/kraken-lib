@@ -5,6 +5,7 @@
       --project {{ kraken_config.providerConfig.project }}
       --no-async
       --quiet
+  ignore_errors: yes
 
 - name: Query all clusters
   shell: gcloud container clusters list --project {{ kraken_config.providerConfig.project }} | grep {{kraken_config.cluster}}
