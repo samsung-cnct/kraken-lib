@@ -45,6 +45,10 @@
   fail: "msg='Deployment {{ kraken_config.cluster }}-k2-deployment failed with: {{yaml_inspect_result}}'"
   when: (yaml_inspect_result is defined) and ((yaml_inspect_result.deployment.operation.status != 'DONE') or (yaml_inspect_result.deployment.operation.progress != 100))
 
+- name: Set legacy kubeconfig certificate behavior
+  command: >
+    gcloud config set container/use_client_certificate True
+
 - name: Get kubeconfig
   command: >
     gcloud container clusters get-credentials {{ kraken_config.cluster }} 
@@ -53,3 +57,4 @@
        --quiet
   environment:
     KUBECONFIG: "{{ config_base | expanduser }}/{{kraken_config.cluster}}/admin.kubeconfig"
+    CLOUDSDK_CONTAINER_USE_CLIENT_CERTIFICATE: True
