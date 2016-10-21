@@ -23,11 +23,11 @@ You will need to have the following:
 
 You will need the following installed on your machine:
 
-- Python 2.x 
+- Python 2.x (virtualenv strongly suggested)
  - pip
  - boto
  - netaddr 
-- Ansible 2.1.x
+- Ansible 2.2.x
 - Cloud SDKs
  - aws cli
  - cli53 (https://github.com/barnybug/cli53/releases)
@@ -38,6 +38,7 @@ You will need the following installed on your machine:
  - Terraform coreosbox provider 0.0.2 (https://github.com/samsung-cnct/terraform-provider-coreosbox/releases) 
 - kubectl 1.3.x 
 - helm alpha.5 or later 
+
 
 ## The K2 image
 
