@@ -10,19 +10,40 @@
 
 - name: Deploy cluster
   command: >
-    gcloud deployment-manager deployments create {{ kraken_config.cluster }}
+    gcloud deployment-manager deployments create {{ kraken_config.cluster }}-k2-deployment
       --config {{ config_base | expanduser }}/{{kraken_config.cluster}}/deploymentmanager.yaml 
       --project {{ kraken_config.providerConfig.project }}
+      --no-async
       --quiet
   when: deployment_check|failed
+  register: deployment_result 
+  ignore_errors: yes
 
 - name: Update cluster
   command: >
-    gcloud deployment-manager deployments update {{ kraken_config.cluster }}
+    gcloud deployment-manager deployments update {{ kraken_config.cluster }}-k2-deployment
       --config {{ config_base | expanduser }}/{{kraken_config.cluster}}/deploymentmanager.yaml 
       --project {{ kraken_config.providerConfig.project }}
+      --no-async
       --quiet
   when: deployment_check|success
+
+- name: Inspect the failed deployments
+  command: >
+    gcloud deployment-manager deployments describe {{ kraken_config.cluster }}-k2-deployment
+      --project {{ kraken_config.providerConfig.project }}
+      --format yaml
+  when: (deployment_result is defined) and deployment_result|failed
+  register: inspect_result
+
+- name: load failed deployment insepction result into variable
+  set_fact:
+    yaml_inspect_result: "{{ inspect_result.stdout | from_yaml }}"
+  when: inspect_result is defined
+
+- name: Fail unless deployed cluster is 100 complete
+  fail: "msg='Deployment {{ kraken_config.cluster }}-k2-deployment failed with: {{yaml_inspect_result}}'"
+  when: (yaml_inspect_result.deployment.operation.status != 'DONE') or (yaml_inspect_result.deployment.operation.progress != 100)
 
 - name: Get kubeconfig
   command: >
