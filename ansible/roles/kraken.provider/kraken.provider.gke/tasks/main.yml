@@ -1,0 +1,7 @@
+---
+- include: authenticate.yaml
+- include: create-cluster.yaml
+  when: kraken_action == 'up'
+- include: destroy-cluster.yaml
+  when: kraken_action == 'down'
+- include: deauthenticate.yaml

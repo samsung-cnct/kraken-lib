@@ -29,7 +29,7 @@ spec:
     - --client-ca-file=/etc/kubernetes/ssl/ca.pem
     - --basic-auth-file=/etc/kubernetes/basicauth.csv
     - --service-account-key-file=/etc/kubernetes/ssl/service-account-key.pem
-    - --cloud-provider={{kraken_kubernetes_cloudprovider}}
+    - --cloud-provider={{kraken_config.kubernetes_cloudprovider}}
     - --v=7
     - --logtostderr=true
     ports:

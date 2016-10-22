@@ -1,0 +1,5 @@
+---
+- name: Set authentication back to {{ current_gcloud_account }}
+  command: >
+    gcloud config set account {{current_gcloud_account}}
+  when: (current_gcloud_account is defined) and (current_gcloud_account is not none) and (current_gcloud_account|trim != '')

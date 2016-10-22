@@ -37,6 +37,7 @@ deployment:
         Type: vxlan
   provider: aws
   providerConfig:
+    type: cloudinit
     resourcePrefix:
     vpc: 10.0.0.0/16
     region: us-west-2
@@ -289,6 +290,9 @@ deployment:
     -
       name: specialNodes
       nodepool: specialNodes
+  auth:
+    user: admin
+    password:
   clusterServices:
     repos:
       -

@@ -1,0 +1,22 @@
+---
+- name: Get current authentication
+  command: >
+    gcloud auth list --filter=status:ACTIVE --format="value(account)"
+  register: auth_list_result
+
+- name: Set current account fact
+  set_fact:
+    current_gcloud_account: "{{ auth_list_result.stdout }}"
+
+- name: Authenticate with {{kraken_config.providerConfig.authentication.serviceAccount}}
+  command: >
+    gcloud auth activate-service-account {{kraken_config.providerConfig.keypair.providerConfig.serviceAccount}} 
+      --key-file {{kraken_config.providerConfig.keypair.providerConfig.serviceAccountKeyFile}}
+  when: kraken_config.providerConfig.keypair.providerConfig.serviceAccountPasswordFile is not defined
+
+- name: Authenticate with {{kraken_config.providerConfig.authentication.serviceAccount}}
+  command: >
+    gcloud auth activate-service-account {{kraken_config.providerConfig.keypair.providerConfig.serviceAccount}} 
+      --key-file {{kraken_config.providerConfig.keypair.providerConfig.serviceAccountKeyFile}}
+      --password-file {{kraken_config.providerConfig.keypair.providerConfig.serviceAccountPasswordFile}}
+  when: kraken_config.providerConfig.keypair.providerConfig.serviceAccountPasswordFile is defined
