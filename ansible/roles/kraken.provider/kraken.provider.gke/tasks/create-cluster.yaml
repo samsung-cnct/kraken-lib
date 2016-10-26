@@ -39,7 +39,7 @@
 - name: load failed deployment inspection result into variable
   set_fact:
     yaml_inspect_result: "{{ inspect_result.stdout | from_yaml }}"
-  when: (inspect_result is defined) and deployment_check|failed
+  when: (inspect_result is defined) and deployment_result|failed
 
 - name: Fail unless deployed cluster is 100 complete
   fail: "msg='Deployment {{ kraken_config.cluster }}-k2-deployment failed with: {{yaml_inspect_result}}'"
