@@ -23,6 +23,7 @@ Cluster services are helm charts to be installed on cluster startup
 | repo | __Required__ | String | Repository name for the chart |
 | chart | __Required__ | String | Chart name |
 | version | __Required__ | String | Chart version |
+| namespace | Optional | String | Kubernetes namespace to install chart into. Defaults to 'default' |
 | values | Optional | Object | Chart values |
 
 # Example
@@ -40,6 +41,7 @@ clusterServices:
         repo: atlas
         chart: kubedns
         version: 0.1.0
+        namespace: kube-system
         values:
           cluster_ip: 10.32.0.2
           dns_domain: krakenCluster.local
