@@ -5,6 +5,14 @@
   with_items: "{{ cluster_namespaces }}"
   when: cluster_namespaces is defined
 
+- name: Dry run of Init helm with default tiller
+  command: >
+    helm init --dry-run --debug
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+    HELM_HOME: "{{ helm_home }}"
+  when: (cluster_services is defined) and (cluster_services.debug is defined) and (cluster_services.debug == True) 
+
 - name: Init helm with default tiller
   command: >
     helm init
@@ -12,6 +20,14 @@
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
   when: (tiller_image is undefined) or (tiller_image is none) or (tiller_image|trim == '')
+
+- name: Dry run of Init helm with overriden tiller
+  command: >
+    helm init --dry-run --debug
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+    HELM_HOME: "{{ helm_home }}"
+  when: (tiller_image is defined) and (tiller_image is not none) and (tiller_image|trim != '')
 
 - name: Init helm with overriden tiller
   command: >
