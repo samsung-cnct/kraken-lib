@@ -17,7 +17,7 @@ deployment:
   kubeConfig:
     -
       name: krakenKubeConfig
-      version: v1.3.7
+      version: v1.4.4
       hyperkubeLocation: gcr.io/google_containers/hyperkube
       containerConfig: dockerconfig
   containerConfig:
@@ -217,6 +217,7 @@ deployment:
         repo: atlas
         chart: kubedns
         version: 0.1.0
+        namespace: kube-system
         values:
           cluster_ip: 10.32.0.2
           dns_domain: cluster.local
@@ -225,6 +226,7 @@ deployment:
         repo: atlas
         chart: heapster
         version: 0.1.0
+        namespace: kube-system
   readiness:
     type: exact
     value: 0

@@ -5,9 +5,19 @@
   with_items: "{{ cluster_namespaces }}"
   when: cluster_namespaces is defined
 
+- name: create helm command string
+  set_fact: 
+    helm_command: "helm --debug"
+  when: (kraken_config.clusterServices.debug is defined) and (kraken_config.clusterServices.debug == True) 
+
+- name: create helm command string
+  set_fact: 
+    helm_command: "helm"
+  when: (kraken_config.clusterServices.debug is undefined) or (kraken_config.clusterServices.debug != True) 
+
 - name: Init helm with default tiller
   command: >
-    helm init
+    {{helm_command}} init
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
@@ -15,7 +25,7 @@
 
 - name: Init helm with overriden tiller
   command: >
-    helm init --tiller-image {{ tiller_image }}
+    {{helm_command}} init --tiller-image {{ tiller_image }}
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
@@ -26,7 +36,7 @@
 
 - name: Remove helm repositories
   command: >
-    helm repo remove {{ item.name }}
+    {{helm_command}} repo remove {{ item.name }}
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
@@ -36,7 +46,7 @@
 
 - name: Add helm repositories
   command: >
-    helm repo add {{ item.name }} {{ item.url }}
+    {{helm_command}} repo add {{ item.name }} {{ item.url }}
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
@@ -51,7 +61,7 @@
 
 - name: Install charts
   command: >
-    helm install {{ item.repo }}/{{ item.chart }}
+    {{helm_command}} install {{ item.repo }}/{{ item.chart }}
       --name {{ item.name }}
       --version {{ item.version }}
       --namespace {{ item.namespace | default('default') }}
