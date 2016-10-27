@@ -11,7 +11,7 @@
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
-  when: (cluster_services is defined) and (cluster_services.debug is defined) and (cluster_services.debug == True) 
+  when: (kraken_config.clusterServices.debug is defined) and (kraken_config.clusterServices.debug == True) 
 
 - name: Init helm with default tiller
   command: >
