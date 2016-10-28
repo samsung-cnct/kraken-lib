@@ -113,8 +113,8 @@ if [ -n "${KRAKEN_GENERATE_PATH+x}" ]; then
 fi
 
 if [ -z ${KRAKEN_CONFIG+x} ]; then
-  warn "--config not specified. Using ~/.kraken/config.yml as location"
-  KRAKEN_CONFIG="~/.kraken/config.yml"
+  warn "--config not specified. Using ~/.kraken/config.yaml as location"
+  KRAKEN_CONFIG="~/.kraken/config.yaml"
 fi
 
 if [ -z ${KRAKEN_BASE+x} ]; then
