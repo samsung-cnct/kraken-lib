@@ -1,6 +1,6 @@
 ---
 deployment:
-  cluster: krakenCluster
+  cluster:
   serviceCidr: 10.32.0.0/12
   serviceDNS: 10.32.0.2
   clusterDomain: cluster.local

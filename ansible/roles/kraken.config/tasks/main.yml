@@ -24,6 +24,11 @@
     kraken_config: "{{ kraken_config_defaults.deployment | combine(kraken_config_user.deployment) | expand_config }}"
   when: config_stat.stat.exists == True
 
+- name: Trigger a fatal error
+  fail: 
+    msg: "Make sure that the 'cluster' is defined in {{config_file}}"
+  when: (kraken_config.cluster is not defined) or (kraken_config.cluster is none) or (kraken_config.cluster|trim == '')
+
 - name: set the kubernetes cloud provider to {{ kraken_config.provider }}
   set_fact:
     kraken_config: "{{ kraken_config | combine({'kubernetes_cloudprovider':kraken_config.provider}) }}"
