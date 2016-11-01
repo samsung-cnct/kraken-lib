@@ -86,8 +86,7 @@
   register: install_dry_out
   when: (cluster_services is defined) and (kraken_config.clusterServices.debug is defined) and (kraken_config.clusterServices.debug == True) 
 
-- debug: var=item.stdout_lines
-  with_items: install_dry_out.results
+- debug: var=install_dry_out.results
 
 - name: Install charts
   command: >
