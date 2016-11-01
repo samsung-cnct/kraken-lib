@@ -31,7 +31,10 @@
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
+  register: init_dry_out
   when: (kraken_config.clusterServices.debug is defined) and (kraken_config.clusterServices.debug == True) 
+
+- debug: var=init_dry_out.stdout_lines
 
 - name: Init helm
   command: >
@@ -80,7 +83,11 @@
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
   with_items: "{{ cluster_services }}"
+  register: install_dry_out
   when: (cluster_services is defined) and (kraken_config.clusterServices.debug is defined) and (kraken_config.clusterServices.debug == True) 
+
+- debug: var=item.stdout_lines
+  with_items: install_dry_out.results
 
 - name: Install charts
   command: >
