@@ -15,21 +15,30 @@
     helm_command: "helm"
   when: (kraken_config.clusterServices.debug is undefined) or (kraken_config.clusterServices.debug != True) 
 
-- name: Init helm with default tiller
-  command: >
-    {{helm_command}} init
-  environment:
-    KUBECONFIG: "{{ kubeconfig }}"
-    HELM_HOME: "{{ helm_home }}"
+- name: create helm init command string
+  set_fact: 
+    helm_init_command: "{{helm_command}} init"
   when: (tiller_image is undefined) or (tiller_image is none) or (tiller_image|trim == '')
 
-- name: Init helm with overriden tiller
+- name: create helm init command string
+  set_fact: 
+    helm_init_command: "{{helm_command}} init --tiller-image {{ tiller_image }}"
+  when: (tiller_image is defined) and (tiller_image is not none) and (tiller_image|trim != '')
+
+- name: Init helm dry-run
   command: >
-    {{helm_command}} init --tiller-image {{ tiller_image }}
+    {{helm_init_command}} --dry-run
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
-  when: (tiller_image is defined) and (tiller_image is not none) and (tiller_image|trim != '')
+  when: (kraken_config.clusterServices.debug is defined) and (kraken_config.clusterServices.debug == True) 
+
+- name: Init helm
+  command: >
+    {{helm_init_command}}
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+    HELM_HOME: "{{ helm_home }}"
 
 - name: Give tiller rc a chance to fully init
   pause: seconds=15
@@ -58,6 +67,20 @@
     dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/{{ item.repo }}-{{ item.name }}.helmvalues"
   with_items: "{{ cluster_services }}"
   when: cluster_services is defined
+
+- name: Install charts dry-run
+  command: >
+    {{helm_command}} install {{ item.repo }}/{{ item.chart }}
+      --name {{ item.name }}
+      --version {{ item.version }}
+      --namespace {{ item.namespace | default('default') }}
+      --values {{ config_base | expanduser }}/{{kraken_config.cluster}}/{{ item.repo }}-{{ item.name }}.helmvalues
+      --dry-run
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+    HELM_HOME: "{{ helm_home }}"
+  with_items: "{{ cluster_services }}"
+  when: (cluster_services is defined) and (kraken_config.clusterServices.debug is defined) and (kraken_config.clusterServices.debug == True) 
 
 - name: Install charts
   command: >
