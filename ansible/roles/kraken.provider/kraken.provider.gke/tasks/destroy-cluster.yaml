@@ -8,7 +8,7 @@
   ignore_errors: yes
 
 - name: Query all clusters
-  shell: gcloud container clusters list --project {{ kraken_config.providerConfig.project }} | grep {{kraken_config.cluster}}
+  shell: gcloud container clusters list --project {{ kraken_config.providerConfig.project }} | grep -w {{kraken_config.cluster}}
   register: cluster_check 
   ignore_errors: yes
 

@@ -4,7 +4,7 @@
    dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/deploymentmanager.yaml"
 
 - name: Query all deployments
-  shell: gcloud deployment-manager deployments list --project {{ kraken_config.providerConfig.project }} --simple-list | grep {{kraken_config.cluster}}
+  shell: gcloud deployment-manager deployments list --project {{ kraken_config.providerConfig.project }} --simple-list | grep -w {{kraken_config.cluster}}
   register: deployment_check 
   ignore_errors: yes
 
