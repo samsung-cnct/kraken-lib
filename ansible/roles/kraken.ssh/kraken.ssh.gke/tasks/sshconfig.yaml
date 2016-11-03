@@ -1,0 +1,17 @@
+---
+- name: Get all managed nodepool descriptions
+  command: >
+    gcloud container node-pools describe {{item.name}} --cluster {{kraken_config.cluster}} --project {{ kraken_config.providerConfig.project }} --format yaml
+  register: nodepools_out
+  with_items: "{{kraken_config.nodepool}}"
+
+- set_fact:
+    nodepool_names: "{{ nodepools_out.results | map(attribute='stdout') | list }}"
+ 
+- set_fact:
+    instanceGroupUrls: "{% for pool in nodepools_out.results %}{{ pool.stdout | from_yaml }}{% endfor %}"
+
+- debug: msg="{{ instanceGroupUrls }}"
+
+
+#{{ config_base | expanduser }}/{{kraken_config.cluster}}

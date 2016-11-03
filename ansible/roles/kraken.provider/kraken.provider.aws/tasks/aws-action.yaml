@@ -9,9 +9,6 @@
   delay: 15
   ignore_errors: yes
 
-- include: aws-inventory.yaml
-  when: kraken_action == 'up'
-
 - fail: "msg='Run cluster {{kraken_action}} failed!'"
   when: kraken_action == 'up' and up_result.rc != 0
 

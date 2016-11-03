@@ -1,0 +1,4 @@
+---
+- include: authenticate.yaml
+- include: sshconfig.yaml
+- include: deauthenticate.yaml

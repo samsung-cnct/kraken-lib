@@ -1,13 +1,47 @@
 ---
 - hosts: localhost
   roles:
-    - { role: 'kraken.config', config_file: "{{ config_path | default('') }}", tags: [ 'config', 'dryrun', 'all' ] }
-    - { role: 'roles/kraken.cluster_common', when: "kraken_config.providerConfig.type == 'cloudinit'", tags: [ 'cluster_common', 'dryrun', 'all' ] }
-    - { role: 'roles/kraken.fabric/kraken.fabric.selector', when: "kraken_config.providerConfig.type == 'cloudinit'", tags: [ 'fabric', 'dryrun', 'all' ] }
-    - { role: 'roles/kraken.etcd/kraken.etcd.selector', when: "kraken_config.providerConfig.type == 'cloudinit'", tags: [ 'etcd', 'dryrun', 'all' ] }
-    - { role: 'roles/kraken.master/kraken.master.selector', when: "kraken_config.providerConfig.type == 'cloudinit'", tags: [ 'master', 'dryrun', 'all' ] }
-    - { role: 'roles/kraken.node/kraken.node.selector', when: "kraken_config.providerConfig.type == 'cloudinit'", tags: [ 'node', 'dryrun', 'all' ] }
-    - { role: 'roles/kraken.assembler', when: "kraken_config.providerConfig.type == 'cloudinit'", tags: [ 'assembler', 'dryrun', 'all' ] }
-    - { role: 'roles/kraken.provider/kraken.provider.selector', tags: [ 'provider', 'all' ] }
-    - { role: 'roles/kraken.readiness', when: "kraken_config.providerConfig.type == 'cloudinit'", tags: [ 'readiness', 'dryrun', 'all' ] }
-    - { role: 'roles/kraken.services', when: "kraken_config.clusterServices is defined", tags: [ 'services', 'all' ] }
+    - { 
+        role: 'kraken.config', config_file: "{{ config_path | default('') }}", 
+        tags: [ 'config', 'always', 'config_only' ] 
+      }
+    - { 
+        role: 'roles/kraken.cluster_common', when: "kraken_config.providerConfig.type == 'cloudinit'", 
+        tags: [ 'common', 'assembler', 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun', 'common_only' ] 
+      }
+    - { 
+        role: 'roles/kraken.fabric/kraken.fabric.selector', when: "kraken_config.providerConfig.type == 'cloudinit'", 
+        tags: [ 'fabric', 'assembler', 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun', 'fabric_only' ] 
+      }
+    - { 
+        role: 'roles/kraken.etcd/kraken.etcd.selector', when: "kraken_config.providerConfig.type == 'cloudinit'", 
+        tags: [ 'etcd', 'assembler', 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun', 'etcd_only' ] 
+      }
+    - { 
+        role: 'roles/kraken.master/kraken.master.selector', when: "kraken_config.providerConfig.type == 'cloudinit'", 
+        tags: [ 'master', 'assembler', 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun', 'master_ony' ] 
+      }
+    - { 
+        role: 'roles/kraken.node/kraken.node.selector', when: "kraken_config.providerConfig.type == 'cloudinit'", 
+        tags: [ 'node', 'assembler', 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun', 'node_only' ] 
+      }
+    - { 
+        role: 'roles/kraken.assembler', when: "kraken_config.providerConfig.type == 'cloudinit'", 
+        tags: [ 'assembler', 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun', 'assembler_only' ] 
+      }
+    - { 
+        role: 'roles/kraken.provider/kraken.provider.selector', 
+        tags: [ 'provider', 'ssh', 'readiness', 'services', 'all', 'provider_only' ] 
+      }
+    - { 
+        role: 'roles/kraken.ssh/kraken.ssh.selector', 
+        tags: [ 'ssh', 'all', 'ssh_only' ] 
+      }
+    - { 
+        role: 'roles/kraken.readiness', when: "kraken_config.providerConfig.type == 'cloudinit'", 
+        tags: [ 'readiness', 'services', 'all', 'readiness_only' ] 
+      }
+    - { 
+        role: 'roles/kraken.services', when: "kraken_config.clusterServices is defined", 
+        tags: [ 'services', 'all', 'services_only' ] 
+      }
