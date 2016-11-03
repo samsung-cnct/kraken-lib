@@ -8,7 +8,7 @@
   ignore_errors: yes
 
 - name: Query all clusters
-  shell: gcloud container clusters list --project {{ kraken_config.providerConfig.project }} | grep -w {{kraken_config.cluster}}
+  shell: gcloud container clusters list --project {{ kraken_config.providerConfig.project }} --filter='name:{{kraken_config.cluster}}' --format='value(name)'
   register: cluster_check 
   ignore_errors: yes
 
@@ -19,5 +19,5 @@
       --zone {{ kraken_config.providerConfig.zone.primaryZone }}
       --no-async
       --quiet
-  when: cluster_check|success
+  when: cluster_check.stdout == "{{kraken_config.cluster}}"
 
