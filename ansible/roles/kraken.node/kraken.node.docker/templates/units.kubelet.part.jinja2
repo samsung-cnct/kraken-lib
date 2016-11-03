@@ -9,6 +9,7 @@
     [Service]
     EnvironmentFile=/etc/network-environment
     ExecStartPre=/usr/bin/mkdir -p /var/lib/kubelet
+    ExecStartPre=/usr/bin/mkdir -p /var/log/containers
     ExecStart=/usr/bin/rkt run \
       --volume etc-resolv-conf,kind=host,source=/etc/resolv.conf \
       --volume etc-cni,kind=host,source=/etc/cni \
@@ -16,6 +17,7 @@
       --volume etc-ssl-certs,kind=host,source=/usr/share/ca-certificates \
       --volume var-lib-docker,kind=host,source=/var/lib/docker \
       --volume var-lib-kubelet,kind=host,source=/var/lib/kubelet \
+      --volume var-log,kind=host,source=/var/log \
       --volume os-release,kind=host,source=/usr/lib/os-release \
       --volume run,kind=host,source=/run \
       --volume opt-cni,kind=host,source=/opt/cni \
@@ -25,6 +27,7 @@
       --mount volume=etc-ssl-certs,target=/etc/ssl/certs \
       --mount volume=var-lib-docker,target=/var/lib/docker \
       --mount volume=var-lib-kubelet,target=/var/lib/kubelet \
+      --mount volume=var-log,target=/var/log \
       --mount volume=os-release,target=/etc/os-release \
       --mount volume=run,target=/run \
       --mount volume=opt-cni,target=/opt/cni \
