@@ -68,8 +68,9 @@ resources:
               {{ label.name }}: {{ label.value }}
 {% endfor %}
 {% endif %}
-{% if nodepool.providerConfig.metadata is defined %}
             metadata:
+              k2nodepool: {{ nodepool.name }}
+{% if nodepool.providerConfig.metadata is defined %}
 {% for metadata in nodepool.providerConfig.metadata %}
               {{ metadata.name }}: {{ metadata.value }}
 {% endfor %}
