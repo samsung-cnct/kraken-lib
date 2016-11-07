@@ -1,5 +1,5 @@
-{% set validHostCounter = 1 %}
 {% for result in ec2_results.results %}
+{% set validHostCounter = 1 %}
 {% for instance in result.instances %}
 {% if instance.state == 'running' or instance.state == 'pending' %}
 {% set privateKeyPath = kraken_config.nodepool | selectattr("name", "equalto", instance.tags['k2-nodepool']) | list %}
