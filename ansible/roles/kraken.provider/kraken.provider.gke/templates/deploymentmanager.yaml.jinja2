@@ -19,6 +19,11 @@ resources:
 {% else %}
       monitoringService: monitoring.googleapis.com
 {% endif %}
+{% if kraken_config.providerConfig.enableKubernetesAlpha is defined and kraken_config.providerConfig.enableKubernetesAlpha == True %}
+      enableKubernetesAlpha: True
+{% else %}
+      enableKubernetesAlpha: False
+{% endif %}
 {% if kraken_config.providerConfig.network is defined %}
       network: {{ kraken_config.providerConfig.network }}
 {% endif %}

@@ -10,6 +10,7 @@
 | disableCloudMonitoring | Optional | Boolean | Do not send metrics from pods in the cluster to the Google Cloud Monitoring API |
 | disableHTTPLoadbalancer | Optional | Boolean | disable HttpLoadBalancing addon |
 | disableHorizontalAutoscaler | Optional | Boolean | disable HorizontalPodAutoscaling addon |
+| enableKubernetesAlpha | Optional | Boolean | Enable kubernetes alpha features. Will cause cluster to be deleted after 30 days. (false) |
 | network | Optional | String | The Compute Engine Network that the cluster will connect to. Defaults to 'default' |
 | password | Optional | String | The password to use for cluster auth. Defaults to a server-specified randomly-generated string |
 | subnetwork | Optional | String | he name of the Google Compute Engine subnetwork |
