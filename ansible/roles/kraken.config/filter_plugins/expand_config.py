@@ -1,5 +1,5 @@
-import yaml, copy, json
-from ansible import errors
+import yaml, copy, json, os
+from ansible import errors 
 
 def expand_config(config_data):
   try:
@@ -8,6 +8,7 @@ def expand_config(config_data):
 
     # iterate over all data, looking for dictionaries
     # expand each dictionary when found
+    # expand all environment variables when found
     for key, value in all_data.items():
       if isinstance(value, dict):
         expand_object(value, top_level_categories, all_data)
@@ -16,12 +17,22 @@ def expand_config(config_data):
           expand_object(item, top_level_categories, all_data)
       else:
         continue
-    return all_data
+    return expand_envs(all_data)
   except Exception, e:
     raise errors.AnsibleFilterError(
             'expand_config plugin error: {0}, config_data={1}'.format(
               str(e),
               str(config_data)))
+
+def expand_envs(obj):
+  if isinstance(obj, dict):
+    return { key: expand_envs(val) for key, val in obj.items()}
+  if isinstance(obj, list):
+    for item in obj:
+      expand_envs(item)
+  if isinstance(obj, basestring):
+    return os.path.expandvars(obj)
+  return obj
 
 # expand dictionary recursively - go over its keys, see if any one of them is a string value key
 # that matches a top level category
