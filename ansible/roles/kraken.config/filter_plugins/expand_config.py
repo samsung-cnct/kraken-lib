@@ -3,7 +3,7 @@ from ansible import errors
 
 def expand_config(config_data):
   try:
-    all_data = copy.deepcopy(config_data)
+    all_data = copy.deepcopy(expand_envs(config_data))
     top_level_categories = all_data.keys()
 
     # iterate over all data, looking for dictionaries
@@ -17,7 +17,7 @@ def expand_config(config_data):
           expand_object(item, top_level_categories, all_data)
       else:
         continue
-    return expand_envs(all_data)
+    return all_data
   except Exception, e:
     raise errors.AnsibleFilterError(
             'expand_config plugin error: {0}, config_data={1}'.format(
@@ -28,8 +28,7 @@ def expand_envs(obj):
   if isinstance(obj, dict):
     return { key: expand_envs(val) for key, val in obj.items()}
   if isinstance(obj, list):
-    for item in obj:
-      expand_envs(item)
+    return [ expand_envs(item) for item in obj ]
   if isinstance(obj, basestring):
     return os.path.expandvars(obj)
   return obj
