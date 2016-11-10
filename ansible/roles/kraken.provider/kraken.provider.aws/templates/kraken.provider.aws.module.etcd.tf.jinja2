@@ -1,0 +1,288 @@
+# etcd cluster resources
+
+variable "vpc_id" {}
+variable "etcds_name" {}
+variable "prefix" {}
+variable "cidr_block" {}
+variable "route53_zone_id" {}
+{% for etcd in kraken_config.etcd %}
+variable "{{etcd.nodepool.keypair.name}}_{{etcd.name}}_key" {}
+{% endfor %}
+
+{% for etcd in kraken_config.etcd %}
+{% for subnet in etcd.nodepool.providerConfig.subnet %}
+variable "{{subnet}}_{{etcd.name}}_subnet_id" {}
+{% endfor %}
+{% endfor %}
+
+{% for etcd in kraken_config.etcd %}
+resource "aws_security_group" "vpc_etcd_{{etcd.name}}_secgroup" {
+  name        = "${var.etcds_name}_${var.prefix}_{{etcd.name}}_secgroup"
+  description = "Security group for ${var.etcds_name}_${var.prefix} {{etcd.name}} etcd cluster"
+  vpc_id      = "${var.vpc_id}"
+
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Allow etcd peers to communicate, include etcd proxies
+  {% for peerPort in etcd.peerPorts %}
+  ingress {
+    from_port = {{peerPort}}
+    to_port = {{peerPort}}
+    protocol = "tcp"
+    cidr_blocks = ["${var.cidr_block}"]
+  }
+  {% endfor %}
+
+  # Allow etcd clients to communicate
+  {% for clientPort in etcd.clientPorts %}
+  ingress {
+    from_port = {{clientPort}}
+    to_port = {{clientPort}}
+    protocol = "tcp"
+    cidr_blocks = ["${var.cidr_block}"]
+  }
+  {% endfor %}
+
+  # Allow SSH
+  ingress {
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    self = true
+  }
+}
+{% endfor %}
+
+# information on CoreOS AMIs for etcd nodepools
+{% for etcd in kraken_config.etcd %}
+resource "coreosbox_ami" "{{etcd.name}}_ami" {
+  channel        = "{{etcd.nodepool.coreos.channel}}"
+  virtualization = "hvm"
+  region         = "{{kraken_config.providerConfig.region}}"
+  version        = "{{etcd.nodepool.coreos.version}}"
+}
+{% endfor %}
+
+# Launch configurations for all etcd clusters
+{% for etcd in kraken_config.etcd %}
+resource "aws_launch_configuration" "{{etcd.name}}_launch_config" {
+  name_prefix                 = "${var.etcds_name}_${var.prefix}_{{etcd.name}}"
+  image_id                    = "${coreosbox_ami.{{etcd.name}}_ami.box_string}"
+  key_name                    = "${var.{{etcd.nodepool.keypair.name}}_{{etcd.name}}_key}"
+  instance_type               = "{{etcd.nodepool.providerConfig.type}}"
+  security_groups             = ["${aws_security_group.vpc_etcd_{{etcd.name}}_secgroup.id}"]
+  associate_public_ip_address = true
+  user_data                   = "${file("{{ config_base | expanduser }}/{{kraken_config.cluster}}/cloud-config/etcd.{{etcd.name}}.cloud-config.yaml")}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  # storage 
+{% for storage in etcd.nodepool.providerConfig.storage %} 
+  {{storage.type}} {
+{% for k,v in storage.opts.iteritems() %}
+    {{k}} = "{{v}}"
+{% endfor %}
+  }
+{% endfor %}
+
+}
+{% endfor %}
+
+# IAM role for lambda functions that will modify DNS records
+data "aws_iam_policy_document" "iam_lambda_etcd_role_doc" {
+  statement {
+    actions = [
+      "sts:AssumeRole",
+    ]
+
+    principals {
+      type = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+
+    effect = "Allow"
+  }
+}
+resource "aws_iam_role" "iam_lambda_etcd_role" {
+    name = "${var.etcds_name}_${var.prefix}_iam_lambda_etcd_role"
+    assume_role_policy = "${data.aws_iam_policy_document.iam_lambda_etcd_role_doc.json}"
+}
+
+# IAM role policy for lambda functions that will modify DNS records
+data "aws_iam_policy_document" "iam_lambda_etcd_role_policy_doc" {
+  statement {
+    actions = [
+      "ec2:Describe*",
+      "ec2:CreateTags",
+      "autoscaling:Describe*",
+      "route53:*"
+    ]
+    resources = [
+      "*",
+    ]
+    effect = "Allow"
+  }
+
+  statement {
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+    ]
+    resources = [
+      "arn:aws:logs:*:*:*",
+    ]
+    effect = "Allow"
+  }
+}
+resource "aws_iam_role_policy" "iam_lambda_etcd_role_policy" {
+  name = "${var.etcds_name}_${var.prefix}_iam_lambda_etcd_role_policy"
+  role = "${aws_iam_role.iam_lambda_etcd_role.id}"
+  policy = "${data.aws_iam_policy_document.iam_lambda_etcd_role_policy_doc.json}"
+}
+
+# IAM role for SNS topic subscription
+data "aws_iam_policy_document" "iam_lambda_sns_role_doc" {
+  statement {
+    actions = [
+      "sts:AssumeRole",
+    ]
+    principals {
+      type = "Service"
+      identifiers = ["autoscaling.amazonaws.com"]
+    }
+    effect = "Allow"
+  }
+}
+resource "aws_iam_role" "iam_lambda_sns_role" {
+  name = "${var.etcds_name}_${var.prefix}_iam_lambda_sns_role"
+  assume_role_policy = "${data.aws_iam_policy_document.iam_lambda_sns_role_doc.json}"
+}
+
+# IAM role policy for for sns events publishing
+data "aws_iam_policy_document" "iam_sns_etcd_role_policy_doc" {
+  statement {
+    actions = [
+      "sns:Publish",
+    ]
+    resources = [
+      "${aws_sns_topic.etcd_scaling_events.arn}",
+    ]
+    effect = "Allow"
+  }
+}
+resource "aws_iam_role_policy" "iam_sns_etcd_role_policy" {
+  name = "${var.etcds_name}_${var.prefix}_iam_lambda_etcd_role_policy"
+  role = "${aws_iam_role.iam_lambda_sns_role.id}"
+  policy = "${data.aws_iam_policy_document.iam_sns_etcd_role_policy_doc.json}"
+}
+
+# SNS resources for etcd clusters
+resource "aws_sns_topic" "etcd_scaling_events" {
+  name = "${var.etcds_name}_${var.prefix}_etcd_events"
+}
+
+# Lambda function that will setup all dns records for etcd discovery
+resource "aws_lambda_function" "etcd_lambda" {
+  filename = "lambda-sns-etcd-service-discovery.zip"
+  function_name = "${var.etcds_name}_${var.prefix}_etcd_srv"
+  role = "${aws_iam_role.iam_lambda_etcd_role.arn}"
+  handler = "lambda-sns-etcd-service-discovery.handler"
+  timeout = 300
+  runtime = "python2.7"
+}
+
+resource "aws_lambda_permission" "etcd_scaling_events_lambda_permission" {
+  statement_id = "AllowExecutionFromSNS"
+  action = "lambda:InvokeFunction"
+  function_name = "${aws_lambda_function.etcd_lambda.arn}"
+  principal = "sns.amazonaws.com"
+  source_arn = "${aws_sns_topic.etcd_scaling_events.arn}"
+}
+
+resource "aws_sns_topic_subscription" "etcd_scaling_events_lambda_subscription" {
+  topic_arn = "${aws_sns_topic.etcd_scaling_events.arn}"
+  protocol  = "lambda"
+  endpoint  = "${aws_lambda_function.etcd_lambda.arn}"
+}
+
+# Autoscaling groups for all etcd clusters
+{% for etcd in kraken_config.etcd %}
+resource "aws_autoscaling_group" "{{etcd.name}}_nodes" {
+  name                      = "${var.etcds_name}_${var.prefix}_{{etcd.name}}_asg"
+  vpc_zone_identifier       = [{% set comma = joiner(",") %}{% for subnet in etcd.nodepool.providerConfig.subnet %}{{ comma() }}"${var.{{subnet}}_{{etcd.name}}_subnet_id}"{% endfor %}]
+  launch_configuration      = "${aws_launch_configuration.{{etcd.name}}_launch_config.name}"
+  wait_for_capacity_timeout = "0"
+  force_delete              = true
+  health_check_grace_period = "30"
+  max_size                  = "{{etcd.nodepool.count}}"
+  min_size                  = "{{etcd.nodepool.count}}"
+  desired_capacity          = "{{etcd.nodepool.count}}"
+  health_check_type         = "EC2"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  tag {
+    key                 = "srvconfig"
+{% if etcd.ssl %}
+    value               = "${var.route53_zone_id}:${var.etcds_name}.internal:{{etcd.name}}:_etcd-client-ssl._tcp:_etcd-server-ssl._tcp:{{etcd.clientPorts[0]}}:{{etcd.peerPorts[0]}}"
+{% else %}
+    value               = "${var.route53_zone_id}:${var.etcds_name}.internal:{{etcd.name}}:_etcd-client._tcp:_etcd-server._tcp:{{etcd.clientPorts[0]}}:{{etcd.peerPorts[0]}}"
+{% endif %}
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "Name"
+    value               = "${var.etcds_name}_${var.prefix}_{{etcd.name}}_node-autoscaled"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "k2-nodepool"
+    value               = "{{etcd.name}}"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "KubernetesCluster"
+    value               = "${var.etcds_name}_${var.prefix}"
+    propagate_at_launch = true
+  }
+
+{% for tag in etcd.nodepool.providerConfig.tags %}
+  tag {
+    key                 = "{{tag.key}}"
+    value               = "{{tag.value}}"
+    propagate_at_launch = true
+  }
+{% endfor %}
+}
+{% endfor %}
+
+resource "aws_autoscaling_notification" "etcd_notifications" {
+  group_names = [
+{% set comma = joiner(",") %}{% for etcd in kraken_config.etcd %}
+    {{ comma() }}"${aws_autoscaling_group.{{etcd.name}}_nodes.name}"
+{% endfor %}
+  ]
+  notifications  = [
+    "autoscaling:EC2_INSTANCE_LAUNCH", 
+    "autoscaling:EC2_INSTANCE_TERMINATE"
+  ]
+  topic_arn = "${aws_sns_topic.etcd_scaling_events.arn}"
+}
+
+output "etcd_dependency" {
+  value = "dummy"
+}

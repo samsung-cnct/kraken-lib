@@ -1,5 +1,4 @@
 ---
-- include: aws-setprefix.yaml
 - include: aws-certs.yaml
   when: kraken_action == 'up'
 - include: aws-template.yaml

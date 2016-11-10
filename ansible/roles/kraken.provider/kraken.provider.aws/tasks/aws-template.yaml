@@ -4,9 +4,34 @@
     path="{{ config_base | expanduser }}/{{kraken_config.cluster}}"
     state=directory
 
+- name: Create module folders
+  file: >
+    path="{{ config_base | expanduser }}/{{kraken_config.cluster}}/{{item}}"
+    state=directory
+  with_items:
+    - vpc
+    - keypair
+    - subnet
+    - cluster_secgroup
+    - etcd
+    - master
+    - node
+
 - name: Generate kraken.provider.aws.tf file
   template: src=kraken.provider.aws.tf.jinja2
             dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/kraken.provider.aws.tf"
+
+- name: Generate module files
+  template: src={{item.source}}
+            dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/{{item.dest}}/module.tf"
+  with_items:
+    - { source: kraken.provider.aws.module.vpc.tf.jinja2, dest: vpc }
+    - { source: kraken.provider.aws.module.keypair.tf.jinja2, dest: keypair }
+    - { source: kraken.provider.aws.module.subnet.tf.jinja2, dest: subnet }
+    - { source: kraken.provider.aws.module.cluster_secgroup.tf.jinja2, dest: cluster_secgroup }
+    - { source: kraken.provider.aws.module.etcd.tf.jinja2, dest: etcd }
+    - { source: kraken.provider.aws.module.master.tf.jinja2, dest: master }
+    - { source: kraken.provider.aws.module.node.tf.jinja2, dest: node }
 
 - name: Copy down AWS lambda source
   command: cp {{ role_path }}/files/lambda-sns-etcd-service-discovery.py . chdir={{ config_base | expanduser }}/{{kraken_config.cluster}}

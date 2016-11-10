@@ -15,7 +15,7 @@
 | password | Optional | String | The password to use for cluster auth. Defaults to a server-specified randomly-generated string |
 | subnetwork | Optional | String | he name of the Google Compute Engine subnetwork |
 | username | Optional | String | The user name to use for cluster auth. Defaults to 'admin' |
-| nodepool | __Required__ | String | Name of the [nodepool](nodepools/README.md) to use as the primary cluster nodepool |
+| nodepool | __Required__ | String | Name of the [nodepool](../nodepools/README.md) to use as the primary cluster nodepool |
 | zone | __Required__ | Object | Information on cluster zones |
 | project | __Required__ | String  | Name of the Google Cloud project to use |
 | keypair | __Required__ | String | Name of a keypair object |

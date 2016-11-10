@@ -19,6 +19,8 @@
     kraken_config: "{{ kraken_config_defaults.deployment | expand_config }}"
   when: config_stat.stat.exists != True
 
+- debug: var=kraken_config
+
 - name: Non-recursively combine defaults and user config expand configuration and register the config fact
   set_fact:
     kraken_config: "{{ kraken_config_defaults.deployment | combine(kraken_config_user.deployment) | expand_config }}"
@@ -53,6 +55,14 @@
   set_fact:
     kraken_config: "{{ kraken_config | combine({'providerConfig': {'type': 'cloudinit'}}, recursive=True) }}"
   when: (kraken_config.providerConfig.type is undefined) or (kraken_config.providerConfig.type is none) or (kraken_config.providerConfig.type|trim == '')
+
+- name: Generate random prefix if required
+  set_fact:
+    kraken_config: "{{ kraken_config | combine({'resourcePrefix': lookup('password', config_base + '/' + kraken_config.cluster + '/prefix' + ' chars=ascii_letters length=7')}, recursive=True) }}"
+  when: 
+    "(kraken_config.resourcePrefix is undefined) or 
+     (kraken_config.resourcePrefix is none) or 
+     (kraken_config.resourcePrefix|trim == '')"
 
 #- name: Display config
 #  debug: var=kraken_config
