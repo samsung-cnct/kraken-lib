@@ -3,7 +3,9 @@
 The snippet configuration for deployments depends on the provider.
 
 # Options
+
 ## Root Options
+
 | Key Name | Required | Type | Description|
 | --- | --- | --- | --- |
 | cluster | __Required__ | String | Name to use for the cluster created by this deployment |
@@ -25,6 +27,8 @@ The snippet configuration for deployments depends on the provider.
 
 
 ## auth Options
+
+| Key Name | Required | Type | Description|
 | --- | --- | --- | --- |
 | name | Required | String | Name of this configuration|
 | user | Optional | String | Username. Defaults to 'admin' |
@@ -50,6 +54,7 @@ The snippet configuration for deployments depends on the provider.
 | providerConfig | Optional | Object | [Provider](keypair/README.md)-specific configuration. |
 
 ## readiness Options
+
 | Key Name | Required | Type | Description|
 | --- | --- | --- | --- |
 | type | __Required__ | String | Type of check: 'exact' 'percent' 'delta' |
@@ -57,12 +62,14 @@ The snippet configuration for deployments depends on the provider.
 | wait | Optional | Integer | Wait for how many seconds total |
 
 ## providerConfig Options
+
 | Key Name | Required | Type | Description|
 | --- | --- | --- | --- |
 | type | Optional | String | Type of provider. cloudinit or autonomous. Autonomous providers do not require cloud init configuration. Defaults to cloudinit |
 | ... | __Required__ | Object | [Provider](deployments/README.md) - specific configuration section |
 
 # Prototype
+
 ```yaml
   deployment:
     cluster: myCluster
