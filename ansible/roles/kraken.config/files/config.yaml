@@ -13,8 +13,8 @@ deployment:
   keypair:
     -
       name: krakenKey
-      publickeyFile: "{{ '~/.ssh/id_rsa.pub' | expanduser}}"
-      privatekeyFile: "{{ '~/.ssh/id_rsa' | expanduser}}"
+      publickeyFile: "$HOME/.ssh/id_rsa.pub"
+      privatekeyFile: "$HOME/.ssh/id_rsa "
   kubeConfig:
     -
       name: krakenKubeConfig
