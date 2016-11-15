@@ -1,7 +1,12 @@
 ---
+- name: Get modules
+  command: >
+    terraform get -no-color -update=true {{ config_base | expanduser }}/{{kraken_config.cluster}} chdir={{ config_base | expanduser }}/{{kraken_config.cluster}}
+  ignore_errors: yes
+
 - name: Run cluster {{kraken_action}}
   command: >
-    terraform apply -input=false {{ config_base | expanduser }}/{{kraken_config.cluster}} chdir={{ config_base | expanduser }}/{{kraken_config.cluster}}
+    terraform apply -input=false -no-color {{ config_base | expanduser }}/{{kraken_config.cluster}} chdir={{ config_base | expanduser }}/{{kraken_config.cluster}}
   when: kraken_action == 'up'
   register: up_result
   until: up_result.rc == 0
@@ -14,7 +19,7 @@
 
 - name: Get kraken endpoint
   shell: > 
-    terraform output kraken_endpoint chdir={{ config_base | expanduser }}/{{kraken_config.cluster}}
+    terraform output -no-color kraken_endpoint chdir={{ config_base | expanduser }}/{{kraken_config.cluster}}
   register: endpoint_result
   when: kraken_action == 'up'
 
@@ -25,7 +30,7 @@
 
 - name: Get kraken aws_route53_zone.private_zone.zone_id
   shell: > 
-    terraform output kraken_private_zone_id chdir={{ config_base | expanduser }}/{{kraken_config.cluster}}
+    terraform output -no-color kraken_private_zone_id chdir={{ config_base | expanduser }}/{{kraken_config.cluster}}
   register: zone_result 
   when: kraken_action == 'up'
 
@@ -53,7 +58,7 @@
 
 - name: Run terraform destroy
   command: >
-    terraform destroy -input=false -force {{ config_base | expanduser }}/{{kraken_config.cluster}} chdir={{ config_base | expanduser }}/{{kraken_config.cluster}}
+    terraform destroy -input=false -no-color -force {{ config_base | expanduser }}/{{kraken_config.cluster}} chdir={{ config_base | expanduser }}/{{kraken_config.cluster}}
   when: (kraken_action == 'down') and (tfstate.stat.exists)
   register: down_result
   until: down_result.rc == 0

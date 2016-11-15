@@ -9,6 +9,7 @@ The snippet configuration for deployments depends on the provider.
 | Key Name | Required | Type | Description|
 | --- | --- | --- | --- |
 | cluster | __Required__ | String | Name to use for the cluster created by this deployment |
+| resourcePrefix | Optional | String | Tagging and naming prefix for providers that need it. Defaults to a random string of 5 letters |
 | serviceCidr | __Required__ | String | Cluster service ip range CIDR |
 | serviceDNS | __Required__ | String | Cluster (kubedns) service IP |
 | clusterDomain | __Required__ | String | Domain name for cluster (internal resolution) |

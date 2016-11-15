@@ -1,0 +1,66 @@
+# cluster securty group
+
+variable "vpc_id" {}
+variable "secgroup_name" {}
+variable "prefix" {}
+variable "default_security_group_id" {}
+
+
+resource "aws_security_group" "vpc_kubernetes_secgroup" {
+  name        = "${var.secgroup_name}_${var.prefix}_secgroup"
+  description = "Security group for ${var.secgroup_name}_${var.prefix} cluster"
+  vpc_id      = "${var.vpc_id}"
+
+{% for ingress in kraken_config.providerConfig.ingressSecurity %}
+  ingress {
+{% for k,v in ingress.iteritems() %}
+{% if v is string %}
+    {{k}} = "{{v}}"
+{% elif v is iterable %}
+    {{k}} = [ {% set comma = joiner(",") %}{% for item in v %}{{ comma() }}"{{item}}"{% endfor %} ]
+{% else %}
+    {{k}} = "{{v}}"
+{% endif %}
+{% endfor %}
+  }
+{% endfor %}
+
+  # intra-group all ports / all protocols
+  ingress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    self            = true
+  }
+
+  # inbound all ports / all protocols from the vpc's default secgroup
+  ingress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    security_groups = ["${var.default_security_group_id}"]
+  }
+
+{% for egress in kraken_config.providerConfig.egressSecurity %}
+  egress {
+{% for k,v in egress.iteritems() %}
+{% if v is string %}
+    {{k}} = "{{v}}"
+{% elif v is iterable %}
+    {{k}} = [ {% set comma = joiner(",") %}{% for item in v %}{{ comma() }}"{{item}}"{% endfor %} ]
+{% else %}
+    {{k}} = "{{v}}"
+{% endif %}
+{% endfor %}
+  }
+{% endfor %}
+
+  tags {
+    Name = "${var.secgroup_name}_${var.prefix}_vpc_secgroup",
+    KubernetesCluster = "${var.secgroup_name}_${var.prefix}"
+  }
+}
+
+output "id" {
+  value = "${aws_security_group.vpc_kubernetes_secgroup.id}"
+}

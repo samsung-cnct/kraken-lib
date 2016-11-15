@@ -1,0 +1,108 @@
+# AWS VPC block
+variable "cidr_block" {}
+variable "vpc_name" {}
+variable "prefix" {}
+
+resource "aws_vpc" "vpc" {
+  cidr_block           = "${var.cidr_block}"
+  instance_tenancy     = "default"
+  enable_dns_support   = true
+  enable_dns_hostnames = true
+
+  tags {
+    Name = "${var.vpc_name}_${var.prefix}_vpc",
+    KubernetesCluster = "${var.vpc_name}_${var.prefix}"
+  }
+}
+
+# A VPC-only route53 zone and record
+resource "aws_route53_zone" "private_zone" {
+  name          = "${var.vpc_name}.internal"
+  comment       = "A VPC-only zone for ${var.vpc_name}_${var.prefix} kubernetes cluster"
+  vpc_id        = "${aws_vpc.vpc.id}"
+  force_destroy = true
+}
+
+# DHCP options sets
+resource "aws_vpc_dhcp_options" "vpc_dhcp" {
+  domain_name         = "${var.vpc_name}.internal"
+  domain_name_servers = ["AmazonProvidedDNS"]
+
+  tags {
+    Name = "${var.vpc_name}_${var.prefix}_dhcp",
+    KubernetesCluster = "${var.vpc_name}_${var.prefix}"
+  }
+}
+
+# DHCP association
+resource "aws_vpc_dhcp_options_association" "vpc_dhcp_association" {
+  vpc_id          = "${aws_vpc.vpc.id}"
+  dhcp_options_id = "${aws_vpc_dhcp_options.vpc_dhcp.id}"
+}
+
+# AWS internet gateway
+resource "aws_internet_gateway" "vpc_gateway" {
+  vpc_id = "${aws_vpc.vpc.id}"
+
+  tags {
+    Name = "${var.vpc_name}_${var.prefix}_gateway",
+    KubernetesCluster = "${var.vpc_name}_${var.prefix}"
+  }
+}
+
+# Route table
+resource "aws_route_table" "vpc_rt" {
+  vpc_id = "${aws_vpc.vpc.id}"
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = "${aws_internet_gateway.vpc_gateway.id}"
+  }
+
+  tags {
+    Name = "${var.vpc_name}_${var.prefix}_routetable",
+    KubernetesCluster = "${var.vpc_name}_${var.prefix}"
+  }
+}
+
+# VPC ACL
+resource "aws_network_acl" "vpc_acl" {
+  vpc_id = "${aws_vpc.vpc.id}"
+
+{% for egress in kraken_config.providerConfig.egressAcl %}
+  egress {
+{% for k,v in egress.iteritems() %}
+    {{k}} = "{{v}}"
+{% endfor %}
+  }
+{% endfor %}
+
+{% for ingress in kraken_config.providerConfig.ingressAcl %}
+  ingress {
+{% for k,v in ingress.iteritems() %}
+    {{k}} ="{{v}}"
+{% endfor %}
+  }
+{% endfor %}
+
+  tags {
+    Name = "${var.vpc_name}_${var.prefix}_acl",
+    KubernetesCluster = "${var.vpc_name}_${var.prefix}"
+  }
+}
+
+output "id" {
+  value = "${aws_vpc.vpc.id}"
+}
+
+output "route_table_id" {
+  value = "${aws_route_table.vpc_rt.id}"
+}
+
+output "default_security_group_id" {
+  value = "${aws_vpc.vpc.default_security_group_id}"
+}
+
+output "route53_zone_id" {
+  value = "${aws_route53_zone.private_zone.zone_id}"
+}
