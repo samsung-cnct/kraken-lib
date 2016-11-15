@@ -1,0 +1,13 @@
+---
+- name: Inspect the configuration and generate a separate update template
+  template: src=deploymentmanager-update.yaml.jinja2
+   dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/deploymentmanager-update.yaml"
+
+- name: Update cluster
+  command: >
+    gcloud deployment-manager deployments update {{ kraken_config.cluster }}-k2-deployment
+      --config {{ config_base | expanduser }}/{{kraken_config.cluster}}/deploymentmanager-update.yaml 
+      --project {{ kraken_config.providerConfig.project }}
+      --no-async
+      --quiet
+  when: deployment_check.stdout == "{{ kraken_config.cluster }}-k2-deployment"

@@ -1,32 +1,17 @@
 ---
 - name: Render a deployment manager template
-  template: src=deploymentmanager.yaml.jinja2
-   dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/deploymentmanager.yaml"
-
-- name: Query all deployments
-  shell: gcloud deployment-manager deployments list --project {{ kraken_config.providerConfig.project }} --filter='name:{{ kraken_config.cluster }}-k2-deployment' --format='value(name)'
-  register: deployment_check 
-  ignore_errors: yes
+  template: src=deploymentmanager-create.yaml.jinja2
+   dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/deploymentmanager-create.yaml"
 
 - name: Deploy cluster
   command: >
     gcloud deployment-manager deployments create {{ kraken_config.cluster }}-k2-deployment
-      --config {{ config_base | expanduser }}/{{kraken_config.cluster}}/deploymentmanager.yaml 
+      --config {{ config_base | expanduser }}/{{kraken_config.cluster}}/deploymentmanager-create.yaml 
       --project {{ kraken_config.providerConfig.project }}
       --no-async
       --quiet
-  when: deployment_check.stdout != "{{ kraken_config.cluster }}-k2-deployment"
   register: deployment_result 
   ignore_errors: yes
-
-- name: Update cluster
-  command: >
-    gcloud deployment-manager deployments update {{ kraken_config.cluster }}-k2-deployment
-      --config {{ config_base | expanduser }}/{{kraken_config.cluster}}/deploymentmanager.yaml 
-      --project {{ kraken_config.providerConfig.project }}
-      --no-async
-      --quiet
-  when: deployment_check.stdout == "{{ kraken_config.cluster }}-k2-deployment"
 
 - name: Inspect the failed deployments
   command: >
