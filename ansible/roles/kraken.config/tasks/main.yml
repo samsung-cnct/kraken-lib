@@ -19,8 +19,6 @@
     kraken_config: "{{ kraken_config_defaults.deployment | expand_config }}"
   when: config_stat.stat.exists != True
 
-- debug: var=kraken_config
-
 - name: Non-recursively combine defaults and user config expand configuration and register the config fact
   set_fact:
     kraken_config: "{{ kraken_config_defaults.deployment | combine(kraken_config_user.deployment) | expand_config }}"
