@@ -45,4 +45,3 @@
     CLOUDSDK_CONTAINER_USE_CLIENT_CERTIFICATE: True
 
 - include: update-cluster.yaml
-  when: "{{ kraken_config.nodepool | map(attribute='kubeConfig.version') | list | length }} > 0"
