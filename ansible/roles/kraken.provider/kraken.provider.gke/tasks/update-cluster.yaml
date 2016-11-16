@@ -7,7 +7,7 @@
       --zone {{ kraken_config.providerConfig.zone.primaryZone }}
       --no-async
       --quiet
-  when: kraken_config.providerConfig.kubeConfig.version is defined
+  when: (kraken_config.providerConfig.kubeConfig is defined) and (kraken_config.providerConfig.kubeConfig.version is defined)
 
 - name: Update nodepools, if needed
   command: >
@@ -18,5 +18,5 @@
       --zone {{ kraken_config.providerConfig.zone.primaryZone }}
       --no-async
       --quiet
-  when: item.kubeConfig.version is defined
+  when: (item.kubeConfig is defined) and (item.kubeConfig.version is defined)
   with_items: "{{kraken_config.nodepool}}"
