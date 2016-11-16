@@ -1,13 +1,22 @@
 ---
-- name: Inspect the configuration and generate a separate update template
-  template: src=deploymentmanager-update.yaml.jinja2
-   dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/deploymentmanager-update.yaml"
-
-- name: Update cluster
+- name: Update master, if needed
   command: >
-    gcloud deployment-manager deployments update {{ kraken_config.cluster }}-k2-deployment
-      --config {{ config_base | expanduser }}/{{kraken_config.cluster}}/deploymentmanager-update.yaml 
+    gcloud container clusters upgrade {{ kraken_config.cluster }}
+      --master
       --project {{ kraken_config.providerConfig.project }}
+      --zone {{ kraken_config.providerConfig.zone.primaryZone }}
       --no-async
       --quiet
-  when: deployment_check.stdout == "{{ kraken_config.cluster }}-k2-deployment"
+  when: kraken_config.providerConfig.kubeConfig.version is defined
+
+- name: Update nodepools, if needed
+  command: >
+    gcloud container clusters upgrade {{ kraken_config.cluster }}
+      --node-pool {{item.name}}
+      --cluster-version {{item.kubeConfig.version}}
+      --project {{ kraken_config.providerConfig.project }}
+      --zone {{ kraken_config.providerConfig.zone.primaryZone }}
+      --no-async
+      --quiet
+  when: item.kubeConfig.version is defined
+  with_items: "{{kraken_config.nodepool}}"
