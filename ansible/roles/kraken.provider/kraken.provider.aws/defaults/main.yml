@@ -1,3 +1,3 @@
 ---
 ssl_cert_common_name: "*.{{kraken_config.providerConfig.region}}.elb.amazonaws.com"
-action_retries: 10
+action_retries: 1
