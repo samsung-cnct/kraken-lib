@@ -92,67 +92,55 @@ resource "aws_instance" "{{etcd.name}}_{{node_idx}}" {
 {% endfor %}
 
   tags {
-    key                 = "k2-nodepool"
-    value               = "{{etcd.name}}"
-    propagate_at_launch = true
-  }
-
-  tags {
-    key                 = "KubernetesCluster"
-    value               = "${var.etcds_name}_${var.prefix}"
-    propagate_at_launch = true
-  }
-
+    Name              = "${var.etcds_name}_${var.prefix}_{{etcd.name}}_{{node_idx}}"
+    k2-nodepool       = "{{etcd.name}}"
+    KubernetesCluster = "${var.etcds_name}_${var.prefix}"
 {% for tag in etcd.nodepool.providerConfig.tags %}
-  tags {
-    key                 = "{{tag.key}}"
-    value               = "{{tag.value}}"
-    propagate_at_launch = true
-  }
+    {{tag.key}}       = "{{tag.value}}"
 {% endfor %}
-
+  }
 } #aws_instance
 
 resource "aws_route53_record" "{{etcd.name}}_vm_A_record_{{node_idx}}" {
-  zone_id = "${var.route53_zone_id}"
-  name = "${aws_instance.{{etcd.name}}_{{node_idx}}.id}.{{etcd.name}}.${var.etcds_name}.internal"
-  type = "A"
-  ttl = "300"
-  records = ["${aws_instance.{{etcd.name}}_{{node_idx}}.private_ip}"]
+  zone_id   = "${var.route53_zone_id}"
+  name      = "${aws_instance.{{etcd.name}}_{{node_idx}}.id}.{{etcd.name}}.${var.etcds_name}.internal"
+  type      = "A"
+  ttl       = "300"
+  records   = ["${aws_instance.{{etcd.name}}_{{node_idx}}.private_ip}"]
 }
 
 {% endfor %} # node_idx
 
 resource "aws_route53_record" "{{etcd.name}}_A_record_all" {
-  zone_id = "${var.route53_zone_id}"
-  name = "{{etcd.name}}.${var.etcds_name}.internal"
-  type = "A"
-  ttl = "300"
-  records = [{% set comma = joiner(",") %}{% for node_idx in range(etcd.nodepool.count) %}{{ comma() }}"${aws_instance.{{etcd.name}}_{{node_idx}}.private_ip}"{% endfor %}]
+  zone_id   = "${var.route53_zone_id}"
+  name      = "{{etcd.name}}.${var.etcds_name}.internal"
+  type      = "A"
+  ttl       = "300"
+  records   = [{% set comma = joiner(",") %}{% for node_idx in range(etcd.nodepool.count) %}{{ comma() }}"${aws_instance.{{etcd.name}}_{{node_idx}}.private_ip}"{% endfor %}]
 }
 
 resource "aws_route53_record" "{{etcd.name}}_SRV_client" {
-  zone_id = "${var.route53_zone_id}"
+  zone_id   = "${var.route53_zone_id}"
 {% if etcd.ssl %}
-  name = "_etcd-client-ssl._tcp.{{etcd.name}}.${var.etcds_name}.internal"
+  name      = "_etcd-client-ssl._tcp.{{etcd.name}}.${var.etcds_name}.internal"
 {% else %}
-  name = "_etcd-client._tcp.{{etcd.name}}.${var.etcds_name}.internal"
+  name      = "_etcd-client._tcp.{{etcd.name}}.${var.etcds_name}.internal"
 {% endif %}  
-  type = "SRV"
-  ttl = "300"
-  records = [{% set comma = joiner(",") %}{% for node_idx in range(etcd.nodepool.count) %}{{ comma() }}"0 0 {{etcd.clientPorts[0]}} ${aws_instance.{{etcd.name}}_{{node_idx}}.id}.{{etcd.name}}.${var.etcds_name}.internal"{% endfor %}]
+  type      = "SRV"
+  ttl       = "300"
+  records   = [{% set comma = joiner(",") %}{% for node_idx in range(etcd.nodepool.count) %}{{ comma() }}"0 0 {{etcd.clientPorts[0]}} ${aws_instance.{{etcd.name}}_{{node_idx}}.id}.{{etcd.name}}.${var.etcds_name}.internal"{% endfor %}]
 }
 
 resource "aws_route53_record" "{{etcd.name}}_SRV_server" {
-  zone_id = "${var.route53_zone_id}"
+  zone_id   = "${var.route53_zone_id}"
 {% if etcd.ssl %}
-  name = "_etcd-server-ssl._tcp.{{etcd.name}}.${var.etcds_name}.internal"
+  name      = "_etcd-server-ssl._tcp.{{etcd.name}}.${var.etcds_name}.internal"
 {% else %}
-  name = "_etcd-server._tcp.{{etcd.name}}.${var.etcds_name}.internal"
+  name      = "_etcd-server._tcp.{{etcd.name}}.${var.etcds_name}.internal"
 {% endif %}  
-  type = "SRV"
-  ttl = "300"
-  records = [{% set comma = joiner(",") %}{% for node_idx in range(etcd.nodepool.count) %}{{ comma() }}"0 0 {{etcd.peerPorts[0]}} ${aws_instance.{{etcd.name}}_{{node_idx}}.id}.{{etcd.name}}.${var.etcds_name}.internal"{% endfor %}]
+  type      = "SRV"
+  ttl       = "300"
+  records   = [{% set comma = joiner(",") %}{% for node_idx in range(etcd.nodepool.count) %}{{ comma() }}"0 0 {{etcd.peerPorts[0]}} ${aws_instance.{{etcd.name}}_{{node_idx}}.id}.{{etcd.name}}.${var.etcds_name}.internal"{% endfor %}]
 }
 
 {% endfor %} # etcd
