@@ -80,7 +80,7 @@ resource "aws_instance" "{{etcd.name}}_{{node_idx}}" {
   vpc_security_group_ids      = ["${aws_security_group.vpc_etcd_{{etcd.name}}_secgroup.id}"]
   user_data                   = "${file("{{ config_base | expanduser }}/{{kraken_config.cluster}}/cloud-config/etcd.{{etcd.name}}.cloud-config.yaml")}"
   associate_public_ip_address = true
-  subnet_id                   = "${var.{{etcd.nodepool.providerConfig.subnet[ node_idx % etcd.nodepool.count ]}}_{{etcd.name}}_subnet_id}"
+  subnet_id                   = "${var.{{etcd.nodepool.providerConfig.subnet[ node_idx % etcd.nodepool.providerConfig.subnet|count ]}}_{{etcd.name}}_subnet_id}"
 
 # storage 
 {% for storage in etcd.nodepool.providerConfig.storage %} 
