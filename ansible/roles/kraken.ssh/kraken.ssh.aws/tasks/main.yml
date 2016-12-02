@@ -6,7 +6,7 @@
     aws_secret_key: "{{kraken_config.providerConfig.authentication.accessSecret}}"
     filters:
       "tag:k2-nodepool": "{{item.name}}"
-      "tag:Name": "{{kraken_config.cluster}}_{{kraken_config.resourcePrefix}}_{{item.name}}_node-autoscaled"
+      "tag:Name": "{{kraken_config.cluster}}_{{kraken_config.resourcePrefix}}_{{item.name}}*"
   with_items: "{{kraken_config.nodepool}}"
   register: ec2_results
 

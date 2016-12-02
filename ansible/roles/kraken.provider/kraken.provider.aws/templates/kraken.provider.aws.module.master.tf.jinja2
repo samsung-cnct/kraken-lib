@@ -225,7 +225,7 @@ resource "aws_autoscaling_group" "master_nodes" {
   
   tag {
     key                 = "Name"
-    value               = "${var.master_name}_${var.prefix}_master_node-autoscaled"
+    value               = "${var.master_name}_${var.prefix}_{{kraken_config.master.nodepool.name}}_node-autoscaled"
     propagate_at_launch = true
   }
 

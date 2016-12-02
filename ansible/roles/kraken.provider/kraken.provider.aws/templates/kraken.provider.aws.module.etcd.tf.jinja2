@@ -72,7 +72,7 @@ resource "coreosbox_ami" "{{etcd.name}}_ami" {
 #  create each etcd node for each etcd individually
 #  this will round-robin spread the nodes across the supplied vpc subnets
 {% for etcd in kraken_config.etcd %}
-{% for node_idx in range(etcd.nodepool.count)%}
+{% for node_idx in range(1, etcd.nodepool.count+1)%}
 resource "aws_instance" "{{etcd.name}}_{{node_idx}}" {
   ami                         = "${coreosbox_ami.{{etcd.name}}_ami.box_string}"
   instance_type               = "{{etcd.nodepool.providerConfig.type}}"
@@ -116,7 +116,7 @@ resource "aws_route53_record" "{{etcd.name}}_A_record_all" {
   name      = "{{etcd.name}}.${var.etcds_name}.internal"
   type      = "A"
   ttl       = "300"
-  records   = [{% set comma = joiner(",") %}{% for node_idx in range(etcd.nodepool.count) %}{{ comma() }}"${aws_instance.{{etcd.name}}_{{node_idx}}.private_ip}"{% endfor %}]
+  records   = [{% set comma = joiner(",") %}{% for node_idx in range(1, etcd.nodepool.count+1) %}{{ comma() }}"${aws_instance.{{etcd.name}}_{{node_idx}}.private_ip}"{% endfor %}]
 }
 
 resource "aws_route53_record" "{{etcd.name}}_SRV_client" {
@@ -128,7 +128,7 @@ resource "aws_route53_record" "{{etcd.name}}_SRV_client" {
 {% endif %}  
   type      = "SRV"
   ttl       = "300"
-  records   = [{% set comma = joiner(",") %}{% for node_idx in range(etcd.nodepool.count) %}{{ comma() }}"0 0 {{etcd.clientPorts[0]}} ${aws_instance.{{etcd.name}}_{{node_idx}}.id}.{{etcd.name}}.${var.etcds_name}.internal"{% endfor %}]
+  records   = [{% set comma = joiner(",") %}{% for node_idx in range(1, etcd.nodepool.count+1) %}{{ comma() }}"0 0 {{etcd.clientPorts[0]}} ${aws_instance.{{etcd.name}}_{{node_idx}}.id}.{{etcd.name}}.${var.etcds_name}.internal"{% endfor %}]
 }
 
 resource "aws_route53_record" "{{etcd.name}}_SRV_server" {
@@ -140,7 +140,7 @@ resource "aws_route53_record" "{{etcd.name}}_SRV_server" {
 {% endif %}  
   type      = "SRV"
   ttl       = "300"
-  records   = [{% set comma = joiner(",") %}{% for node_idx in range(etcd.nodepool.count) %}{{ comma() }}"0 0 {{etcd.peerPorts[0]}} ${aws_instance.{{etcd.name}}_{{node_idx}}.id}.{{etcd.name}}.${var.etcds_name}.internal"{% endfor %}]
+  records   = [{% set comma = joiner(",") %}{% for node_idx in range(1, etcd.nodepool.count+1) %}{{ comma() }}"0 0 {{etcd.peerPorts[0]}} ${aws_instance.{{etcd.name}}_{{node_idx}}.id}.{{etcd.name}}.${var.etcds_name}.internal"{% endfor %}]
 }
 
 {% endfor %} # etcd
