@@ -1,5 +1,5 @@
 ---
-- name: See if tiller rc if present
+- name: Ensuring fabric directory exists
   shell: >
     mkdir -p {{ config_base | expanduser }}/{{kraken_config.cluster}}/fabric
   ignore_errors: yes
