@@ -25,7 +25,7 @@ spec:
         # Runs the flannel daemon to enable vxlan networking between
         # container hosts.
         - name: flannel
-          image: quay.io/coreos/flannel:v0.6.1
+          image: {{kraken_config.fabric.options.containers.flannel.location}}:{{kraken_config.fabric.options.containers.flannel.version}}
           env:
             # The location of the etcd cluster.
             - name: FLANNELD_ETCD_ENDPOINTS
@@ -77,7 +77,7 @@ spec:
         # container programs network policy and local routes on each
         # host.
         - name: calico-node
-          image: quay.io/calico/node:latest
+          image: {{kraken_config.fabric.options.containers.calicoNode.location}}:{{kraken_config.fabric.options.containers.calicoNode.version}}
           env:
             # The location of the etcd cluster.
             - name: ETCD_ENDPOINTS
@@ -123,7 +123,7 @@ spec:
         # This container installs the Calico CNI binaries
         # and CNI network config file on each node.
         - name: install-calico-cni
-          image: calico/cni:v1.4.2
+          image: {{kraken_config.fabric.options.containers.calicoCni.location}}:{{kraken_config.fabric.options.containers.calicoCni.version}}
           imagePullPolicy: Always
           command: ["/install-cni.sh"]
           env:
@@ -214,12 +214,12 @@ spec:
       containers:
         # Writes basic flannel configuration to etcd.
         - name: configure-flannel
-          image: quay.io/coreos/etcd:v3.0.9
+          image: {{kraken_config.fabric.options.containers.etcd.location}}:{{kraken_config.fabric.options.containers.etcd.version}}
           command:
           - "etcdctl"
           - "set"
           - "/coreos.com/network/config"
-          - '{ "Network": "10.128.0.0/10", "SubnetLen": 22, "SubnetMin": "10.128.0.0", "SubnetMax": "10.191.255.255", "Backend": {"Type": "vxlan"} }'
+          - '{ "Network": "{{kraken_config.fabric.options.network.network}}", "SubnetLen": {{kraken_config.fabric.options.network.subnetLen}}, "SubnetMin": "{{kraken_config.fabric.options.network.subnetMin}}", "SubnetMax": "{{kraken_config.fabric.options.network.subnetMax}}", "Backend": {"Type": "{{kraken_config.fabric.options.network.backend.type}}"} }'
           env:
             # The location of the etcd cluster.
             - name: ETCDCTL_PEERS
@@ -282,7 +282,7 @@ spec:
       hostNetwork: true
       containers:
         - name: calico-policy-controller
-          image: calico/kube-policy-controller:latest
+          image: {{kraken_config.fabric.options.containers.kubePolicyController.location}}:{{kraken_config.fabric.options.containers.kubePolicyController.version}}
           env:
             # The location of the Calico etcd cluster.
             - name: ETCD_ENDPOINTS
