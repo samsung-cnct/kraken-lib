@@ -44,7 +44,7 @@
     HELM_HOME: "{{ helm_home }}"
 
 - name: Give tiller rc a chance to fully init
-  pause: seconds=15
+  pause: seconds=60
 
 - name: Remove helm repositories
   command: >

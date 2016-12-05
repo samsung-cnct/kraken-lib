@@ -1,29 +1,21 @@
 ---
-- name: Generate master writefiles flannel cni
-  template: src=write_files.flannelcni.part.jinja2
-            dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/master.write_files.flannelcni.part"
+- name: See if tiller rc if present
+  shell: >
+    mkdir -p {{ config_base | expanduser }}/{{kraken_config.cluster}}/fabric
+  ignore_errors: yes
 
-- name: Generate master .units.flanneld.part files
-  template: src=units.flanneld.part.jinja2
-            dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/master.units.flanneld.part"
-  with_items:
-    - "{{kraken_config.master}}"
+- name: Generate canal deployment file
+  template: src=canal.yaml.part.jinja2
+            dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/fabric/canal.yaml"
 
-- name: Generate nodes writefiles flannel cni
-  template: src=write_files.flannelcni.part.jinja2
-            dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/node.{{item.name}}.write_files.flannelcni.part"
-  with_items: "{{kraken_config.node}}"
+- name: Generate canal configuration file
+  template: src=config.yaml.part.jinja2
+            dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/fabric/config.yaml"
 
-- name: Generate nodes .units.flanneld.part files
-  template: src=units.flanneld.part.jinja2
-            dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/node.{{item.name}}.units.flanneld.part"
-  with_items: "{{kraken_config.node}}"
+- name: Deploy canal configuration
+  command: >
+    kubectl --kubeconfig={{ kubeconfig | expanduser }} apply -f {{ config_base | expanduser }}/{{kraken_config.cluster}}/fabric/config.yaml
 
-- name: Generate master .cores.flanneld.part files
-  template: src=coreos.flanneld.part.jinja2
-            dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/master.coreos.flanneld.part"
-
-- name: Generate nodes .coreos.flanneld.part files
-  template: src=coreos.flanneld.part.jinja2
-            dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/node.{{item.name}}.coreos.flanneld.part"
-  with_items: "{{kraken_config.node}}"
+- name: Deploy canal daemonset
+  command: >
+    kubectl --kubeconfig={{ kubeconfig | expanduser }} apply -f {{ config_base | expanduser }}/{{kraken_config.cluster}}/fabric/canal.yaml
