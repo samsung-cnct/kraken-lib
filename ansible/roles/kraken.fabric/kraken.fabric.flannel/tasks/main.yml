@@ -12,7 +12,7 @@
   template: src=config.yaml.part.jinja2
             dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/fabric/config.yaml"
 
-- name: Deploy canal configuration
+- name: Ensure the kube-networking namespace exists
   command: >
     kubectl --kubeconfig={{ kubeconfig | expanduser }} create namespace kube-networking
   ignore_errors: yes
