@@ -5,7 +5,7 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: canal-config
-  namespace: kube-system
+  namespace: kube-networking
 data:
   # Configure this with the location of your etcd cluster.
   etcd_endpoints: "{% if kraken_config.master.infra.etcd.ssl == true %}https{% else %}http{% endif %}://{{kraken_config.master.infra.etcd.name}}.{{kraken_config.cluster}}.internal:{{kraken_config.master.infra.etcd.clientPorts[0]}}"

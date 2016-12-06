@@ -5,7 +5,7 @@ kind: DaemonSet
 apiVersion: extensions/v1beta1
 metadata:
   name: canal-node
-  namespace: kube-system
+  namespace: kube-networking
   labels:
     k8s-app: canal-node
 spec:
@@ -201,7 +201,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: configure-canal
-  namespace: kube-system
+  namespace: kube-networking
   labels:
     k8s-app: canal
 spec:
@@ -264,7 +264,7 @@ apiVersion: extensions/v1beta1
 kind: ReplicaSet
 metadata:
   name: calico-policy-controller
-  namespace: kube-system
+  namespace: kube-networking
   labels:
     k8s-app: calico-policy
 spec:
@@ -273,7 +273,7 @@ spec:
   template:
     metadata:
       name: calico-policy-controller
-      namespace: kube-system
+      namespace: kube-networking
       labels:
         k8s-app: calico-policy
     spec:
