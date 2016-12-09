@@ -4,3 +4,8 @@ generated/
 **/.DS_Store
 *.tgz
 .env/
+.ansible/
+.kraken/
+.rnd
+.srl
+.terraform.d/
