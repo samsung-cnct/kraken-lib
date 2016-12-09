@@ -1,6 +1,5 @@
 import StringIO
 import gzip
-import time
 
 def gz(content_to_compress):
  	out = StringIO.StringIO()
