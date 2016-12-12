@@ -22,8 +22,8 @@
   command: >
     kubectl --kubeconfig={{ kubeconfig }} delete --namespace {{ item.metadata.namespace }} svc {{ item.metadata.name }}
   with_items: "{{ the_services }}"
-  ignore_errors: yes
   when: item.status.loadBalancer.ingress[0].hostname is defined and kraken_action == 'down'
+  ignore_errors: yes
 
 - name: Pauase to let services come down
   pause: minutes=5
