@@ -15,6 +15,7 @@
 | label | Optional | Object Array | Node k8s labels. |
 | metadata | Optional | Object Array | Node gce metadata. |
 | tags | Optional | String Array | List of RFC1035 compliant node tags. |
+| kubeConfig | Optional | String | Name of a [kubeConfig](../kubernetes.md) object. Only name and version number are relevant |
 
 ## autoscaling options
 | Key Name | Required | Type | Description|

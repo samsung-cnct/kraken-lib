@@ -19,6 +19,7 @@
 | zone | __Required__ | Object | Information on cluster zones |
 | project | __Required__ | String  | Name of the Google Cloud project to use |
 | keypair | __Required__ | String | Name of a keypair object |
+| kubeConfig | Optional | String | Name of a [kubeConfig](../kubernetes.md) object. Only name and version number are relevant |
 
 
 ## zone options
