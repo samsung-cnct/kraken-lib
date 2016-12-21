@@ -66,7 +66,7 @@ The easiest way to get started with K2 directly is to use a K2 container image
 ## Preparing the environment  
   
 ### Initial K2 Directory
-If this is your first time using kraken, use k2 docker image to generate a 'sensible defaults' configuration (this assumes AWS is the infrastructure provider):
+If this is your first time using k2, use k2 docker image to generate a 'sensible defaults' configuration (this assumes AWS is the infrastructure provider):
 
 With docker container:
 
