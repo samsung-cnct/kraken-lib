@@ -3,7 +3,39 @@ Deploy a __Kubernetes__ cluster on top of __CoreOS__ using __Terraform__  and __
 
 [![Docker Repository on Quay](https://quay.io/repository/samsung_cnct/k2/status "Docker Repository on Quay")](https://quay.io/repository/samsung_cnct/k2)
 
+## What is K2
+K2 is an orchestration and cluster level management system for [Kubernetes](https://kubernetes.io).  By default,  K2 will create a production scale Kubernetes
+cluster on a range of platforms.  It boasts a large configuration file for extensive tweaking for your environment and use case.  Especially if you are getting 
+started and don't need a HA production level cluster right away.
+
+We (Samsung CNCT) built this tool to aid in our own research into high performance and reliability for the Kubernetes control plane.  We realised this would be a useful
+tool for the public at large and released it as [Kraken](https://github.com/samsung-cnct/kraken).  Kraken is great but it was developed for research and rather quickly.
+After using it ourselves for almost a year and running with the pain points we decided it was best to take the best parts and build anew.  It remains an ansible and 
+terraform project because we believe those tools provide flexible and powerful abstractions at the right layers.  
+
+K2 provides the same functionality with much cleaner internal abstractions.  This makes it easier for both external contributions and internal ones.  It will also allow
+us to continue to quickly improve and evolve with the Kubernetes ecosystem as a whole.
+
+## What is K2 for
+K2 is targeted at operations teams that need to support Kubernetes.  This is becoming known as ClusterOps.  K2 provides a single interface to manage your Kubernetes
+clusters across all environments.
+
+K2 uses a single file to drive cluster configuration.  This makes it easy to check the file into a vcs of your choice and solve two major problems:
+1. use version control for your cluster configuration as you promote changes from dev through to production for either existing cluster configurations or brand new ones
+2. enable Continuous Integration for developer applications against sandboxed and transient Kubernetes clusters.  K2 contains a destroy command that will clean up all
+traces of the temporary infrastructure
+
+We believe solving these two problems is a baseline for effectively and efficiently nurturing a Kubernetes based infrastructure.
+
+## K2 supported addons
+K2 also supports a number of Samsung CNCT supported addons in the form of Kubernetes Charts.  Those charts can be found in the [K2 Charts repository](https://github.com/samsung-cnct/k2-charts).
+These charts are tested and maintained by Samsung CNCT.  They should work on any Kubernetes cluster.  
+
 # Getting Started with K2
+The easiest and best supported path for using K2 is to use [K2Cli](https://github.com/samsung-cnct/k2cli).  This cli wraps the K2 image in an easy to use
+and configure tool.
+
+If you want to use the K2 image directly, please continue with this guide.
 
 ## Prerequisites
 
@@ -42,14 +74,14 @@ You will need the following installed on your machine:
 
 ## The K2 image
 
-The easiest way to get started with K2 is to use a K2 container image
+The easiest way to get started with K2 directly is to use a K2 container image
 
 `docker pull quay.io/samsung_cnct/k2:latest`
 
 ## Preparing the environment  
   
 ### Initial K2 Directory
-If this is your first time using kraken, use k2 docker image to generate a 'sensible defaults' configuration:
+If this is your first time using K2, use K2 docker image to generate a 'sensible defaults' configuration (this assumes AWS is the infrastructure provider):
 
 With docker container:
 
@@ -91,7 +123,7 @@ This will allow you to configure the environment with your AWS credentials
 
 ### kubectl
 
-To use the kubectl shipped with k2, run a command similar to:
+To use the kubectl shipped with K2, run a command similar to:
 
 ```bash
 docker run -v ~/:/root -it --rm=true quay.io/samsung_cnct/k2:latest kubectl --kubeconfig ~/.kraken/YOURCLUSTER/admin.kubeconfig get nodes
@@ -105,7 +137,7 @@ with locally installed kubectl:
 
 ### helm
 
-To use the helm shipped with k2, run a command similar to:
+To use the helm shipped with K2, run a command similar to:
 
 ```bash
 docker run -v ~/:/root -it --rm=true -e HELM_HOME=/root/.kraken/YOURCLUSTER/.helm -e KUBECONFIG=/root/.kraken/YOURCLUSTER/admin.kubeconfig quay.io/samsung_cnct/k2:latest helm list
