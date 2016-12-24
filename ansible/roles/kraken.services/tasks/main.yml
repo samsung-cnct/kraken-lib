@@ -14,6 +14,9 @@
   set_fact:
     cluster_namespaces: "{{ kraken_config.clusterServices.namespaces | default([]) }}"
 
+- include: generate-oidc-cert.yaml
+  when: (kraken_config.kubeAuth.oidc is defined) and (kraken_action == 'up')
+
 - name: See if tiller rc if present
   shell: >
     kubectl --kubeconfig={{ kubeconfig }} get deployment {{ tiller }} --namespace=kube-system

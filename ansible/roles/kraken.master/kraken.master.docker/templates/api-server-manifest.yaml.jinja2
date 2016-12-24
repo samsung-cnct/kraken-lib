@@ -31,6 +31,13 @@ spec:
     - --service-account-key-file=/etc/kubernetes/ssl/service-account-key.pem
     - --cloud-provider={{kraken_config.kubernetes_cloudprovider}}
     - --logtostderr=true
+{% if kraken_config.kubeAuth.oidc is defined %}
+    - --oidc-issuer-url={{kraken_config.kubeAuth.oidc.issuer}}
+    - --oidc-client-id=example-app
+    - --oidc-ca-file=/etc/kubernetes/ssl/ca.pem
+    - --oidc-username-claim=email
+    - --oidc-groups-claim=groups
+{% endif %}
     ports:
     - containerPort: 443
       hostPort: 443

@@ -1,0 +1,47 @@
+---
+- name: Generate dex key
+  command: >
+    openssl genrsa -out {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/dex-key.pem 2048
+
+- name: Generate dex csr
+  command: >
+    openssl req -new -key {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/dex-key.pem
+      -subj "/CN={{ kraken_config.kubeAuth.oidc.domain }}" -out {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/dex.csr
+
+- name: Generate dex pem
+  command: >
+    openssl x509 -req -in {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/dex.csr
+      -CA {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/ca.pem
+        -CAkey {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/ca-key.pem
+          -CAcreateserial -out {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/dex.pem -days 10000
+
+- name: Generate dex service Tls.Ca
+  set_fact:
+    dex_tls_ca: "{{ lookup('file', config_base + '/' + kraken_config.cluster + '/certs/ca.pem' | expanduser) | b64encode }}"
+
+- name: Generate dex service Tls.Cert
+  set_fact:
+    dex_tls_cert: "{{ lookup('file', config_base + '/' + kraken_config.cluster + '/certs/dex.pem' | expanduser) | b64encode }}"
+
+- name: Generate dex service Tls.Key
+  set_fact:
+    dex_tls_key: "{{ lookup('file', config_base + '/' + kraken_config.cluster + '/certs/dex-key.pem' | expanduser) | b64encode }}"
+
+- name: Retrive dex service from cluster services
+  set_fact:
+    dex_service: "{{ cluster_services | selectattr('name', 'match', '^dex$') | first }}"
+
+- name: Remove the dex service from cluster services
+  set_fact:
+    cluster_services: "{{ cluster_services | difference( [ dex_service ] )}}"
+
+- name: Create default TLS values to dex service
+  set_fact:
+    dex_service: "{{ dex_service | combine( {'values':{'Dex':{'Tls':{'Ca': dex_tls_ca,'Cert': dex_tls_cert,'Key': dex_tls_key }}}}, recursive=True ) }}"
+
+- name: Merge dex modified dex service to cluster services
+  set_fact:
+    cluster_services: "{{ cluster_services + [ dex_service ] }}"
+
+- name: Display Service Configuration
+  debug: var=cluster_services

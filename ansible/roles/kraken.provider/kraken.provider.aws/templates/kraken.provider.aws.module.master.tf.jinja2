@@ -126,6 +126,22 @@ resource "aws_elb" "master_elb" {
     lb_protocol = "tcp"
   }
 
+{% if kraken_config.kubeAuth.oidc is defined %}
+  listener {
+    instance_port = 30443
+    instance_protocol = "tcp"
+    lb_port = 30443
+    lb_protocol = "tcp"
+  }
+
+  listener {
+    instance_port = 30080
+    instance_protocol = "tcp"
+    lb_port = 30080
+    lb_protocol = "tcp"
+  }
+{% endif %}
+
   health_check {
     healthy_threshold = 2
     unhealthy_threshold = 10
@@ -147,6 +163,16 @@ resource "aws_route53_record" "master_record" {
   ttl = "300"
   records = ["${aws_elb.master_elb.dns_name}"]
 }
+
+{% if kraken_config.kubeAuth.oidc is defined %}
+resource "aws_route53_record" "dex_record" {
+  zone_id = "${var.route53_zone_id}"
+  name = "dex.${var.master_name}.kube.cluster.io"
+  type = "CNAME"
+  ttl = "300"
+  records = ["${aws_elb.master_elb.dns_name}"]
+}
+{% endif %}
 
 {% else %}
 # Launch configuration for master loadbalancer
