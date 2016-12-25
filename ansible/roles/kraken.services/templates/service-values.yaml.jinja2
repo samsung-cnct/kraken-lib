@@ -1,6 +1,4 @@
 ---
 {% if 'values' in item %}
-{% for key, value in item['values'].iteritems() %}
-{{ key }}: {{ value }}
-{% endfor %}
+{{ item['values'] | to_nice_yaml }}
 {% endif %}
