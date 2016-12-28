@@ -126,7 +126,7 @@ This will allow you to configure the environment with your AWS credentials
 To use the kubectl shipped with K2, run a command similar to:
 
 ```bash
-docker run -v ~/:/root -it --rm=true quay.io/samsung_cnct/k2:latest kubectl --kubeconfig ~/.kraken/YOURCLUSTER/admin.kubeconfig get nodes
+docker run -v ~/:/root -it --rm=true quay.io/samsung_cnct/k2:latest kubectl --kubeconfig /root/.kraken/YOURCLUSTER/admin.kubeconfig get nodes
 ```
 
 with locally installed kubectl:
