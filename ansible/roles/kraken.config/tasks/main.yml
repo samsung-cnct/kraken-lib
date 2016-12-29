@@ -62,5 +62,8 @@
      (kraken_config.resourcePrefix is none) or 
      (kraken_config.resourcePrefix|trim == '')"
 
-#- name: Display config
-#  debug: var=kraken_config
+- include: set-oidc-info.yaml
+  when: "kraken_config.kubeAuth.oidc is defined"
+
+  #- name: Display config
+  #  debug: var=kraken_config
