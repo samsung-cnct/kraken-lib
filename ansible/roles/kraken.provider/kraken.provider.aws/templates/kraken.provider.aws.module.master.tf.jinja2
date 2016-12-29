@@ -167,7 +167,7 @@ resource "aws_route53_record" "master_record" {
 {% if kraken_config.kubeAuth.oidc is defined %}
 resource "aws_route53_record" "dex_record" {
   zone_id = "${var.route53_zone_id}"
-  name = "dex.${var.master_name}.kube.cluster.io"
+  name = "{{ kraken_config.kubeAuth.oidc.domain }}"
   type = "CNAME"
   ttl = "300"
   records = ["${aws_elb.master_elb.dns_name}"]
