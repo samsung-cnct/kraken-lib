@@ -21,9 +21,6 @@ deployment:
       version: v1.4.4
       hyperkubeLocation: gcr.io/google_containers/hyperkube
       containerConfig: dockerconfig
-  kubeAuth:
-    authn:
-    authz:
   containerConfig:
     -
       name: dockerconfig
