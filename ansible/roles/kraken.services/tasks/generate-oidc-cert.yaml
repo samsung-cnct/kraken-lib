@@ -6,7 +6,7 @@
 - name: Generate dex csr
   command: >
     openssl req -new -key {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/dex-key.pem
-      -subj "/CN={{ kraken_config.kubeAuth.oidc.domain }}" -out {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/dex.csr
+      -subj "/CN={{ kraken_config.kubeAuth.authn.oidc.domain }}" -out {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/dex.csr
 
 - name: Generate dex pem
   command: >
