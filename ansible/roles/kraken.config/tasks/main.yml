@@ -51,6 +51,11 @@
     }, recursive=True) }}"
   when: "kraken_config.kubeAuth.authn.default_basic_user is undefined"
 
+- name: Set empty authz dic if not defined
+  set_fact:
+    kraken_config: "{{ kraken_config | combine({'kubeAuth': {'authz': {}}}, recursive=True) }}"
+  when: "kraken_config.kubeAuth.authz is undefined"
+
 - name: Generate default kubernetes user if not defined
   set_fact:
     kraken_config: "{{ kraken_config | combine(
