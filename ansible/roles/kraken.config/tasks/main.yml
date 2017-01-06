@@ -60,7 +60,7 @@
           'basic':[
             {
               'user': kraken_config.kubeAuth.authn.default_basic_user,
-              'password': lookup('password', config_base + '/' + kraken_config.cluster + '/k8spassword' + ' chars=ascii_letters length=11')
+              'password': lookup('password', config_base + '/' + kraken_config.cluster + '/auth/k8spassword-' + kraken_config.kubeAuth.authn.default_basic_user + ' chars=ascii_letters length=11')
             }
           ]
         }
@@ -78,7 +78,7 @@
 
 - name: Generate password for the auths
   set_fact:
-    basic_kube_auths: "{{ basic_kube_auths + [ { 'user': item.user, 'password': lookup('password', config_base + '/' + kraken_config.cluster + '/k8spassword' + ' chars=ascii_letters length=11') } ] }}"
+    basic_kube_auths: "{{ basic_kube_auths + [ { 'user': item.user, 'password': lookup('password', config_base + '/' + kraken_config.cluster + '/auth/k8spassword-' + item.user + ' chars=ascii_letters length=11') } ] }}"
   with_items: "{{undefined_password_basic_kube_auths}}"
 
 - name: Merge the auths to kraken_config
