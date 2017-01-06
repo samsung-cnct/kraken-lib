@@ -41,6 +41,10 @@
         role: 'roles/kraken.fabric/kraken.fabric.selector', when: "kraken_config.providerConfig.type == 'cloudinit'",
         tags: [ 'fabric', 'assembler', 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun', 'fabric_only' ]
       }
+      #    - {
+      #        role: 'roles/kraken.auth', when: "kraken_config.kubeAuth.authz is defined",
+      #        tags: [ 'authz', 'all', 'authz_only' ]
+      #      }
     - {
         role: 'roles/kraken.services', when: "kraken_config.clusterServices is defined", 
         tags: [ 'services', 'all', 'services_only' ] 

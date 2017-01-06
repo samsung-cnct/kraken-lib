@@ -31,12 +31,18 @@ spec:
     - --service-account-key-file=/etc/kubernetes/ssl/service-account-key.pem
     - --cloud-provider={{kraken_config.kubernetes_cloudprovider}}
     - --logtostderr=true
-{% if kraken_config.kubeAuth.oidc is defined %}
-    - --oidc-issuer-url={{kraken_config.kubeAuth.oidc.issuer}}
+    - --v=5
+{% if kraken_config.kubeAuth.authn.oidc is defined %}
+    - --oidc-issuer-url={{kraken_config.kubeAuth.authn.oidc.issuer}}
     - --oidc-client-id=example-app
     - --oidc-ca-file=/etc/kubernetes/ssl/ca.pem
     - --oidc-username-claim=email
     - --oidc-groups-claim=groups
+{% endif %}
+{% if kraken_config.kubeAuth.authz.rbac is defined %}
+    - --authorization-mode=RBAC
+    - --authorization-rbac-super-user={{ kraken_config.kubeAuth.authz.rbac.super_user | default('admin') }}
+    - --runtime-config=rbac.authorization.k8s.io/v1alpha1
 {% endif %}
     ports:
     - containerPort: 443

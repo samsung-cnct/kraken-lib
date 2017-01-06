@@ -22,6 +22,8 @@ deployment:
       hyperkubeLocation: gcr.io/google_containers/hyperkube
       containerConfig: dockerconfig
   kubeAuth:
+    authn:
+    authz:
   containerConfig:
     -
       name: dockerconfig
@@ -308,9 +310,6 @@ deployment:
     -
       name: specialNodes
       nodepool: specialNodes
-  auth:
-    user: admin
-    password:
   clusterServices:
     repos:
       -

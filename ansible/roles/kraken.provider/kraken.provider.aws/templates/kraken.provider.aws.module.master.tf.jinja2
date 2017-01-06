@@ -126,7 +126,7 @@ resource "aws_elb" "master_elb" {
     lb_protocol = "tcp"
   }
 
-{% if kraken_config.kubeAuth.oidc is defined %}
+{% if kraken_config.kubeAuth.authn.oidc is defined %}
   listener {
     instance_port = 30443
     instance_protocol = "tcp"
@@ -138,6 +138,13 @@ resource "aws_elb" "master_elb" {
     instance_port = 30080
     instance_protocol = "tcp"
     lb_port = 30080
+    lb_protocol = "tcp"
+  }
+
+  listener {
+    instance_port = 31080
+    instance_protocol = "tcp"
+    lb_port = 31080
     lb_protocol = "tcp"
   }
 {% endif %}
@@ -164,10 +171,10 @@ resource "aws_route53_record" "master_record" {
   records = ["${aws_elb.master_elb.dns_name}"]
 }
 
-{% if kraken_config.kubeAuth.oidc is defined %}
+{% if kraken_config.kubeAuth.authn.oidc is defined %}
 resource "aws_route53_record" "dex_record" {
   zone_id = "${var.route53_zone_id}"
-  name = "{{ kraken_config.kubeAuth.oidc.domain }}"
+  name = "{{ kraken_config.kubeAuth.authn.oidc.domain }}"
   type = "CNAME"
   ttl = "300"
   records = ["${aws_elb.master_elb.dns_name}"]
