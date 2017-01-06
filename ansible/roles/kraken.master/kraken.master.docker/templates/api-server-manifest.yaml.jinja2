@@ -31,7 +31,6 @@ spec:
     - --service-account-key-file=/etc/kubernetes/ssl/service-account-key.pem
     - --cloud-provider={{kraken_config.kubernetes_cloudprovider}}
     - --logtostderr=true
-    - --v=5
 {% if kraken_config.kubeAuth.authn.oidc is defined %}
     - --oidc-issuer-url={{kraken_config.kubeAuth.authn.oidc.issuer}}
     - --oidc-client-id=example-app
