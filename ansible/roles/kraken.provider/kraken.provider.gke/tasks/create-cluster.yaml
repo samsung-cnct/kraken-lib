@@ -1,7 +1,7 @@
 ---
-- name: Retrive default user from authn list
+- name: Retrive default auth from kube basic authn list
   set_fact:
-    default_basic_kube_auth: "{{ kraken_config.kubeAuth.authn.basic | selectattr('user', 'match', '^'+kraken_config.kubeAuth.authn.default_basic_user+'$') | first }}"
+    default_kube_basic_auth: "{{ kraken_config.kubeAuth.authn.basic | selectattr('user', 'match', '^'+kraken_config.kubeAuth.authn.default_basic_user+'$') | first }}"
 
 - name: Render a deployment manager template
   template: src=deploymentmanager-create.yaml.jinja2

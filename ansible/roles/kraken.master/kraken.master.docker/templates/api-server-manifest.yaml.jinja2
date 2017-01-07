@@ -40,7 +40,7 @@ spec:
 {% endif %}
 {% if kraken_config.kubeAuth.authz.rbac is defined %}
     - --authorization-mode=RBAC
-    - --authorization-rbac-super-user={{ kraken_config.kubeAuth.authz.rbac.super_user | default('admin') }}
+    - --authorization-rbac-super-user={{ kraken_config.kubeAuth.authz.rbac.super_user }}
     - --runtime-config=rbac.authorization.k8s.io/v1alpha1
 {% endif %}
     ports:
