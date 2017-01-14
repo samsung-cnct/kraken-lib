@@ -1,0 +1,419 @@
+---
+deployment:
+  cluster: keyolk
+  serviceCidr: 10.32.0.0/12
+  serviceDNS: 10.32.0.2
+  clusterDomain: cluster.local
+  coreos:
+    -
+      name: allNodes
+      version: current
+      channel: stable
+      rebootStrategy: off
+  keypair:
+    -
+      name: krakenKey
+      publickeyFile: "$HOME/.ssh/id_rsa.pub"
+      privatekeyFile: "$HOME/.ssh/id_rsa "
+  kubeConfig:
+    -
+      name: krakenKubeConfig
+      version: v1.4.4
+      hyperkubeLocation: gcr.io/google_containers/hyperkube
+      containerConfig: dockerconfig
+
+  kubeAuth:
+    authn:
+      oidc:
+        service_name: dex
+      default_basic_user: admin
+      basic:
+      - user: admin
+        password: secret
+      - user: keyolk
+      - user: galphy
+    authz:
+      rbac:
+        super_user: admin
+
+  containerConfig:
+    -
+      name: dockerconfig
+      version: 1.12.0
+      runtime: docker
+  fabric:
+    provider: flannel
+    options:
+      containers:
+        kubePolicyController:
+          version: v0.5.1
+          location: calico/kube-policy-controller
+        etcd:
+          version: v3.0.9
+          location: quay.io/coreos/etcd
+        calicoCni:
+          version: v1.4.2
+          location: calico/cni
+        calicoNode:
+          version: v1.0.0-rc1
+          location: quay.io/calico/node
+        flannel:
+          version: v0.6.1
+          location: quay.io/coreos/flannel
+      network:
+        network: 10.128.0.0/10
+        subnetLen: 22
+        subnetMin: 10.128.0.0
+        subnetMax: 10.191.255.255
+        backend:
+          type: vxlan
+  provider: aws
+  providerConfig:
+    type: cloudinit
+    resourcePrefix:
+    vpc: 10.0.0.0/16
+    region: us-west-2
+    subnet:
+      -
+        name: uwswest2a
+        az: us-west-2a
+        cidr: 10.0.0.0/18
+      -
+        name: uwswest2b
+        az: us-west-2b
+        cidr: 10.0.64.0/18
+      -
+        name: uwswest2c
+        az: us-west-2c
+        cidr: 10.0.128.0/17
+    egressAcl:
+      -
+        protocol: "-1"
+        rule_no: 100
+        action: "allow"
+        cidr_block: "0.0.0.0/0"
+        from_port: 0
+        to_port: 0
+    ingressAcl:
+      -
+        protocol: "-1"
+        rule_no: 100
+        action: "allow"
+        cidr_block: "0.0.0.0/0"
+        from_port: 0
+        to_port: 0
+    authentication:
+      accessKey:
+      accessSecret:
+      credentialsFile:
+      credentialsProfile:
+    ingressSecurity:
+      -
+        from_port: 22
+        to_port: 22
+        protocol: "TCP"
+        cidr_blocks: ["0.0.0.0/0"]
+      -
+        from_port: 443
+        to_port: 443
+        protocol: "TCP"
+        cidr_blocks: ["0.0.0.0/0"]
+      -
+        from_port: 30080
+        to_port: 30080
+        protocol: "TCP"
+        cidr_blocks: ["0.0.0.0/0"]
+      -
+        from_port: 30443
+        to_port: 30443
+        protocol: "TCP"
+        cidr_blocks: ["0.0.0.0/0"]
+      -
+        from_port: 31080
+        to_port: 31080
+        protocol: "TCP"
+        cidr_blocks: ["0.0.0.0/0"]
+    egressSecurity:
+      -
+        from_port: 0
+        to_port: 0
+        protocol: "-1"
+        cidr_blocks: ["0.0.0.0/0"]
+  nodepool:
+    -
+      name: etcd
+      count: 5
+      mounts:
+        -
+          device: sdf
+          path: /var/lib/docker
+          forceFormat: true
+        -
+          device: sdg
+          path: /ephemeral
+          forceFormat: false
+      providerConfig:
+        type: t2.small
+        subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
+        tags:
+          -
+            key: comments
+            value: "Cluster etcd"
+        storage:
+          -
+            type: ebs_block_device
+            opts:
+              device_name: sdf
+              volume_type: gp2
+              volume_size: 100
+              delete_on_termination: true
+              snapshot_id:
+              encrypted: false
+          -
+            type: ebs_block_device
+            opts:
+              device_name: sdg
+              volume_type: gp2
+              volume_size: 10
+              delete_on_termination: true
+              snapshot_id:
+              encrypted: false
+      keypair: krakenKey
+      coreos: allNodes
+    -
+      name: etcdEvents
+      count: 5
+      mounts:
+        -
+          device: sdf
+          path: /var/lib/docker
+          forceFormat: true
+        -
+          device: sdg
+          path: /ephemeral
+          forceFormat: false
+      providerConfig:
+        type: t2.small
+        subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
+        tags:
+          -
+            key: comments
+            value: "Cluster events etcd"
+        storage:
+          -
+            type: ebs_block_device
+            opts:
+              device_name: sdf
+              volume_type: gp2
+              volume_size: 100
+              delete_on_termination: true
+              snapshot_id:
+              encrypted: false
+          -
+            type: ebs_block_device
+            opts:
+              device_name: sdg
+              volume_type: gp2
+              volume_size: 10
+              delete_on_termination: true
+              snapshot_id:
+              encrypted: false
+      keypair: krakenKey
+      coreos: allNodes
+    -
+      name: masterNodes
+      count: 3
+      mounts:
+        -
+          device: sdf
+          path: /var/lib/docker
+          forceFormat: true
+      providerConfig:
+        type: m3.medium
+        subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
+        tags:
+          -
+            key: comments
+            value: "Master instances"
+        storage:
+          -
+            type: ebs_block_device
+            opts:
+              device_name: sdf
+              volume_type: gp2
+              volume_size: 100
+              delete_on_termination: true
+              snapshot_id:
+              encrypted: false
+      keypair: krakenKey
+      kubeConfig: krakenKubeConfig
+      coreos: allNodes
+    -
+      name: clusterNodes
+      count: 3
+      keypair: krakenKey
+      mounts:
+        -
+          device: sdf
+          path: /var/lib/docker
+          forceFormat: true
+      providerConfig:
+        type: c4.large
+        subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
+        tags:
+          -
+            key: comments
+            value: "Cluster plain nodes"
+        storage:
+          -
+            type: ebs_block_device
+            opts:
+              device_name: sdf
+              volume_type: gp2
+              volume_size: 100
+              delete_on_termination: true
+              snapshot_id:
+              encrypted: false
+      kubeConfig: krakenKubeConfig
+      coreos: allNodes
+    -
+      name: specialNodes
+      count: 2
+      mounts:
+        -
+          device: sdf
+          path: /var/lib/docker
+          forceFormat: true
+      keypair: krakenKey
+      providerConfig:
+        type: m3.medium
+        subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
+        tags:
+          -
+            key: comments
+            value: "Cluster special nodes"
+        storage:
+          -
+            type: ebs_block_device
+            opts:
+              device_name: sdf
+              volume_type: gp2
+              volume_size: 100
+              delete_on_termination: true
+              snapshot_id:
+              encrypted: false
+      kubeConfig: krakenKubeConfig
+      coreos: allNodes
+  etcd:
+    -
+      name: etcd
+      clientPorts: [2379, 4001]
+      clusterToken: espouse-monger-rarely
+      nodepool: etcd
+      peerPorts: [2380]
+      ssl: true
+      version: v3.0.3
+      containerConfig: dockerconfig
+    -
+      name: etcdEvents
+      clientPorts: [2381]
+      clusterToken: animism-training-chastity
+      nodepool: etcdEvents
+      peerPorts: [2382]
+      ssl: true
+      version: v3.0.3
+      containerConfig: dockerconfig
+  master:
+    nodepool: masterNodes
+    loadbalancer: cloud
+    infra:
+      etcd: etcd
+    events:
+      etcd: etcdEvents
+  node:
+    -
+      name: clusterNodes
+      nodepool: clusterNodes
+    -
+      name: specialNodes
+      nodepool: specialNodes
+  clusterServices:
+    repos:
+      -
+        name: atlas
+        url: http://atlas.cnct.io
+    services:
+      -
+        name: kubedns
+        repo: atlas
+        chart: kubedns
+        version: 0.1.0
+        namespace: kube-system
+        values:
+          cluster_ip: 10.32.0.2
+          dns_domain: cluster.local
+      -
+        name: heapster
+        repo: atlas
+        chart: heapster
+        version: 0.1.0
+        namespace: kube-system
+      -
+        name: openldap
+        repo: atlas
+        chart: openldap
+        version: 0.1.0
+        namespace: kube-auth
+        values:
+          OpenLdap:
+            Domain: local.io
+            AdminPassword: admin
+      -
+        name: dex
+        repo: atlas
+        chart: dex
+        version: 0.1.0
+        namespace: kube-auth
+        values:
+          Dex:
+            Issuer: https://auth.keyolk.cluster.io:30443
+            StaticPassword:
+              Email: "admin@example.com"
+              Password: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"
+              Username: "admin"
+              UserID: "08a8684b-db88-4b73-90a9-3cd1661f5466"
+            Connector:
+              GitHub:
+                Name: "GitHub"
+                ClientId: ODAyOWM3MWNiYjRmNmFkOGZmZGE=
+                ClientSecret: NTE5YzRlODg0NDI3MTBhZDJmMGM0YWE1NDBjNjgyZTNlNDY4YWEzZg==
+              Oidc:
+                Issuer: https://accounts.google.com
+                ClientId: ODc2MDc2NjM5NDQ0LW8zdTIzZjY5ZGlsdXMxYTBkNzd0ZHQxb3FzMWZpaDViLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29t
+                ClientSecret: T0pMc0FLeUpsY2ZjaUtnbkhzaHVwZjQ4
+              Ldap:
+                Name: "LDAP"
+                Host: "openldap:389"
+                InsecureNoSsl: true
+                InsecureSkipVerify: true
+                BindDn: "cn=admin,dc=local,dc=io"
+                BindPw: "admin"
+                UserSearch:
+                  BaseDn: "ou=users,dc=local,dc=io"
+                  Filter: "(objectClass=posixAccount)"
+                  Username: "uid"
+                  IdAttr: "uid"
+                  EmailAttr: "mail"
+                  NameAttr: "uid"
+                GroupSearch:
+                  BaseDn: "ou=groups,dc=local,dc=io"
+                  Filter: "(objectClass=posixGroup)"
+                  UserAttr: "uid"
+                  GroupAttr: "memberUid"
+                  NameAttr: "cn"
+          DexApp:
+            RedirectUri: http://auth.keyolk.cluster.io:30080/callback
+  readiness:
+    type: exact
+    value: 0
+    wait: 600
