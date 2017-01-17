@@ -193,7 +193,7 @@ Then the ssh hostnames available will be:
 
 Earlier, you copied a sample cluster configuration over into `~/.kraken`.  Please take a moment to review the sample configuration and make changes if you desire
 
-You may prefer to save it eith a name that is consistent to the `cluster` variable in the configuration. In other words, if your `cluster` is `foo`, then perhaps your file should be named `foo.yaml`
+You may prefer to save it with a name that is consistent with the `cluster` variable in the configuration. In other words, if your `cluster` is `foo`, then perhaps your file should be named `foo.yaml`
 
 ### Important configuration variables to adjust
 
@@ -253,7 +253,7 @@ ip-10-0-58-24.us-west-2.compute.internal     Ready                      3m
 ip-10-0-65-77.us-west-2.compute.internal     Ready                      2m
 ```
 
-#### Getting Kubernetess Deployments
+#### Getting Kubernetes Deployments
 
 ```bash
 docker run -v ~/:/root -it --rm=true quay.io/samsung_cnct/k2:latest kubectl --kubeconfig ~/.kraken/foo/admin.kubeconfig get deployments --all-namespaces
