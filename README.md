@@ -221,7 +221,7 @@ docker run --rm=true -it -v ~/:/root quay.io/samsung_cnct/k2:latest ./up.sh --co
 
 Replace `foo.yaml` with the name of the configuration file you intended to use
 
-Normally K2 will take a look at your configuration, generate artefacts like cloud-config files, and deploy VMs that will become your cluster.
+Normally K2 will take a look at your configuration, generate artifacts like cloud-config files, and deploy VMs that will become your cluster.
 
 During this time errors can happen if the configuration file contains unexpected settings. Please fix any errors and restart the cluster deployment if needed.
 
@@ -233,7 +233,7 @@ After K2 has run, you should have a working cluster waiting for workloads. To ve
 
 You will need to change `cluster` configuration value from `foo` to the value specified in your configuration.
 
-#### Getting K8s Nodes
+#### Getting Kubernetes Nodes
 
 ```bash
 docker run -v ~/:/root -it --rm=true quay.io/samsung_cnct/k2:latest kubectl --kubeconfig ~/.kraken/foo/admin.kubeconfig get nodes
@@ -269,7 +269,7 @@ kube-system   tiller-deploy   1         1         1            1           8m
 
 _Optional step_
 
-You can try having helm install a new service, such as the Kubernetess dashboard
+You can try having helm install a new service, such as the Kubernetes dashboard
 
 ##### Find Kubernetes Dashboard Version
 
