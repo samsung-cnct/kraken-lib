@@ -1,39 +1,32 @@
-# K2  
-Deploy a __Kubernetes__ cluster on top of __CoreOS__ using __Terraform__  and __Ansible__.
+# __K2__ deploys a __Kubernetes__ cluster on top of __CoreOS__ using __Terraform__  and __Ansible__.
 
 [![Docker Repository on Quay](https://quay.io/repository/samsung_cnct/k2/status "Docker Repository on Quay")](https://quay.io/repository/samsung_cnct/k2)
 
 ## What is K2
-K2 is an orchestration and cluster level management system for [Kubernetes](https://kubernetes.io).  By default,  K2 will create a production scale Kubernetes
-cluster on a range of platforms.  It boasts a large configuration file for extensive tweaking for your environment and use case.  Especially if you are getting 
-started and don't need a HA production level cluster right away.
+K2 is an orchestration and cluster level management system for [Kubernetes](https://kubernetes.io). K2 will create a production scale Kubernetes
+cluster on a range of platforms using its default settings. This can be especially useful if you are getting
+started and don't need a HA production level cluster right away. When you are ready to optimize your cluster for your own environment and use case, K2 provides a rich set of configurable options.  
 
-We (Samsung CNCT) built this tool to aid in our own research into high performance and reliability for the Kubernetes control plane.  We realised this would be a useful
-tool for the public at large and released it as [Kraken](https://github.com/samsung-cnct/kraken).  Kraken is great but it was developed for research and rather quickly.
-After using it ourselves for almost a year and running with the pain points we decided it was best to take the best parts and build anew.  It remains an ansible and 
-terraform project because we believe those tools provide flexible and powerful abstractions at the right layers.  
+We (Samsung CNCT) built this tool to aid in our own research into high performance and reliability for the Kubernetes control plane. We realized this would be a useful tool for the public at large and released it as [Kraken](https://github.com/samsung-cnct/kraken). Kraken was great but it was developed quickly for research. After using it ourselves for almost a year and identifying some pain points we decided it was best to build anew, bringing the best parts forward. It continues to use Ansible and
+Terraform because we believe those tools provide flexible and powerful abstractions at the right layers.  
 
-K2 provides the same functionality with much cleaner internal abstractions.  This makes it easier for both external contributions and internal ones.  It will also allow
-us to continue to quickly improve and evolve with the Kubernetes ecosystem as a whole.
+K2 provides the same functionality with much cleaner internal abstractions. This makes it easier for both external and internal contributions. It will also allow us to continue to quickly improve and evolve with the Kubernetes ecosystem as a whole.
 
 ## What is K2 for
-K2 is targeted at operations teams that need to support Kubernetes.  This is becoming known as ClusterOps.  K2 provides a single interface to manage your Kubernetes
-clusters across all environments.
+K2 is targeted at operations teams that need to support Kubernetes, a practice becoming known as ClusterOps. K2 provides a single interface where you can manage your Kubernetes clusters across all environments.
 
-K2 uses a single file to drive cluster configuration.  This makes it easy to check the file into a vcs of your choice and solve two major problems:
-1. use version control for your cluster configuration as you promote changes from dev through to production for either existing cluster configurations or brand new ones
-2. enable Continuous Integration for developer applications against sandboxed and transient Kubernetes clusters.  K2 contains a destroy command that will clean up all
-traces of the temporary infrastructure
+K2 uses a single file to drive cluster configuration. This makes it easy to check the file into a VCS of your choice and solve two major problems:
+1. use version control for your cluster configuration as you promote changes from dev through to production, for either existing cluster configurations or brand new ones
+2. enable Continuous Integration for developer applications against sandboxed and transient Kubernetes clusters. K2 provides a destroy command that will clean up all traces of the temporary infrastructure
 
 We believe solving these two problems is a baseline for effectively and efficiently nurturing a Kubernetes based infrastructure.
 
 ## K2 supported addons
-K2 also supports a number of Samsung CNCT supported addons in the form of Kubernetes Charts.  Those charts can be found in the [K2 Charts repository](https://github.com/samsung-cnct/k2-charts).
-These charts are tested and maintained by Samsung CNCT.  They should work on any Kubernetes cluster.  
+K2 also supports a number of Samsung CNCT supported addons in the form of Kubernetes Charts. These charts can be found in the [K2 Charts repository](https://github.com/samsung-cnct/k2-charts).
+These charts are tested and maintained by Samsung CNCT. They should work on any Kubernetes cluster.  
 
 # Getting Started with K2
-The easiest and best supported path for using K2 is to use [K2Cli](https://github.com/samsung-cnct/k2cli).  This cli wraps the K2 image in an easy to use
-and configure tool.
+The easiest and best supported way to use K2 is through the [K2Cli](https://github.com/samsung-cnct/k2cli).  This cli wraps the K2 image in a tool that is easy to use and configure.
 
 If you want to use the K2 image directly, please continue with this guide.
 
@@ -58,7 +51,7 @@ You will need the following installed on your machine:
 - Python 2.x (virtualenv strongly suggested)
  - pip
  - boto
- - netaddr 
+ - netaddr
 - Ansible 2.2.x
 - Cloud SDKs
  - aws cli
@@ -67,9 +60,9 @@ You will need the following installed on your machine:
 - Terraform and providers
  - Terraform 0.7.x
  - Terraform execute provider 0.0.3 (https://github.com/samsung-cnct/terraform-provider-execute/releases)  
- - Terraform coreosbox provider 0.0.2 (https://github.com/samsung-cnct/terraform-provider-coreosbox/releases) 
-- kubectl 1.3.x 
-- helm alpha.5 or later 
+ - Terraform coreosbox provider 0.0.2 (https://github.com/samsung-cnct/terraform-provider-coreosbox/releases)
+- kubectl 1.3.x
+- helm alpha.5 or later
 
 
 ## The K2 image
@@ -79,23 +72,23 @@ The easiest way to get started with K2 directly is to use a K2 container image
 `docker pull quay.io/samsung_cnct/k2:latest`
 
 ## Preparing the environment  
-  
-### Initial K2 Directory
-If this is your first time using K2, use K2 docker image to generate a 'sensible defaults' configuration (this assumes AWS is the infrastructure provider):
 
-With docker container:
+### Initial K2 Directory
+If this is your first time using K2, use the K2 Docker image to generate a 'sensible defaults' configuration (this assumes AWS is the infrastructure provider):
+
+With the Docker container:
 
 ```bash
 docker run -v ~:/root --rm=true -it quay.io/samsung_cnct/k2:latest ./up.sh --generate
 ```
 
-With cloned repo:
+With the cloned repo:
 
 ```bash
 ./up.sh --generate
 ```
 
-This will generate a config.yaml file at 
+This will generate a config.yaml file located at
 
 ```
 ~/.kraken/config.yaml
@@ -105,21 +98,19 @@ This will generate a config.yaml file at
 
 _If you already have configured your machine to be able to use AWS, you can skip this step_
 
-To setup AWS credentials, please run the following command
+To configure the environment with your AWS credentials, run one of the following commands:
 
-With docker container:
+using a Docker container:
 
 ```bash
 docker run -v ~/:/root -it --rm=true quay.io/samsung_cnct/k2:latest bash -c 'aws configure'
 ```
 
-with local awscli:
+using the local awscli tool:
 
 ```bash
  aws configure
 ```
-
-This will allow you to configure the environment with your AWS credentials
 
 ### kubectl
 
@@ -200,9 +191,9 @@ Then the ssh hostnames available will be:
 
 ## Configure your Kubernetes Cluster
 
-Earlier, you copied a sample cluster configuration over into `~/.kraken`  Please take a moment to review the sample configuration and make changes if you desire
+Earlier, you copied a sample cluster configuration over into `~/.kraken`.  Please take a moment to review the sample configuration and make changes if you desire
 
-It may be preferable to save it to a name that is consistent to the `cluster` variable in the configuration.  In other words, if your `cluster` is `foo`, then perhaps your file should be named `foo.yaml`
+You may prefer to save it eith a name that is consistent to the `cluster` variable in the configuration. In other words, if your `cluster` is `foo`, then perhaps your file should be named `foo.yaml`
 
 ### Important configuration variables to adjust
 
@@ -228,19 +219,19 @@ To boot up a cluster per your configuration, please execute the following comman
 docker run --rm=true -it -v ~/:/root quay.io/samsung_cnct/k2:latest ./up.sh --config /root/.kraken/foo.yaml
 ```
 
-Replace `foo.yaml` with the name of the configuration file you intended to use 
+Replace `foo.yaml` with the name of the configuration file you intended to use
 
 Normally K2 will take a look at your configuration, generate artefacts like cloud-config files, and deploy VMs that will become your cluster.
 
-During this time errors can happen if the configuration file is not as expected.  Please look at the errors and restart the cluster deployment if needed.
+During this time errors can happen if the configuration file contains unexpected settings. Please fix any errors and restart the cluster deployment if needed.
 
 The amount of time it will take to deploy a new cluster is variable, but expect about 5 minutes from the time you start the command to when a cluster should be available for use
 
 ### Verifying cluster is available
 
-After K2 has run, you should have a working cluster waiting for workloads.  To verify things are good, type in the following commands:
+After K2 has run, you should have a working cluster waiting for workloads. To verify it is functional, run the commands described in this section.
 
-In all cases, assumption is made that `cluster` value in your configuration was `foo`.  Please change `foo` to your value
+You will need to change `cluster` configuration value from `foo` to the value specified in your configuration.
 
 #### Getting K8s Nodes
 
@@ -248,7 +239,7 @@ In all cases, assumption is made that `cluster` value in your configuration was 
 docker run -v ~/:/root -it --rm=true quay.io/samsung_cnct/k2:latest kubectl --kubeconfig ~/.kraken/foo/admin.kubeconfig get nodes
 ```
 
-This should result in the following:
+The result should resemble the following:
 
 ```bash
 NAME                                         STATUS                     AGE
@@ -262,7 +253,7 @@ ip-10-0-58-24.us-west-2.compute.internal     Ready                      3m
 ip-10-0-65-77.us-west-2.compute.internal     Ready                      2m
 ```
 
-#### Getting K8s Deployments
+#### Getting Kubernetess Deployments
 
 ```bash
 docker run -v ~/:/root -it --rm=true quay.io/samsung_cnct/k2:latest kubectl --kubeconfig ~/.kraken/foo/admin.kubeconfig get deployments --all-namespaces
@@ -278,7 +269,7 @@ kube-system   tiller-deploy   1         1         1            1           8m
 
 _Optional step_
 
-In order to feel a bit more confident things are working, try having helm install a new service, like the K8S dashboard
+You can try having helm install a new service, such as the Kubernetess dashboard
 
 ##### Find Kubernetes Dashboard Version
 
@@ -288,7 +279,7 @@ docker run -v ~/:/root -it --rm=true -e HELM_HOME=/root/.kraken/foo/.helm -e KUB
 $ atlas/kubernetes-dashboard-0.1.0.tgz
 ```
 
-Now we know that we want `atlas/kubernetes-dashboard-0.1.0`
+This indicates that the file to install is `atlas/kubernetes-dashboard-0.1.0`.
 
 ##### Install Kubernetes Dashboard
 
@@ -300,7 +291,7 @@ docker run -v ~/:/root -it --rm=true -e HELM_HOME=/root/.kraken/foo/.helm -e KUB
 Fetched atlas/kubernetes-dashboard-0.1.0 to /kraken/kubernetes-dashboard-0.1.0.tgz
 foolhardy-scorpion
 Last Deployed: Wed Oct  5 16:20:42 2016
-Namespace: 
+Namespace:
 Status: DEPLOYED
 
 Resources:
@@ -313,7 +304,7 @@ NAME                   CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
 kubernetes-dashboard   10.37.204.191   <pending>     80/TCP    1s
 ```
 
-The chart has been installed.  It will take a moment for AWS ELB DNS to propagate, but we can get the DNS now
+The chart has been installed. It will take a moment for AWS ELB DNS to propagate, but you can get the DNS now.
 
 ##### Finding DNS name for Kubernetes Dashboard
 
@@ -340,13 +331,13 @@ Events:
   6m    6m    1 {service-controller }     Normal    CreatedLoadBalancer Created load balancer
 ```
 
-After a few minutes, we should feel comfortable going to http://aa95470398b1711e6b3a706da4d1c1f9-1324035908.us-west-2.elb.amazonaws.com and viewing the kubernetes dashboard
+After a few minutes, you should be able to view the kubernetes dashboard. In this example it is located at http://aa95470398b1711e6b3a706da4d1c1f9-1324035908.us-west-2.elb.amazonaws.com.
 
 ### Debugging
 
-If K2 hangs during deployment, please hit ctrl-c to break out of the application and try again.  Note that some steps are slow and may not indicate things are hung.  Particularly `TASK [/kraken/ansible/roles/kraken.provider/kraken.provider.aws : Run cluster up] ***` and while waiting for a cluster to come up
+If K2 hangs during deployment, please hit ctrl-c to break out of the application and try again. Note that some steps are slow and may give a false indication that the deployment is hung.  In particular, the `TASK [/kraken/ansible/roles/kraken.provider/kraken.provider.aws : Run cluster up] ***` step and the wait for a cluster to come up can take some time.
 
-If you desire to log into the VMs that have been created during this process, please use the AWS console.  There you will see various items
+You can use the AWS console to log into the VMs that have been created. There you will see various items, such as:
 
 - EC2 Instances that include the `cluster` value in their name
 - Auto Scaling Groups that include the `cluster` value in their name
@@ -354,25 +345,26 @@ If you desire to log into the VMs that have been created during this process, pl
 - VPC that includes the `cluster` value in its name
 - Route 53 Zone that includes the `clusterDomain` value in its name
 
-Using the EC2 instance list one can SSH into VMs and do further debugging
+Using the EC2 instance list you can SSH into VMs and do further debugging.
 
 ## Changing configuration
 
-Some changes to the cluster can be done with K2
+Some changes to the cluster configuration can be made by re-running K2.
+
+### Things that should not be changed by re-running K2
+
+- cluster name (`cluster` value in configuration)
+- etcd settings (beyond machine type)
 
 ### Things that can be changed (sometimes with some manual intervention)
 
 - nodepools
 - nodepool counts and instance types
 - cluster services desired to be run
-- Kubernetes version / location of hypekube container
+- Kubernetes version
+- location of the hyperkube container
 
-If you change these settings, a manual step may be needed.  For example you may need to terminate existing nodes to have new nodes spun up with updated configurations
-
-### Things that should not be changed right now
-
-- cluster name (`cluster` value in configuration)
-- etcd settings (beyond machine type)
+If you change these settings, some manuals step may be needed. For example, you may need to terminate existing nodes to have new nodes spun up with updated configurations.
 
 In order to effect these changes, make appropriate adjustments to the configuration file and re-run the command that created the cluster.
 
@@ -382,19 +374,19 @@ In other words:
 docker run --rm=true -it -v ~/:/root quay.io/samsung_cnct/k2:latest ./up.sh --config /root/.kraken/foo.yaml
 ```
 
-Replace `foo.yaml` with the name of the configuration file you intended to use 
+Replace `foo.yaml` with the name of the configuration file you intend to use.
 
 ## Destroying a Kubernetes Cluster
 
-How zen of you - everything must come to end, including kubernetes clusters.  To destroy a cluster created with K2, please do the following:
+How zen of you - everything must come to end, including Kubernetes clusters. To destroy a cluster created with K2, please do the following:
 
 ```bash
 docker run --rm=true -it -v ~/:/root quay.io/samsung_cnct/k2:latest ./down.sh --config /root/.kraken/foo.yaml
 ```
 
-Replace `foo.yaml` with the name of the configuration file you intended to use 
+Replace `foo.yaml` with the name of the configuration file you intended to use
 
 # Docs
-Further reading can be found here: 
+Further information can be found here:
 
-[kraken documentation](Documentation/README.md)
+[K2 documentation](Documentation/README.md)
