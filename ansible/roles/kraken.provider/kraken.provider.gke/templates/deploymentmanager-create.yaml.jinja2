@@ -7,8 +7,8 @@ resources:
       name: {{ kraken_config.cluster }}
       description: {{ kraken_config.cluster }} managed by k2
       masterAuth:
-        username: {{ kraken_config.auth.user }}
-        password: {{ kraken_config.auth.password }}
+        username: {{ default_kube_basic_auth.user }}
+        password: {{ default_kube_basic_auth.password }}
 {% if kraken_config.providerConfig.disableCloudLogging is defined and kraken_config.providerConfig.disableCloudLogging == True %}
       loggingService: none
 {% else %}

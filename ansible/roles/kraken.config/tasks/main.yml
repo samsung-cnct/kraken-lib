@@ -29,27 +29,75 @@
     msg: "Make sure that the 'cluster' is defined in {{config_file}}"
   when: (kraken_config.cluster is not defined) or (kraken_config.cluster is none) or (kraken_config.cluster|trim == '')
 
-- name: set the kubernetes cloud provider to {{ kraken_config.provider }}
+- name: Set the kubernetes cloud provider to {{ kraken_config.provider }}
   set_fact:
     kraken_config: "{{ kraken_config | combine({'kubernetes_cloudprovider':kraken_config.provider}) }}"
   when: "kraken_config.provider in ['aws', 'gke', 'cloudstack', 'gce', 'mesos', 'openstack', 'ovirt', 'rackspace', 'vsphere']"
 
-- name: set the kubernetes cloud provider to none
+- name: Set the kubernetes cloud provider to none
   set_fact:
     kraken_config: "{{ kraken_config | combine({'kubernetes_cloudprovider':''}) }}"
   when: "kraken_config.provider not in ['aws', 'azure', 'cloudstack', 'gce', 'mesos', 'openstack', 'ovirt', 'rackspace', 'vsphere']"
 
-- name: Generate kubernetes master user name
+- name: Set default kubernetes basic user if not defined
   set_fact:
-    kraken_config: "{{ kraken_config | combine({'auth': {'user': 'admin'}}, recursive=True) }}"
-  when: (kraken_config.auth.user is undefined) or (kraken_config.auth.user is none) or (kraken_config.auth.user|trim == '')
+    kraken_config: "{{ kraken_config | combine(
+    {
+      'kubeAuth': {
+        'authn': {
+          'default_basic_user': 'admin',
+        }
+      }
+    }, recursive=True) }}"
+  when: "kraken_config.kubeAuth.authn.default_basic_user is undefined"
 
-- name: Generate kubernetes master password
+- name: Set empty kubernetes authz dic if not defined
   set_fact:
-    kraken_config: "{{ kraken_config | combine({'auth': {'password': lookup('password', config_base + '/' + kraken_config.cluster + '/k8spassword' + ' chars=ascii_letters length=11')}}, recursive=True) }}"
-  when: (kraken_config.auth.password is undefined) or (kraken_config.auth.password is none) or (kraken_config.auth.password|trim == '')
+    kraken_config: "{{ kraken_config | combine({'kubeAuth': {'authz': {}}}, recursive=True) }}"
+  when: "kraken_config.kubeAuth.authz is undefined"
 
-- name: set the provider type
+- name: Generate default kubernetes basic auth if not defined
+  set_fact:
+    kraken_config: "{{ kraken_config | combine(
+    {
+      'kubeAuth': {
+        'authn': {
+          'basic':[
+            {
+              'user': kraken_config.kubeAuth.authn.default_basic_user,
+              'password': lookup('password', config_base + '/' + kraken_config.cluster + '/auth/k8spassword-' + kraken_config.kubeAuth.authn.default_basic_user + ' chars=ascii_letters length=11')
+            }
+          ]
+        }
+      }
+    }, recursive=True) }}"
+  when: (kraken_config.kubeAuth.authn.basic is undefined) or (kraken_config.kubeAuth.authn.default_basic_user is undefined)
+
+- name: Retrive kube_basic_auths which have no password from kraken_config
+  set_fact:
+    undefined_password_kube_basic_auths: "{{ kraken_config.kubeAuth.authn.basic | selectattr('password', 'undefined') | list }} "
+
+- name: Remove auths which have no password from kube_basic_auths
+  set_fact:
+    kube_basic_auths: "{{ kraken_config.kubeAuth.authn.basic | difference( undefined_password_kube_basic_auths )}}"
+
+- name: Generate password for the auths
+  set_fact:
+    kube_basic_auths: "{{ kube_basic_auths + [ { 'user': item.user, 'password': lookup('password', config_base + '/' + kraken_config.cluster + '/auth/k8spassword-' + item.user + ' chars=ascii_letters length=11') } ] }}"
+  with_items: "{{undefined_password_kube_basic_auths}}"
+
+- name: Merge the kube basic auths to kraken_config
+  set_fact:
+    kraken_config: "{{ kraken_config | combine(
+    {
+      'kubeAuth': {
+        'authn': {
+          'basic': kube_basic_auths
+        }
+      }
+    }, recursive=True) }}"
+
+- name: Set the provider type
   set_fact:
     kraken_config: "{{ kraken_config | combine({'providerConfig': {'type': 'cloudinit'}}, recursive=True) }}"
   when: (kraken_config.providerConfig.type is undefined) or (kraken_config.providerConfig.type is none) or (kraken_config.providerConfig.type|trim == '')
@@ -63,7 +111,7 @@
      (kraken_config.resourcePrefix|trim == '')"
 
 - include: set-oidc-info.yaml
-  when: "kraken_config.kubeAuth.oidc is defined"
+  when: "kraken_config.kubeAuth.authn.oidc is defined"
 
   #- name: Display config
   #  debug: var=kraken_config

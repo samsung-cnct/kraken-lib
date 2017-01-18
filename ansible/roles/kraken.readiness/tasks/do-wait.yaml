@@ -18,6 +18,9 @@
   set_fact: 
     remaining_time: "{{ readiness_wait | int - (wait_api_end_timestamp | int - wait_api_start_timestamp | int ) }}"
 
+- include: bootstrap-default-rbac-policy.yaml
+  when: "kraken_config.kubeAuth.authz.rbac is defined"
+
 - name: Get all nodes
   command: >
     kubectl --kubeconfig={{ kubeconfig | expanduser }} get nodes --no-headers=true

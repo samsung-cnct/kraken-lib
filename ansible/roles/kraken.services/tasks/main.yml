@@ -15,7 +15,7 @@
     cluster_namespaces: "{{ kraken_config.clusterServices.namespaces | default([]) }}"
 
 - include: generate-oidc-cert.yaml
-  when: (kraken_config.kubeAuth.oidc is defined) and (kraken_action == 'up')
+  when: (kraken_config.kubeAuth.authn.oidc is defined) and (kraken_action == 'up')
 
 - name: See if tiller rc if present
   shell: >
