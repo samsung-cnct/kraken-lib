@@ -42,7 +42,7 @@
 | --- | --- | --- | --- |
 | accessKey | Optional | String | AWS secret key ID. Default is picked up from standart AWS evironment variables |
 | accessSecret | Optional | String | AWS secret. Default is picked up from standart AWS evironment variables |
-| credentialsFile | Optional | String | This is the path to the shared credentials file. If this is not set and a profile is specified, ~/.aws/credentials will be used. |
+| credentialsFile | Optional | String | This is the path to the shared credentials file. If this is not set and a profile is specified, ${HOME}/.aws/credentials will be used. |
 | credentialsProfile | Optional | String | AWS credentials profile |
 
 ## cert options
