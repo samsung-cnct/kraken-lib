@@ -195,6 +195,9 @@ Earlier, you copied a sample cluster configuration over into `~/.kraken`.  Pleas
 
 You may prefer to save it with a name that is consistent with the `cluster` variable in the configuration. In other words, if your `cluster` is `foo`, then perhaps your file should be named `foo.yaml`
 
+> Note that file paths within the configuration file must be relative to any docker mapping used when running the k2 container. 
+> For example `credentialsFile: /root/.aws/credentials` to use `~/.aws/credentials` when running the container with `-v ~/:/root`.
+
 ### Important configuration variables to adjust
 
 While all configuration options are available for a reason, some are more important than others.  Some key ones include
