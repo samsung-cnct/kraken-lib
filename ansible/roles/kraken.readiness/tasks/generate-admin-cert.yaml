@@ -14,5 +14,7 @@
   command: >
     openssl x509 -req -in {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/end-user.csr 
       -CA {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/ca.pem
-        -CAkey {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/ca-key.pem
-          -CAcreateserial -out {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/end-user.crt -days 10000 
+      -CAkey {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/ca-key.pem
+      -CAcreateserial 
+      -CAserial {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/ca.srl
+      -out {{ config_base | expanduser }}/{{kraken_config.cluster}}/certs/end-user.crt -days 10000 
