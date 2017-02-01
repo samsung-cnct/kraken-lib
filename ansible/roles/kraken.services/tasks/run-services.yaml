@@ -45,8 +45,13 @@
   retries: 60 
   delay: 1
 
-- name: Give tiller rc a chance to fully init
-  pause: seconds=60
+- name: Wait for tiller to be ready
+  command: "kubectl --kubeconfig={{ kubeconfig | expanduser }} --namespace=kube-system get deploy tiller-deploy -o json"
+  register: output
+  until: ((output.stdout|from_json).status.availableReplicas|default(0)) > 0
+  retries: 600
+  delay: 1
+  changed_when: false
 
 - name: Remove helm repositories
   command: >
