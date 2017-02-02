@@ -18,17 +18,6 @@
   when: kraken_action == 'down'
   ignore_errors: yes
 
-- name: Clean up services
-  command: >
-    kubectl --kubeconfig={{ kubeconfig }} delete --namespace {{ item.metadata.namespace }} svc {{ item.metadata.name }}
-  with_items: "{{ the_services }}"
-  when: item.status.loadBalancer.ingress[0].hostname is defined and kraken_action == 'down'
-  ignore_errors: yes
-
-- name: Pauase to let services come down
-  pause: minutes=5
-  when: kraken_action == 'down'
-
 - name: Clean up releases
   command: >
     helm delete --purge {{ item.name }}
@@ -44,9 +33,43 @@
     kubectl --kubeconfig={{ kubeconfig }} delete deployment {{ tiller }} --namespace=kube-system
   when: tiller_present|succeeded and not tiller_present|skipped
 
+- name: Clean up services
+  command: >
+    kubectl --kubeconfig={{ kubeconfig }} delete --namespace {{ item.metadata.namespace }} svc {{ item.metadata.name }}
+  with_items: "{{ the_services }}"
+  when: item.status.loadBalancer.ingress[0].hostname is defined and kraken_action == 'down'
+  ignore_errors: yes
+
 - name: Delete all service namespaces
   command: >
     kubectl --kubeconfig={{ kubeconfig }} delete namespace {{ item }}
   with_items: "{{ cluster_namespaces }}"
   when: cluster_namespaces is defined
   ignore_errors: yes
+
+- name: Get vpc id
+  shell: "terraform state show -state={{ config_base | expanduser }}/{{kraken_config.cluster}}/terraform.tfstate module.vpc.aws_vpc.vpc  | awk '/^id/{print $3}'"
+  register: vpcid
+  when: kraken_action == 'down'
+  changed_when: false
+
+- name: Set vpcid lookup string
+  set_fact:
+    vpc_lookup: "elbs[?vpc_id=='{{ vpcid.stdout }}']"
+  when: kraken_action == 'down'
+  changed_when: false
+
+- name: Wait for ELBs to be deleted
+  action:
+    module: ec2_elb_facts
+    region: "{{ kraken_config.providerConfig.region }}"
+    aws_access_key: "{{ kraken_config.providerConfig.authentication.accessKey or omit}}"
+    aws_secret_key: "{{ kraken_config.providerConfig.authentication.accessSecret or omit }}"
+    profile: "{{ kraken_config.providerConfig.authentication.credentialsProfile or omit }}"
+  register: elb_facts
+  vars:
+    vpc_lookup: "elbs[?vpc_id=='{{ vpcid.stdout }}']"
+  when: kraken_action == 'down'
+  until: "{{ elb_facts|json_query(vpc_lookup)|length }} <= 1"
+  retries: 600
+  delay: 1
