@@ -49,15 +49,14 @@
 
 - name: Get vpc id
   shell: "terraform state show -state={{ config_base | expanduser }}/{{kraken_config.cluster}}/terraform.tfstate module.vpc.aws_vpc.vpc  | awk '/^id/{print $3}'"
-  register: vpcid
+  register: terraform_state_show
   when: kraken_action == 'down'
   changed_when: false
 
-- name: Set vpcid lookup string
+- name: Set vpc_id fact
   set_fact:
-    vpc_lookup: "elbs[?vpc_id=='{{ vpcid.stdout }}']"
+    vpcid: "{{ terraform_state_show.stdout }}"
   when: kraken_action == 'down'
-  changed_when: false
 
 - name: Wait for ELBs to be deleted
   action:
@@ -68,8 +67,8 @@
     profile: "{{ kraken_config.providerConfig.authentication.credentialsProfile or omit }}"
   register: elb_facts
   vars:
-    vpc_lookup: "elbs[?vpc_id=='{{ vpcid.stdout }}']"
-  when: kraken_action == 'down'
-  until: "{{ elb_facts|json_query(vpc_lookup)|length }} <= 1"
+    vpc_lookup: "elbs[?vpc_id=='{{ vpcid }}']"
+  when: kraken_action == 'down' and kraken_config.provider == 'aws'
+  until: (elb_facts is none) or (elb_facts|json_query(vpc_lookup) is none) or (elb_facts|json_query(vpc_lookup)|length <= 1)
   retries: 600
   delay: 1
