@@ -3,7 +3,7 @@
   command: >
     kubectl --kubeconfig={{ kubeconfig }} get services --all-namespaces -o json
   register: added_services
-  when: kraken_action == 'down'
+  when: kraken_action == 'down' and kubeconfig|is_file
   ignore_errors: yes
 
 - name: Register services fact
@@ -37,12 +37,12 @@
     HELM_HOME: "{{ helm_home }}"
   with_items: "{{cluster_services}}"
   ignore_errors: yes
-  when: tiller_present|success
+  when: tiller_present|succeeded and not tiller_present|skipped
 
 - name: Clean up tiller if present
   command: >
     kubectl --kubeconfig={{ kubeconfig }} delete deployment {{ tiller }} --namespace=kube-system
-  when: tiller_present|success
+  when: tiller_present|succeeded and not tiller_present|skipped
 
 - name: Delete all service namespaces
   command: >

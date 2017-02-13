@@ -21,6 +21,7 @@
   shell: >
     kubectl --kubeconfig={{ kubeconfig }} get deployment {{ tiller }} --namespace=kube-system
   register: tiller_present
+  when: kubeconfig|is_file
   ignore_errors: yes
 
 - include: kill-services.yaml
