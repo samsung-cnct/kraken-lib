@@ -1,15 +1,16 @@
 ---
 - name: Gather inventory of all cluster nodes
   ec2_remote_facts:
-    region: "{{kraken_config.providerConfig.region}}"
-    aws_access_key: "{{kraken_config.providerConfig.authentication.accessKey}}"
-    aws_secret_key: "{{kraken_config.providerConfig.authentication.accessSecret}}"
+    region: "{{ kraken_config.providerConfig.region }}"
+    aws_access_key: "{{ kraken_config.providerConfig.authentication.accessKey or omit}}"
+    aws_secret_key: "{{ kraken_config.providerConfig.authentication.accessSecret or omit }}"
+    profile: "{{ kraken_config.providerConfig.authentication.credentialsProfile or omit }}"
     filters:
-      "tag:k2-nodepool": "{{item.name}}"
-      "tag:Name": "{{kraken_config.cluster}}_{{kraken_config.resourcePrefix}}_{{item.name}}*"
-  with_items: "{{kraken_config.nodepool}}"
+      "tag:k2-nodepool": "{{ item.name }}"
+      "tag:Name": "{{ kraken_config.cluster }}_{{ kraken_config.resourcePrefix }}_{{ item.name }}*"
+  with_items: "{{ kraken_config.nodepool }}"
   register: ec2_results
 
 - name: Generate ssh inventory
   template: src=ssh_config.jinja2
-    dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/ssh_config"
+    dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/ssh_config"

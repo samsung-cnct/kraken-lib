@@ -130,6 +130,3 @@ if [ -z ${KRAKEN_TAGS+x} ]; then
 fi
 
 KRAKEN_EXTRA_VARS="config_path=${KRAKEN_CONFIG} config_base=${KRAKEN_BASE} "
-
-# We don't want anything else to think home is someplace we should write to. Change it.
-export HOME=$(mktemp -d)

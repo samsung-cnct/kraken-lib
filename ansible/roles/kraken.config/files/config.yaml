@@ -14,7 +14,7 @@ deployment:
     -
       name: krakenKey
       publickeyFile: "$HOME/.ssh/id_rsa.pub"
-      privatekeyFile: "$HOME/.ssh/id_rsa "
+      privatekeyFile: "$HOME/.ssh/id_rsa"
   kubeConfig:
     -
       name: krakenKubeConfig
@@ -58,6 +58,7 @@ deployment:
     resourcePrefix:
     vpc: 10.0.0.0/16
     region: us-west-2
+    configFile: "$HOME/.aws/config"
     subnet:
       -
         name: uwswest2a
@@ -90,7 +91,7 @@ deployment:
     authentication:
       accessKey:
       accessSecret:
-      credentialsFile:
+      credentialsFile: "$HOME/.aws/credentials"
       credentialsProfile:
     ingressSecurity:
       -

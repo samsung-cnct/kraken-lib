@@ -42,6 +42,8 @@
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
+  retries: 60 
+  delay: 1
 
 - name: Give tiller rc a chance to fully init
   pause: seconds=60

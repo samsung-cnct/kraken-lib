@@ -15,7 +15,8 @@
 - name: Ensure the kube-networking namespace exists
   command: >
     kubectl --kubeconfig={{ kubeconfig | expanduser }} create namespace kube-networking
-  ignore_errors: yes
+  retries: 120
+  delay: 1
 
 - name: Deploy canal configuration
   command: >
