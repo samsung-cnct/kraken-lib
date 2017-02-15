@@ -3,7 +3,7 @@
   command: >
     kubectl --kubeconfig={{ kubeconfig }} get services --all-namespaces -o json
   register: added_services
-  when: kraken_action == 'down'
+  when: kraken_action == 'down' and kubeconfig|is_file
   ignore_errors: yes
 
 - name: Register services fact
@@ -18,17 +18,6 @@
   when: kraken_action == 'down'
   ignore_errors: yes
 
-- name: Clean up services
-  command: >
-    kubectl --kubeconfig={{ kubeconfig }} delete --namespace {{ item.metadata.namespace }} svc {{ item.metadata.name }}
-  with_items: "{{ the_services }}"
-  when: item.status.loadBalancer.ingress[0].hostname is defined and kraken_action == 'down'
-  ignore_errors: yes
-
-- name: Pauase to let services come down
-  pause: minutes=5
-  when: kraken_action == 'down'
-
 - name: Clean up releases
   command: >
     helm delete --purge {{ item.name }}
@@ -37,12 +26,19 @@
     HELM_HOME: "{{ helm_home }}"
   with_items: "{{cluster_services}}"
   ignore_errors: yes
-  when: tiller_present|success
+  when: tiller_present|succeeded and not tiller_present|skipped
 
 - name: Clean up tiller if present
   command: >
     kubectl --kubeconfig={{ kubeconfig }} delete deployment {{ tiller }} --namespace=kube-system
-  when: tiller_present|success
+  when: tiller_present|succeeded and not tiller_present|skipped
+
+- name: Clean up services
+  command: >
+    kubectl --kubeconfig={{ kubeconfig }} delete --namespace {{ item.metadata.namespace }} svc {{ item.metadata.name }}
+  with_items: "{{ the_services }}"
+  when: item.status.loadBalancer.ingress[0].hostname is defined and kraken_action == 'down'
+  ignore_errors: yes
 
 - name: Delete all service namespaces
   command: >
@@ -50,3 +46,29 @@
   with_items: "{{ cluster_namespaces }}"
   when: cluster_namespaces is defined
   ignore_errors: yes
+
+- name: Get vpc id
+  shell: "terraform state show -state={{ config_base | expanduser }}/{{kraken_config.cluster}}/terraform.tfstate module.vpc.aws_vpc.vpc  | awk '/^id/{print $3}'"
+  register: terraform_state_show
+  when: kraken_action == 'down'
+  changed_when: false
+
+- name: Set vpc_id fact
+  set_fact:
+    vpcid: "{{ terraform_state_show.stdout }}"
+  when: kraken_action == 'down'
+
+- name: Wait for ELBs to be deleted
+  action:
+    module: ec2_elb_facts
+    region: "{{ kraken_config.providerConfig.region }}"
+    aws_access_key: "{{ kraken_config.providerConfig.authentication.accessKey or omit}}"
+    aws_secret_key: "{{ kraken_config.providerConfig.authentication.accessSecret or omit }}"
+    profile: "{{ kraken_config.providerConfig.authentication.credentialsProfile or omit }}"
+  register: elb_facts
+  vars:
+    vpc_lookup: "elbs[?vpc_id=='{{ vpcid }}']"
+  when: kraken_action == 'down' and kraken_config.provider == 'aws'
+  until: (elb_facts is none) or (elb_facts|json_query(vpc_lookup) is none) or (elb_facts|json_query(vpc_lookup)|length <= 1)
+  retries: 600
+  delay: 1

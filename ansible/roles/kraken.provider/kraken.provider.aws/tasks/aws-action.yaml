@@ -26,7 +26,7 @@
 - name: Set the kraken end point fact
   set_fact:
     kraken_endpoint: "{{ endpoint_result.stdout }}"
-  when: kraken_action == 'up'
+  when: endpoint_result|succeeded and not endpoint_result|skipped
 
 - name: Get kraken aws_route53_zone.private_zone.zone_id
   shell: > 

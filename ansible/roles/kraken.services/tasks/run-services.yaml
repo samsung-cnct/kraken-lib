@@ -25,6 +25,13 @@
     helm_init_command: "{{helm_command}} init --tiller-image {{ tiller_image }}"
   when: (tiller_image is defined) and (tiller_image is not none) and (tiller_image|trim != '')
 
+- name: Wait for api server to become available in case it's not
+  wait_for:
+    host: "{{ item|regex_replace('https://','') }}"
+    port: 443
+    timeout: 600
+  with_items: "{{ api_servers }}"
+
 - name: Init helm dry-run
   command: >
     {{helm_init_command}} --dry-run
@@ -45,8 +52,13 @@
   retries: 60 
   delay: 1
 
-- name: Give tiller rc a chance to fully init
-  pause: seconds=60
+- name: Wait for tiller to be ready
+  command: "kubectl --kubeconfig={{ kubeconfig | expanduser }} --namespace=kube-system get deploy tiller-deploy -o json"
+  register: output
+  until: ((output.stdout|from_json).status.availableReplicas|default(0)) > 0
+  retries: 600
+  delay: 1
+  changed_when: false
 
 - name: Remove helm repositories
   command: >
