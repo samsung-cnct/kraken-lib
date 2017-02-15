@@ -33,7 +33,7 @@
   wait_for:
     host: "{{ item|regex_replace('https://','') }}"
     port: 443
-    timeout: "{{ readiness_wait }}"
+    timeout: 600
   with_items: "{{ api_servers }}"
 
 - name: Init helm dry-run
