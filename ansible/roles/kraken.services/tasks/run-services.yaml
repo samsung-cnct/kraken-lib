@@ -25,10 +25,6 @@
     helm_init_command: "{{helm_command}} init --tiller-image {{ tiller_image }}"
   when: (tiller_image is defined) and (tiller_image is not none) and (tiller_image|trim != '')
 
-- name: Fetch k8s api server address
-  set_fact:
-    api_servers: "{{ lookup('file', kubeconfig)|from_yaml|json_query('clusters[*].cluster.server') }}"
-
 - name: Wait for api server to become available in case it's not
   wait_for:
     host: "{{ item|regex_replace('https://','') }}"
