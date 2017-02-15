@@ -130,3 +130,9 @@ if [ -z ${KRAKEN_TAGS+x} ]; then
 fi
 
 KRAKEN_EXTRA_VARS="config_path=${KRAKEN_CONFIG} config_base=${KRAKEN_BASE} "
+
+if [ -z ${BUILD_TAG+x} ]; then
+    VERBOSE=""
+else
+    VERBOSE=-vvv
+fi

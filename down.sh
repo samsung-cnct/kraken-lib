@@ -11,4 +11,4 @@ set -o pipefail
 my_dir=$(dirname "${BASH_SOURCE}")
 source "${my_dir}/bin/utils.sh"
 
-ansible-playbook -i ansible/inventory/localhost ansible/down.yaml --extra-vars "${KRAKEN_EXTRA_VARS}kraken_action=down" --tags "${KRAKEN_TAGS}"
+ansible-playbook ${VERBOSE} -i ansible/inventory/localhost ansible/down.yaml --extra-vars "${KRAKEN_EXTRA_VARS}kraken_action=down" --tags "${KRAKEN_TAGS}"
