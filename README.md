@@ -79,7 +79,7 @@ Configure a volume environment variable for use below. Ensure that each of these
 KRAKEN=${HOME}/.kraken          # This is the default output directory for K2
 SSH_KEY=${HOME}/.ssh/id_rsa     # This is the default rsa key configured
 SSH_PUB=${HOME}/.ssh/id_rsa.pub
-AWS_CONFIG=${HOME}/.aws/conifg  # Use these files when using the aws provider
+AWS_CONFIG=${HOME}/.aws/config  # Use these files when using the aws provider
 AWS_CREDENTIALS=${HOME}/.aws/credentials
 K2OPTS="-v ${KRAKEN}:${KRAKEN}
         -v ${SSH_KEY}:${SSH_KEY}
@@ -89,6 +89,7 @@ K2OPTS="-v ${KRAKEN}:${KRAKEN}
         -e HOME=${HOME}
         --rm=true
         -it"
+```
 
 ### Initial K2 Directory
 If this is your first time using K2, use the K2 Docker image to generate a 'sensible defaults' configuration (this assumes AWS is the infrastructure provider):
