@@ -28,7 +28,7 @@ By default we have an array of etcd clusters that we want to configure
     nodepool: etcd
     peerPorts: [2380]
     ssl: true
-    version: 3.0.3
+    version: 3.1.0
     containerConfig: dockerconfig
   -
     name: etcd-events
@@ -37,6 +37,6 @@ By default we have an array of etcd clusters that we want to configure
     nodepool: etcd-events
     peerPorts: [2382]
     ssl: true
-    version: 3.0.3
+    version: 3.1.0
     containerConfig: dockerconfig
 ```
