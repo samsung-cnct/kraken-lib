@@ -154,7 +154,7 @@ resource "aws_elb" "master_elb" {
     unhealthy_threshold = 10
     timeout = 10
     target = "TCP:443"
-    interval = 20
+    interval = 45
   }
 
   tags {
