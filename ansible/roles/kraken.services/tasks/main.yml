@@ -26,4 +26,5 @@
 
 - include: kill-services.yaml
 - include: run-services.yaml
+  static: no
   when: kraken_action == 'up'

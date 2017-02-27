@@ -14,8 +14,10 @@
   delay: 15
   ignore_errors: yes
 
-- fail: "msg='Run cluster {{kraken_action}} failed!'"
-  when: kraken_action == 'up' and up_result.rc != 0
+- name: Check for terraform success
+  fail: "msg='Run cluster {{kraken_action}} failed!'"
+  when: (kraken_action == 'up') and (up_result|failed)
+  changed_when: false
 
 - name: Get kraken endpoint
   shell: > 
@@ -32,12 +34,11 @@
   shell: > 
     terraform output -no-color kraken_private_zone_id chdir={{ config_base | expanduser }}/{{kraken_config.cluster}}
   register: zone_result 
-  when: kraken_action == 'up'
+  changed_when: false
 
 - name: Write zone id to file (THANKS, TERRAFORM)
   copy: >
     content={{ zone_result.stdout }} dest={{ config_base | expanduser }}/{{kraken_config.cluster}}/route53_zone
-  when: kraken_action == 'up'
 
 - name: Kill off the hosted zone using cli53 (THANKS, TERRAFORM)
   command: >
