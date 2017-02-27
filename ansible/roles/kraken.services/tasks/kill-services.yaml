@@ -70,5 +70,5 @@
     vpc_lookup: "elbs[?vpc_id=='{{ vpcid }}']"
   when: kraken_action == 'down' and kraken_config.provider == 'aws'
   until: (elb_facts is none) or (elb_facts|json_query(vpc_lookup) is none) or (elb_facts|json_query(vpc_lookup)|length <= 1)
-  retries: 600
-  delay: 1
+  retries: 120
+  delay: 5
