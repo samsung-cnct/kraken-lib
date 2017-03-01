@@ -55,7 +55,6 @@ You will need the following installed on your machine:
 - Ansible 2.2.x
 - Cloud SDKs
  - aws cli
- - cli53 (https://github.com/barnybug/cli53/releases)
  - gcloud SDK
 - Terraform and providers
  - Terraform 0.7.x

@@ -30,28 +30,6 @@
     kraken_endpoint: "{{ endpoint_result.stdout }}"
   when: endpoint_result|succeeded and not endpoint_result|skipped
 
-- name: Get kraken aws_route53_zone.private_zone.zone_id
-  shell: > 
-    terraform output -no-color kraken_private_zone_id chdir={{ config_base | expanduser }}/{{kraken_config.cluster}}
-  register: zone_result 
-  changed_when: false
-
-- name: Write zone id to file (THANKS, TERRAFORM)
-  copy: >
-    content={{ zone_result.stdout }} dest={{ config_base | expanduser }}/{{kraken_config.cluster}}/route53_zone
-
-- name: Kill off the hosted zone using cli53 (THANKS, TERRAFORM)
-  command: >
-    cli53 delete --purge {{ lookup('file', '{{config_base}}/{{kraken_config.cluster}}/route53_zone') }}
-  when: kraken_action == 'down'
-  ignore_errors: yes
-
-- name: Remove the route 53 zone from state (THANKS, TERRAFORM)
-  command: >
-    terraform state rm aws_route53_zone.private_zone chdir={{ config_base | expanduser }}/{{kraken_config.cluster}}
-  when: kraken_action == 'down'
-  ignore_errors: yes
-
 - name: Check for terraform state file
   stat: path={{ config_base | expanduser }}/{{kraken_config.cluster}}/terraform.tfstate
   register: tfstate
@@ -72,7 +50,6 @@
     state: absent
   when: kraken_action == 'down'
   with_items:
-    - route53_zone
     - aws_prefix
     - terraform.tfstate
     - terraform.tfstate.backup
