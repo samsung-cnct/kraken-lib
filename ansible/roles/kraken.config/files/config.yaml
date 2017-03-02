@@ -20,12 +20,11 @@ deployment:
       name: krakenKubeConfig
       version: v1.5.2
       hyperkubeLocation: gcr.io/google_containers/hyperkube
-      containerConfig: dockerconfig
   containerConfig:
     -
       name: dockerconfig
-      version: 1.12.0
       runtime: docker
+      type: distro
   fabric:
     provider: flannel
     options:
@@ -150,6 +149,7 @@ deployment:
               snapshot_id:
               encrypted: false
       keypair: krakenKey
+      containerConfig: dockerconfig
       coreos: allNodes
     -
       name: etcdEvents
@@ -190,6 +190,7 @@ deployment:
               snapshot_id:
               encrypted: false
       keypair: krakenKey
+      containerConfig: dockerconfig
       coreos: allNodes
     -
       name: masterNodes
@@ -218,6 +219,7 @@ deployment:
               encrypted: false
       keypair: krakenKey
       kubeConfig: krakenKubeConfig
+      containerConfig: dockerconfig
       coreos: allNodes
     -
       name: clusterNodes
@@ -246,6 +248,7 @@ deployment:
               snapshot_id:
               encrypted: false
       kubeConfig: krakenKubeConfig
+      containerConfig: dockerconfig
       coreos: allNodes
     -
       name: specialNodes
@@ -274,6 +277,7 @@ deployment:
               snapshot_id:
               encrypted: false
       kubeConfig: krakenKubeConfig
+      containerConfig: dockerconfig
       coreos: allNodes
   etcd:
     -
@@ -284,7 +288,6 @@ deployment:
       peerPorts: [2380]
       ssl: true
       version: v3.1.0
-      containerConfig: dockerconfig
     -
       name: etcdEvents
       clientPorts: [2381]
@@ -293,7 +296,6 @@ deployment:
       peerPorts: [2382]
       ssl: true
       version: v3.1.0
-      containerConfig: dockerconfig
   master:
     nodepool: masterNodes
     loadbalancer: cloud

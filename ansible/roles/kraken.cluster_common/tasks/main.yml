@@ -9,4 +9,5 @@
 - include: coreos_update.yaml
 - include: storage.yaml
 - include: locksmith.yaml
+- include: docker-install.yaml
 - include: docker-wait-for-mounts.yaml

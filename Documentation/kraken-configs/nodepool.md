@@ -24,6 +24,7 @@ We do not expect the same machine types to be used for each purpose, therefore e
 | kubeConfig | Optional | String | Name of one of the [Kubernetes configurations](kubernetes.md)|
 | kubeLabels | Optional | String | Name of one of the [Kubernetes label sets](kubelabels.md)|
 | mounts | Optional | Object | Array of device/path pairs indicating which device name will be mounted to which path|
+| containerConfig | __Required__ | String | Name of one of the [container configurations](container.md) |
 | coreos | Required | String | Name of the coreos configuration from [Deployment](deployment.md)|
 
 # Example

@@ -7,12 +7,3 @@
         After={{mount.path | replace('/', '-') | replace('-', '', 1)}}.mount
         Requires={{mount.path | replace('/', '-') | replace('-', '', 1)}}.mount
 {% endfor %}
-- name: early-docker.service
-  drop-ins:
-    - name: 10-wait-early-docker.conf
-      content: |
-        [Unit]
-{% for mount in item.nodepool.mounts %}
-        After={{mount.path | replace('/', '-') | replace('-', '', 1)}}.mount
-        Requires={{mount.path | replace('/', '-') | replace('-', '', 1)}}.mount
-{% endfor %}
