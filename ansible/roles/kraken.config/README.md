@@ -2,7 +2,7 @@ Role Name
 =========
 kraken.config
 
-Sets a bunch of config facts from a loaded config yml
+Sets a bunch of config facts from a loaded config yaml
 
 Requirements
 ------------
