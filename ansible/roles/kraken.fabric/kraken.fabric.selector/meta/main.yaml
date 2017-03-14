@@ -12,6 +12,6 @@ dependencies:
       role: '{{ playbook_dir }}/roles/kraken.error',
       kraken_component_type: fabric,
       kraken_component_error: 'Unsupported provider',
-      kraken_component_name: '{{kraken_config.fabric.provider}}',
+      kraken_component_name: '{{ kraken_config.fabric.provider }}',
       when: "kraken_config.fabric.provider not in ['flannel', 'calico']"
     }

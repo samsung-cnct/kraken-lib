@@ -1,19 +1,19 @@
 ---
 - hosts: localhost
   roles:
-    - { 
+    - {
         role: 'kraken.config',
-        tags: [ 'config', 'always', 'config_only' ] 
+        tags: [ 'config', 'always', 'config_only' ]
       }
-    - { 
-        role: 'roles/kraken.services', when: "kraken_config.clusterServices is defined", 
-        tags: [ 'services', 'all', 'services_only' ] 
+    - {
+        role: 'roles/kraken.services', when: "kraken_config.clusterServices is defined",
+        tags: [ 'services', 'all', 'services_only' ]
       }
-    - { 
-        role: 'roles/kraken.provider/kraken.provider.selector', 
-        tags: [ 'provider', 'all', 'provider_only' ] 
+    - {
+        role: 'roles/kraken.provider/kraken.provider.selector',
+        tags: [ 'provider', 'all', 'provider_only' ]
       }
-    - { 
-        role: 'roles/kraken.clean', 
-        tags: [ 'dryrun', 'all' ] 
+    - {
+        role: 'roles/kraken.clean',
+        tags: [ 'dryrun', 'all' ]
       }

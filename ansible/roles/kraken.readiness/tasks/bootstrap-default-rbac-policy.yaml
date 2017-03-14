@@ -1,22 +1,22 @@
 ---
 - name: Make sure generated folder for RBAC policy is there
   file: >
-    path="{{ config_base | expanduser }}/{{kraken_config.cluster}}/auth"
+    path="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/auth"
     state=directory
 
 - name: Generate RBAC policy file
   template: src=rbac-default-policy.yaml.jinja2
-            dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/auth/rbac-default-policy.yaml"
-  with_items: "{{kraken_config.etcd}}"
+            dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/auth/rbac-default-policy.yaml"
+  with_items: "{{ kraken_config.etcd }}"
 
 - name: Get needed number of masters
-  set_fact: 
+  set_fact:
     needed_masters: "{{ kraken_config | expected_masters(readiness_type, readiness_value) }}"
 
 - name: Wait until API server up
   shell: "kubectl --kubeconfig={{ kubeconfig | expanduser }} get node --no-headers=true | grep -i schedulingdisabled"
   register: job_get_nodes_apiserver_result
-  until: "{{job_get_nodes_apiserver_result.stdout_lines | length }} >= needed_masters | int"
+  until: "{{ job_get_nodes_apiserver_result.stdout_lines | length }} >= needed_masters | int"
   retries: "{{ remaining_time }}"
   delay: 1
 

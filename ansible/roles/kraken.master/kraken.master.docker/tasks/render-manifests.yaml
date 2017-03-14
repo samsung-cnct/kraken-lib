@@ -1,15 +1,15 @@
 - name: Generate master api-server.yaml
   template: src=api-server-manifest.yaml.jinja2
-    dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/master.api-server.yaml.manifest"
+    dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/master.api-server.yaml.manifest"
 
 - name: Generate master controller-manager.yaml
   template: src=controller-manager-manifest.yaml.jinja2
-    dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/master.controller-manager.yaml.manifest"
+    dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/master.controller-manager.yaml.manifest"
 
 - name: Generate master kube-proxy.yaml
   template: src=kube-proxy-manifest.yaml.jinja2
-    dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/master.kube-proxy.yaml.manifest"
+    dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/master.kube-proxy.yaml.manifest"
 
 - name: Generate master scheduler.yaml
   template: src=scheduler-manifest.yaml.jinja2
-    dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/master.scheduler.yaml.manifest"
+    dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/master.scheduler.yaml.manifest"

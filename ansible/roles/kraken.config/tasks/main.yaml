@@ -1,11 +1,11 @@
 ---
 - name: Include configuration variables from defaults file
-  include_vars: 
+  include_vars:
     file: "{{ role_path }}/files/config.yaml"
     name: kraken_config_defaults
 
 - name: Include configuration variables
-  include_vars: 
+  include_vars:
     file: "{{ config_file }}"
     name: kraken_config_user
   when: config_file | is_file
@@ -21,8 +21,8 @@
   when: config_file | is_file
 
 - name: Verify cluster is defined
-  fail: 
-    msg: "Make sure that the 'cluster' is defined in {{config_file}}"
+  fail:
+    msg: "Make sure that the 'cluster' is defined in {{ config_file }}"
   when: kraken_config.cluster | is_empty
 
 - name: Verify cloud provider is supported
@@ -55,7 +55,7 @@
 
 - name: Set empty kubernetes authz dic if not defined
   set_fact:
-    kraken_config: "{{ kraken_config | combine({'kubeAuth': {'authz': {}}}, recursive=True) }}"
+    kraken_config: "{{ kraken_config | combine({'kubeAuth': {'authz': { }}}, recursive=True) }}"
   when: "kraken_config.kubeAuth.authz is undefined"
 
 - name: Generate default kubernetes basic auth if not defined
@@ -81,12 +81,12 @@
 
 - name: Remove auths which have no password from kube_basic_auths
   set_fact:
-    kube_basic_auths: "{{ kraken_config.kubeAuth.authn.basic | difference( undefined_password_kube_basic_auths )}}"
+    kube_basic_auths: "{{ kraken_config.kubeAuth.authn.basic | difference( undefined_password_kube_basic_auths ) }}"
 
 - name: Generate password for the auths
   set_fact:
     kube_basic_auths: "{{ kube_basic_auths + [ { 'user': item.user, 'password': lookup('password', config_base + '/' + kraken_config.cluster + '/auth/k8spassword-' + item.user + ' chars=ascii_letters length=11') } ] }}"
-  with_items: "{{undefined_password_kube_basic_auths}}"
+  with_items: "{{ undefined_password_kube_basic_auths }}"
 
 - name: Merge the kube basic auths to kraken_config
   set_fact:
@@ -101,7 +101,7 @@
 
 - name: Set the provider type
   set_fact:
-    kraken_config: "{{ kraken_config | combine({'providerConfig': {'type': 'cloudinit'}}, recursive=True) }}"
+    kraken_config: "{{ kraken_config | combine({'providerConfig': {'type': 'cloudinit' }}, recursive=True) }}"
   when: kraken_config.providerConfig.type | is_empty
 
 - name: Generate random prefix if required

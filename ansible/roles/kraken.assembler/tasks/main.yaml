@@ -1,7 +1,7 @@
 ---
 - name: Make sure generated folder for full cloud configs is there
   file: >
-    path="{{ config_base | expanduser }}/{{kraken_config.cluster}}/cloud-config"
+    path="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/cloud-config"
     state=directory
 
 - include: master.yaml

@@ -12,6 +12,6 @@ dependencies:
       role: '{{ playbook_dir }}/roles/kraken.error',
       kraken_component_type: provider,
       kraken_component_error: 'Unsupported provider',
-      kraken_component_name: '{{kraken_config.provider}}',
+      kraken_component_name: '{{ kraken_config.provider }}',
       when: "kraken_config.provider not in ['aws', 'gke']"
     }

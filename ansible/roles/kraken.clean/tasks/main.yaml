@@ -1,5 +1,5 @@
 ---
 - name: clean the generated folder
   file:
-    path: "{{ config_base | expanduser }}/{{kraken_config.cluster}}"
+    path: "{{ config_base | expanduser }}/{{ kraken_config.cluster }}"
     state: absent

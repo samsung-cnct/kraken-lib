@@ -3,12 +3,12 @@
   command: >
     kubectl --kubeconfig={{ kubeconfig }} get services --all-namespaces -o json
   register: added_services
-  when: kraken_action == 'down' and kubeconfig|is_file
+  when: kraken_action == 'down' and kubeconfig | is_file
   ignore_errors: yes
 
 - name: Register services fact
   set_fact:
-    added_services_map: "{{ added_services.stdout|from_json }}"
+    added_services_map: "{{ added_services.stdout | from_json }}"
   when: kraken_action == 'down'
   ignore_errors: yes
 
@@ -24,14 +24,14 @@
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
-  with_items: "{{cluster_services}}"
+  with_items: "{{ cluster_services }}"
   ignore_errors: yes
-  when: tiller_present|succeeded and not tiller_present|skipped
+  when: tiller_present | succeeded and not tiller_present | skipped
 
 - name: Clean up tiller if present
   command: >
     kubectl --kubeconfig={{ kubeconfig }} delete deployment {{ tiller }} --namespace=kube-system
-  when: tiller_present|succeeded and not tiller_present|skipped
+  when: tiller_present | succeeded and not tiller_present | skipped
 
 - name: Clean up services
   command: >
@@ -48,7 +48,7 @@
   ignore_errors: yes
 
 - name: Get vpc id
-  shell: "terraform state show -state={{ config_base | expanduser }}/{{kraken_config.cluster}}/terraform.tfstate module.vpc.aws_vpc.vpc  | awk '/^id/{print $3}'"
+  shell: "terraform state show -state={{ config_base | expanduser }}/{{ kraken_config.cluster }}/terraform.tfstate module.vpc.aws_vpc.vpc  | awk '/^id/{print $3}'"
   register: terraform_state_show
   when: kraken_action == 'down'
   changed_when: false
@@ -62,13 +62,13 @@
   action:
     module: ec2_elb_facts
     region: "{{ kraken_config.providerConfig.region }}"
-    aws_access_key: "{{ kraken_config.providerConfig.authentication.accessKey or omit}}"
+    aws_access_key: "{{ kraken_config.providerConfig.authentication.accessKey or omit }}"
     aws_secret_key: "{{ kraken_config.providerConfig.authentication.accessSecret or omit }}"
     profile: "{{ kraken_config.providerConfig.authentication.credentialsProfile or omit }}"
   register: elb_facts
   vars:
     vpc_lookup: "elbs[?vpc_id=='{{ vpcid }}']"
   when: kraken_action == 'down' and kraken_config.provider == 'aws'
-  until: (elb_facts is none) or (elb_facts|json_query(vpc_lookup) is none) or (elb_facts|json_query(vpc_lookup)|length <= 1)
+  until: (elb_facts is none) or (elb_facts | json_query(vpc_lookup) is none) or (elb_facts | json_query(vpc_lookup) | length <= 1)
   retries: 120
   delay: 5

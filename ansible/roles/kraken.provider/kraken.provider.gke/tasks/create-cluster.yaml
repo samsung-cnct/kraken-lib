@@ -5,16 +5,16 @@
 
 - name: Render a deployment manager template
   template: src=deploymentmanager-create.yaml.jinja2
-   dest="{{ config_base | expanduser }}/{{kraken_config.cluster}}/deploymentmanager-create.yaml"
+   dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/deploymentmanager-create.yaml"
 
 - name: Deploy cluster
   command: >
     gcloud deployment-manager deployments create {{ kraken_config.cluster }}-k2-deployment
-      --config {{ config_base | expanduser }}/{{kraken_config.cluster}}/deploymentmanager-create.yaml 
+      --config {{ config_base | expanduser }}/{{ kraken_config.cluster }}/deploymentmanager-create.yaml
       --project {{ kraken_config.providerConfig.project }}
       --no-async
       --quiet
-  register: deployment_result 
+  register: deployment_result
   ignore_errors: yes
 
 - name: Inspect the failed deployments
@@ -22,16 +22,16 @@
     gcloud deployment-manager deployments describe {{ kraken_config.cluster }}-k2-deployment
       --project {{ kraken_config.providerConfig.project }}
       --format yaml
-  when: (deployment_result is defined) and deployment_result|failed
+  when: (deployment_result is defined) and deployment_result | failed
   register: inspect_result
 
 - name: load failed deployment inspection result into variable
   set_fact:
     yaml_inspect_result: "{{ inspect_result.stdout | from_yaml }}"
-  when: (inspect_result is defined) and deployment_result|failed
+  when: (inspect_result is defined) and deployment_result | failed
 
 - name: Fail unless deployed cluster is 100 complete
-  fail: "msg='Deployment {{ kraken_config.cluster }}-k2-deployment failed with: {{yaml_inspect_result}}'"
+  fail: "msg='Deployment {{ kraken_config.cluster }}-k2-deployment failed with: {{ yaml_inspect_result }}'"
   when: (yaml_inspect_result is defined) and ((yaml_inspect_result.deployment.operation.status != 'DONE') or (yaml_inspect_result.deployment.operation.progress != 100))
 
 - name: Set legacy kubeconfig certificate behavior
@@ -40,12 +40,12 @@
 
 - name: Get kubeconfig
   command: >
-    gcloud container clusters get-credentials {{ kraken_config.cluster }} 
+    gcloud container clusters get-credentials {{ kraken_config.cluster }}
        --project {{ kraken_config.providerConfig.project }}
        --zone {{ kraken_config.providerConfig.zone.primaryZone }}
        --quiet
   environment:
-    KUBECONFIG: "{{ config_base | expanduser }}/{{kraken_config.cluster}}/admin.kubeconfig"
+    KUBECONFIG: "{{ config_base | expanduser }}/{{ kraken_config.cluster }}/admin.kubeconfig"
     CLOUDSDK_CONTAINER_USE_CLIENT_CERTIFICATE: True
 
 - include: update-cluster.yaml

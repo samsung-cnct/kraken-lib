@@ -15,6 +15,6 @@ dependencies:
       kraken_component_type: master,
       kraken_component_error: 'Unsupported container runtime',
       kraken_component_name: master,
-      when: 
+      when:
         "kraken_config.master.nodepool.containerConfig.runtime not in ['docker']"
     }

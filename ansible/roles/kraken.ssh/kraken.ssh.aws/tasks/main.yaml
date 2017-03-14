@@ -2,7 +2,7 @@
 - name: Gather inventory of all cluster nodes
   ec2_remote_facts:
     region: "{{ kraken_config.providerConfig.region }}"
-    aws_access_key: "{{ kraken_config.providerConfig.authentication.accessKey or omit}}"
+    aws_access_key: "{{ kraken_config.providerConfig.authentication.accessKey or omit }}"
     aws_secret_key: "{{ kraken_config.providerConfig.authentication.accessSecret or omit }}"
     profile: "{{ kraken_config.providerConfig.authentication.credentialsProfile or omit }}"
     filters:
