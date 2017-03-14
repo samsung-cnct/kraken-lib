@@ -27,7 +27,7 @@
 - name: Trigger a fatal error
   fail: 
     msg: "Make sure that the 'cluster' is defined in {{config_file}}"
-  when: (kraken_config.cluster is not defined) or (kraken_config.cluster is none) or (kraken_config.cluster|trim == '')
+  when: kraken_config.cluster | is_empty
 
 - name: Set the kubernetes cloud provider to {{ kraken_config.provider }}
   set_fact:
@@ -100,18 +100,12 @@
 - name: Set the provider type
   set_fact:
     kraken_config: "{{ kraken_config | combine({'providerConfig': {'type': 'cloudinit'}}, recursive=True) }}"
-  when: (kraken_config.providerConfig.type is undefined) or (kraken_config.providerConfig.type is none) or (kraken_config.providerConfig.type|trim == '')
+  when: kraken_config.providerConfig.type | is_empty
 
 - name: Generate random prefix if required
   set_fact:
     kraken_config: "{{ kraken_config | combine({'resourcePrefix': lookup('password', config_base + '/' + kraken_config.cluster + '/prefix' + ' chars=ascii_letters length=7')}, recursive=True) }}"
-  when: 
-    "(kraken_config.resourcePrefix is undefined) or 
-     (kraken_config.resourcePrefix is none) or 
-     (kraken_config.resourcePrefix|trim == '')"
+  when: kraken_config.resourcePrefix | is_empty
 
 - include: set-oidc-info.yaml
   when: "kraken_config.kubeAuth.authn.oidc is defined"
-
-  #- name: Display config
-  #  debug: var=kraken_config
