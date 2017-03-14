@@ -24,20 +24,26 @@
     kraken_config: "{{ kraken_config_defaults.deployment | combine(kraken_config_user.deployment) | expand_config }}"
   when: config_stat.stat.exists == True
 
-- name: Trigger a fatal error
+- name: Verify cluster is defined
   fail: 
     msg: "Make sure that the 'cluster' is defined in {{config_file}}"
   when: kraken_config.cluster | is_empty
 
+- name: Verify cloud provider is supported
+  fail:
+    msg: |
+      {{ kraken_config.provider }} is not a supported cloud provider. Please file an issue at
+      https://github.com/samsung-cnct/k2/issues to request support.
+  when: kraken_config.provider not in ['aws', 'gke']
+
 - name: Set the kubernetes cloud provider to {{ kraken_config.provider }}
   set_fact:
     kraken_config: "{{ kraken_config | combine({'kubernetes_cloudprovider':kraken_config.provider}) }}"
-  when: "kraken_config.provider in ['aws', 'gke', 'cloudstack', 'gce', 'mesos', 'openstack', 'ovirt', 'rackspace', 'vsphere']"
 
 - name: Set the kubernetes cloud provider to none
   set_fact:
     kraken_config: "{{ kraken_config | combine({'kubernetes_cloudprovider':''}) }}"
-  when: "kraken_config.provider not in ['aws', 'azure', 'cloudstack', 'gce', 'mesos', 'openstack', 'ovirt', 'rackspace', 'vsphere']"
+  when: kraken_config.provider not in ['aws', 'azure', 'cloudstack', 'gce', 'mesos', 'openstack', 'ovirt', 'rackspace', 'vsphere']
 
 - name: Set default kubernetes basic user if not defined
   set_fact:
