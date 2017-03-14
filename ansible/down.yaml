@@ -2,7 +2,7 @@
 - hosts: localhost
   roles:
     - { 
-        role: 'kraken.config', config_file: "{{ config_path | default('') }}", 
+        role: 'kraken.config',
         tags: [ 'config', 'always', 'config_only' ] 
       }
     - { 

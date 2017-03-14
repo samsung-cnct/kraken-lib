@@ -1,8 +1,4 @@
 ---
-- name: Check if configuration file exists
-  stat: path={{ config_file | default(config_file_default) }}
-  register: config_stat
-
 - name: Include configuration variables from defaults file
   include_vars: 
     file: "{{ role_path }}/files/config.yaml"
@@ -10,19 +6,19 @@
 
 - name: Include configuration variables
   include_vars: 
-    file: "{{config_file}}"
+    file: "{{ config_file }}"
     name: kraken_config_user
-  when: config_stat.stat.exists == True
+  when: config_file | is_file
 
 - name: expand default configuration and register the config fact
   set_fact:
     kraken_config: "{{ kraken_config_defaults.deployment | expand_config }}"
-  when: config_stat.stat.exists != True
+  when: not config_file | is_file
 
 - name: Non-recursively combine defaults and user config expand configuration and register the config fact
   set_fact:
     kraken_config: "{{ kraken_config_defaults.deployment | combine(kraken_config_user.deployment) | expand_config }}"
-  when: config_stat.stat.exists == True
+  when: config_file | is_file
 
 - name: Verify cluster is defined
   fail: 
