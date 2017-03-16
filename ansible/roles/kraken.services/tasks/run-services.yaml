@@ -55,7 +55,7 @@
 - name: Wait for tiller to be ready
   command: "kubectl --kubeconfig={{ kubeconfig | expanduser }} --namespace=kube-system get deploy tiller-deploy -o json"
   register: output
-  until: ((output.stdout | from_json).status.availableReplicas | default(0)) > 0
+  until: (output | succeeded) and ((output.stdout | from_json).status.availableReplicas | default(0)) > 0
   retries: 600
   delay: 1
   changed_when: false
