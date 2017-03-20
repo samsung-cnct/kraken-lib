@@ -11,7 +11,6 @@ definitions:
           url: http://atlas.cnct.io
         - name: stable
           url: https://kubernetes-charts.storage.googleapis.com
-      # Note that services was renamed charts to match the helm nomenclature.
       charts:
         - name: kubedns
           repo: atlas
@@ -34,7 +33,6 @@ definitions:
     - &defaultCanalFabric
       name: defaultCanalFabric
       kind: fabric
-      # !? Note "provider: flannel" was changed to "type: canal"
       type: canal
       options:
         containers:
@@ -336,7 +334,6 @@ definitions:
   keyPairs:
    - &defaultKeyPair
       name: defaultKeyPair
-      # !? Cf. Joyent
       kind: keyPair
       publickeyFile: "$HOME/.ssh/id_rsa.pub"
       privatekeyFile: "$HOME/.ssh/id_rsa"
