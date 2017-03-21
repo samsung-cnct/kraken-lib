@@ -42,6 +42,7 @@
       --exec=/hyperkube -- kubelet \
       --api_servers=https://apiserver.{{kraken_config.cluster}}.internal \
       --register-node=true \
+      --node-labels=nodepool={{item.nodepool.name}} \
       --allow-privileged=true \
       --config=/etc/kubernetes/manifests \
       --kubeconfig=/etc/kubernetes/kubeconfig.yaml \

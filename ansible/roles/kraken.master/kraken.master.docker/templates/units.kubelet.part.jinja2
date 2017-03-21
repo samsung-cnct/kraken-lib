@@ -42,6 +42,7 @@
       --allow-privileged=true \
       --config=/etc/kubernetes/manifests \
       --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
+      --node-labels=nodepool={{kraken_config.master.nodepool.name}} \
       --hostname-override=${DEFAULT_IPV4} \
       --cluster-dns={{kraken_config.serviceDNS}} \
       --cluster-domain={{kraken_config.clusterDomain}} \
