@@ -349,7 +349,7 @@ deployment:
       dns: 10.32.0.2
       domain: cluster.local
       providerConfig: *defaultAws
-      nodes:
+      nodePools:
         - name: etcd
           count: 5
           etcdConfig: *defaultEtcd
