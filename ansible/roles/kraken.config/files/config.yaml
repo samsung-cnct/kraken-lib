@@ -112,8 +112,6 @@ definitions:
       channel: stable
       rebootStrategy: "off"
   nodeConfigs:
-    # !? Etcd and EtcdEvents nodeConfigs differ only in tags.
-    # !? Cluster and master nodeConfigs differ only in instance type.
     - &defaultAwsEtcdNode
       name: defaultAwsEtcdNode
       kind: node
@@ -338,9 +336,7 @@ definitions:
       publickeyFile: "$HOME/.ssh/id_rsa.pub"
       privatekeyFile: "$HOME/.ssh/id_rsa"
 
-# This is the core of the new configuration. We might want to move some of the
-# definitions above for clarity. One suggestion was to move providerConfigs
-# into their own provider.d directory structure.
+# This is the core of the new configuration.
 
 deployment:
   clusters:
@@ -394,8 +390,8 @@ deployment:
     value: 0
     wait: 600
 
-# !? Below are the old definitions for backwards compatibility while we convert
-# each Ansible task to reference the new definitions and organization.
+# These are the old definitions included for backwards compatibility while we
+# convert each Ansible task to reference the new definitions and organization.
 
   cluster: k2recon
   serviceCidr: 10.32.0.0/12
