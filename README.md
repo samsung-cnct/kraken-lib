@@ -164,7 +164,7 @@ with locally installed kubectl:
 After creating a cluster, to use the helm shipped with K2, run a command similar to:
 
 ```bash
-docker run $K2OPTS -e HELM_HOME=$HOME/.kraken/YOURCLUSTER/.helm -e KUBECONFIG=$HOME/g.kraken/YOURCLUSTER/admin.kubeconfig quay.io/samsung_cnct/k2:latest helm list
+docker run $K2OPTS -e HELM_HOME=$HOME/.kraken/YOURCLUSTER/.helm -e KUBECONFIG=$HOME/.kraken/YOURCLUSTER/admin.kubeconfig quay.io/samsung_cnct/k2:latest helm list
 ```
 
 with locally installed kubectl:
@@ -307,7 +307,7 @@ You can try having helm install a new service, such as the Kubernetes dashboard
 ##### Find Kubernetes Dashboard Version
 
 ```bash
-docker run $K2OPTS -e HELM_HOME=$HOME/.kraken/foo/.helm -e KUBECONFIG=$HOME/g.kraken/foo/admin.kubeconfig quay.io/samsung_cnct/k2:latest helm search kubernetes
+docker run $K2OPTS -e HELM_HOME=$HOME/.kraken/foo/.helm -e KUBECONFIG=$HOME/.kraken/foo/admin.kubeconfig quay.io/samsung_cnct/k2:latest helm search kubernetes
 
 $ atlas/kubernetes-dashboard-0.1.0.tgz
 ```
@@ -317,7 +317,7 @@ This indicates that the file to install is `atlas/kubernetes-dashboard-0.1.0`.
 ##### Install Kubernetes Dashboard
 
 ```bash
-docker run $K2OPTS -e HELM_HOME=$HOME/.kraken/foo/.helm -e KUBECONFIG=$HOME/g.kraken/foo/admin.kubeconfig quay.io/samsung_cnct/k2:latest helm install atlas/kubernetes-dashboard-0.1.0
+docker run $K2OPTS -e HELM_HOME=$HOME/.kraken/foo/.helm -e KUBECONFIG=$HOME/.kraken/foo/admin.kubeconfig quay.io/samsung_cnct/k2:latest helm install atlas/kubernetes-dashboard-0.1.0
 ```
 
 ```bash
