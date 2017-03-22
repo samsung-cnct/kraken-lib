@@ -340,7 +340,7 @@ definitions:
 
 deployment:
   clusters:
-    - name: k2recon
+    - name:
       network: 10.32.0.0/12
       dns: 10.32.0.2
       domain: cluster.local
@@ -393,7 +393,7 @@ deployment:
 # These are the old definitions included for backwards compatibility while we
 # convert each Ansible task to reference the new definitions and organization.
 
-  cluster: k2recon
+  cluster:
   serviceCidr: 10.32.0.0/12
   serviceDNS: 10.32.0.2
   clusterDomain: cluster.local
@@ -428,7 +428,7 @@ deployment:
     -
       name: masterNodes
       count: 3
-      <<: *defaultAwsEtcdNode
+      <<: *defaultAwsMasterNode
       keypair: *defaultKeyPair
       kubeConfig: *defaultKube
       containerConfig: *defaultDocker
