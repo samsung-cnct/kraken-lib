@@ -29,7 +29,9 @@
 - name: Ensure the kube-networking namespace exists
   command: >
     kubectl --kubeconfig={{ kubeconfig | expanduser }} create namespace kube-networking
+  register: result
   retries: 120
+  until: result|succeeded
   delay: 1
   when: not kube_networking_namespace.rc == 0
   ignore_errors: yes
