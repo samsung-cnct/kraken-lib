@@ -20,6 +20,6 @@
      --set-env=HOST_IP=${DEFAULT_IPV4} \
      --set-env=SERVICE_DNS_NAME={{item.name}}.{{kraken_config.cluster}}.internal \
      --set-env=HOST_DNS_NAME=*.{{item.name}}.{{kraken_config.cluster}}.internal \
-     quay.io/samsung_cnct/drunkensmee:v0.4 \
+     quay.io/samsung_cnct/drunkensmee:v0.5 \
      --exec /assets/generate_etcd.sh
     ExecStopPost=/usr/bin/rkt gc --mark-only

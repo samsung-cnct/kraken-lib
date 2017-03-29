@@ -20,6 +20,6 @@
      --set-env=HOST_IP=${DEFAULT_IPV4} \
      --set-env=KUBE_SERVICE_IP={{ kraken_config.serviceCidr | ipaddr('1') | ipaddr('address') }} \
      --set-env=SERVICE_DNS_NAME=apiserver.{{kraken_config.cluster}}.internal \
-     quay.io/samsung_cnct/drunkensmee:v0.4 \
+     quay.io/samsung_cnct/drunkensmee:v0.5 \
      --exec /assets/generate_apiserver.sh
     ExecStopPost=/usr/bin/rkt gc --mark-only
