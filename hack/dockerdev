@@ -1,0 +1,67 @@
+#!/bin/bash
+#
+# This script can be used to stand up a k2 container for development
+#
+# This maps any files or directories specified in your config.yaml file
+# into the docker container (just like k2cli does) and maps your development
+# tree over the contents of the quay container.
+#
+
+# Work around OSX
+realpath() {
+    REALDIR=$(cd "$(dirname "$@")" && pwd -P)
+    REALFILE=$(basename "$@")
+    echo ${REALDIR}/${REALFILE}
+}
+
+if [[ -z "$(which envsubst)" ]]; then
+    cat << EOF
+OSX doesn't have envsubst by default. Please install gettext:
+    brew install gettext
+    brew link --force gettext
+EOF
+    exit 1
+fi
+
+while getopts c:i: opt; do
+    case $opt in
+        c) CONFIGFILE="${OPTARG}";;
+        i) IMAGE="${OPTARG}";;
+    esac
+done
+
+CONFIGFILE="${CONFIGFILE:-${HOME}/.kraken/config.yaml}"
+IMAGE="${IMAGE:-quay.io/samsung_cnct/k2-tools:latest}"
+GITROOT="$(git rev-parse --show-toplevel)"
+
+# error if this isn't a k2 checkout
+if ! [[ -d ${GITROOT}/ansible/roles/kraken.config ]]; then
+    echo $0 must be run under your k2 checkout
+fi
+
+# error if the config file does not exist
+if ! [[ -f ${CONFIGFILE} ]]; then
+    echo $CONFIGFILE does not exist. Must have a valid config yaml file.
+    exit 1
+fi
+
+CONFIGFILE=$(realpath ${CONFIGFILE})
+MAPPINGS="-v ${CONFIGFILE}:${CONFIGFILE}"
+
+# Add any file that exists in the config yaml to the docker maps
+for d in $(sed -e 's/[^:]\+://' -e "s/^[ ]*\([\"']\)\(.*\)\1\$/\2/g" $CONFIGFILE); do
+    p=$(envsubst <<< "$d")  # expand variables
+    p=$(sed -e "s/^[\"']//" -e "s/[\"']$//" <<< "$p")
+    # only add the map if the path is absolute, if it's not already in the string, and if it's a file or directory
+    if [[ $p == /* ]] && ! [[ ${MAPPINGS} == *${p}* ]] && ([[ -f $p ]] || [[ -d $p ]]); then
+        MAPPINGS="${MAPPINGS} -v ${p}:${p}"
+    fi
+done
+
+# Map the git root to /kraken
+MAPPINGS="${MAPPINGS} -v ${GITROOT}:/kraken"
+
+echo -e "Mappings:\n$(tr ' ' '\n' <<< "$MAPPINGS" | grep -e -v '-v' | sort)"
+echo ""
+echo "Running bash in k2 container. Use up.sh, down.sh, etc."
+docker run ${MAPPINGS} -e HOME=${HOME} --rm=true -it ${IMAGE} /bin/bash
