@@ -4,7 +4,7 @@ provider "aws" {
   shared_credentials_file = "{{kraken_config.providerConfig.authentication.credentialsFile}}"
   profile     = "{{kraken_config.providerConfig.authentication.credentialsProfile}}"
   region      = "{{kraken_config.providerConfig.region}}"
-  max_retries = "100"
+  max_retries = "8"
 }
 
 module "vpc" {
