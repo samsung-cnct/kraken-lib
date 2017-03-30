@@ -14,6 +14,6 @@ source "${my_dir}/bin/utils.sh"
 # setup a sigint trap
 trap control_c SIGINT
 
-DISPLAY_SKIPPED_HOSTS=0 ansible-playbook ${VERBOSE} -i ansible/inventory/localhost ansible/up.yaml --extra-vars "${KRAKEN_EXTRA_VARS}kraken_action=up" --tags "${KRAKEN_TAGS}" || show_post_cluster_error
+DISPLAY_SKIPPED_HOSTS=0 ansible-playbook ${K2_VERBOSE} -i ansible/inventory/localhost ansible/up.yaml --extra-vars "${KRAKEN_EXTRA_VARS}kraken_action=up" --tags "${KRAKEN_TAGS}" || show_post_cluster_error
 
 show_post_cluster

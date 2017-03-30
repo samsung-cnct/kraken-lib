@@ -9,6 +9,8 @@ my_dir=$(dirname "${BASH_SOURCE}")
 # set KRAKEN_ROOT to absolute path for use in other scripts
 readonly KRAKEN_ROOT=$(cd "${my_dir}/.."; pwd)
 KRAKEN_VERBOSE=${KRAKEN_VERBOSE:-false}
+K2_VERBOSE=''
+KRAKEN_TF_LOG=k2_tf_debug.log
 
 # set RANDFILE to prevent creation of ${HOME}/.rnd by openssl
 export RANDFILE=$(mktemp)
@@ -96,6 +98,10 @@ case $key in
   KRAKEN_TAGS="$2"
   shift
   ;;
+  -v|--verbose)
+  K2_VERBOSE="$2"
+  shift
+  ;;
   -h|--help)
   KRAKEN_HELP=true
   ;;
@@ -131,8 +137,13 @@ fi
 
 KRAKEN_EXTRA_VARS="config_path=${KRAKEN_CONFIG} config_base=${KRAKEN_BASE} "
 
-if [ -z ${BUILD_TAG+x} ]; then
-    VERBOSE=""
-else
-    VERBOSE=-vvv
+if [ ! -z ${BUILD_TAG+x} ]; then
+    K2_VERBOSE='-vvv'
 fi
+
+if [ ! -z ${K2_VERBOSE+x} ]; then
+   TF_LOG_PATH="${KRAKEN_ROOT}/${KRAKEN_TF_LOG}"
+   TF_LOG=DEBUG
+fi
+
+
