@@ -104,6 +104,14 @@
     kraken_config: "{{ kraken_config | combine({'providerConfig': {'type': 'cloudinit' }}, recursive=True) }}"
   when: kraken_config.providerConfig.type | is_empty
 
+- name: Set kubernetes minor version for master nodes
+  set_fact:
+    kubernetes_minor_version: "{{ masterVersion[0:(masterVersion.find('.', 3)) ] }}"
+  vars:
+    # json_query returns a list of items, which in this case is one element long.
+    masterVersion: "{{ (kraken_config | json_query('nodepool[?name==`masterNodes`].kubeConfig.version'))[0] }}"
+  when: kraken_config.provider == 'aws'
+
 - name: Generate random prefix if required
   set_fact:
     kraken_config: "{{ kraken_config | combine({'resourcePrefix': lookup('password', config_base + '/' + kraken_config.cluster + '/prefix' + ' chars=ascii_letters length=7')}, recursive=True) }}"
