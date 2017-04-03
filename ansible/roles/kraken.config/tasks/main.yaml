@@ -41,6 +41,11 @@
     kraken_config: "{{ kraken_config | combine({'kubernetes_cloudprovider':''}) }}"
   when: kraken_config.provider not in ['aws', 'azure', 'cloudstack', 'gce', 'mesos', 'openstack', 'ovirt', 'rackspace', 'vsphere']
 
+- name: Set empty kubeAuth if not defined
+  set_fact:
+    kraken_config: "{{ kraken_config | combine({'kubeAuth': {}}, recursive=True) }}"
+  when: "kraken_config.kubeAuth is undefined"
+
 - name: Set default kubernetes basic user if not defined
   set_fact:
     kraken_config: "{{ kraken_config | combine(
@@ -51,7 +56,7 @@
         }
       }
     }, recursive=True) }}"
-  when: "kraken_config.kubeAuth.authn.default_basic_user is undefined"
+  when: "kraken_config.kubeAuth.authn is undefined"
 
 - name: Set empty kubernetes authz dic if not defined
   set_fact:
