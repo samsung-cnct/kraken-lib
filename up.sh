@@ -9,7 +9,7 @@ set -o pipefail
 
 # pull in utils
 my_dir=$(dirname "${BASH_SOURCE}")
-source "${my_dir}/bin/utils.sh"
+source "${my_dir}/lib/common.sh"
 
 # setup a sigint trap
 trap control_c SIGINT
