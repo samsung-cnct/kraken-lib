@@ -25,6 +25,17 @@
     msg: "Make sure that the 'cluster' is defined in {{ config_file }}"
   when: kraken_config.cluster | is_empty
 
+- name: Warn if still using old style configuration format
+  debug:
+    msg: >-
+         k2 is migrating to a new configuration file format. The configuration
+         file ({{ config_file }}) appears to be using the old style format. If
+         you would like to continue using this configuration file you can
+         checkout the k2 version tagged 0.0, however, it is strongly recommended
+         that you generate a new configuration file, and then modify it as
+         appropriate for your environment.
+  when: kraken_config_user.version is undefined
+
 - name: Verify cloud provider is supported
   fail:
     msg: |
