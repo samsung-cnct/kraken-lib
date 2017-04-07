@@ -1,0 +1,2 @@
+cd /kraken
+export PS1='K2 Docker:\u@\h \W\$ '

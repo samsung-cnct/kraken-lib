@@ -64,7 +64,10 @@ MAPPINGS="${MAPPINGS} -v ${GITROOT}:/kraken"
 # Map the .kraken directory
 MAPPINGS="${MAPPINGS} -v ${HOME}/.kraken:${HOME}/.kraken"
 
+# Map a bashrc file
+MAPPINGS="${MAPPINGS} -v ${GITROOT}/lib/bashrc:${HOME}/.bashrc"
+
 echo -e "Mappings:\n$(tr ' ' '\n' <<< "$MAPPINGS" | grep -e -v '-v' | sort)"
 echo ""
 echo "Running bash in k2 container. Use up.sh, down.sh, etc."
-docker run ${MAPPINGS} -e HOME=${HOME} --rm=true -it ${IMAGE} /bin/bash
+docker run ${MAPPINGS} -e HOME=${HOME} --rm=true -it ${IMAGE} /bin/bash --rcfile ${HOME}/.bashrc 
