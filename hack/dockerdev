@@ -61,6 +61,9 @@ done
 # Map the git root to /kraken
 MAPPINGS="${MAPPINGS} -v ${GITROOT}:/kraken"
 
+# Map the .kraken directory
+MAPPINGS="${MAPPINGS} -v ${HOME}/.kraken:${HOME}/.kraken"
+
 echo -e "Mappings:\n$(tr ' ' '\n' <<< "$MAPPINGS" | grep -e -v '-v' | sort)"
 echo ""
 echo "Running bash in k2 container. Use up.sh, down.sh, etc."
