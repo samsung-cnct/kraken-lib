@@ -58,11 +58,6 @@ definitions:
           subnetMax: 10.191.255.255
           backend:
             type: vxlan
-  loadBalancerConfigs:
-    - &defaultLoadBalancer
-      name: defaultLoadBalancer
-      kind: loadBalancer
-      type: cloud
   kvStoreConfigs:
     - &defaultEtcd
       name: defaultEtcd
@@ -86,6 +81,7 @@ definitions:
     - &defaultApiServer
       name: defaultApiServer
       kind: apiServer
+      loadBalancer: cloud
       state:
         etcd: *defaultEtcd
       events:
@@ -362,7 +358,6 @@ deployment:
           keyPair: *defaultKeyPair
         - name: master
           count: 3
-          loadBalancerConfig: *defaultLoadBalancer
           apiServerConfig: *defaultApiServer
           kubeConfig: *defaultKube
           containerConfig: *defaultDocker
