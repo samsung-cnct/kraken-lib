@@ -1,0 +1,17 @@
+galaxy_info:
+  author: Samsung CNCT
+  description:
+  company: Samsung CNCT
+  license: Apache 2.0
+  min_ansible_version: 1.2
+
+dependencies:
+  - { role: '{{ playbook_dir }}/roles/kraken.provider/kraken.provider.aws', when: kraken_config.provider == 'aws' }
+  - { role: '{{ playbook_dir }}/roles/kraken.provider/kraken.provider.gke', when: kraken_config.provider == 'gke' }
+  - {
+      role: '{{ playbook_dir }}/roles/kraken.error',
+      kraken_component_type: provider,
+      kraken_component_error: 'Unsupported provider',
+      kraken_component_name: '{{ kraken_config.provider }}',
+      when: "kraken_config.provider not in ['aws', 'gke']"
+    }

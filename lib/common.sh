@@ -94,6 +94,15 @@ function show_post_cluster_error {
   exit 1
 }
 
+function show_upgrade {
+  inf "Node versions have all been successfully upgraded."
+}
+
+function show_upgrade_error {
+  warn "The cluster has not been completely upgraded.  Some nodes may still be in the previous version."
+  exit 1
+}
+
 function control_c() {
   warn "Interrupted!"
   show_post_cluster_error
@@ -156,7 +165,7 @@ if [ -z ${KRAKEN_BASE+x} ]; then
 fi
 
 if [ -z ${KRAKEN_TAGS+x} ]; then
-  KRAKEN_TAGS="all" 
+  KRAKEN_TAGS="all"
 fi
 
 KRAKEN_EXTRA_VARS="config_path=${KRAKEN_CONFIG} config_base=${KRAKEN_BASE} "

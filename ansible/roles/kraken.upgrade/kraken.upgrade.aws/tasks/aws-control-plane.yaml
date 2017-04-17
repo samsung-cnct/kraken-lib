@@ -1,0 +1,32 @@
+- name: Set Expected Master Node Count
+  vars:
+    test_case: "nodepool[?name=='masterNodes'].count"
+  set_fact:
+    expected_master_node_count: "{{ kraken_config|json_query(test_case) }}"
+
+- name: Collect Master nodes
+  shell: kubectl --kubeconfig={{ kubeconfig }} get nodes -l nodepool=masterNodes -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}'
+  register: master_node_names
+
+- name: Gather EC2 facts
+  ec2_remote_facts:
+    region: "{{ kraken_config.providerConfig.region }}"
+    aws_access_key: "{{ kraken_config.providerConfig.authentication.accessKey or omit }}"
+    aws_secret_key: "{{ kraken_config.providerConfig.authentication.accessSecret or omit }}"
+    profile: "{{ kraken_config.providerConfig.authentication.credentialsProfile or omit }}"
+  register: instance_info
+  ignore_errors: yes
+
+- name: Create dict with node names and instance ids
+  set_fact:
+    names_and_instance_ids: "{{ names_and_instance_ids|default({}) | combine( {item.0: item.1} )  }}"
+  with_together:
+    - "{{ instance_info.instances|map(attribute='private_dns_name')|list }}"
+    - "{{ instance_info.instances|map(attribute='id')|list }}"
+  when: item.0 in master_node_names.stdout_lines
+
+- name: Delete and Terminate Master Nodes
+  set_fact:
+    node_destruction: "{{ item.key |delete_and_terminate_node_filter(item.value, expected_master_node_count.0, kubeconfig) }}"
+  with_dict: "{{ names_and_instance_ids }}"
+  failed_when: node_destruction == False

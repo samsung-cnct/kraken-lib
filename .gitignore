@@ -9,3 +9,5 @@ generated/
 .rnd
 .srl
 .terraform.d/
+clusters/
+ansible/cluster_changes.txt

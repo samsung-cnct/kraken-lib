@@ -1,0 +1,3 @@
+---
+
+- include: aws-control-plane.yaml
