@@ -122,7 +122,7 @@
 
 - name: Set kubernetes minor version for master nodes in aws
   set_fact:
-    kubernetes_minor_version: "{{ masterVersion[0:(masterVersion.find('.', 3)) ] }}"
+    kubernetes_minor_version: "{{ masterVersion[0:(masterVersion.find('.', (masterVersion.find('.') + 1 )))] }}"
   vars:
     masterVersion: "{{ (kraken_config | json_query('nodepool[?name==`masterNodes`].kubeConfig.version'))[0] }}"
   when: kraken_config.provider == 'aws'
