@@ -44,7 +44,7 @@
       --register-node=true \
       --node-labels=nodepool={{item.nodepool.name}} \
       --allow-privileged=true \
-      --config=/etc/kubernetes/manifests \
+      --pod-manifest-path=/etc/kubernetes/manifests \
       --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
       --cluster-dns={{kraken_config.serviceDNS}} \
       --cluster-domain={{kraken_config.clusterDomain}} \

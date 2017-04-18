@@ -40,7 +40,7 @@
       --api_servers=http://127.0.0.1:8080 \
       --register-schedulable=false \
       --allow-privileged=true \
-      --config=/etc/kubernetes/manifests \
+      --pod-manifest-path=/etc/kubernetes/manifests \
       --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
       --node-labels=nodepool={{kraken_config.master.nodepool.name}} \
       --hostname-override=${DEFAULT_IPV4} \
