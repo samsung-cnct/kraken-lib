@@ -2,7 +2,7 @@
 
 [![Docker Repository on Quay](https://quay.io/repository/samsung_cnct/k2/status "Docker Repository on Quay")](https://quay.io/repository/samsung_cnct/k2)
 
-Please use [k2cli](https://github.com/samsung-cnct/k2cli), the intended user interface to K2. The 
+Please use [k2cli](https://github.com/samsung-cnct/k2cli), the intended user interface to K2. The
 following instructions are intended for developers working on K2.
 
 ## What is K2
@@ -118,7 +118,7 @@ containing the keyword `cluster`, which once a name has been decided would look 
 cluster: YOURCLUSTER
 ```
 
-Finally, we suggest you rename the `config.yaml` file to something like 
+Finally, we suggest you rename the `config.yaml` file to something like
 
 ```
 YOURCLUSTER.yaml
@@ -408,6 +408,21 @@ docker run $K2OPTS quay.io/samsung_cnct/k2:latest ./up.sh --config $HOME/.kraken
 ```
 
 Replace `foo.yaml` with the name of the configuration file you intend to use.
+
+#### Upgrading Kubernetes Version of Master Nodes
+As mentioned above, before you can upgrade the Kubernetes version, you will first need to update your configuration file with the intended version and run:
+
+```bash
+docker run $K2OPTS quay.io/samsung_cnct/k2:latest ./up.sh --config $HOME/.kraken/<your_config>.yaml
+```
+
+Then run:
+
+ ```bash
+docker run $K2OPTS quay.io/samsung_cnct/k2:latest ./upgrade.sh --config $HOME/.kraken/<your_config>.yaml
+```
+
+Refer to [Kuberntes release versioning](https://github.com/kubernetes/kubernetes/blob/release-1.5.4/docs/design/versioning.md#supported-releases) for questions about supported versions
 
 ## Destroying a Kubernetes Cluster
 
