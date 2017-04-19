@@ -37,7 +37,7 @@
   command: >
     kubectl --kubeconfig={{ kubeconfig }} delete --namespace {{ item.metadata.namespace }} svc {{ item.metadata.name }}
   with_items: "{{ the_services }}"
-  when: item.status.loadBalancer.ingress[0].hostname is defined and kraken_action == 'down'
+  when: kraken_action == 'down' and item.status.loadBalancer.ingress[0].hostname is defined
   ignore_errors: yes
 
 - name: Delete all service namespaces
