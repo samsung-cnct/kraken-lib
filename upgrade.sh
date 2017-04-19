@@ -1,4 +1,4 @@
-l#!/bin/bash -
+#!/bin/bash -
 #title           :upgrade.sh
 #description     :upgrade kubernetes version after running up.sh with new version declared
 #author          :Samsung SDSRA
