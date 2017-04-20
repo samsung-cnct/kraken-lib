@@ -27,10 +27,10 @@ class FilterModule(object):
             print("Exception when calling CoreV1Api->delete_node: %s\n" % e)
             raise
 
-    def terminate_node(self, instance_id):
+    def terminate_node(self, instance_id, aws_region):
         ids = [instance_id]
         try:
-            ec2 = boto3.resource('ec2')
+            ec2 = boto3.resource('ec2', region_name=aws_region)
         except Exception as e:
             print "Unexpected error: %s" % e
             raise
@@ -57,9 +57,9 @@ class FilterModule(object):
 
     # delete and terminate node, then wait until node recreates itself by running a check on current node count versus expected node count
     # update this so that it tries to do each part, and breaks if any part fails with a good error message
-    def delete_and_terminate_node_filter(self, node_name, instance_id, expected_count, kubeconfig):
+    def delete_and_terminate_node_filter(self, node_name, instance_id, expected_count, kubeconfig, aws_region):
         try:
-            self.terminate_node(instance_id)
+            self.terminate_node(instance_id, aws_region)
             print "Terminating instance: " + instance_id
         except Exception:
             return False
@@ -77,4 +77,4 @@ class FilterModule(object):
             current_count = int(self.current_node_count(kubeconfig))
             print "Available Nodes: %s/%s" % (current_count, expected_count)
         print "Node has been upgraded."
-        return True 
+        return True

@@ -1,3 +1,6 @@
+- set_fact:
+    aws_region: "{{ kraken_config.providerConfig.region }}"
+
 - name: Set Expected Master Node Count
   vars:
     test_case: "nodepool[?name=='masterNodes'].count"
@@ -27,6 +30,6 @@
 
 - name: Delete and Terminate Master Nodes
   set_fact:
-    node_destruction: "{{ item.key |delete_and_terminate_node_filter(item.value, expected_master_node_count.0, kubeconfig) }}"
+    node_destruction: "{{ item.key |delete_and_terminate_node_filter(item.value, expected_master_node_count.0, kubeconfig, aws_region) }}"
   with_dict: "{{ names_and_instance_ids }}"
   failed_when: node_destruction == False
