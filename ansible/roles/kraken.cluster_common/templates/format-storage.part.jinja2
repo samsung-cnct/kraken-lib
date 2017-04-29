@@ -1,4 +1,4 @@
-{% for mount in item.nodepool.mounts %}
+{% for mount in item.nodeConfig.mounts %}
 - name: format-storage-{{mount.device | mapdevice}}.service
   command: start
   content: |

@@ -1,14 +1,14 @@
-{% for nodepool in kraken_config.nodepool %}
+{% for nodepool in cluster.nodePools %}
 {% set validHostCounter = 1 %}
 {% set gke_ips = node_ips_out.results[loop.index - 1].stdout_lines %}
 {% for address in gke_ips %}
-{% if kraken_config.providerConfig.keypair.privatekeyFile is defined %}
-{% if kraken_config.providerConfig.keypair.providerConfig.username is defined %}
+{% if cluster.providerConfig.keypair.privatekeyFile is defined %}
+{% if cluster.providerConfig.keypair.providerConfig.username is defined %}
 Host {{nodepool.name}}-{{validHostCounter}}
   HostName {{address}}
   Port 22
-  User {{kraken_config.providerConfig.keypair.providerConfig.username}}
-  IdentityFile {{kraken_config.providerConfig.keypair.privatekeyFile}}
+  User {{cluster.providerConfig.keypair.providerConfig.username}}
+  IdentityFile {{cluster.providerConfig.keypair.privatekeyFile}}
 {% set validHostCounter = validHostCounter + 1 %}
 {% endif %}
 {% endif %}

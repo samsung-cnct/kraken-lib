@@ -1,3 +1,8 @@
 ---
 
 - include: aws-control-plane.yaml
+  with_items:
+    - "{{ kraken_config.clusters }}"
+  loop_control:
+    loop_var: a_cluster
+  

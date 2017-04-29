@@ -1,34 +1,24 @@
 ---
 - name: Make sure generated folder for certs is there
   file: >
-    path="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/certs"
+    path="{{ config_base | expanduser }}/{{ cluster.name }}/certs"
     state=directory
 
 - name: Generate self-signed CA key
   command: >
-    openssl genrsa -out {{ config_base | expanduser }}/{{ kraken_config.cluster }}/certs/ca-key.pem 2048
-    creates={{ config_base | expanduser }}/{{ kraken_config.cluster }}/certs/ca-key.pem
+    openssl genrsa -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/ca-key.pem 2048
+    creates={{ config_base | expanduser }}/{{ cluster.name }}/certs/ca-key.pem
 
 - name: Generate self-signed CA
   command: >
     openssl req -x509 -new -nodes
-      -key {{ config_base | expanduser }}/{{ kraken_config.cluster }}/certs/ca-key.pem
+      -key {{ config_base | expanduser }}/{{ cluster.name }}/certs/ca-key.pem
       -days 7300
-      -out {{ config_base | expanduser }}/{{ kraken_config.cluster }}/certs/ca.pem
+      -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/ca.pem
       -subj "/CN=kraken-ca"
-    creates={{ config_base | expanduser }}/{{ kraken_config.cluster }}/certs/ca.pem
+    creates={{ config_base | expanduser }}/{{ cluster.name }}/certs/ca.pem
 
-- name: Generate etcd .write_files.cert-authority.part files
+- name: Generate nodePool .write_files.cert-authority.part files
   template: src=write_files.cert-authority.part.jinja2
-            dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/etcd.{{ item.name }}.write_files.cert-authority.part"
-  with_items: "{{ kraken_config.etcd }}"
-
-- name: Generate node .write_files.cert-authority.part files
-  template: src=write_files.cert-authority.part.jinja2
-            dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/node.{{ item.name }}.write_files.cert-authority.part"
-  with_items: "{{ kraken_config.node }}"
-
-- name: Generate master .write_files.cert-authority.part files
-  template: src=write_files.cert-authority.part.jinja2
-            dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/master.write_files.cert-authority.part"
-  with_items: ["{{ kraken_config.master }}"]
+            dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ item.name }}.write_files.cert-authority.part"
+  with_items: "{{ cluster.nodePools }}"

@@ -1,6 +1,0 @@
----
-- include: service-account-key.yaml
-- include: render-manifests.yaml
-- include: render-kubeconfig.yaml
-- include: render-write-files.yaml
-- include: render-units.yaml

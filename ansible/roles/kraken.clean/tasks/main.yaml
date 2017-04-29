@@ -1,5 +1,9 @@
 ---
 - name: clean the generated folder
   file:
-    path: "{{ config_base | expanduser }}/{{ kraken_config.cluster }}"
+    path: "{{ config_base | expanduser }}/{{ a_cluster.name }}"
     state: absent
+  with_items:
+    - "{{ kraken_config.clusters }}"
+  loop_control:
+    loop_var: a_cluster

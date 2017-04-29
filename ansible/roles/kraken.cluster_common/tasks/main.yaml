@@ -1,13 +1,10 @@
 ---
-- name: Make sure generated folder for cloud init snippets is there
-  file: >
-    path="{{ config_base | expanduser }}/{{ kraken_config.cluster }}"
-    state=directory
-
-- include: network_environment.yaml
-- include: certificate_authority.yaml
-- include: coreos_update.yaml
-- include: storage.yaml
-- include: locksmith.yaml
-- include: docker-install.yaml
-- include: docker-wait-for-mounts.yaml
+#   top level task to loop over all clusters in the cluster list
+#   its a bit weird but its the cleanest way to do it, I think
+- name: Loop over all elements of cluster_common for each cluster
+  include: cluster-start.yaml
+  with_items:
+    - "{{ kraken_config.clusters }}"
+  loop_control:
+    loop_var: a_cluster
+  when: a_cluster.providerConfig.type == 'cloudinit'

@@ -1,33 +1,30 @@
 provider "aws" {
-  access_key  = "{{kraken_config.providerConfig.authentication.accessKey}}"
-  secret_key  = "{{kraken_config.providerConfig.authentication.accessSecret}}"
-  shared_credentials_file = "{{kraken_config.providerConfig.authentication.credentialsFile}}"
-  profile     = "{{kraken_config.providerConfig.authentication.credentialsProfile}}"
-  region      = "{{kraken_config.providerConfig.region}}"
+  access_key  = "{{cluster.providerConfig.authentication.accessKey}}"
+  secret_key  = "{{cluster.providerConfig.authentication.accessSecret}}"
+  shared_credentials_file = "{{cluster.providerConfig.authentication.credentialsFile}}"
+  profile     = "{{cluster.providerConfig.authentication.credentialsProfile}}"
+  region      = "{{cluster.providerConfig.region}}"
   max_retries = "8"
 }
 
 module "vpc" {
   source = "./vpc"
 
-  cidr_block  = "{{kraken_config.providerConfig.vpc}}"
-  vpc_name  = "{{kraken_config.cluster}}"
-  prefix = "{{kraken_config.resourcePrefix}}"
+  cidr_block  = "{{cluster.providerConfig.vpc}}"
+  vpc_name  = "{{cluster.name}}"
 }
 
 module "keypair" {
   source = "./keypair"
 
-  keypairs_name  = "{{kraken_config.cluster}}"
-  prefix = "{{kraken_config.resourcePrefix}}"
+  keypairs_name  = "{{cluster.name}}"
 }
 
 module "subnet" {
   source = "./subnet"
 
   vpc_id = "${module.vpc.id}"
-  subnets_name  = "{{kraken_config.cluster}}"
-  prefix = "{{kraken_config.resourcePrefix}}"  
+  subnets_name  = "{{cluster.name}}"
   route_table_id = "${module.vpc.route_table_id}"
 }
 
@@ -35,8 +32,7 @@ module "cluster_secgroup" {
   source = "./cluster_secgroup"
 
   vpc_id = "${module.vpc.id}"
-  secgroup_name  = "{{kraken_config.cluster}}"
-  prefix = "{{kraken_config.resourcePrefix}}"  
+  secgroup_name  = "{{cluster.name}}"
   default_security_group_id = "${module.vpc.default_security_group_id}"
 }
 
@@ -44,17 +40,21 @@ module "etcd" {
   source = "./etcd"
 
   vpc_id = "${module.vpc.id}"
-  etcds_name  = "{{kraken_config.cluster}}"
-  prefix = "{{kraken_config.resourcePrefix}}"  
-  cidr_block = "{{kraken_config.providerConfig.vpc}}"
+  etcds_name  = "{{cluster.name}}"
+  cidr_block = "{{cluster.providerConfig.vpc}}"
   route53_zone_id = "${module.vpc.route53_zone_id}"
-{% for etcd in kraken_config.etcd %}
-  {{etcd.nodepool.keypair.name}}_{{etcd.name}}_key = "${module.keypair.{{etcd.nodepool.keypair.name}}_keyname}"
+{% for node in cluster.nodePools %}
+{% if node.etcdConfig is defined %}
+  {{node.keyPair.name}}_{{node.name}}_key = "${module.keypair.{{node.keyPair.name}}_keyname}"
+{% endif %}
 {% endfor %}
-{% for etcd in kraken_config.etcd %}
-{% for subnet in etcd.nodepool.providerConfig.subnet %}
-  {{subnet}}_{{etcd.name}}_subnet_id = "${module.subnet.{{subnet}}_subnet_id}"
+
+{% for node in cluster.nodePools %}
+{% if node.etcdConfig is defined %}
+{% for subnet in node.nodeConfig.providerConfig.subnet %}
+  {{subnet}}_{{node.name}}_subnet_id = "${module.subnet.{{subnet}}_subnet_id}"
 {% endfor %}
+{% endif %}
 {% endfor %}
 }
 
@@ -65,11 +65,14 @@ module "master" {
   dependency = "${module.etcd.etcd_dependency}"
 
   vpc_id = "${module.vpc.id}"
-  master_name = "{{kraken_config.cluster}}"
-  prefix = "{{kraken_config.resourcePrefix}}"
-  master_key_name = "${module.keypair.{{kraken_config.master.nodepool.keypair.name}}_keyname}"
-{% for subnet in kraken_config.master.nodepool.providerConfig.subnet %}
+  master_name = "{{cluster.name}}"
+{% for node in cluster.nodePools %}
+{% if node.apiServerConfig is defined %}
+  master_key_name = "${module.keypair.{{node.keyPair.name}}_keyname}"
+{% for subnet in node.nodeConfig.providerConfig.subnet %}
   {{subnet}}_subnet_id = "${module.subnet.{{subnet}}_subnet_id}"
+{% endfor %}
+{% endif %}
 {% endfor %}
   route53_zone_id = "${module.vpc.route53_zone_id}"
   kubernetes_sec_group = "${module.cluster_secgroup.id}"
@@ -82,16 +85,20 @@ module "node" {
   dependency = "${module.master.master_dependency}"
 
   vpc_id = "${module.vpc.id}"
-  nodes_name = "{{kraken_config.cluster}}"
-  prefix = "{{kraken_config.resourcePrefix}}"
-{% for node in kraken_config.node %}
-  {{node.nodepool.keypair.name}}_{{node.name}}_key = "${module.keypair.{{node.nodepool.keypair.name}}_keyname}"
+  nodes_name = "{{cluster.name}}"
+{% for node in cluster.nodePools %}
+{% if node.etcdConfig is not defined and node.apiServerConfig is not defined %}
+  {{node.keyPair.name}}_{{node.name}}_key = "${module.keypair.{{node.keyPair.name}}_keyname}"
+{% endif %}
 {% endfor %}
+
   kubernetes_sec_group = "${module.cluster_secgroup.id}"
-{% for node in kraken_config.node %}
-{% for subnet in node.nodepool.providerConfig.subnet %}
+{% for node in cluster.nodePools %}
+{% if node.etcdConfig is not defined and node.apiServerConfig is not defined %}
+{% for subnet in node.nodeConfig.providerConfig.subnet %}
   {{subnet}}_{{node.name}}_subnet_id = "${module.subnet.{{subnet}}_subnet_id}"
 {% endfor %}
+{% endif %}
 {% endfor %}
 }
 
@@ -102,4 +109,3 @@ output "kraken_endpoint" {
 output "kraken_private_zone_id" {
   value = "${module.vpc.route53_zone_id}"
 }
-

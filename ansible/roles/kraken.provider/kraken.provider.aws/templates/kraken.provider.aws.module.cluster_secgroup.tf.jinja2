@@ -2,16 +2,14 @@
 
 variable "vpc_id" {}
 variable "secgroup_name" {}
-variable "prefix" {}
 variable "default_security_group_id" {}
 
-
 resource "aws_security_group" "vpc_kubernetes_secgroup" {
-  name        = "${var.secgroup_name}_${var.prefix}_secgroup"
-  description = "Security group for ${var.secgroup_name}_${var.prefix} cluster"
+  name        = "${var.secgroup_name}_secgroup"
+  description = "Security group for ${var.secgroup_name} cluster"
   vpc_id      = "${var.vpc_id}"
 
-{% for ingress in kraken_config.providerConfig.ingressSecurity %}
+{% for ingress in cluster.providerConfig.ingressSecurity %}
   ingress {
 {% for k,v in ingress.iteritems() %}
 {% if v is string %}
@@ -41,7 +39,7 @@ resource "aws_security_group" "vpc_kubernetes_secgroup" {
     security_groups = ["${var.default_security_group_id}"]
   }
 
-{% for egress in kraken_config.providerConfig.egressSecurity %}
+{% for egress in cluster.providerConfig.egressSecurity %}
   egress {
 {% for k,v in egress.iteritems() %}
 {% if v is string %}
@@ -56,8 +54,8 @@ resource "aws_security_group" "vpc_kubernetes_secgroup" {
 {% endfor %}
 
   tags {
-    Name = "${var.secgroup_name}_${var.prefix}_vpc_secgroup",
-    KubernetesCluster = "${var.secgroup_name}_${var.prefix}"
+    Name = "${var.secgroup_name}_vpc_secgroup",
+    KubernetesCluster = "${var.secgroup_name}"
   }
 }
 

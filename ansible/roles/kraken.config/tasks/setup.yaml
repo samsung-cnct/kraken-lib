@@ -1,0 +1,21 @@
+---
+- set_fact:
+    cluster: "{{ cluster_node_tuple.0 }}"
+    node: "{{ cluster_node_tuple.1 }}"
+
+- name: Verify cloud provider is supported
+  fail:
+    msg: |
+      {{ cluster.providerConfig.provider }} is not a supported cloud provider. Please file an issue at
+      https://github.com/samsung-cnct/k2/issues to request support.
+  when: cluster.providerConfig.provider not in ['aws', 'gke']
+
+- name: Verify kubeAuth is defined
+  fail:
+    msg: "Make sure that there is a 'kubeAuth' stanza in {{ config_file }}"
+  when: cluster.kubeAuth | is_empty
+
+- name: Set the provider type
+  set_fact:
+    kraken_config: "{{ kraken_config | combine({'providerConfig': {'type': 'cloudinit' }}, recursive=True) }}"
+  when: cluster.providerConfig.type | is_empty

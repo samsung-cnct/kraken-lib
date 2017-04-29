@@ -1,105 +1,105 @@
 resources:
-- name: {{ kraken_config.cluster }}
+- name: {{ cluster.name }}
   type: container.v1.cluster
   properties:
-    zone: {{ kraken_config.providerConfig.zone.primaryZone }}
+    zone: {{ cluster.providerConfig.zone.primaryZone }}
     cluster:
-      name: {{ kraken_config.cluster }}
-      description: {{ kraken_config.cluster }} managed by k2
+      name: {{ cluster.name }}
+      description: {{ cluster.name }} managed by k2
       masterAuth:
         username: {{ default_kube_basic_auth.user }}
         password: {{ default_kube_basic_auth.password }}
-{% if kraken_config.providerConfig.disableCloudLogging is defined and kraken_config.providerConfig.disableCloudLogging == True %}
+{% if cluster.providerConfig.disableCloudLogging is defined and cluster.providerConfig.disableCloudLogging == True %}
       loggingService: none
 {% else %}
       loggingService: logging.googleapis.com
 {% endif %}
-{% if kraken_config.providerConfig.disableCloudMonitoring is defined and kraken_config.providerConfig.disableCloudMonitoring == True %}
+{% if cluster.providerConfig.disableCloudMonitoring is defined and cluster.providerConfig.disableCloudMonitoring == True %}
       monitoringService: none
 {% else %}
       monitoringService: monitoring.googleapis.com
 {% endif %}
-{% if kraken_config.providerConfig.enableKubernetesAlpha is defined and kraken_config.providerConfig.enableKubernetesAlpha == True %}
+{% if cluster.providerConfig.enableKubernetesAlpha is defined and cluster.providerConfig.enableKubernetesAlpha == True %}
       enableKubernetesAlpha: True
 {% else %}
       enableKubernetesAlpha: False
 {% endif %}
-{% if kraken_config.providerConfig.network is defined %}
-      network: {{ kraken_config.providerConfig.network }}
+{% if cluster.providerConfig.network is defined %}
+      network: {{ cluster.providerConfig.network }}
 {% endif %}
-{% if kraken_config.providerConfig.clusterIpv4Cidr is defined  %}
-      clusterIpv4Cidr: {{ kraken_config.providerConfig.clusterIpv4Cidr }}
+{% if cluster.providerConfig.clusterIpv4Cidr is defined  %}
+      clusterIpv4Cidr: {{ cluster.providerConfig.clusterIpv4Cidr }}
 {% endif %}
       addonsConfig:
         httpLoadBalancing:
-{% if kraken_config.providerConfig.disableHTTPLoadbalancer is defined and kraken_config.providerConfig.disableHTTPLoadbalancer == True %}
+{% if cluster.providerConfig.disableHTTPLoadbalancer is defined and cluster.providerConfig.disableHTTPLoadbalancer == True %}
           disabled: true
 {% else %}
           disabled: false
 {% endif %}
         horizontalPodAutoscaling:
-{% if kraken_config.providerConfig.disableHorizontalAutoscaler is defined and kraken_config.providerConfig.disableHorizontalAutoscaler == True %}
+{% if cluster.providerConfig.disableHorizontalAutoscaler is defined and cluster.providerConfig.disableHorizontalAutoscaler == True %}
           disabled: true
 {% else %}
           disabled: false
 {% endif %}
       nodePools:
-{% for nodepool in kraken_config.nodepool %}
+{% for nodepool in cluster.nodePools %}
         -
           name: {{ nodepool.name }} 
           initialNodeCount: {{ nodepool.count }}
           config:
-            machineType: {{ nodepool.providerConfig.machineType }}
-            diskSizeGb: {{ nodepool.providerConfig.diskSize }}
-{% if nodepool.providerConfig.localSsdCount is defined %}
-            localSsdCount: {{ nodepool.providerConfig.localSsdCount }}
+            machineType: {{ nodepool.nodeConfig.providerConfig.machineType }}
+            diskSizeGb: {{ nodepool.nodeConfig.providerConfig.diskSize }}
+{% if nodepool.nodeConfig.providerConfig.localSsdCount is defined %}
+            localSsdCount: {{ nodepool.nodeConfig.providerConfig.localSsdCount }}
 {% endif %}
-{% if nodepool.providerConfig.scopes is defined %}
+{% if nodepool.nodeConfig.providerConfig.scopes is defined %}
             oauthScopes:
-{% for scope in nodepool.providerConfig.scopes %}
+{% for scope in nodepool.nodeConfig.providerConfig.scopes %}
               - {{ scope }}     
 {% endfor %}
 {% endif %}
-{% if nodepool.providerConfig.serviceAccount is defined  %}
-            serviceAccount: {{ nodepool.providerConfig.serviceAccount }}
+{% if nodepool.nodeConfig.providerConfig.serviceAccount is defined  %}
+            serviceAccount: {{ nodepool.nodeConfig.providerConfig.serviceAccount }}
 {% endif %}
-{% if nodepool.providerConfig.imageType is defined %}
-            imageType: {{ nodepool.providerConfig.imageType }}
+{% if nodepool.nodeConfig.providerConfig.imageType is defined %}
+            imageType: {{ nodepool.nodeConfig.providerConfig.imageType }}
 {% endif %}
             labels: 
               k2nodepool: {{ nodepool.name }}
-{% if nodepool.providerConfig.label is defined %}
-{% for label in nodepool.providerConfig.label %}
+{% if nodepool.nodeConfig.providerConfig.label is defined %}
+{% for label in nodepool.nodeConfig.providerConfig.label %}
               {{ label.name }}: {{ label.value }}
 {% endfor %}
 {% endif %}
             metadata:
               k2nodepool: {{ nodepool.name }}
-{% if nodepool.providerConfig.metadata is defined %}
-{% for metadata in nodepool.providerConfig.metadata %}
+{% if nodepool.nodeConfig.providerConfig.metadata is defined %}
+{% for metadata in nodepool.nodeConfig.providerConfig.metadata %}
               {{ metadata.name }}: {{ metadata.value }}
 {% endfor %}
 {% endif %}
-{% if nodepool.providerConfig.tags is defined %}
+{% if nodepool.nodeConfig.providerConfig.tags is defined %}
             tags:
-{% for tag in nodepool.providerConfig.tags %}
+{% for tag in nodepool.nodeConfig.providerConfig.tags %}
               - {{ tag }}
 {% endfor %}
 {% endif %}
-{% if nodepool.providerConfig.autoscaling is defined %}
+{% if nodepool.nodeConfig.providerConfig.autoscaling is defined %}
           autoscaling:
             enabled: true
-            minNodeCount: {{ nodepool.providerConfig.autoscaling.minNodeCount }}
-            maxNodeCount: {{ nodepool.providerConfig.autoscaling.maxNodeCount }}
+            minNodeCount: {{ nodepool.nodeConfig.providerConfig.autoscaling.minNodeCount }}
+            maxNodeCount: {{ nodepool.nodeConfig.providerConfig.autoscaling.maxNodeCount }}
 {% else %}
           autoscaling:
             enabled: false
 {% endif %}
 {% endfor %}
-{% if kraken_config.providerConfig.zone.additionalZones is defined %}
+{% if cluster.providerConfig.zone.additionalZones is defined %}
       locations:
-        - {{ kraken_config.providerConfig.zone.primaryZone }}
-{% for location in kraken_config.providerConfig.zone.additionalZones %}
+        - {{ cluster.providerConfig.zone.primaryZone }}
+{% for location in cluster.providerConfig.zone.additionalZones %}
         - {{ location }}
 {% endfor %}
 {% endif %}

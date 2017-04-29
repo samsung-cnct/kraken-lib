@@ -43,7 +43,7 @@ class FilterModule(object):
     def current_node_count(self, config_path):
         config.load_kube_config(config_file=config_path)
         api_instance = kubernetes.client.CoreV1Api()
-        label_selector = 'nodepool=masterNodes'
+        label_selector = 'nodepool=master'
         timeout_seconds = 30
 
         try:
@@ -58,6 +58,14 @@ class FilterModule(object):
     # delete and terminate node, then wait until node recreates itself by running a check on current node count versus expected node count
     # update this so that it tries to do each part, and breaks if any part fails with a good error message
     def delete_and_terminate_node_filter(self, node_name, instance_id, expected_count, kubeconfig, aws_region):
+        current_count = int(self.current_node_count(kubeconfig))
+
+        while current_count != int(expected_count):
+            print "Available Nodes: %s/%s" % (current_count, expected_count)
+            print "Pausing for node creation"
+            time.sleep(60)
+            current_count = int(self.current_node_count(kubeconfig))
+
         try:
             self.terminate_node(instance_id, aws_region)
             print "Terminating instance: " + instance_id

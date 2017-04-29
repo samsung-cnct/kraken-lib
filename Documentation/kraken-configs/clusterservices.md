@@ -37,13 +37,10 @@ clusterServices:
         url: http://atlas.cnct.io
     services:
       -
-        name: kubedns
+        name: heapster
         repo: atlas
-        chart: kubedns
+        chart: heapster
         version: 0.1.0
         namespace: kube-system
-        values:
-          cluster_ip: 10.32.0.2
-          dns_domain: krakenCluster.local
 
 ```

@@ -342,16 +342,11 @@ deployment:
       -
         name: atlas
         url: http://atlas.cnct.io
-    services:
-      -
-        name: kubedns
-        repo: atlas
-        chart: kubedns
-        version: 0.1.0
+    kubedns:
         namespace: kube-system
-        values:
-          cluster_ip: 10.32.0.2
-          dns_domain: cluster.local
+        cluster_ip: 10.32.0.2
+        dns_domain: cluster.local
+    services:
       -
         name: heapster
         repo: atlas

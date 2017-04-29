@@ -1,60 +1,22 @@
 ---
 - name: Determine which nodes will use which container runtime
   set_fact:
-    custom_etcd: "{{ kraken_config.etcd
-                   | selectattr('nodepool.containerConfig.runtime', 'equalto', 'docker')
-                   | selectattr('nodepool.containerConfig.type', 'equalto', 'tgz')
-                   | list }}"
-    custom_master: "{{ [ kraken_config.master ]
-                   | selectattr('nodepool.containerConfig.runtime', 'equalto', 'docker')
-                   | selectattr('nodepool.containerConfig.type', 'equalto', 'tgz')
-                   | list }}"
-    custom_nodes: "{{ kraken_config.node
-                   | selectattr('nodepool.containerConfig.runtime', 'equalto', 'docker')
-                   | selectattr('nodepool.containerConfig.type', 'equalto', 'tgz')
+    custom_nodes: "{{ cluster.nodePools
+                   | selectattr('containerConfig.runtime', 'equalto', 'docker')
+                   | selectattr('containerConfig.type', 'equalto', 'tgz')
                    | list }}"
 
-- name: Generate etcd .units.exec-docker.part files
+- name: Generate nodePool .units.exec-docker.part files
   template: src=docker-exec.part.jinja2
-            dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/etcd.{{ item.name }}.units.exec-docker.part"
-  with_items: "{{ custom_etcd }}"
-
-- name: Generate master .units.exec-docker.part files
-  template: src=docker-exec.part.jinja2
-            dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/master.units.exec-docker.part"
-  with_items: "{{ custom_master }}"
-
-- name: Generate node .units.exec-docker.part files
-  template: src=docker-exec.part.jinja2
-            dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/node.{{ item.name }}.units.exec-docker.part"
+            dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ item.name }}.units.exec-docker.part"
   with_items: "{{ custom_nodes }}"
 
-- name: Generate etcd .units.exec-containerd.part files
+- name: Generate nodePool .units.exec-containerd.part files
   template: src=containerd-exec.part.jinja2
-            dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/etcd.{{ item.name }}.units.exec-containerd.part"
-  with_items: "{{ custom_etcd }}"
-
-- name: Generate master .units.exec-containerd.part files
-  template: src=containerd-exec.part.jinja2
-            dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/master.units.exec-containerd.part"
-  with_items: "{{ custom_master }}"
-
-- name: Generate node .units.exec-containerd.part files
-  template: src=containerd-exec.part.jinja2
-            dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/node.{{ item.name }}.units.exec-containerd.part"
+            dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ item.name }}.units.exec-containerd.part"
   with_items: "{{ custom_nodes }}"
-
-- name: Generate etcd .units.docker-install.part files
-  template: src=docker-install.part.jinja2
-            dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/etcd.{{ item.name }}.units.docker-install.part"
-  with_items: "{{ custom_etcd }}"
-
-- name: Generate master .units.docker-install.part files
-  template: src=docker-install.part.jinja2
-            dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/master.units.docker-install.part"
-  with_items: "{{ custom_master }}"
 
 - name: Generate node .units.docker-install.part files
   template: src=docker-install.part.jinja2
-            dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/node.{{ item.name }}.units.docker-install.part"
+            dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ item.name }}.units.docker-install.part"
   with_items: "{{ custom_nodes }}"

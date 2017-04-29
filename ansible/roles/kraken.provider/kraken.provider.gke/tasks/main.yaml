@@ -1,4 +1,13 @@
 ---
+- name: rename cluster fact
+  set_fact:
+    cluster: "{{ a_cluster }}"
+
+- name: Make sure generated folder for full cloud configs is there
+  file: >
+    path="{{ config_base | expanduser }}/{{ cluster.name }}"
+    state=directory
+
 - include: authenticate.yaml
 - include: process-cluster.yaml
   when: kraken_action == 'up'

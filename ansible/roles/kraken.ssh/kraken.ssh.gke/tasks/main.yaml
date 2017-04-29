@@ -1,4 +1,8 @@
 ---
+- name: rename cluster fact
+  set_fact:
+    cluster: "{{ a_cluster }}"
+
 - include: authenticate.yaml
 - include: sshconfig.yaml
 - include: deauthenticate.yaml

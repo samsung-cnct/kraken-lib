@@ -1,30 +1,7 @@
 ---
-- name: Setup readiness type
-  set_fact:
-    readiness_type: "{{ kraken_config.readiness.type | default('exact') }}"
-
-- name: Setup readiness value
-  set_fact:
-    readiness_value: "{{ kraken_config.readiness.value | default(0) }}"
-  when: readiness_type == 'exact'
-
-- name: Setup readiness value
-  set_fact:
-    readiness_value: "{{ kraken_config.readiness.value | default(100) }}"
-  when: readiness_type == 'percent'
-
-- name: Setup readiness value
-  set_fact:
-    readiness_value: "{{ kraken_config.readiness.value | default(0) }}"
-  when: readiness_type == 'delta'
-
-- name: Setup readiness wait
-  set_fact:
-    readiness_wait: "{{ kraken_config.readiness.wait | default(600) }}"
-
-- include: generate-admin-cert.yaml
-
-- include: generate-admin-kubeconfig.yaml
-  when: kraken_endpoint is defined
-
-- include: do-wait.yaml
+- include: setup-readiness.yaml
+  with_items:
+    - "{{ kraken_config.clusters }}"
+  loop_control:
+    loop_var: a_cluster
+  when: a_cluster.providerConfig.type == 'cloudinit'

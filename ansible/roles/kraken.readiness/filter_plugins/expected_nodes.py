@@ -2,8 +2,10 @@ import yaml, copy, json
 from ansible import errors
 
 def expected_nodes(config_data, readiness_type, readiness_value):
-  total_nodes = int(config_data['master']['nodepool']['count']) + \
-          sum(int(item['nodepool']['count']) for item in config_data['node']) 
+  total_nodes = 0
+  for node in config_data['nodePools']:
+    if 'etcdConfig' not in node:
+      total_nodes += node['count']
 
   if readiness_type == 'exact':
     return total_nodes

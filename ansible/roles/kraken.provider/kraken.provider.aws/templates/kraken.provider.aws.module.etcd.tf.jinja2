@@ -2,23 +2,27 @@
 
 variable "vpc_id" {}
 variable "etcds_name" {}
-variable "prefix" {}
 variable "cidr_block" {}
 variable "route53_zone_id" {}
-{% for etcd in kraken_config.etcd %}
-variable "{{etcd.nodepool.keypair.name}}_{{etcd.name}}_key" {}
+{% for node in cluster.nodePools %}
+{% if node.etcdConfig is defined %}
+variable "{{node.keyPair.name}}_{{node.name}}_key" {}
+{% endif %}
 {% endfor %}
 
-{% for etcd in kraken_config.etcd %}
-{% for subnet in etcd.nodepool.providerConfig.subnet %}
-variable "{{subnet}}_{{etcd.name}}_subnet_id" {}
+{% for node in cluster.nodePools %}
+{% if node.etcdConfig is defined %}
+{% for subnet in node.nodeConfig.providerConfig.subnet %}
+variable "{{subnet}}_{{node.name}}_subnet_id" {}
 {% endfor %}
+{% endif %}
 {% endfor %}
 
-{% for etcd in kraken_config.etcd %}
-resource "aws_security_group" "vpc_etcd_{{etcd.name}}_secgroup" {
-  name        = "${var.etcds_name}_${var.prefix}_{{etcd.name}}_secgroup"
-  description = "Security group for ${var.etcds_name}_${var.prefix} {{etcd.name}} etcd cluster"
+{% for node in cluster.nodePools %}
+{% if node.etcdConfig is defined %}
+resource "aws_security_group" "vpc_etcd_{{node.name}}_secgroup" {
+  name        = "${var.etcds_name}_{{node.name}}_secgroup"
+  description = "Security group for ${var.etcds_name} {{node.name}} etcd cluster"
   vpc_id      = "${var.vpc_id}"
 
   egress {
@@ -29,7 +33,7 @@ resource "aws_security_group" "vpc_etcd_{{etcd.name}}_secgroup" {
   }
 
   # Allow etcd peers to communicate, include etcd proxies
-  {% for peerPort in etcd.peerPorts %}
+  {% for peerPort in node.etcdConfig.peerPorts %}
   ingress {
     from_port = {{peerPort}}
     to_port = {{peerPort}}
@@ -39,7 +43,7 @@ resource "aws_security_group" "vpc_etcd_{{etcd.name}}_secgroup" {
   {% endfor %}
 
   # Allow etcd clients to communicate
-  {% for clientPort in etcd.clientPorts %}
+  {% for clientPort in node.etcdConfig.clientPorts %}
   ingress {
     from_port = {{clientPort}}
     to_port = {{clientPort}}
@@ -57,33 +61,37 @@ resource "aws_security_group" "vpc_etcd_{{etcd.name}}_secgroup" {
     self = true
   }
 }
+{% endif %}
 {% endfor %}
 
 # information on CoreOS AMIs for etcd nodepools
-{% for etcd in kraken_config.etcd %}
-resource "coreosbox_ami" "{{etcd.name}}_ami" {
-  channel        = "{{etcd.nodepool.coreos.channel}}"
+{% for node in cluster.nodePools %}
+{% if node.etcdConfig is defined %}
+resource "coreosbox_ami" "{{node.name}}_ami" {
+  channel        = "{{node.osConfig.channel}}"
   virtualization = "hvm"
-  region         = "{{kraken_config.providerConfig.region}}"
-  version        = "{{etcd.nodepool.coreos.version}}"
+  region         = "{{cluster.providerConfig.region}}"
+  version        = "{{node.osConfig.version}}"
 }
+{% endif %}
 {% endfor %}
 
 #  create each etcd node for each etcd individually
 #  this will round-robin spread the nodes across the supplied vpc subnets
-{% for etcd in kraken_config.etcd %}
-{% for node_idx in range(1, etcd.nodepool.count+1)%}
-resource "aws_instance" "{{etcd.name}}_{{node_idx}}" {
-  ami                         = "${coreosbox_ami.{{etcd.name}}_ami.box_string}"
-  instance_type               = "{{etcd.nodepool.providerConfig.type}}"
-  key_name                    = "${var.{{etcd.nodepool.keypair.name}}_{{etcd.name}}_key}"
-  vpc_security_group_ids      = ["${aws_security_group.vpc_etcd_{{etcd.name}}_secgroup.id}"]
-  user_data                   = "${file("{{ config_base | expanduser }}/{{kraken_config.cluster}}/cloud-config/etcd.{{etcd.name}}.cloud-config.yaml")}"
+{% for node in cluster.nodePools %}
+{% if node.etcdConfig is defined %}
+{% for node_idx in range(1, node.count+1)%}
+resource "aws_instance" "{{node.name}}_{{node_idx}}" {
+  ami                         = "${coreosbox_ami.{{node.name}}_ami.box_string}"
+  instance_type               = "{{node.nodeConfig.providerConfig.type}}"
+  key_name                    = "${var.{{node.keyPair.name}}_{{node.name}}_key}"
+  vpc_security_group_ids      = ["${aws_security_group.vpc_etcd_{{node.name}}_secgroup.id}"]
+  user_data                   = "${file("{{ config_base | expanduser }}/{{cluster.name}}/cloud-config/{{node.name}}.cloud-config.yaml")}"
   associate_public_ip_address = true
-  subnet_id                   = "${var.{{etcd.nodepool.providerConfig.subnet[ node_idx % etcd.nodepool.providerConfig.subnet|count ]}}_{{etcd.name}}_subnet_id}"
+  subnet_id                   = "${var.{{node.nodeConfig.providerConfig.subnet[ node_idx % node.nodeConfig.providerConfig.subnet|count ]}}_{{node.name}}_subnet_id}"
 
-# storage 
-{% for storage in etcd.nodepool.providerConfig.storage %} 
+# storage
+{% for storage in node.nodeConfig.providerConfig.storage %}
   {{storage.type}} {
 {% for k,v in storage.opts.iteritems() %}
     {{k}} = "{{v}}"
@@ -92,57 +100,58 @@ resource "aws_instance" "{{etcd.name}}_{{node_idx}}" {
 {% endfor %}
 
   tags {
-    Name              = "${var.etcds_name}_${var.prefix}_{{etcd.name}}_{{node_idx}}"
-    k2-nodepool       = "{{etcd.name}}"
-    KubernetesCluster = "${var.etcds_name}_${var.prefix}"
-{% for tag in etcd.nodepool.providerConfig.tags %}
+    Name              = "${var.etcds_name}_{{node.name}}_{{node_idx}}"
+    k2-nodepool       = "{{node.name}}"
+    KubernetesCluster = "${var.etcds_name}"
+{% for tag in node.nodeConfig.providerConfig.tags %}
     {{tag.key}}       = "{{tag.value}}"
 {% endfor %}
   }
 } #aws_instance
 
-resource "aws_route53_record" "{{etcd.name}}_vm_A_record_{{node_idx}}" {
+resource "aws_route53_record" "{{node.name}}_vm_A_record_{{node_idx}}" {
   zone_id   = "${var.route53_zone_id}"
-  name      = "${aws_instance.{{etcd.name}}_{{node_idx}}.id}.{{etcd.name}}.${var.etcds_name}.internal"
+  name      = "${aws_instance.{{node.name}}_{{node_idx}}.id}.{{node.name}}.${var.etcds_name}.internal"
   type      = "A"
   ttl       = "300"
-  records   = ["${aws_instance.{{etcd.name}}_{{node_idx}}.private_ip}"]
+  records   = ["${aws_instance.{{node.name}}_{{node_idx}}.private_ip}"]
 }
 
 {% endfor %} # node_idx
 
-resource "aws_route53_record" "{{etcd.name}}_A_record_all" {
+resource "aws_route53_record" "{{node.name}}_A_record_all" {
   zone_id   = "${var.route53_zone_id}"
-  name      = "{{etcd.name}}.${var.etcds_name}.internal"
+  name      = "{{node.name}}.${var.etcds_name}.internal"
   type      = "A"
   ttl       = "300"
-  records   = [{% set comma = joiner(",") %}{% for node_idx in range(1, etcd.nodepool.count+1) %}{{ comma() }}"${aws_instance.{{etcd.name}}_{{node_idx}}.private_ip}"{% endfor %}]
+  records   = [{% set comma = joiner(",") %}{% for node_idx in range(1, node.count+1) %}{{ comma() }}"${aws_instance.{{node.name}}_{{node_idx}}.private_ip}"{% endfor %}]
 }
 
-resource "aws_route53_record" "{{etcd.name}}_SRV_client" {
+resource "aws_route53_record" "{{node.name}}_SRV_client" {
   zone_id   = "${var.route53_zone_id}"
-{% if etcd.ssl %}
-  name      = "_etcd-client-ssl._tcp.{{etcd.name}}.${var.etcds_name}.internal"
+{% if node.etcdConfig.ssl %}
+  name      = "_etcd-client-ssl._tcp.{{node.name}}.${var.etcds_name}.internal"
 {% else %}
-  name      = "_etcd-client._tcp.{{etcd.name}}.${var.etcds_name}.internal"
-{% endif %}  
+  name      = "_etcd-client._tcp.{{node.name}}.${var.etcds_name}.internal"
+{% endif %}
   type      = "SRV"
   ttl       = "300"
-  records   = [{% set comma = joiner(",") %}{% for node_idx in range(1, etcd.nodepool.count+1) %}{{ comma() }}"0 0 {{etcd.clientPorts[0]}} ${aws_instance.{{etcd.name}}_{{node_idx}}.id}.{{etcd.name}}.${var.etcds_name}.internal"{% endfor %}]
+  records   = [{% set comma = joiner(",") %}{% for node_idx in range(1, node.count+1) %}{{ comma() }}"0 0 {{node.etcdConfig.clientPorts[0]}} ${aws_instance.{{node.name}}_{{node_idx}}.id}.{{node.name}}.${var.etcds_name}.internal"{% endfor %}]
 }
 
-resource "aws_route53_record" "{{etcd.name}}_SRV_server" {
+resource "aws_route53_record" "{{node.name}}_SRV_server" {
   zone_id   = "${var.route53_zone_id}"
-{% if etcd.ssl %}
-  name      = "_etcd-server-ssl._tcp.{{etcd.name}}.${var.etcds_name}.internal"
+{% if node.etcdConfig.ssl %}
+  name      = "_etcd-server-ssl._tcp.{{node.name}}.${var.etcds_name}.internal"
 {% else %}
-  name      = "_etcd-server._tcp.{{etcd.name}}.${var.etcds_name}.internal"
-{% endif %}  
+  name      = "_etcd-server._tcp.{{node.name}}.${var.etcds_name}.internal"
+{% endif %}
   type      = "SRV"
   ttl       = "300"
-  records   = [{% set comma = joiner(",") %}{% for node_idx in range(1, etcd.nodepool.count+1) %}{{ comma() }}"0 0 {{etcd.peerPorts[0]}} ${aws_instance.{{etcd.name}}_{{node_idx}}.id}.{{etcd.name}}.${var.etcds_name}.internal"{% endfor %}]
+  records   = [{% set comma = joiner(",") %}{% for node_idx in range(1, node.count+1) %}{{ comma() }}"0 0 {{node.etcdConfig.peerPorts[0]}} ${aws_instance.{{node.name}}_{{node_idx}}.id}.{{node.name}}.${var.etcds_name}.internal"{% endfor %}]
 }
 
+{% endif %}
 {% endfor %} # etcd
 
 output "etcd_dependency" {

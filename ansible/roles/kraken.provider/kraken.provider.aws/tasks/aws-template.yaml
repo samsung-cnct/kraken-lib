@@ -1,12 +1,12 @@
 ---
 - name: Create terraform folder
   file: >
-    path="{{ config_base | expanduser }}/{{ kraken_config.cluster }}"
+    path="{{ config_base | expanduser }}/{{ cluster.name }}"
     state=directory
 
 - name: Create module folders
   file: >
-    path="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/{{ item }}"
+    path="{{ config_base | expanduser }}/{{ cluster.name }}/{{ item }}"
     state=directory
   with_items:
     - vpc
@@ -19,11 +19,11 @@
 
 - name: Generate kraken.provider.aws.tf file
   template: src=kraken.provider.aws.tf.jinja2
-            dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/kraken.provider.aws.tf"
+            dest="{{ config_base | expanduser }}/{{ cluster.name }}/kraken.provider.aws.tf"
 
 - name: Generate module files
   template: src={{ item.source }}
-            dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/{{ item.dest }}/module.tf"
+            dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ item.dest }}/module.tf"
   with_items:
     - { source: kraken.provider.aws.module.vpc.tf.jinja2, dest: vpc }
     - { source: kraken.provider.aws.module.keypair.tf.jinja2, dest: keypair }

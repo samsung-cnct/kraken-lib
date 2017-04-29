@@ -9,10 +9,10 @@ The snippet configuration for deployments depends on the provider.
 | Key Name | Required | Type | Description|
 | --- | --- | --- | --- |
 | cluster | __Required__ | String | Name to use for the cluster created by this deployment |
-| resourcePrefix | Optional | String | Tagging and naming prefix for providers that need it. Defaults to a random string of 5 letters |
+| resourcePrefix | Optional | String | Tagging and naming prefix for providers that need it. |
 | serviceCidr | __Required__ | String | Cluster service ip range CIDR |
-| serviceDNS | __Required__ | String | Cluster (kubedns) service IP |
-| clusterDomain | __Required__ | String | Domain name for cluster (internal resolution) |
+| serviceDNS | __Required__ | String | Cluster (kubedns) service IP <br>Also mus be st in `cluster.dnsConfig.kubedns.cluster_ip` |
+| clusterDomain | __Required__ | String | Domain name for cluster (internal resolution) <br>Also mus be st in `cluster.dnsConfig.kubedns.dns_domain` |
 | coreos | Optional | Object array | named CoreOS options array|
 | keypair | Optional | Object Array | Array of key pairs to use in this deployment (in node pools and so on) |
 | kubeConfig | __Required__ | Object Array | Array of [Kubernetes configurations](kubernetes.md) |
@@ -102,7 +102,10 @@ The snippet configuration for deployments depends on the provider.
       # node config
     clusterServices:
       # cluster services config
+      kubedns:
+        namespace: kube-system
+        cluster_ip: 10.32.0.2
+        dns_domain: cluster.local
     etcd:
       # etcd config
 ```
-

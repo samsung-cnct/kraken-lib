@@ -1,30 +1,37 @@
 ---
-- name: Create Helm home
-  file: >
-    path={{ helm_home }}
-    state=directory
-
-- name: Set cluster services fact
-  set_fact:
-    cluster_services: "{{ kraken_config.clusterServices.services | default([]) }}"
-- name: Set cluster repos fact
-  set_fact:
-    cluster_repos: "{{ kraken_config.clusterServices.repos | default([]) }}"
-- name: Set cluster namespaces fact
-  set_fact:
-    cluster_namespaces: "{{ kraken_config.clusterServices.namespaces | default([]) }}"
-
 - include: generate-oidc-cert.yaml
-  when: (kraken_config.kubeAuth.authn.oidc is defined) and (kraken_action == 'up')
+  with_items:
+    - "{{ kraken_config.clusters }}"
+  loop_control:
+    loop_var: a_cluster
+  when: (a_cluster.kubeAuth.authn.oidc is defined) and (kraken_action == 'up') and (a_cluster.clusterServices is defined)
 
-- name: See if tiller rc if present
-  shell: >
-    kubectl --kubeconfig={{ kubeconfig }} get deployment {{ tiller }} --namespace=kube-system
-  register: tiller_present
-  when: kubeconfig | is_file
-  ignore_errors: yes
+- include: kill-dns.yaml
+  with_items:
+    - "{{ kraken_config.clusters }}"
+  loop_control:
+    loop_var: a_cluster
+  when: (kraken_action == 'down') and (a_cluster.providerConfig.provider in ['aws'])
+  static: no
+- include: run-dns.yaml
+  with_items:
+    - "{{ kraken_config.clusters }}"
+  loop_control:
+    loop_var: a_cluster
+  when: (kraken_action == 'up') and (a_cluster.providerConfig.provider in ['aws'])
+  static: no
 
 - include: kill-services.yaml
+  with_items:
+    - "{{ kraken_config.clusters }}"
+  loop_control:
+    loop_var: a_cluster
+  when: a_cluster.helmConfig is defined
+
 - include: run-services.yaml
+  with_items:
+    - "{{ kraken_config.clusters }}"
+  loop_control:
+    loop_var: a_cluster
+  when: (kraken_action == 'up') and (a_cluster.helmConfig is defined)
   static: no
-  when: kraken_action == 'up'

@@ -8,15 +8,15 @@
   set_fact:
     current_gcloud_account: "{{ auth_list_result.stdout }}"
 
-- name: Authenticate with {{ kraken_config.providerConfig.keypair.providerConfig.serviceAccount }}
+- name: Authenticate with {{ cluster.providerConfig.keypair.providerConfig.serviceAccount }}
   command: >
-    gcloud auth activate-service-account {{ kraken_config.providerConfig.keypair.providerConfig.serviceAccount }}
-      --key-file {{ kraken_config.providerConfig.keypair.providerConfig.serviceAccountKeyFile }}
-  when: kraken_config.providerConfig.keypair.providerConfig.serviceAccountPasswordFile is not defined
+    gcloud auth activate-service-account {{ cluster.providerConfig.keypair.providerConfig.serviceAccount }}
+      --key-file {{ cluster.providerConfig.keypair.providerConfig.serviceAccountKeyFile }}
+  when: cluster.providerConfig.keypair.providerConfig.serviceAccountPasswordFile is not defined
 
-- name: Authenticate with {{ kraken_config.providerConfig.keypair.providerConfig.serviceAccount }}
+- name: Authenticate with {{ cluster.providerConfig.keypair.providerConfig.serviceAccount }}
   command: >
-    gcloud auth activate-service-account {{ kraken_config.providerConfig.keypair.providerConfig.serviceAccount }}
-      --key-file {{ kraken_config.providerConfig.keypair.providerConfig.serviceAccountKeyFile }}
-      --password-file {{ kraken_config.providerConfig.keypair.providerConfig.serviceAccountPasswordFile }}
-  when: kraken_config.providerConfig.keypair.providerConfig.serviceAccountPasswordFile is defined
+    gcloud auth activate-service-account {{ cluster.providerConfig.keypair.providerConfig.serviceAccount }}
+      --key-file {{ cluster.providerConfig.keypair.providerConfig.serviceAccountKeyFile }}
+      --password-file {{ cluster.providerConfig.keypair.providerConfig.serviceAccountPasswordFile }}
+  when: cluster.providerConfig.keypair.providerConfig.serviceAccountPasswordFile is defined

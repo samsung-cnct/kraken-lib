@@ -6,7 +6,11 @@
         tags: [ 'config', 'always', 'config_only' ]
       }
     - {
+<<<<<<< 80b0c74bd28b148517fdfcccee1fd6d6080c02c2
         role: 'roles/kraken.master/kraken.master.selector', when: "kraken_config.providerConfig.type == 'cloudinit'",
+=======
+        role: 'kraken.nodePool/kraken.nodePool.selector',
+>>>>>>> upgrade migration (#360)
         tags: [ 'master', 'assembler', 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun', 'master_ony' ]
       }
     - {

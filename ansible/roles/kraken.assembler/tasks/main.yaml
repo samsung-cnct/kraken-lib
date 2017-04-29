@@ -1,9 +1,10 @@
 ---
-- name: Make sure generated folder for full cloud configs is there
-  file: >
-    path="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/cloud-config"
-    state=directory
-
-- include: master.yaml
-- include: node.yaml
-- include: etcd.yaml
+#   top level task to loop over all clusters in the cluster list
+#   its a bit weird but its the cleanest way to do it, I think
+- name: Loop over all clusters to generate all cloud-configs for each
+  include: node.yaml
+  with_items:
+    - "{{ kraken_config.clusters }}"
+  loop_control:
+    loop_var: a_cluster
+  when: a_cluster.providerConfig.type == 'cloudinit'

@@ -1,33 +1,36 @@
 ---
+- set_fact:
+    cluster: "{{ a_cluster }}"
+    
 - name: Generate dex key
   command: >
-    openssl genrsa -out {{ config_base | expanduser }}/{{ kraken_config.cluster }}/certs/dex-key.pem 2048
+    openssl genrsa -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/dex-key.pem 2048
 
 - name: Generate dex csr
   command: >
-    openssl req -new -key {{ config_base | expanduser }}/{{ kraken_config.cluster }}/certs/dex-key.pem
-      -subj "/CN={{ kraken_config.kubeAuth.authn.oidc.domain }}" -out {{ config_base | expanduser }}/{{ kraken_config.cluster }}/certs/dex.csr
+    openssl req -new -key {{ config_base | expanduser }}/{{ cluster.name }}/certs/dex-key.pem
+      -subj "/CN={{ cluster.kubeAuth.authn.oidc.domain }}" -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/dex.csr
 
 - name: Generate dex pem
   command: >
-    openssl x509 -req -in {{ config_base | expanduser }}/{{ kraken_config.cluster }}/certs/dex.csr
-      -CA {{ config_base | expanduser }}/{{ kraken_config.cluster }}/certs/ca.pem
-      -CAkey {{ config_base | expanduser }}/{{ kraken_config.cluster }}/certs/ca-key.pem
+    openssl x509 -req -in {{ config_base | expanduser }}/{{ cluster.name }}/certs/dex.csr
+      -CA {{ config_base | expanduser }}/{{ cluster.name }}/certs/ca.pem
+      -CAkey {{ config_base | expanduser }}/{{ cluster.name }}/certs/ca-key.pem
       -CAcreateserial
-      -CAserial {{ config_base | expanduser }}/{{ kraken_config.cluster }}/certs/ca.srl
-      -out {{ config_base | expanduser }}/{{ kraken_config.cluster }}/certs/dex.pem -days 10000
+      -CAserial {{ config_base | expanduser }}/{{ cluster.name }}/certs/ca.srl
+      -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/dex.pem -days 10000
 
 - name: Generate dex service Tls.Ca
   set_fact:
-    dex_tls_ca: "{{ lookup('file', config_base + '/' + kraken_config.cluster + '/certs/ca.pem' | expanduser) | b64encode }}"
+    dex_tls_ca: "{{ lookup('file', config_base + '/' + cluster.name + '/certs/ca.pem' | expanduser) | b64encode }}"
 
 - name: Generate dex service Tls.Cert
   set_fact:
-    dex_tls_cert: "{{ lookup('file', config_base + '/' + kraken_config.cluster + '/certs/dex.pem' | expanduser) | b64encode }}"
+    dex_tls_cert: "{{ lookup('file', config_base + '/' + cluster.name + '/certs/dex.pem' | expanduser) | b64encode }}"
 
 - name: Generate dex service Tls.Key
   set_fact:
-    dex_tls_key: "{{ lookup('file', config_base + '/' + kraken_config.cluster + '/certs/dex-key.pem' | expanduser) | b64encode }}"
+    dex_tls_key: "{{ lookup('file', config_base + '/' + cluster.name + '/certs/dex-key.pem' | expanduser) | b64encode }}"
 
 - name: Retrive dex service from cluster services
   set_fact:

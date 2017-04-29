@@ -75,7 +75,7 @@ function show_help {
   inf "[up].sh --config \${HOME}/.kraken/myclusterconfig.yaml"
 }
 
-function show_post_cluster {
+function show_post_cluster_broken {
   parse_config
   inf "To use kubectl: "
   inf "kubectl --kubeconfig=${KRAKEN_BASE}/${KRAKEN_CONFIG_deployment_cluster}/admin.kubeconfig <kubctl command>\n"
@@ -87,6 +87,20 @@ function show_post_cluster {
   inf "ssh <node pool name>-<number> -F ${KRAKEN_BASE}/${KRAKEN_CONFIG_deployment_cluster}/ssh_config"
   inf "For example: \nssh masterNodes-3 -F ${KRAKEN_BASE}/krakenCluster/ssh_config"
 }
+
+function show_post_cluster {
+  parse_config
+  inf "To use kubectl: "
+  inf "kubectl --kubeconfig=${KRAKEN_BASE}/<your cluster name>/admin.kubeconfig <kubctl command>\n"
+  inf "For example: \nkubectl --kubeconfig=${KRAKEN_BASE}/krakenCluster/admin.kubeconfig get services --all-namespaces"
+  inf "To use helm:"
+  inf "KUBECONFIG=${KRAKEN_BASE}/<your cluster name>/admin.kubeconfig; helm <helm command> --home ${KRAKEN_BASE}/<your cluster name>/.helm"
+  inf "For example: \nKUBECONFIG=${KRAKEN_BASE}/krakenCluster/admin.kubeconfig; helm list --home ${KRAKEN_BASE}/krakenCluster/.helm\n"
+  inf "To ssh:"
+  inf "ssh <node pool name>-<number> -F ${KRAKEN_BASE}/<your cluster name>/ssh_config"
+  inf "For example: \nssh masterNodes-3 -F ${KRAKEN_BASE}/krakenCluster/ssh_config"
+}
+
 
 function show_post_cluster_error {
   warn "Some of the cluster state MAY be available:"

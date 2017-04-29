@@ -1,19 +1,48 @@
 ---
+
+- set_fact:
+    cluster: "{{ a_cluster }}"
+
+- name: Look up and set k8s minor version for this cluster
+  set_fact:
+    kubernetes_minor_version: "{{ kubernetes_minor_versions[cluster.name] }}"
+
+- name: Execute appropriate kubectl per minor version
+  set_fact:
+    kubectl: "/opt/cnct/kubernetes/{{ kubernetes_minor_version }}/bin/kubectl"
+
+- set_fact:
+    cluster_services: "{{ cluster.helmConfig.charts | default([]) }}"
+    cluster_repos: "{{ cluster.helmConfig.repos | default([]) }}"
+    kubeconfig: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
+    helm_home: "{{ config_base | expanduser }}/{{ cluster.name }}/.helm"
+    cluster_namespaces: []
+- set_fact:
+    cluster_namespaces: "{{ cluster_namespaces + [item.namespace | default('kube-system')] }}"
+  with_items: "{{ cluster_services }}"
+- set_fact:
+    cluster_namespaces: "{{ cluster_namespaces | unique | reject('search', 'kube-system') | list }}"
+
+- name: Create Helm home
+  file: >
+    path={{ helm_home }}
+    state=directory
+
 - name: Create all service namespaces
   command: >
-    kubectl --kubeconfig={{ kubeconfig | expanduser }} create namespace {{ item }}
+    {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} create namespace {{ item }}
   with_items: "{{ cluster_namespaces }}"
   when: cluster_namespaces is defined
 
 - name: create helm command string
   set_fact:
     helm_command: "helm --debug"
-  when: (kraken_config.clusterServices.debug is defined) and (kraken_config.clusterServices.debug == True)
+  when: (cluster.helmConfig.debug is defined) and (cluster.helmConfig.debug == True)
 
 - name: create helm command string
   set_fact:
     helm_command: "helm"
-  when: (kraken_config.clusterServices.debug is undefined) or (kraken_config.clusterServices.debug != True)
+  when: (cluster.helmConfig.debug is undefined) or (cluster.helmConfig.debug != True)
 
 - name: create helm init command string
   set_fact:
@@ -24,6 +53,10 @@
   set_fact:
     helm_init_command: "{{ helm_command }} init --tiller-image {{ tiller_image }}"
   when: (tiller_image is defined) and (tiller_image is not none) and (tiller_image | trim != '')
+
+- name: Set api_servers fact
+  set_fact: 
+    api_servers: "{{ lookup('file', kubeconfig) | from_yaml | json_query('clusters[*].cluster.server') }}"
 
 - name: Wait for api server to become available in case it's not
   wait_for:
@@ -39,7 +72,7 @@
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
   register: init_dry_out
-  when: (kraken_config.clusterServices.debug is defined) and (kraken_config.clusterServices.debug == True)
+  when: (cluster.helmConfig.debug is defined) and (cluster.helmConfig.debug == True)
 
 - debug: var=init_dry_out.stdout_lines
 
@@ -53,7 +86,7 @@
   delay: 1
 
 - name: Wait for tiller to be ready
-  command: "kubectl --kubeconfig={{ kubeconfig | expanduser }} --namespace=kube-system get deploy tiller-deploy -o json"
+  command: "{{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} --namespace=kube-system get deploy tiller-deploy -o json"
   register: output
   until: (output | succeeded) and ((output.stdout | from_json).status.availableReplicas | default(0)) > 0
   retries: 600
@@ -81,7 +114,7 @@
 
 - name: Save all config values to files
   template: src=service-values.yaml.jinja2
-    dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/{{ item.repo }}-{{ item.name }}.helmvalues"
+    dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ item.repo }}-{{ item.name }}.helmvalues"
   with_items: "{{ cluster_services }}"
   when: cluster_services is defined
 
@@ -91,14 +124,14 @@
       --name {{ item.name }}
       --version {{ item.version }}
       --namespace {{ item.namespace | default('default') }}
-      --values {{ config_base | expanduser }}/{{ kraken_config.cluster }}/{{ item.repo }}-{{ item.name }}.helmvalues
+      --values {{ config_base | expanduser }}/{{ cluster.name }}/{{ item.repo }}-{{ item.name }}.helmvalues
       --dry-run
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
   with_items: "{{ cluster_services }}"
   register: install_dry_out
-  when: (cluster_services is defined) and (kraken_config.clusterServices.debug is defined) and (kraken_config.clusterServices.debug == True)
+  when: (cluster_services is defined) and (cluster.helmConfig.debug is defined) and (cluster.helmConfig.debug == True)
 
 - debug: var=install_dry_out.results
 
@@ -108,7 +141,7 @@
       --name {{ item.name }}
       --version {{ item.version }}
       --namespace {{ item.namespace | default('default') }}
-      --values {{ config_base | expanduser }}/{{ kraken_config.cluster }}/{{ item.repo }}-{{ item.name }}.helmvalues
+      --values {{ config_base | expanduser }}/{{ cluster.name }}/{{ item.repo }}-{{ item.name }}.helmvalues
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"

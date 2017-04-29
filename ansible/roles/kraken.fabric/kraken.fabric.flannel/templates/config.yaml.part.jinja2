@@ -8,7 +8,7 @@ metadata:
   namespace: kube-networking
 data:
   # Configure this with the location of your etcd cluster.
-  etcd_endpoints: "{% if kraken_config.master.infra.etcd.ssl == true %}https{% else %}http{% endif %}://{{kraken_config.master.infra.etcd.name}}.{{kraken_config.cluster}}.internal:{{kraken_config.master.infra.etcd.clientPorts[0]}}"
+  etcd_endpoints: "{% if etcd.etcdConfig.ssl == true %}https{% else %}http{% endif %}://{{etcd.etcdConfig.name}}.{{cluster.name}}.internal:{{etcd.etcdConfig.clientPorts[0]}}"
   etcd_ca_cert_file: "/etc/etcd/ssl/client-ca.pem"
   etcd_cert_file: "/etc/etcd/ssl/client.pem"
   etcd_key_file: "/etc/etcd/ssl/client-key.pem"

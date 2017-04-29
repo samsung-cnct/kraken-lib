@@ -20,10 +20,13 @@
     kraken_config: "{{ kraken_config_defaults.deployment | combine(kraken_config_user.deployment) | expand_config }}"
   when: config_file | is_file
 
-- name: Verify cluster is defined
+- name: Verify all clusters in the clusters list have names
   fail:
-    msg: "Make sure that the 'cluster' is defined in {{ config_file }}"
-  when: kraken_config.cluster | is_empty
+    msg: "Make sure that all 'clusters.name' are defined in {{ config_file }}"
+  when: item.name | is_empty
+  with_items:
+    - "{{ kraken_config.clusters }}"
+
 
 - name: Warn if still using old style configuration format
   debug:
@@ -36,108 +39,42 @@
          appropriate for your environment.
   when: kraken_config_user.version is undefined
 
-- name: Verify cloud provider is supported
+- name: Ensure each nodePool corresponds to exactly one of the node roles (i.e. etcd, master, or node)
   fail:
-    msg: |
-      {{ kraken_config.provider }} is not a supported cloud provider. Please file an issue at
-      https://github.com/samsung-cnct/k2/issues to request support.
-  when: kraken_config.provider not in ['aws', 'gke']
+    msg: "({{ i.0.name }}, {{ i.1.name }}) corresponds to more than one node role"
+  with_subelements:
+    - "{{ kraken_config.clusters }}"
+    - nodePools
+  loop_control:
+    loop_var: i
+  when: (i.1.etcdConfig is defined and (i.1.apiServerConfig is defined or i.1.kubeConfig is defined))
+         or (i.1.apiServerConfig is defined and i.1.kubeConfig is undefined)
+         or (i.1.etcdConfig is undefined and i.1.kubeConfig is undefined)
 
-- name: Set the kubernetes cloud provider to {{ kraken_config.provider }}
+- name: Set kubernetes minor versions for each aws or gke cluster
   set_fact:
-    kraken_config: "{{ kraken_config | combine({'kubernetes_cloudprovider':kraken_config.provider}) }}"
-
-- name: Set the kubernetes cloud provider to none
-  set_fact:
-    kraken_config: "{{ kraken_config | combine({'kubernetes_cloudprovider':''}) }}"
-  when: kraken_config.provider not in ['aws', 'azure', 'cloudstack', 'gce', 'mesos', 'openstack', 'ovirt', 'rackspace', 'vsphere']
-
-- name: Set empty kubeAuth if not defined
-  set_fact:
-    kraken_config: "{{ kraken_config | combine({'kubeAuth': {}}, recursive=True) }}"
-  when: "kraken_config.kubeAuth is undefined"
-
-- name: Set default kubernetes basic user if not defined
-  set_fact:
-    kraken_config: "{{ kraken_config | combine(
-    {
-      'kubeAuth': {
-        'authn': {
-          'default_basic_user': 'admin',
-        }
-      }
-    }, recursive=True) }}"
-  when: "kraken_config.kubeAuth.authn is undefined"
-
-- name: Set empty kubernetes authz dic if not defined
-  set_fact:
-    kraken_config: "{{ kraken_config | combine({'kubeAuth': {'authz': { }}}, recursive=True) }}"
-  when: "kraken_config.kubeAuth.authz is undefined"
-
-- name: Generate default kubernetes basic auth if not defined
-  set_fact:
-    kraken_config: "{{ kraken_config | combine(
-    {
-      'kubeAuth': {
-        'authn': {
-          'basic':[
-            {
-              'user': kraken_config.kubeAuth.authn.default_basic_user,
-              'password': lookup('password', config_base + '/' + kraken_config.cluster + '/auth/k8spassword-' + kraken_config.kubeAuth.authn.default_basic_user + ' chars=ascii_letters length=11')
-            }
-          ]
-        }
-      }
-    }, recursive=True) }}"
-  when: (kraken_config.kubeAuth.authn.basic is undefined) or (kraken_config.kubeAuth.authn.default_basic_user is undefined)
-
-- name: Retrive kube_basic_auths which have no password from kraken_config
-  set_fact:
-    undefined_password_kube_basic_auths: "{{ kraken_config.kubeAuth.authn.basic | selectattr('password', 'undefined') | list }} "
-
-- name: Remove auths which have no password from kube_basic_auths
-  set_fact:
-    kube_basic_auths: "{{ kraken_config.kubeAuth.authn.basic | difference( undefined_password_kube_basic_auths ) }}"
-
-- name: Generate password for the auths
-  set_fact:
-    kube_basic_auths: "{{ kube_basic_auths + [ { 'user': item.user, 'password': lookup('password', config_base + '/' + kraken_config.cluster + '/auth/k8spassword-' + item.user + ' chars=ascii_letters length=11') } ] }}"
-  with_items: "{{ undefined_password_kube_basic_auths }}"
-
-- name: Merge the kube basic auths to kraken_config
-  set_fact:
-    kraken_config: "{{ kraken_config | combine(
-    {
-      'kubeAuth': {
-        'authn': {
-          'basic': kube_basic_auths
-        }
-      }
-    }, recursive=True) }}"
-
-- name: Set the provider type
-  set_fact:
-    kraken_config: "{{ kraken_config | combine({'providerConfig': {'type': 'cloudinit' }}, recursive=True) }}"
-  when: kraken_config.providerConfig.type | is_empty
-
-- name: Set kubernetes minor version for master nodes in aws
-  set_fact:
-    kubernetes_minor_version: "{{ masterVersion[0:(masterVersion.find('.', (masterVersion.find('.') + 1 )))] }}"
+    kubernetes_minor_versions: "{{ kubernetes_minor_versions| default({}) |combine
+      (
+        { item.0.name: masterVersion[0:(masterVersion.find('.', 3 ))] }
+      )
+    }}"
+  with_subelements:
+    - "{{ kraken_config.clusters }}"
+    - nodePools
+  when: (item.1.apiServerConfig is defined) or (item.0.providerConfig.provider == 'gke')
   vars:
-    masterVersion: "{{ (kraken_config | json_query('nodepool[?name==`masterNodes`].kubeConfig.version'))[0] }}"
-  when: kraken_config.provider == 'aws'
+    masterVersion: "{{ item.1.kubeConfig.version }}"
 
-- name: Set kubernetes minor version for gke clusters
-  set_fact:
-    kubernetes_minor_version: "{{ clusterVersion[0:(clusterVersion.find('.', (clusterVersion.find('.') + 1 )))] }}"
-  vars:
-    clusterVersion: "{{ (kraken_config | json_query('kubeConfig[?name==`krakenKubeConfig`].version'))[0] }}"
-  when: kraken_config.provider == 'gke'
-
-- name: Generate random prefix if required
-  set_fact:
-    kraken_config: "{{ kraken_config | combine({'resourcePrefix': lookup('password', config_base + '/' + kraken_config.cluster + '/prefix' + ' chars=ascii_letters length=7')}, recursive=True) }}"
-  when: kraken_config.resourcePrefix | is_empty
+- include: setup.yaml
+  with_subelements:
+    - "{{ kraken_config.clusters }}"
+    - nodePools
+  loop_control:
+    loop_var: cluster_node_tuple
 
 - include: set-oidc-info.yaml
-  when: "kraken_config.kubeAuth.authn.oidc is defined"
+  with_items:
+    - "{{ kraken_config.clusters }}"
+  loop_control:
+    loop_var: a_cluster
+  when: "a_cluster.kubeAuth.authn.oidc is defined"

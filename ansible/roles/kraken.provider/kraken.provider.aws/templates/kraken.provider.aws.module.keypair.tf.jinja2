@@ -1,9 +1,10 @@
 variable "keypairs_name" {}
-variable "prefix" {}
 
-{% for keypair in kraken_config.keypair %}
+{% set unique_keypairs = cluster.nodePools | map(attribute='keyPair') | list | unique %}
+
+{% for keypair in unique_keypairs %}
 resource "aws_key_pair" "{{keypair.name}}" {
-  key_name = "${var.keypairs_name}_${var.prefix}_{{keypair.name}}"
+  key_name = "${var.keypairs_name}_{{keypair.name}}"
 {% if keypair.publickey is defined  %}
   public_key = "{{keypair.publickey}}"
 {% elif keypair.publickeyFile is defined %}
@@ -12,7 +13,7 @@ resource "aws_key_pair" "{{keypair.name}}" {
 }
 {% endfor %}
 
-{% for keypair in kraken_config.keypair %}
+{% for keypair in unique_keypairs %}
 output "{{keypair.name}}_keyname" {
   value = "${aws_key_pair.{{keypair.name}}.key_name}"
 }

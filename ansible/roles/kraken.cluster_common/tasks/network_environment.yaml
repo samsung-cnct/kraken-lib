@@ -1,15 +1,5 @@
 ---
-- name: Generate etcd.units.setup-network-environment.part files
+- name: Generate per nodePool setup-network-environment.part files
   template: src=setup-network-environment.part.jinja2
-            dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/etcd.{{ item.name }}.units.setup-network-environment.part"
-  with_items: "{{ kraken_config.etcd }}"
-
-- name: Generate node.units.setup-network-environment.part files
-  template: src=setup-network-environment.part.jinja2
-            dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/node.{{ item.name }}.units.setup-network-environment.part"
-  with_items: "{{ kraken_config.node }}"
-
-- name: Generate master.units.setup-network-environment.part files
-  template: src=setup-network-environment.part.jinja2
-            dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/master.units.setup-network-environment.part"
-  with_items: "{{ kraken_config.node }}"
+            dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ item.name }}.units.setup-network-environment.part"
+  with_items: "{{ cluster.nodePools }}"

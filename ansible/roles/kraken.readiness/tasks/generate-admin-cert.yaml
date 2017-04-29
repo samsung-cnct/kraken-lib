@@ -1,20 +1,20 @@
 ---
 - name: Generate end-user admin key
   command: >
-    openssl genrsa -out {{ config_base | expanduser }}/{{ kraken_config.cluster }}/certs/end-user.key 2048
-      creates={{ config_base | expanduser }}/{{ kraken_config.cluster }}/certs/end-user.key
+    openssl genrsa -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user.key 2048
+      creates={{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user.key
 
 - name: Generate end-user admin csr
   command: >
-    openssl req -new -key {{ config_base | expanduser }}/{{ kraken_config.cluster }}/certs/end-user.key
-      -subj "/CN=kraken-ca" -out {{ config_base | expanduser }}/{{ kraken_config.cluster }}/certs/end-user.csr
-        creates={{ config_base | expanduser }}/{{ kraken_config.cluster }}/certs/end-user.csr
+    openssl req -new -key {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user.key
+      -subj "/CN=kraken-ca" -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user.csr
+        creates={{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user.csr
 
 - name: Generate end-user admin crt
   command: >
-    openssl x509 -req -in {{ config_base | expanduser }}/{{ kraken_config.cluster }}/certs/end-user.csr
-      -CA {{ config_base | expanduser }}/{{ kraken_config.cluster }}/certs/ca.pem
-      -CAkey {{ config_base | expanduser }}/{{ kraken_config.cluster }}/certs/ca-key.pem
+    openssl x509 -req -in {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user.csr
+      -CA {{ config_base | expanduser }}/{{ cluster.name }}/certs/ca.pem
+      -CAkey {{ config_base | expanduser }}/{{ cluster.name }}/certs/ca-key.pem
       -CAcreateserial
-      -CAserial {{ config_base | expanduser }}/{{ kraken_config.cluster }}/certs/ca.srl
-      -out {{ config_base | expanduser }}/{{ kraken_config.cluster }}/certs/end-user.crt -days 10000
+      -CAserial {{ config_base | expanduser }}/{{ cluster.name }}/certs/ca.srl
+      -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user.crt -days 10000

@@ -1,13 +1,23 @@
-- name: Create a list of file for nodes
+---
+- name: Set Cluster Fact
+  set_fact:
+    cluster: "{{ a_cluster }}"
+
+- name: Make sure generated folder for full cloud configs is there
+  file: >
+    path="{{ config_base | expanduser }}/{{ cluster.name }}/cloud-config"
+    state=directory
+
+- name: Create a list of files for all nodePools
   find: >
-    paths="{{ config_base | expanduser }}/{{ kraken_config.cluster }}"
-    patterns="node.{{ item.name }}.*.part"
+    paths="{{ config_base | expanduser }}/{{ cluster.name }}"
+    patterns="{{ item.name }}.*.part"
   register: node_list
-  with_items: "{{ kraken_config.node }}"
+  with_items: "{{ cluster.nodePools }}"
 
 - name: Generate node cloud init
   template: src=node.yaml.jinja2
-    dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/cloud-config/node.{{ item.0.name }}.cloud-config.yaml"
+    dest="{{ config_base | expanduser }}/{{ cluster.name }}/cloud-config/{{ item.0.name }}.cloud-config.yaml"
   with_together:
-    - "{{ kraken_config.node }}"
+    - "{{ cluster.nodePools }}"
     - "{{ node_list.results }}"

@@ -1,15 +1,11 @@
 ---
-- name: Generate etcd .locksmith.part files
-  template: src=locksmith.part.jinja2
-            dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/etcd.{{ item.name }}.locksmith.part"
-  with_items: "{{ kraken_config.etcd }}"
+- name: find nodePool named etcd - assume this is the primary etcd cluster
+  set_fact: 
+    etcd: "{{ item }}"
+  with_items: "{{ cluster.nodePools }}"
+  when: item.name == "etcd"
 
-- name: Generate master .locksmith.part files
+- name: Generate nodePool .locksmith.part files
   template: src=locksmith.part.jinja2
-            dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/master.locksmith.part"
-  with_items: ["{{ kraken_config.master }}"]
-
-- name: Generate node .locksmith.part files
-  template: src=locksmith.part.jinja2
-            dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/node.{{ item.name }}.locksmith.part"
-  with_items: "{{ kraken_config.node }}"
+            dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ item.name }}.locksmith.part"
+  with_items: "{{ cluster.nodePools }}"

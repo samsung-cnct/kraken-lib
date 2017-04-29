@@ -1,17 +1,17 @@
 ---
 - name: Retrive default auth from kube basic authn list
   set_fact:
-    default_kube_basic_auth: "{{ kraken_config.kubeAuth.authn.basic | selectattr('user', 'match', '^'+kraken_config.kubeAuth.authn.default_basic_user+'$') | first }}"
+    default_kube_basic_auth: "{{ cluster.kubeAuth.authn.basic | selectattr('user', 'match', '^'+cluster.kubeAuth.authn.default_basic_user+'$') | first }}"
 
 - name: Render a deployment manager template
   template: src=deploymentmanager-create.yaml.jinja2
-   dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/deploymentmanager-create.yaml"
+   dest="{{ config_base | expanduser }}/{{ cluster.name }}/deploymentmanager-create.yaml"
 
 - name: Deploy cluster
   command: >
-    gcloud deployment-manager deployments create {{ kraken_config.cluster }}-k2-deployment
-      --config {{ config_base | expanduser }}/{{ kraken_config.cluster }}/deploymentmanager-create.yaml
-      --project {{ kraken_config.providerConfig.project }}
+    gcloud deployment-manager deployments create {{ cluster.name }}-k2-deployment
+      --config {{ config_base | expanduser }}/{{ cluster.name }}/deploymentmanager-create.yaml
+      --project {{ cluster.providerConfig.project }}
       --no-async
       --quiet
   register: deployment_result
@@ -19,8 +19,8 @@
 
 - name: Inspect the failed deployments
   command: >
-    gcloud deployment-manager deployments describe {{ kraken_config.cluster }}-k2-deployment
-      --project {{ kraken_config.providerConfig.project }}
+    gcloud deployment-manager deployments describe {{ cluster.name }}-k2-deployment
+      --project {{ cluster.providerConfig.project }}
       --format yaml
   when: (deployment_result is defined) and deployment_result | failed
   register: inspect_result
@@ -31,7 +31,7 @@
   when: (inspect_result is defined) and deployment_result | failed
 
 - name: Fail unless deployed cluster is 100 complete
-  fail: "msg='Deployment {{ kraken_config.cluster }}-k2-deployment failed with: {{ yaml_inspect_result }}'"
+  fail: "msg='Deployment {{ cluster.name }}-k2-deployment failed with: {{ yaml_inspect_result }}'"
   when: (yaml_inspect_result is defined) and ((yaml_inspect_result.deployment.operation.status != 'DONE') or (yaml_inspect_result.deployment.operation.progress != 100))
 
 - name: Set legacy kubeconfig certificate behavior
@@ -40,12 +40,12 @@
 
 - name: Get kubeconfig
   command: >
-    gcloud container clusters get-credentials {{ kraken_config.cluster }}
-       --project {{ kraken_config.providerConfig.project }}
-       --zone {{ kraken_config.providerConfig.zone.primaryZone }}
+    gcloud container clusters get-credentials {{ cluster.name }}
+       --project {{ cluster.providerConfig.project }}
+       --zone {{ cluster.providerConfig.zone.primaryZone }}
        --quiet
   environment:
-    KUBECONFIG: "{{ config_base | expanduser }}/{{ kraken_config.cluster }}/admin.kubeconfig"
+    KUBECONFIG: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
     CLOUDSDK_CONTAINER_USE_CLIENT_CERTIFICATE: True
 
 - include: update-cluster.yaml

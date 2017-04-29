@@ -1,23 +1,23 @@
 ---
 - name: Delete the deployment (cluster)
   command: >
-    gcloud deployment-manager deployments delete {{ kraken_config.cluster }}-k2-deployment
-      --project {{ kraken_config.providerConfig.project }}
+    gcloud deployment-manager deployments delete {{ cluster.name }}-k2-deployment
+      --project {{ cluster.providerConfig.project }}
       --no-async
       --quiet
   ignore_errors: yes
 
 - name: Query all clusters
-  shell: gcloud container clusters list --project {{ kraken_config.providerConfig.project }} --filter='name:{{ kraken_config.cluster }}' --format='value(name)'
+  shell: gcloud container clusters list --project {{ cluster.providerConfig.project }} --filter='name:{{ cluster.name }}' --format='value(name)'
   register: cluster_check
   ignore_errors: yes
 
 - name: Delete the cluster
   command: >
-    gcloud container clusters delete {{ kraken_config.cluster }}
-      --project {{ kraken_config.providerConfig.project }}
-      --zone {{ kraken_config.providerConfig.zone.primaryZone }}
+    gcloud container clusters delete {{ cluster.name }}
+      --project {{ cluster.providerConfig.project }}
+      --zone {{ cluster.providerConfig.zone.primaryZone }}
       --no-async
       --quiet
-  when: cluster_check.stdout == "{{ kraken_config.cluster }}"
+  when: cluster_check.stdout == "{{ cluster.name }}"
 

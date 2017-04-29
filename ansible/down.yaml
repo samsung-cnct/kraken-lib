@@ -6,7 +6,7 @@
         tags: [ 'config', 'always', 'config_only' ]
       }
     - {
-        role: 'roles/kraken.services', when: "kraken_config.clusterServices is defined",
+        role: 'roles/kraken.services',
         tags: [ 'services', 'all', 'services_only' ]
       }
     - {

@@ -1,4 +1,0 @@
-- name: Generate node kube proxy.yaml
-  template: src=kube-proxy-manifest.yaml.jinja2
-    dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/node.{{ item.name }}.kube-proxy.yaml.manifest"
-  with_items: "{{ kraken_config.node }}"

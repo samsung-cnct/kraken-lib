@@ -2,12 +2,12 @@
 - name: Set cert variable if required
   set_fact:
     kraken_aws_certs: "{{ '' | makedict(['certFile','privateKeyFile']) }}"
-  when: kraken_config.providerConfig.cert is undefined
+  when: cluster.providerConfig.cert is undefined
 
 - name: Set cert variable if required
   set_fact:
-    kraken_aws_certs: "{{ kraken_config.providerConfig.cert }}"
-  when: kraken_config.providerConfig.cert is defined
+    kraken_aws_certs: "{{ cluster.providerConfig.cert }}"
+  when: cluster.providerConfig.cert is defined
 
 - name: Run key generation
   include: aws-certs-generate.yaml

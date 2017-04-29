@@ -6,27 +6,19 @@
         tags: [ 'config', 'always', 'config_only' ]
       }
     - {
-        role: 'roles/kraken.cluster_common', when: "kraken_config.providerConfig.type == 'cloudinit'",
+        role: 'roles/kraken.cluster_common',
         tags: [ 'common', 'assembler', 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun', 'common_only' ]
       }
     - {
-        role: 'roles/kraken.fabric/kraken.fabric.selector', when: "kraken_config.providerConfig.type == 'cloudinit'",
+        role: 'roles/kraken.fabric/kraken.fabric.selector',
         tags: [ 'fabric', 'assembler', 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun', 'fabric_only' ]
       }
     - {
-        role: 'roles/kraken.etcd/kraken.etcd.selector', when: "kraken_config.providerConfig.type == 'cloudinit'",
-        tags: [ 'etcd', 'assembler', 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun', 'etcd_only' ]
+        role: 'roles/kraken.nodePool/kraken.nodePool.selector',
+        tags: [ 'nodePools', 'assembler', 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun', 'nodePools_only' ]
       }
     - {
-        role: 'roles/kraken.master/kraken.master.selector', when: "kraken_config.providerConfig.type == 'cloudinit'",
-        tags: [ 'master', 'assembler', 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun', 'master_ony' ]
-      }
-    - {
-        role: 'roles/kraken.node/kraken.node.selector', when: "kraken_config.providerConfig.type == 'cloudinit'",
-        tags: [ 'node', 'assembler', 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun', 'node_only' ]
-      }
-    - {
-        role: 'roles/kraken.assembler', when: "kraken_config.providerConfig.type == 'cloudinit'",
+        role: 'roles/kraken.assembler',
         tags: [ 'assembler', 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun', 'assembler_only' ]
       }
     - {
@@ -38,6 +30,6 @@
         tags: [ 'ssh', 'all', 'ssh_only' ]
       }
     - {
-        role: 'roles/kraken.readiness', when: "kraken_config.providerConfig.type == 'cloudinit'",
+        role: 'roles/kraken.readiness',
         tags: [ 'readiness', 'services', 'all', 'readiness_only' ]
       }

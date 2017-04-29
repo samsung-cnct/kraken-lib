@@ -1,2 +1,1 @@
 ---
-kubeconfig: "{{ config_base | expanduser }}/{{ kraken_config.cluster }}/admin.kubeconfig"

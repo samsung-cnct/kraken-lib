@@ -4,10 +4,10 @@
     gcloud compute instances list
       --format="value(networkInterfaces[0].accessConfigs[0].natIP)"
       --filter="metadata.items.key:k2nodepool AND metadata.items.value:{{ item.name }}"
-      --project {{ kraken_config.providerConfig.project }}
+      --project {{ cluster.providerConfig.project }}
   register: node_ips_out
-  with_items: "{{ kraken_config.nodepool }}"
+  with_items: "{{ cluster.nodePools }}"
 
 - name: Generate ssh inventory
   template: src=ssh_config.jinja2
-    dest="{{ config_base | expanduser }}/{{ kraken_config.cluster }}/ssh_config"
+    dest="{{ config_base | expanduser }}/{{ cluster.name }}/ssh_config"

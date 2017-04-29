@@ -1,7 +1,43 @@
 ---
+
+- set_fact:
+    cluster: "{{ a_cluster }}"
+
+- name: Look up and set k8s minor version for this cluster
+  set_fact:
+    kubernetes_minor_version: "{{ kubernetes_minor_versions[cluster.name] }}"
+
+- name: Execute appropriate kubectl per minor version
+  set_fact:
+    kubectl: "/opt/cnct/kubernetes/{{ kubernetes_minor_version }}/bin/kubectl"
+
+- set_fact:
+    cluster_services: "{{ cluster.helmConfig.charts | default([]) }}"
+    cluster_repos: "{{ cluster.helmConfig.repos | default([]) }}"
+    kubeconfig: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
+    helm_home: "{{ config_base | expanduser }}/{{ cluster.name }}/.helm"
+    cluster_namespaces: []
+- set_fact:
+    cluster_namespaces: "{{ cluster_namespaces + [item.namespace | default('kube-system')] }}"
+  with_items: "{{ cluster_services }}"
+- set_fact:
+    cluster_namespaces: "{{ cluster_namespaces | unique | reject('search', 'kube-system') | list }}"
+
+- name: See if tiller rc if present
+  shell: >
+      {{ kubectl }} --kubeconfig={{ kubeconfig }} get deployment {{ tiller }} --namespace=kube-system
+  register: tiller_present
+  when: kubeconfig | is_file
+  ignore_errors: yes
+
+- name: Create Helm home
+  file: >
+    path={{ helm_home }}
+    state=directory
+
 - name: Collect all services
   command: >
-    kubectl --kubeconfig={{ kubeconfig }} get services --all-namespaces -o json
+    {{ kubectl }} --kubeconfig={{ kubeconfig }} get services --all-namespaces -o json
   register: added_services
   when: kraken_action == 'down' and kubeconfig | is_file
   ignore_errors: yes
@@ -30,12 +66,12 @@
 
 - name: Clean up tiller if present
   command: >
-    kubectl --kubeconfig={{ kubeconfig }} delete deployment {{ tiller }} --namespace=kube-system
+    {{ kubectl }} --kubeconfig={{ kubeconfig }} delete deployment {{ tiller }} --namespace=kube-system
   when: tiller_present | succeeded and not tiller_present | skipped
 
 - name: Clean up services
   command: >
-    kubectl --kubeconfig={{ kubeconfig }} delete --namespace {{ item.metadata.namespace }} svc {{ item.metadata.name }}
+    {{ kubectl }} --kubeconfig={{ kubeconfig }} delete --namespace {{ item.metadata.namespace }} svc {{ item.metadata.name }}
   with_items: "{{ the_services }}"
   when: kraken_action == 'down' and item.status.loadBalancer.ingress[0].hostname is defined
   ignore_errors: yes
@@ -48,7 +84,7 @@
   ignore_errors: yes
 
 - name: Get vpc id
-  shell: "terraform state show -state={{ config_base | expanduser }}/{{ kraken_config.cluster }}/terraform.tfstate module.vpc.aws_vpc.vpc  | awk '/^id/{print $3}'"
+  shell: "terraform state show -state={{ config_base | expanduser }}/{{ cluster.name }}/terraform.tfstate module.vpc.aws_vpc.vpc  | awk '/^id/{print $3}'"
   register: terraform_state_show
   when: kraken_action == 'down'
   changed_when: false
@@ -61,14 +97,14 @@
 - name: Wait for ELBs to be deleted
   action:
     module: ec2_elb_facts
-    region: "{{ kraken_config.providerConfig.region }}"
-    aws_access_key: "{{ kraken_config.providerConfig.authentication.accessKey or omit }}"
-    aws_secret_key: "{{ kraken_config.providerConfig.authentication.accessSecret or omit }}"
-    profile: "{{ kraken_config.providerConfig.authentication.credentialsProfile or omit }}"
+    region: "{{ cluster.providerConfig.region }}"
+    aws_access_key: "{{ cluster.providerConfig.authentication.accessKey or omit }}"
+    aws_secret_key: "{{ cluster.providerConfig.authentication.accessSecret or omit }}"
+    profile: "{{ cluster.providerConfig.authentication.credentialsProfile or omit }}"
   register: elb_facts
   vars:
     vpc_lookup: "elbs[?vpc_id=='{{ vpcid }}']"
-  when: kraken_action == 'down' and kraken_config.provider == 'aws'
+  when: kraken_action == 'down' and cluster.providerConfig.provider == 'aws'
   until: (elb_facts is none) or (elb_facts | json_query(vpc_lookup) is none) or (elb_facts | json_query(vpc_lookup) | length <= 1)
   retries: 120
   delay: 5

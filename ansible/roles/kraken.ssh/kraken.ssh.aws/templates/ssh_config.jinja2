@@ -2,13 +2,13 @@
 {% set validHostCounter = 1 %}
 {% for instance in result.instances %}
 {% if instance.state == 'running' or instance.state == 'pending' %}
-{% set privateKeyPath = kraken_config.nodepool | selectattr("name", "equalto", instance.tags['k2-nodepool']) | list %}
-{% if privateKeyPath[0].keypair.privatekeyFile is defined %}
+{% set privateKeyPath = cluster.nodePools | selectattr("name", "equalto", instance.tags['k2-nodepool']) | list %}
+{% if privateKeyPath[0].keyPair.privatekeyFile is defined %}
 Host {{instance.tags['k2-nodepool']}}-{{validHostCounter}}
   HostName {{instance.public_dns_name}}
   Port 22
   User core
-  IdentityFile {{privateKeyPath[0].keypair.privatekeyFile}}
+  IdentityFile {{privateKeyPath[0].keyPair.privatekeyFile}}
 {% set validHostCounter = validHostCounter + 1 %}
 {% endif %}
 {% endif %}

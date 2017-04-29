@@ -1,0 +1,5 @@
+---
+- name: Generate nodePool .coreos.update.part files
+  template: src=os.update.part.jinja2
+            dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ item.name }}.update.part"
+  with_items: "{{ cluster.nodePools }}"

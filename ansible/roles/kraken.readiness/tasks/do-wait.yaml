@@ -1,7 +1,15 @@
 ---
+- name: Look up and set k8s minor version for this cluster
+  set_fact:
+    kubernetes_minor_version: "{{ kubernetes_minor_versions[cluster.name] }}"
+
+- name: Execute appropriate kubectl per minor version
+  set_fact:
+    kubectl: "/opt/cnct/kubernetes/{{ kubernetes_minor_version }}/bin/kubectl"
+
 - name: Get needed number of nodes
   set_fact:
-    needed_nodes: "{{ kraken_config | expected_nodes(readiness_type, readiness_value) }}"
+    needed_nodes: "{{ cluster | expected_nodes(readiness_type, readiness_value) }}"
 
 - name: Get timestamp before api server wait
   set_fact:
@@ -27,11 +35,11 @@
     remaining_time: "{{ readiness_wait | int - (wait_api_end_timestamp | int - wait_api_start_timestamp | int ) }}"
 
 - include: bootstrap-default-rbac-policy.yaml
-  when: "kraken_config.kubeAuth.authz.rbac is defined"
+  when: "cluster.kubeAuth.authz.rbac is defined"
 
 - name: Get all nodes
   command: >
-    kubectl --kubeconfig={{ kubeconfig | expanduser }} get nodes --no-headers=true
+    {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} get nodes --no-headers=true
   register: job_get_nodes_result
   until: "{{ job_get_nodes_result.stdout_lines | length }} >= needed_nodes | int"
   retries: "{{ remaining_time }}"

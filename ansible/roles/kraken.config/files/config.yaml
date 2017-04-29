@@ -1,7 +1,15 @@
 ---
-version: v1alpha
+version: v1
 # These are the new definitions which are used throughout the configuration.
 definitions:
+  dnsConfig:
+    - &defaultDns
+      name: defaultDns
+      kind: dns
+      kubedns:
+        cluster_ip: 10.32.0.2
+        dns_domain: cluster.local
+        namsepace: kube-system 
   helmConfigs:
     - &defaultHelm
       name: defaultHelm
@@ -12,14 +20,6 @@ definitions:
         - name: stable
           url: https://kubernetes-charts.storage.googleapis.com
       charts:
-        - name: kubedns
-          repo: atlas
-          chart: kubedns
-          version: 0.1.0
-          namespace: kube-system
-          values:
-            cluster_ip: 10.32.0.2
-            dns_domain: cluster.local
         - name: heapster
           repo: atlas
           chart: heapster
@@ -60,7 +60,7 @@ definitions:
             type: vxlan
   kvStoreConfigs:
     - &defaultEtcd
-      name: defaultEtcd
+      name: etcd
       kind: kvStore
       type: etcd
       clientPorts: [2379, 4001]
@@ -69,7 +69,7 @@ definitions:
       ssl: true
       version: v3.1.0
     - &defaultEtcdEvents
-      name: defaultEtcdEvents
+      name: etcdEvents
       kind: kvStore
       type: etcd
       clientPorts: [2381]
@@ -89,16 +89,15 @@ definitions:
   kubeConfigs:
     - &defaultKube
       name: defaultKube
-      kind: k8s
-      type: release
-      version: v1.5.2
+      kind: kubernetes
+      version: v1.5.6
       hyperkubeLocation: gcr.io/google_containers/hyperkube
   containerConfigs:
     - &defaultDocker
       name: defaultDocker
       kind: container
-      type: distro
       runtime: docker
+      type: distro
   osConfigs:
     - &defaultCoreOs
       name: defaultCoreOs
@@ -306,7 +305,7 @@ definitions:
       authentication:
         accessKey:
         accessSecret:
-        credentialsFile:
+        credentialsFile: "$HOME/.aws/credentials"
         credentialsProfile:
       ingressSecurity:
         -
@@ -325,6 +324,7 @@ definitions:
           to_port: 0
           protocol: "-1"
           cidr_blocks: ["0.0.0.0/0"]
+ 
   keyPairs:
    - &defaultKeyPair
       name: defaultKeyPair
@@ -332,11 +332,21 @@ definitions:
       publickeyFile: "$HOME/.ssh/id_rsa.pub"
       privatekeyFile: "$HOME/.ssh/id_rsa"
 
+  kubeAuth:
+   - &defaultKubeAuth
+      authz: {}
+      authn:
+        basic:
+          -
+            password: "ChangeMe"
+            user: "admin"
+        default_basic_user: "admin"
+
 # This is the core of the new configuration.
 
 deployment:
   clusters:
-    - name:
+    - name: 
       network: 10.32.0.0/12
       dns: 10.32.0.2
       domain: cluster.local
@@ -379,124 +389,11 @@ deployment:
           nodeConfig: *defaultAwsSpecialNode
           keyPair: *defaultKeyPair
       fabricConfig: *defaultCanalFabric
+      kubeAuth: *defaultKubeAuth
       helmConfig: *defaultHelm
-      readiness:
-        type: exact
-        value: 0
-        wait: 600
-
-# These are the old definitions included for backwards compatibility while we
-# convert each Ansible task to reference the new definitions and organization.
-
-  cluster:
-  serviceCidr: 10.32.0.0/12
-  serviceDNS: 10.32.0.2
-  clusterDomain: cluster.local
-  coreos:
-    - *defaultCoreOs
-  keypair:
-    - *defaultKeyPair
-  kubeConfig:
-    - *defaultKube
-  containerConfig:
-    - *defaultDocker
-  fabric:
-    provider: flannel
-    <<: *defaultCanalFabric
-  provider: aws
-  providerConfig: *defaultAws
-  nodepool:
-    -
-      name: etcd
-      count: 5
-      <<: *defaultAwsEtcdNode
-      keypair: *defaultKeyPair
-      containerConfig: *defaultDocker
-      coreos: *defaultCoreOs
-    -
-      name: etcdEvents
-      count: 5
-      <<: *defaultAwsEtcdEventsNode
-      keypair: *defaultKeyPair
-      containerConfig: *defaultDocker
-      coreos: *defaultCoreOs
-    -
-      name: masterNodes
-      count: 3
-      <<: *defaultAwsMasterNode
-      keypair: *defaultKeyPair
-      kubeConfig: *defaultKube
-      containerConfig: *defaultDocker
-      coreos: *defaultCoreOs
-    -
-      name: clusterNodes
-      count: 3
-      <<: *defaultAwsClusterNode
-      keypair: *defaultKeyPair
-      kubeConfig: *defaultKube
-      containerConfig: *defaultDocker
-      coreos: *defaultCoreOs
-    -
-      name: specialNodes
-      count: 2
-      <<: *defaultAwsSpecialNode
-      keypair: *defaultKeyPair
-      kubeConfig: *defaultKube
-      containerConfig: *defaultDocker
-      coreos: *defaultCoreOs
-  etcd:
-    -
-      name: etcd
-      clientPorts: [2379, 4001]
-      clusterToken: espouse-monger-rarely
-      nodepool: etcd
-      peerPorts: [2380]
-      ssl: true
-      version: v3.1.0
-    -
-      name: etcdEvents
-      clientPorts: [2381]
-      clusterToken: animism-training-chastity
-      nodepool: etcdEvents
-      peerPorts: [2382]
-      ssl: true
-      version: v3.1.0
-  master:
-    nodepool: masterNodes
-    loadbalancer: cloud
-    infra:
-      etcd: etcd
-    events:
-      etcd: etcdEvents
-  node:
-    -
-      name: clusterNodes
-      nodepool: clusterNodes
-    -
-      name: specialNodes
-      nodepool: specialNodes
-  clusterServices:
-    repos:
-      -
-        name: atlas
-        url: http://atlas.cnct.io
-    services:
-      -
-        name: kubedns
-        repo: atlas
-        chart: kubedns
-        version: 0.1.0
-        namespace: kube-system
-        values:
-          cluster_ip: 10.32.0.2
-          dns_domain: cluster.local
-      -
-        name: heapster
-        repo: atlas
-        chart: heapster
-        version: 0.1.0
-        namespace: kube-system
+      dnsConfig: *defaultDns
   readiness:
     type: exact
     value: 0
     wait: 600
+    

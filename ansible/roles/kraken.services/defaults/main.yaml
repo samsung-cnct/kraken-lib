@@ -1,6 +1,59 @@
 ---
-kubeconfig: "{{ config_base | expanduser }}/{{ kraken_config.cluster }}/admin.kubeconfig"
-helm_home: "{{ config_base | expanduser }}/{{ kraken_config.cluster }}/.helm"
 tiller: tiller-deploy
 tiller_image:
-api_servers: "{{ lookup('file', kubeconfig) | from_yaml | json_query('clusters[*].cluster.server') }}"
+#
+# Last Resort Vars used for kubedns
+# 4/13/2017 - mln
+# all can be overriden in the config.yaml file if needed
+kubedns:
+  k8sapp: "kube-dns"
+  service_name: "KubeDNS"
+  namespace: "kube-system"
+  dns_domain: "cluster.local"
+  cluster_ip: 10.100.0.10
+  replicas: 1
+  version: v17
+  color: FFFF66
+  kubedns_image: "gcr.io/google_containers/kubedns-amd64:1.8"
+  kubedns_image_v16: "gcr.io/google_containers/k8s-dns-kube-dns-amd64:1.14.1"
+  kubedns_image_v15: "gcr.io/google_containers/kubedns-amd64:1.9"
+  kubedns_image_v14: "gcr.io/google_containers/kubedns-amd64:1.8"
+  kubedns_log_level: 0
+  kubedns_max_surge: 10%
+  kubedns_max_unavail: 0
+  kubedns_cpu_lim: 100m
+  kubedns_mem_lim: 170Mi
+  kubedns_cpu_req: 100m
+  kubedns_mem_req: 70Mi
+  healthz_image: "gcr.io/google_containers/exechealthz-amd64:1.2"
+  healthz_image_v15: "gcr.io/google_containers/exechealthz-amd64:1.2"
+  healthz_image_v14: "gcr.io/google_containers/exechealthz-amd64:1.2"
+  healthz_cpu_lim: 10m
+  healthz_mem_lim: 50Mi
+  healthz_cpu_req: 10m
+  healthz_mem_req: 50Mi
+  healthz_delay: 60
+  healthz_timeout: 5
+  healthz_success_thresh: 1
+  healthz_failure_thresh: 5
+  readiness_delay: 3
+  readiness_timeout: 5
+  dnsmasq_image: "gcr.io/google_containers/kube-dnsmasq-amd64:1.4.1"
+  dnsmasq_image_v16: "gcr.io/google_containers/k8s-dns-dnsmasq-nanny-amd64:1.14.1"
+  dnsmasq_image_v15: "gcr.io/google_containers/kube-dnsmasq-amd64:1.4.1"
+  dnsmasq_image_v14: "gcr.io/google_containers/kube-dnsmasq-amd64:1.4.1"
+  dnsmasq_delay: 60
+  dnsmasq_timeout: 5
+  dnsmasq_succ_thresh: 1
+  dnsmasq_fail_thresh: 5 
+  dnsmasq_cpu_req: 150m
+  dnsmasq_mem_req: 10Mi
+  dnsmasq_metrics_image_v16: "gcr.io/google_containers/k2s-dns-sidecare-amd64:1.14.1"
+  dnsmasq_metrics_image_v15: "gcr.io/google_containers/dnsmasq-metrics-amd64:1.0.1"
+  dnsmasq_metrics_delay: 60
+  dnsmasq_metrics_timeout: 5
+  dnsmasq_metrics_succ_thresh: 1
+  dnsmasq_metrics_fail_thresh: 5 
+  dnsmasq_log_level: 2
+  dnsmasq_metrics_mem_req: 20Mi
+  dnsmasq_metrics_cpu_req: 10m

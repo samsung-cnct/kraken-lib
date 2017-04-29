@@ -1,4 +1,4 @@
-{% for mount in item.nodepool.mounts %}
+{% for mount in item.nodeConfig.mounts %}
 - name: {{mount.path | replace('/', '-') | replace('-', '', 1)}}.mount
   command: start
   content: |

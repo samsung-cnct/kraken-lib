@@ -1,6 +1,0 @@
-- path: /etc/kubernetes/manifests/kube-proxy.yaml
-  owner: root
-  permissions: 0644
-  encoding: "gz+b64"
-  content: |
-    {{ lookup('file', '{{config_base}}/{{kraken_config.cluster}}/node.{{item.name}}.kube-proxy.yaml.manifest' | expanduser) | gz | b64encode }}

@@ -1,0 +1,151 @@
+---
+version: v1
+# These are the new definitions which are used throughout the configuration.
+definitions:
+  dnsConfig:
+    - &defaultDns
+      name: defaultDns
+      kind: dns
+      kubedns:
+        cluster_ip: 10.35.240.10
+        dns_domain: cluster.local
+        namsepace: kube-system 
+  helmConfigs:
+    - &defaultHelm
+      name: defaultHelm
+      kind: helm
+      repos:
+        - name: atlas
+          url: http://atlas.cnct.io
+        - name: stable
+          url: https://kubernetes-charts.storage.googleapis.com
+      charts:
+        - name: heapster
+          repo: atlas
+          chart: heapster
+          version: 0.1.0
+          namespace: kube-system
+        - name: central-logging
+          repo: atlas
+          chart: central-logging
+          version: 0.2.0
+  fabricConfigs:
+    - &defaultCanalFabric
+      name: defaultCanalFabric
+      kind: fabric
+      type: canal
+      options:
+        containers:
+          kubePolicyController:
+            version: v0.5.1
+            location: calico/kube-policy-controller
+          etcd:
+            version: v3.0.9
+            location: quay.io/coreos/etcd
+          calicoCni:
+            version: v1.4.2
+            location: calico/cni
+          calicoNode:
+            version: v1.0.0-rc1
+            location: quay.io/calico/node
+          flannel:
+            version: v0.6.1
+            location: quay.io/coreos/flannel
+        network:
+          network: 10.128.0.0/10
+          subnetLen: 22
+          subnetMin: 10.128.0.0
+          subnetMax: 10.191.255.255
+          backend:
+            type: vxlan
+  kubeConfigs:
+    - &defaultKube
+      name: defaultKube
+      kind: kubernetes
+      version: v1.5.6
+      hyperkubeLocation: gcr.io/google_containers/hyperkube
+  containerConfigs:
+    - &defaultDocker
+      name: defaultDocker
+      kind: container
+      runtime: docker
+      type: distro
+  nodeConfigs:
+    - &defaultGKEClusterNode
+      name: defaultGKEClusterNode
+      kind: node
+      providerConfig:
+        diskSize: 100
+        machineType: n1-standard-1
+        scopes:
+          - https://www.googleapis.com/auth/compute
+          - https://www.googleapis.com/auth/devstorage.read_only
+          - https://www.googleapis.com/auth/logging.write
+          - https://www.googleapis.com/auth/monitoring
+    - &defaultGKEOtherNode
+      name: defaultGKEOtherNode
+      kind: node
+      providerConfig:
+        diskSize: 100
+        machineType: n1-standard-1
+        scopes:
+          - https://www.googleapis.com/auth/compute
+          - https://www.googleapis.com/auth/devstorage.read_only
+          - https://www.googleapis.com/auth/logging.write
+          - https://www.googleapis.com/auth/monitoring
+  keyPairs:
+   - &defaultGKEKeyPair
+      name: defaultGKEKeyPair
+      kind: keyPair
+      providerConfig: 
+        serviceAccount: patrickrobot@k8s-work.iam.gserviceaccount.com
+        serviceAccountKeyFile:  /kraken/patrickRobot.json
+  kubeAuth:
+   - &defaultKubeAuth
+      authz: {}
+      authn:
+        basic:
+          -
+            password: "ChangeMe"
+            user: "admin"
+        default_basic_user: "admin"
+  providerConfigs:
+    - &defaultGKE
+      name: defaultGKE
+      kind: provider
+      provider: gke
+      type: autonomous
+      project: k8s-work
+      keypair: *defaultGKEKeyPair
+      zone:
+        primaryZone: us-central1-a
+        additionalZones: 
+          - us-central1-b
+          - us-central1-c
+
+# This is the core of the new configuration.
+
+deployment:
+  clusters:
+    - name: delight
+      network: 10.32.0.0/12
+      dns: 10.32.0.2
+      domain: cluster.local
+      providerConfig: *defaultGKE
+      kubeAuth: *defaultKubeAuth
+      nodePools:
+        - name: clusternodes
+          count: 3
+          kubeConfig: *defaultKube
+          nodeConfig: *defaultGKEClusterNode
+        - name: othernodes
+          count: 2
+          kubeConfig: *defaultKube
+          nodeConfig: *defaultGKEOtherNode
+      fabricConfig: *defaultCanalFabric
+      helmConfig: *defaultHelm
+      dnsConfig: *defaultDns
+  readiness:
+    type: exact
+    value: 0
+    wait: 600

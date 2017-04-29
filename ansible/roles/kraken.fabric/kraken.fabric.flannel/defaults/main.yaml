@@ -1,2 +1,1 @@
 ---
-api_servers: "{{ lookup('file', kubeconfig) | from_yaml | json_query('clusters[*].cluster.server') }}"

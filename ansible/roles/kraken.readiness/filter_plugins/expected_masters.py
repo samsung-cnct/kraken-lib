@@ -2,7 +2,10 @@ import yaml, copy, json
 from ansible import errors
 
 def expected_masters(config_data, readiness_type, readiness_value):
-  total_masters = int(config_data['master']['nodepool']['count'])
+  total_nodes = 0
+  for node in config_data['nodePools']:
+    if 'apiServerConfig' in node:
+      total_nodes += node['count']
 
   if readiness_type == 'exact':
     return total_masters

@@ -1,0 +1,20 @@
+---
+- set_fact:
+    cluster: "{{ a_cluster }}"
+
+- name: Canal Fabric Type
+  include_role:
+    name: '{{ playbook_dir }}/roles/kraken.fabric/kraken.fabric.flannel'
+  when: cluster.fabricConfig.type == 'canal'
+
+- name: Calico Fabric Type
+  include_role:
+    name: '{{ playbook_dir }}/roles/kraken.fabric/kraken.fabric.calico'
+  when: cluster.fabricConfig.type == 'calico'
+
+- name: Error Fabric Type
+  include_role:
+    name: '{{ playbook_dir }}/roles/kraken.error'
+    kraken_component_type: type
+    kraken_component_error: 'Unsupported fabric type'
+  when: cluster.fabricConfig.type not in ['canal', 'calico']

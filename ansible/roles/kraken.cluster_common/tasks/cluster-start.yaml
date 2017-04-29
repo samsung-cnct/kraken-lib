@@ -1,0 +1,17 @@
+---
+- name: Set Cluster Fact
+  set_fact:
+    cluster: "{{ a_cluster }}"
+
+- name: Make sure generated folder for cloud init snippets is there
+  file: >
+    path="{{ config_base | expanduser }}/{{ cluster.name }}"
+    state=directory
+
+- include: network_environment.yaml
+- include: certificate_authority.yaml
+- include: os_update.yaml
+- include: storage.yaml
+- include: locksmith.yaml
+- include: docker-install.yaml
+- include: docker-wait-for-mounts.yaml

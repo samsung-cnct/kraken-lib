@@ -1,11 +1,11 @@
 ---
 - name: Query all deployments
-  shell: gcloud deployment-manager deployments list --project {{ kraken_config.providerConfig.project }} --filter='name:{{ kraken_config.cluster }}-k2-deployment' --format='value(name)'
+  shell: gcloud deployment-manager deployments list --project {{ cluster.providerConfig.project }} --filter='name:{{ cluster.name }}-k2-deployment' --format='value(name)'
   register: deployment_check
   ignore_errors: yes
 
 - include: create-cluster.yaml
-  when: deployment_check.stdout != "{{ kraken_config.cluster }}-k2-deployment"
+  when: deployment_check.stdout != "{{ cluster.name }}-k2-deployment"
 
 - include: update-cluster.yaml
-  when: deployment_check.stdout == "{{ kraken_config.cluster }}-k2-deployment"
+  when: deployment_check.stdout == "{{ cluster.name }}-k2-deployment"
