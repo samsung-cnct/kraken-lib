@@ -1,7 +1,7 @@
 # GKE specific node configuration
 
-# Options
-## Root Options
+## Options
+### Root Options
 | Key Name | Required | Type | Description|
 | --- | --- | --- | --- |
 | username | Optional | String | GCE user name for the privatekeyFile/publickeyFile. I.e. 'core' |

@@ -33,8 +33,11 @@
 
 # Example
 ```yaml
-  fabric:
-    provider: flannel
+fabricConfigs:
+  - &defaultCanalFabric
+    name: defaultCanalFabric
+    kind: fabric
+    type: canal
     options:
       containers:
         kubePolicyController:
@@ -60,4 +63,3 @@
         backend:
           type: vxlan
 ```
-

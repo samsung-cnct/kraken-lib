@@ -24,8 +24,10 @@ Below is sequence of getting/validating auth.
 By default, Auth is disabled in k2.
 To enable this see below example in for config.yaml
 ```yaml
-deployment:
+definitions:
+  ...
   kubeAuth:
+   - &defaultKubeAuth
     authn:
       oidc:
         service_name: dex
@@ -37,6 +39,7 @@ deployment:
       rbac:
         super_user: admin
 ```
+
 From above,
 for authentication, it uses 'dex' for oidc provider.
 for Authorization, it uses RBAC.
@@ -46,12 +49,18 @@ It is default user so will be set to kubeConfig file.
 It is also RBAC super user, so has permission to manage RBAC policies.
 
 Below is example service configuration.
+
 ```yaml
-  clusterServices:
+helmConfigs:
+  - &defaultHelm
+    name: defaultHelm
+    kind: helm
     repos:
-    - name: atlas
-      url: http://atlas.cnct.io
-    services:
+      - name: atlas
+        url: http://atlas.cnct.io
+      - name: stable
+        url: https://kubernetes-charts.storage.googleapis.com
+    charts:
     - name: openldap
       repo: atlas
       chart: openldap
@@ -108,11 +117,11 @@ Below is example service configuration.
           RedirectUri: http://auth.keyolk.cluster.io:30080/callback
 ```
 
-The service 'dex' is oidc provider for kube-apiserver.
+The chart 'dex' is oidc provider for kube-apiserver.
 It has two endpoint which user should access, 'Dex' and 'DexApp'.
 It should be accessible from user side but also cluster inside.
 
-The service 'openldap' is used for authentication backend of 'dex'.
+The chart 'openldap' is used for authentication backend of 'dex'.
 
 ## Endpoints
 By default, it exposes ports 30443, 30080 for 'dex'.

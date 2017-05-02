@@ -1,9 +1,14 @@
-#Kraken Configuration File Format
+# Kraken Configuration File Format (Definition section)
 
-* `environment` - [Deployment Environment](deployment.md)
-* `etcd` - [etcd Configuration](etcd.md)
-* `fabric` - [Network Fabric configuration](fabric.md)
-* `master` - [Master configuration](master.md)
-* `node pools` - [Node Pool configuration](nodepool.md)
-* `clusterservices` - [cluster services configuration](clusterservices.md)
-
+* `dns` - [dns configurations](dns.md)
+* `helm` - [helm charts configuration](helmconfigs.md)
+* `fabric` - [Network Fabric configuration](fabric/README.md)
+* `kvStore` - [kvStore configuration](kvstore.md)
+* `apiServer` - [apiServer configuration](apiserver.md)
+* `kubeConfig` - [kubeConfigs](kubeconfig.md)
+* `container` - [container configuration](container.md)
+* `os` - [os configuration](os.md)
+* `node` - [node configuration](node/README.md)
+* `provider` -[provider configuration](provider/README.md)
+* `keypairs` -[keyPair configuration](keypair/README.md)
+* `kubeAuth` -[kubeAuth configuration](kubeauth.md)

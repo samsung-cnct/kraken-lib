@@ -1,7 +1,7 @@
 # Calico options
 
-# Options
-## Root Options
+## Options
+### Root Options
 | Key Name | Required | Type | Description|
 | --- | --- | --- | --- |
 
@@ -11,4 +11,3 @@
     provider: calico
     options:
 ```
-

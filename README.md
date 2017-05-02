@@ -110,12 +110,12 @@ This will generate a config.yaml file located at
 ```
 ${KRAKEN}/config.yaml
 ```
-
-In discussions that follow, the variable `YOURCLUSTER` refers to the line found in the beginning of the generated `config.yaml` file
-containing the keyword `cluster`, which once a name has been decided would look like
+In discussions that follow, the variable `YOURCLUSTER` refers to the name you must assign to your cluster at the bottom of the generated `config.yaml` in the deployments section, which once a name has been decided would look like:
 
 ```
-cluster: YOURCLUSTER
+deployment:
+  clusters:
+    - name: YOURCLUSTER
 ```
 
 Finally, we suggest you rename the `config.yaml` file to something like
@@ -125,7 +125,7 @@ YOURCLUSTER.yaml
 ```
 
 It is particularly useful when trying to create and manage multiple clusters, each of which
-should have unique names.
+**must** have unique names.
 
 ### Preparing AWS credentials
 
@@ -191,25 +191,20 @@ Cluster creating process generates an ssh config file at
 Host names are based on node pool names from your config file. I.e. if you had a config file with nodepool section like so:
 
 ```
-nodepool:
-  -
-    name: etcd
+nodePools:
+  - name: etcd
     count: 5
     ...
-  -
-    name: etcdEvents
+  - name: etcdEvents
     count: 5
     ...
-  -
-    name: masterNodes
+  - name: master
     count: 3
     ...
-  -
-    name: clusterNodes
+  - name: clusterNodes
     count: 3
     ...
-  -
-    name: specialNodes
+  - name: specialNodes
     count: 2
     ...
 ```
@@ -218,7 +213,7 @@ Then the ssh hostnames available will be:
 
 - etcd-1 through etcd-5
 - etcdEvents-1 through etcdEvents-5
-- masterNodes-1 through masterNodes-3
+- master-1 through master-3
 - clusterNodes-1 through clusterNodes-3
 - specialNodes-1 through specialNodes-2
 
@@ -236,9 +231,9 @@ While all configuration options are available for a reason, some are more import
 - `kubeConfig.version`
 - `kubeConfig.hyperkubeLocation`
 - `providerConfig.region`
-- `nodepool[x].count`
-- `nodepool[x].providerConfig.type`
-- `clusterServices.services`
+- `nodePools[x].count`
+- `nodePools[x].providerConfig.type`
+- `helmConfig.charts`
 
 For a detailed explanation of all configuration variables, please consult [our configuration documentation](Documentation/kraken-configs/README.md)
 
@@ -386,7 +381,9 @@ Some changes to the cluster configuration can be made by re-running K2.
 
 ### Things that should not be changed by re-running K2
 
-- cluster name (`cluster` value in configuration)
+- cluster name
+```clusters:
+  - name: YOURCLUSTER```
 - etcd settings (beyond machine type)
 
 ### Things that can be changed (sometimes with some manual intervention)
