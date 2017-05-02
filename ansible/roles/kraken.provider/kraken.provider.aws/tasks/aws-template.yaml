@@ -1,13 +1,13 @@
 ---
 - name: Create terraform folder
-  file: >
-    path="{{ config_base | expanduser }}/{{ cluster.name }}"
-    state=directory
+  file:
+    path: "{{ config_base | expanduser }}/{{ cluster.name }}"
+    state: directory
 
 - name: Create module folders
-  file: >
-    path="{{ config_base | expanduser }}/{{ cluster.name }}/{{ item }}"
-    state=directory
+  file:
+    path: "{{ config_base | expanduser }}/{{ cluster.name }}/{{ item }}"
+    state: directory
   with_items:
     - vpc
     - keypair

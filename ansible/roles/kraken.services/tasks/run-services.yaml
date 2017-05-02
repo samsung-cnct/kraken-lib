@@ -24,9 +24,9 @@
     cluster_namespaces: "{{ cluster_namespaces | unique | reject('search', 'kube-system') | list }}"
 
 - name: Create Helm home
-  file: >
-    path={{ helm_home }}
-    state=directory
+  file:
+    path: "{{ helm_home }}"
+    state: directory
 
 - name: Create all service namespaces
   command: >
@@ -55,7 +55,7 @@
   when: (tiller_image is defined) and (tiller_image is not none) and (tiller_image | trim != '')
 
 - name: Set api_servers fact
-  set_fact: 
+  set_fact:
     api_servers: "{{ lookup('file', kubeconfig) | from_yaml | json_query('clusters[*].cluster.server') }}"
 
 - name: Wait for api server to become available in case it's not

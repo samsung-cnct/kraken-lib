@@ -31,9 +31,9 @@
   ignore_errors: yes
 
 - name: Create Helm home
-  file: >
-    path={{ helm_home }}
-    state=directory
+  file:
+    path: "{{ helm_home }}"
+    state: directory
 
 - name: Collect all services
   command: >

@@ -1,8 +1,8 @@
 ---
 - name: Make sure generated folder for certs is there
-  file: >
-    path="{{ config_base | expanduser }}/{{ cluster.name }}/certs"
-    state=directory
+  file:
+    path: "{{ config_base | expanduser }}/{{ cluster.name }}/certs"
+    state: directory
 
 - name: Generate self-signed CA key
   command: >

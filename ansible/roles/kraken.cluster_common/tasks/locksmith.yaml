@@ -1,6 +1,6 @@
 ---
 - name: find nodePool named etcd - assume this is the primary etcd cluster
-  set_fact: 
+  set_fact:
     etcd: "{{ item }}"
   with_items: "{{ cluster.nodePools }}"
   when: item.name == "etcd"

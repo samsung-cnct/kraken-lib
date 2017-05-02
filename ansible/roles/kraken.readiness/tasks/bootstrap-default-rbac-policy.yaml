@@ -1,12 +1,13 @@
 ---
 - name: Make sure generated folder for RBAC policy is there
-  file: >
-    path="{{ config_base | expanduser }}/{{ cluster.name }}/auth"
-    state=directory
+  file:
+    path: "{{ config_base | expanduser }}/{{ cluster.name }}/auth"
+    state: directory
 
 - name: Generate RBAC policy file
-  template: src=rbac-default-policy.yaml.jinja2
-            dest="{{ config_base | expanduser }}/{{ cluster.name }}/auth/rbac-default-policy.yaml"
+  template:
+    src: rbac-default-policy.yaml.jinja2
+    dest: "{{ config_base | expanduser }}/{{ cluster.name }}/auth/rbac-default-policy.yaml"
   with_items: "{{ cluster.nodePools }}"
   when: item.etcdConfig is defined
 

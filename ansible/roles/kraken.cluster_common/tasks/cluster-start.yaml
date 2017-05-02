@@ -4,9 +4,9 @@
     cluster: "{{ a_cluster }}"
 
 - name: Make sure generated folder for cloud init snippets is there
-  file: >
-    path="{{ config_base | expanduser }}/{{ cluster.name }}"
-    state=directory
+  file:
+    path: "{{ config_base | expanduser }}/{{ cluster.name }}"
+    state: directory
 
 - include: network_environment.yaml
 - include: certificate_authority.yaml

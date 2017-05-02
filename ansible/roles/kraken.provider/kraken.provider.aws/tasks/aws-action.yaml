@@ -1,14 +1,14 @@
 ---
 - name: Get modules
   command: >
-    terraform get -no-color -update=true {{ config_base | expanduser }}/{{ cluster.name }} 
+    terraform get -no-color -update=true {{ config_base | expanduser }}/{{ cluster.name }}
   args:
     chdir: "{{ config_base | expanduser }}/{{ cluster.name }}"
   ignore_errors: yes
 
 - name: Run cluster {{ kraken_action }}
   command: >
-    terraform apply -input=false -no-color {{ config_base | expanduser }}/{{ cluster.name }} 
+    terraform apply -input=false -no-color {{ config_base | expanduser }}/{{ cluster.name }}
   args:
     chdir: "{{ config_base | expanduser }}/{{ cluster.name }}"
   when: kraken_action == 'up'
@@ -37,7 +37,8 @@
   when: endpoint_result | succeeded and not endpoint_result | skipped
 
 - name: Check for terraform state file
-  stat: path={{ config_base | expanduser }}/{{ cluster.name }}/terraform.tfstate
+  stat:
+    path: "{{ config_base | expanduser }}/{{ cluster.name }}/terraform.tfstate"
   register: tfstate
   when: (kraken_action == 'down')
 
