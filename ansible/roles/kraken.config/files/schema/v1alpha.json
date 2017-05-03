@@ -1,0 +1,556 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#", 
+    "id": "http://judkins.house/apis/k2/v1",
+
+    "title": "k2 configuration file",
+    "description": "Describes one or more Kubernetes clusters",
+
+    "properties": {
+        "version": {
+            "description": "The k2 configuration version determines which schema is used to validate the configuration file",
+            "type": "string"
+        },
+        "definitions": { "$ref": "#/definitions/definitions" },
+        "deployment": { "$ref": "#/definitions/deployment" }
+    },
+    "required": [
+        "version",
+        "deployment"
+    ],
+    "type": "object",
+
+    "definitions": {
+        "deployment": {
+            "title": "A Kubernetes deployment",
+            "description": "Describes the deployment of one or more Kubernetes clusters",
+            "properties": {
+                "clusters": {
+                    "description": "A list of cluster configurations",
+                    "items": {
+                        "$ref": "#/definitions/cluster"
+                    },
+                    "minItems": 1,
+                    "type": "array"
+                }
+            },
+            "required": [
+                "clusters"
+            ],
+            "type": "object"
+        },
+
+        "cluster": {
+            "title": "A single cluster configuration",
+            "description": "A set of one or more nodePools, along with any shared configuration between them",
+            "properties": {
+                "name": {
+                    "description": "Name of this cluster",
+                    "type": "string"
+                },
+                "network": {
+                    "description": "Internal IP address range (CIDR) for services",
+                    "format": "cidr",
+                    "type": "string"
+                },
+                "dns": {
+                    "description": "Internal IP address of the DNS service",
+                    "format": "ipv4",
+                    "type": "string"
+                },
+                "domain": {
+                    "description": "Domain name for cluster (internal resolution)",
+                    "format": "hostname",
+                    "type": "string"
+                },
+                "providerConfig": {
+                    "description": "Provider (e.g. AWS, GKE, etc.) configuration",
+                    "$ref": "#/definitions/providerConfig"
+                },
+                "nodePools": {
+                    "description": "A list of nodePool",
+                    "items": {
+                        "$ref": "#/definitions/nodePool"
+                    },
+                    "minItems": 1,
+                    "type": "array"
+                },
+                "fabricConfig": {
+                    "description": "Fabric config for the kubernetes overlay network",
+                    "$ref": "#/definitions/fabricConfig"
+                },
+                "helmConfig": {
+                    "description": "Helm config for installing kubernetes resources",
+                    "$ref": "#/definitions/helmConfig"
+                }
+            },
+            "required": [
+                "name", 
+                "network", 
+                "dns",
+                "domain",
+                "providerConfig",
+                "nodePools",
+                "fabricConfig",
+                "helmConfig"
+            ], 
+            "type": "object"
+        },
+
+        "nodePool": {
+            "title": "Nodepool configuration",
+            "description": "A set of one or more nodes which share the same configuration",
+            "properties": {
+                "name": {
+                    "description": "Name of the nodePool",
+                    "type": "string"
+                },
+                "count": {
+                    "description": "Number of nodes in the nodePool",
+                    "type": "number"
+                },
+                "kvStoreConfig": { "$ref": "#/definitions/kvStoreConfig" },
+                "loadBalancerConfig": { "$ref": "#/definitions/loadBalancerConfig" },
+                "apiServerConfig": { "$ref": "#/definitions/apiServerConfig" },
+                "kubeConfig": { "$ref": "#/definitions/kubeConfig" },
+                "containerConfig": { "$ref": "#/definitions/containerConfig" },
+                "osConfig": { "$ref": "#/definitions/osConfig" },
+                "nodeConfig": { "$ref": "#/definitions/nodeConfig" },
+                "keyPair": { "$ref": "#/definitions/keyPair" }
+            },
+            "required": [
+                "name",
+                "count",
+                "containerConfig",
+                "osConfig",
+                "nodeConfig",
+                "keyPair"
+            ],
+            "type": "object"
+        },
+
+        "kvStoreConfig": {
+            "title": "kvStore configuration",
+            "description": "kvStore configuration",
+            "oneOf": [
+                { "$ref": "#/definitions/etcdConfig" }
+            ],
+            "type": "object"
+        },
+
+        "etcdConfig": {
+            "description": "etcd configuration",
+            "properties": {
+                "name": {
+                    "description": "Name of etcd configuration",
+                    "type": "string"
+                },
+                "type": {
+                  "description": "Type of kvStore",
+                  "enum": [ "etcd" ],
+                  "type": "string"
+                },
+                "clientPorts": {
+                    "description": "Ports used to listen for client requests",
+                    "items": {
+                        "type": "number"
+                    },
+                    "type": "array"
+                },
+                "clusterToken": {
+                    "description": "Token used during etcd cluster formation",
+                    "type": "string"
+                },
+                "peerPorts": {
+                    "description": "Ports used for peer to peer communication",
+                    "items": {
+                        "type": "number"
+                    },
+                    "type": "array"
+                },
+                "ssl": {
+                    "description": "Whether or not SSL is used for etcd traffic",
+                    "type": "boolean"
+                },
+                "version": {
+                    "description": "Version of etcd container which will be run",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "type",
+                "clientPorts",
+                "clusterToken",
+                "peerPorts",
+                "ssl",
+                "version"
+            ],
+            "type": "object"
+        },
+
+        "loadBalancerConfig": {
+            "title": "Load balancer configuration",
+            "description": "Load balancer configuration for Kubernetes API servers",
+            "properties": {
+                "name": {
+                    "description": "Name of the load balancer configuration",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Type of load balancer",
+                    "enum": [ "cloud", "nginx" ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "type"
+            ],
+            "type": "object"
+        },
+
+        "apiServerConfig": {
+            "title": "Kubernetes API server configuration",
+            "description": "kvStore (e.g. etcd) for API servers",
+            "//": "The etcd fields below are unnecessary. They should be removed once we stop supporting old style configurations",
+            "//": "The type property needs to be reconsidered. What are the possible alternatives?",
+            "properties": {
+                "name": {
+                    "description": "Name of the API server configuration",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Type of API server configuration",
+                    "enum": [ "simple" ]
+                },
+                "state": {
+                    "etcd": { "$ref": "#/definitions/kvStoreConfig" }
+                },
+                "events": {
+                    "etcd": { "$ref": "#/definitions/kvStoreConfig" }
+                }
+            },
+            "required": [
+                "type",
+                "state"
+            ],
+            "type": "object"
+        },
+
+        "kubeConfig": {
+            "title": "A Kubernetes configuration",
+            "description": "The location and version of a container containing the Kubernetes hyperkube binary.",
+            "properties": {
+                "name": {
+                    "description": "Name of the Kubernetes configuration",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Type of Kubernetes configuration",
+                    "enum": [ "hyperkube" ]
+                },
+                "hyperkubeLocation": {
+                    "description": "Location of the Kubernetes container.",
+                    "format": "uri",
+                    "type": "string"
+                },
+                "version": {
+                    "description": "Version of the hyperkube binary.",
+                    "format": "symver",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "type",
+                "hyperkubeLocation",
+                "version"
+            ],
+            "type": "object"
+        },
+
+        "containerConfig": {
+            "description": "Container runtime specific configuration",
+            "oneOf": [
+                { "$ref": "#/definitions/dockerContainerConfig" }
+            ],
+            "type": "object"
+        },
+
+        "dockerContainerConfig": {
+            "description": "Container specific configuration",
+            "//": "type should be renamed installMethod to avoid confusion with other uses of the word type",
+
+            "properties": {
+                "name": {
+                    "description": "Name of the docker configuration (e.g. prodDockerConfig, betaDockerConfig, etc.)",
+                    "type": "string",
+                    "default": "defaultDockerConfig"
+                },
+                "runtime": {
+                    "description": "Type of container runtime",
+                    "enum": [ "docker" ],
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Type of docker installation",
+                    "enum": [ "distro", "tgz" ],
+                    "type": "string"
+                },
+                "uri": {
+                    "description": "If type is tgz, then uri identifies how to obtain a tgz file containing the docker binaries",
+                    "type": "string",
+                    "default": "distro"
+                }
+            },
+            "required": [
+                "runtime",
+                "type"
+            ],
+            "type": "object"
+        },
+
+        "osConfig": {
+            "description": "Operating System specific configuration",
+            "oneOf": [
+                { "$ref": "#/definitions/coreOsConfig" }
+            ],
+            "type": "object"
+        },
+
+        "coreOsConfig": {
+            "description": "CoreOS specific configuration",
+            "properties": {
+                "name": {
+                    "description": "Name of the CoreOS configuration",
+                    "default": "defaultCoreOsConfig",
+                    "type": "string"
+                },
+                "kind": {
+                    "default": "osConfig",
+                    "description": "Location of the Kubernetes container.",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Operating System distribution",
+                    "enum": [ "coreOs" ],
+                    "default": "coreOs",
+                    "type": "string"
+                },
+                "channel": {
+                    "description": "Channel of the CoreOS release.", 
+                    "enum": [ "stable", "beta", "alpha" ],
+                    "default": "stable",
+                    "type": "string"
+                }, 
+                "rebootStrategy": {
+                    "description": "Define rebootStrategy.",
+                    "enum": [ "etcd-lock", "reboot", "off" ],
+                    "default": "off",
+                    "type": "string"
+                },
+                "version": {
+                    "default": "current",
+                    "description": "Location of the Kubernetes container.", 
+                    "type": "string"
+                }
+            },
+            "required": [
+                "type",
+                "channel",
+                "version",
+                "rebootStrategy"
+            ],
+            "type": "object"
+        },
+
+        "nodeConfig": {
+            "//": "Once the node schema are defined, consider changing anyOf to oneOf",
+            "anyOf": [
+                { "$ref": "#/definitions/awsNodeConfig" },
+                { "$ref": "#/definitions/gkeNodeConfig" }
+            ]
+        },
+
+        "awsNodeConfig": {
+            "//": "Not yet implemented",
+            "properties": {
+                "name": {
+                    "description": "Name of the AWS node configuration.",
+                    "default": "defaultAwsNodeConfig",
+                    "type": "string"
+                },
+                "kind": {
+                    "default": "nodeConfig",
+                    "description": "!?",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Provider node type.",
+                    "enum": [ "awsNode" ],
+                    "default": "awsNode",
+                    "type": "string"
+                }
+            }
+        },
+
+        "gkeNodeConfig": {
+            "//": "Not yet implemented"
+        },
+
+        "providerConfig": {
+            "//": "Once the provider schema are defined, consider changing anyOf to oneOf",
+            "anyOf": [
+                { "$ref": "#/definitions/awsProviderConfig" },
+                { "$ref": "#/definitions/gkeProviderConfig" }
+            ]
+        },
+ 
+        "awsProviderConfig": {
+            "//": "Not yet implemented"
+        },
+
+        "gkeProviderConfig": {
+            "//": "Not yet implemented"
+        },
+
+        "keyPair": {
+            "title": "SSH credentials",
+            "description": "SSH credentials used for administrative access to the cluster.",
+            "properties": {
+                "name": {
+                    "description": "Name of the keyPair",
+                    "default": "defaultKeyPair",
+                    "type": "string"
+                },
+                "publicKeyFile": {
+                    "description": "Location of SSH public key file.",
+                    "default": "${HOME}/.ssh/id_rsa.pub",
+                    "type": "string"
+                },
+                "privateKeyFile": {
+                    "description": "Location of SSH private key file.",
+                    "default": "${HOME}/.ssh/id_rsa",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "privateKeyFile"
+            ],
+            "type": "object"
+        },
+
+        "fabricConfig": {
+        },
+
+        "helmConfig": {
+        },
+
+        "definitions": {
+           "description": "A dict containing JSON snippets which are referenced within the config for clarity or brevity.",
+
+            "properties": {
+                "helmConfigs": {
+                    "title": "Helm configurations",
+                    "description": "A list of Helm configurations referenced within the configuration file.",
+                    "items": {
+                        "$ref": "#/definitions/helmConfig",
+                        "minItems": 1
+                    },
+                    "type": "array"
+                },
+                "fabricConfigs": {
+                    "title": "Fabric configurations",
+                    "description": "A list of fabric configurations referenced within the configuration file.",
+                    "items": {
+                        "$ref": "#/definitions/fabricConfig",
+                        "minItems": 1
+                    },
+                    "type": "array"
+                },
+                "loadBalancerConfigs": {
+                    "title": "Load Balancer configurations",
+                    "description": "A list of Load Balancer configurations referenced within the configuration file.",
+                    "items": {
+                        "$ref": "#/definitions/loadBalancerConfig",
+                        "minItems": 1
+                    },
+                    "type": "array"
+                },
+                "kvStoreConfigs": {
+                    "title": "kvStore configurations",
+                    "description": "A list of kvStore (e.g. etcd) configurations referenced within the configuration file.",
+                    "items": {
+                        "$ref": "#/definitions/kvStoreConfig",
+                        "minItems": 1
+                    },
+                    "type": "array"
+                },
+                "apiServerConfigs": {
+                    "title": "API server configurations",
+                    "description": "A list of API server configurations referenced within the configuration file.",
+                    "items": {
+                        "$ref": "#/definitions/apiServerConfig",
+                        "minItems": 1
+                    },
+                    "type": "array"
+                },
+                "kubeConfigs": {
+                    "title": "Kubernetes configurations",
+                    "description": "A list of Kubernetes configurations referenced within the configuration file.",
+                    "items": {
+                        "$ref": "#/definitions/kubeConfig",
+                        "minItems": 1
+                    },
+                    "type": "array"
+                },
+                "containerConfigs": {
+                    "title": "Container configurations",
+                    "description": "A list of container configurations referenced within the configuration file.",
+                    "items": {
+                        "$ref": "#/definitions/containerConfig"
+                    },
+                    "minItems": 1,
+                    "type": "array"
+                },
+                "osConfigs": {
+                    "title": "OS configurations",
+                    "description": "A list of OS configurations referenced within the configuration file.",
+                    "items": {
+                        "$ref": "#/definitions/osConfig"
+                    },
+                    "minItems": 1,
+                    "type": "array"
+                },
+                "nodeConfigs": {
+                    "title": "Node configurations",
+                    "description": "A list of (provider specific) node configurations referenced within the configuration file.",
+                    "items": {
+                        "$ref": "#/definitions/nodeConfig",
+                        "minItems": 1
+                    },
+                    "type": "array"
+                },
+                "providerConfigs": {
+                    "title": "Provider configurations",
+                    "description": "A list of provider (e.g. AWS, GKE, etc.) configurations referenced within the configuration file.",
+                    "items": {
+                        "$ref": "#/definitions/providerConfig",
+                        "minItems": 1
+                    },
+                    "type": "array"
+                },
+                "keyPairs": {
+                    "title": "Key pairs",
+                    "description": "A list of key pairs referenced within the configuration file.",
+                    "items": {
+                        "$ref": "#/definitions/keyPair",
+                        "minItems": 1
+                    },
+                    "type": "array"
+                }
+            },
+
+            "//": "Nothing is required. The administrator can choose not to declare a definitions stanza.",
+
+            "type": "object"
+        }
+    }
+}
