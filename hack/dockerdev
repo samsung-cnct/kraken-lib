@@ -23,14 +23,16 @@ EOF
     exit 1
 fi
 
-while getopts c:i: opt; do
+while getopts c:i:r: opt; do
     case $opt in
         c) CONFIGFILE="${OPTARG}";;
         i) IMAGE="${OPTARG}";;
+        r) MYHOME="${OPTARG}";;
     esac
 done
 
-CONFIGFILE="${CONFIGFILE:-${HOME}/.kraken/config.yaml}"
+MYHOME=${MYHOME:-${HOME}}
+CONFIGFILE="${CONFIGFILE:-${MYHOME}/.kraken/config.yaml}"
 IMAGE="${IMAGE:-quay.io/samsung_cnct/k2-tools:latest}"
 GITROOT="$(git rev-parse --show-toplevel)"
 
@@ -62,12 +64,14 @@ done
 MAPPINGS="${MAPPINGS} -v ${GITROOT}:/kraken"
 
 # Map the .kraken directory
-MAPPINGS="${MAPPINGS} -v ${HOME}/.kraken:${HOME}/.kraken"
+MAPPINGS="${MAPPINGS} -v ${MYHOME}/.kraken:${MYHOME}/.kraken"
+MAPPINGS="${MAPPINGS} -v ${MYHOME}/.ssh:${MYHOME}/.ssh"
+MAPPINGS="${MAPPINGS} -v ${MYHOME}/.aws:${MYHOME}/.aws"
 
 # Map a bashrc file
-MAPPINGS="${MAPPINGS} -v ${GITROOT}/lib/bashrc:${HOME}/.bashrc"
+MAPPINGS="${MAPPINGS} -v ${GITROOT}/lib/bashrc:${MYHOME}/.bashrc"
 
 echo -e "Mappings:\n$(tr ' ' '\n' <<< "$MAPPINGS" | grep -e -v '-v' | sort)"
 echo ""
 echo "Running bash in k2 container. Use up.sh, down.sh, etc."
-docker run ${MAPPINGS} -e HOME=${HOME} --rm=true -it ${IMAGE} /bin/bash --rcfile ${HOME}/.bashrc 
+docker run ${MAPPINGS} -e HOME=${MYHOME} --rm=true -it ${IMAGE} /bin/bash --rcfile ${MYHOME}/.bashrc
