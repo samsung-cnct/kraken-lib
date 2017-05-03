@@ -11,6 +11,10 @@
   set_fact:
     kubectl: "/opt/cnct/kubernetes/{{ kubernetes_minor_version }}/bin/kubectl"
 
+- name: Execute appropriate helm per minor version
+  set_fact:
+    helm_command: "/opt/cnct/kubernetes/{{ kubernetes_minor_version }}/bin/helm"
+
 - set_fact:
     cluster_services: "{{ cluster.helmConfig.charts | default([]) }}"
     cluster_repos: "{{ cluster.helmConfig.repos | default([]) }}"
@@ -34,15 +38,10 @@
   with_items: "{{ cluster_namespaces }}"
   when: cluster_namespaces is defined
 
-- name: create helm command string
+- name: create debug helm command string
   set_fact:
-    helm_command: "helm --debug"
+    helm_command: "{{ helm_command }} --debug"
   when: (cluster.helmConfig.debug is defined) and (cluster.helmConfig.debug == True)
-
-- name: create helm command string
-  set_fact:
-    helm_command: "helm"
-  when: (cluster.helmConfig.debug is undefined) or (cluster.helmConfig.debug != True)
 
 - name: create helm init command string
   set_fact:

@@ -7,6 +7,10 @@
   set_fact:
     kubernetes_minor_version: "{{ kubernetes_minor_versions[cluster.name] }}"
 
+- name: Execute appropriate helm per minor version
+  set_fact:
+    helm_command: "/opt/cnct/kubernetes/{{ kubernetes_minor_version }}/bin/helm"
+
 - name: Execute appropriate kubectl per minor version
   set_fact:
     kubectl: "/opt/cnct/kubernetes/{{ kubernetes_minor_version }}/bin/kubectl"
@@ -17,9 +21,11 @@
     kubeconfig: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
     helm_home: "{{ config_base | expanduser }}/{{ cluster.name }}/.helm"
     cluster_namespaces: []
+
 - set_fact:
     cluster_namespaces: "{{ cluster_namespaces + [item.namespace | default('kube-system')] }}"
   with_items: "{{ cluster_services }}"
+
 - set_fact:
     cluster_namespaces: "{{ cluster_namespaces | unique | reject('search', 'kube-system') | list }}"
 
@@ -56,7 +62,7 @@
 
 - name: Clean up releases
   command: >
-    helm delete --purge {{ item.name }}
+    {{ helm_command }} delete --purge {{ item.name }}
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
