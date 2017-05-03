@@ -9,7 +9,7 @@ definitions:
       kubedns:
         cluster_ip: 10.32.0.2
         dns_domain: cluster.local
-        namsepace: kube-system 
+        namsepace: kube-system
   helmConfigs:
     - &defaultHelm
       name: defaultHelm
@@ -147,7 +147,7 @@ definitions:
               snapshot_id:
               encrypted: false
     - &defaultAwsEtcdEventsNode
-      name: defaultAwsEtcdEventsNode 
+      name: defaultAwsEtcdEventsNode
       kind: node
       mounts:
         -
@@ -221,7 +221,7 @@ definitions:
           forceFormat: true
       providerConfig:
         provider: aws
-        type: c4.large
+        type: m4.xlarge
         subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
         tags:
           -
@@ -324,7 +324,7 @@ definitions:
           to_port: 0
           protocol: "-1"
           cidr_blocks: ["0.0.0.0/0"]
- 
+
   keyPairs:
    - &defaultKeyPair
       name: defaultKeyPair
@@ -346,7 +346,7 @@ definitions:
 
 deployment:
   clusters:
-    - name: 
+    - name:
       network: 10.32.0.0/12
       dns: 10.32.0.2
       domain: cluster.local
@@ -375,7 +375,7 @@ deployment:
           nodeConfig: *defaultAwsMasterNode
           keyPair: *defaultKeyPair
         - name: clusterNodes
-          count: 3
+          count: 6
           kubeConfig: *defaultKube
           containerConfig: *defaultDocker
           osConfig: *defaultCoreOs
@@ -396,4 +396,3 @@ deployment:
     type: exact
     value: 0
     wait: 600
-    

@@ -9,7 +9,7 @@ definitions:
       kubedns:
         cluster_ip: 10.35.240.10
         dns_domain: cluster.local
-        namsepace: kube-system 
+        namsepace: kube-system
   helmConfigs:
     - &defaultHelm
       name: defaultHelm
@@ -76,7 +76,7 @@ definitions:
       kind: node
       providerConfig:
         diskSize: 100
-        machineType: n1-standard-1
+        machineType: n1-standard-16
         scopes:
           - https://www.googleapis.com/auth/compute
           - https://www.googleapis.com/auth/devstorage.read_only
@@ -97,7 +97,7 @@ definitions:
    - &defaultGKEKeyPair
       name: defaultGKEKeyPair
       kind: keyPair
-      providerConfig: 
+      providerConfig:
         serviceAccount: patrickrobot@k8s-work.iam.gserviceaccount.com
         serviceAccountKeyFile:  /kraken/patrickRobot.json
   kubeAuth:
@@ -119,7 +119,7 @@ definitions:
       keypair: *defaultGKEKeyPair
       zone:
         primaryZone: us-central1-a
-        additionalZones: 
+        additionalZones:
           - us-central1-b
           - us-central1-c
 
@@ -135,7 +135,7 @@ deployment:
       kubeAuth: *defaultKubeAuth
       nodePools:
         - name: clusternodes
-          count: 3
+          count: 6
           kubeConfig: *defaultKube
           nodeConfig: *defaultGKEClusterNode
         - name: othernodes
