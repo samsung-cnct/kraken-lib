@@ -99,7 +99,7 @@ definitions:
       kind: keyPair
       providerConfig:
         serviceAccount: patrickrobot@k8s-work.iam.gserviceaccount.com
-        serviceAccountKeyFile:  /kraken/patrickRobot.json
+        serviceAccountKeyFile:  ~/.config/gcloud/patrickRobot.json
   kubeAuth:
    - &defaultKubeAuth
       authz: {}
@@ -127,7 +127,7 @@ definitions:
 
 deployment:
   clusters:
-    - name: delight
+    - name: 
       network: 10.32.0.0/12
       dns: 10.32.0.2
       domain: cluster.local

@@ -122,7 +122,7 @@ definitions:
       providerConfig:
         provider: aws
         type: t2.small
-        subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
+        subnet: ["zone-1", "zone-2", "zone-3"]
         tags:
           -
             key: comments
@@ -161,7 +161,7 @@ definitions:
       providerConfig:
         provider: aws
         type: t2.small
-        subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
+        subnet: ["zone-1", "zone-2", "zone-3"]
         tags:
           -
             key: comments
@@ -195,8 +195,8 @@ definitions:
           forceFormat: true
       providerConfig:
         provider: aws
-        type: m3.medium
-        subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
+        type: m4.large
+        subnet: ["zone-1", "zone-2", "zone-3"]
         tags:
           -
             key: comments
@@ -221,8 +221,8 @@ definitions:
           forceFormat: true
       providerConfig:
         provider: aws
-        type: m4.xlarge
-        subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
+        type: c4.large
+        subnet: ["zone-1", "zone-2", "zone-3"]
         tags:
           -
             key: comments
@@ -248,8 +248,8 @@ definitions:
       keypair: krakenKey
       providerConfig:
         provider: aws
-        type: m3.medium
-        subnet: ["uwswest2a", "uwswest2b", "uwswest2c"]
+        type: m4.large
+        subnet: ["zone-1", "zone-2", "zone-3"]
         tags:
           -
             key: comments
@@ -272,19 +272,19 @@ definitions:
       type: cloudinit
       resourcePrefix:
       vpc: 10.0.0.0/16
-      region: us-west-2
+      region: us-east-2
       subnet:
         -
-          name: uwswest2a
-          az: us-west-2a
+          name: zone-1
+          az: us-east-2a
           cidr: 10.0.0.0/18
         -
-          name: uwswest2b
-          az: us-west-2b
+          name: zone-2
+          az: us-east-2b
           cidr: 10.0.64.0/18
         -
-          name: uwswest2c
-          az: us-west-2c
+          name: zone-3
+          az: us-east-2c
           cidr: 10.0.128.0/17
       egressAcl:
         -
@@ -375,7 +375,7 @@ deployment:
           nodeConfig: *defaultAwsMasterNode
           keyPair: *defaultKeyPair
         - name: clusterNodes
-          count: 6
+          count: 10
           kubeConfig: *defaultKube
           containerConfig: *defaultDocker
           osConfig: *defaultCoreOs
