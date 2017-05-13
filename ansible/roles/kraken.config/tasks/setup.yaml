@@ -1,7 +1,6 @@
 ---
 - set_fact:
-    cluster: "{{ cluster_node_tuple.0 }}"
-    node: "{{ cluster_node_tuple.1 }}"
+    cluster: "{{ a_cluster }}"
 
 - name: Verify cloud provider is supported
   fail:

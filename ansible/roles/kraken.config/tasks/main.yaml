@@ -70,11 +70,10 @@
     masterVersion: "{{ item.1.kubeConfig.version }}"
 
 - include: setup.yaml
-  with_subelements:
+  with_items:
     - "{{ kraken_config.clusters }}"
-    - nodePools
   loop_control:
-    loop_var: cluster_node_tuple
+    loop_var: a_cluster
 
 - include: set-oidc-info.yaml
   with_items:
