@@ -36,12 +36,13 @@ podTemplate(label: 'k2', containers: [
 
                         container('e2e-tester') {
                             stage('run e2e tests') {
-                                sh "build-scripts/conformance-tests.sh v1.5.6 ${env.JOB_BASE_NAME}-${env.BUILD_ID} /mnt/scratch"
+                                sh "PWD=`pwd` && build-scripts/conformance-tests.sh v1.5.6 ${env.JOB_BASE_NAME}-${env.BUILD_ID} /mnt/scratch"
                             }
                         }
                     } finally {
                         container('k2-tools') {
                             stage('destroy k2 cluster') {
+                                junit "output/artifacts/*.xml"
                                 sh 'PWD=`pwd` && ./down.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/'                        
                             }
                         }
