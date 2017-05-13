@@ -5,7 +5,7 @@
 
 set -x
 
-cluster_name=`echo $2 | tr -cd '[[:alnum:]]-'`
+cluster_name=`echo $2 | tr -cd '[[:alnum:]]-' | tr '[:upper:]' '[:lower:]'`
 
 #  old style configs (can be removed after k2recon is merged)
 sed -i -e "s/cluster:/cluster: ${cluster_name}/" $1
