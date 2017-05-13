@@ -49,17 +49,17 @@ You will need to have the following:
 You will need the following installed on your machine:
 
 - Python 2.x (virtualenv strongly suggested)
- - pip
- - boto
- - netaddr
+  - pip
+  - boto
+  - netaddr
 - Ansible 2.2.x
 - Cloud SDKs
- - aws cli
- - gcloud SDK
+  - aws cli
+  - gcloud SDK
 - Terraform and providers
- - Terraform 0.7.x
- - Terraform execute provider 0.0.3 (https://github.com/samsung-cnct/terraform-provider-execute/releases)  
- - Terraform coreosbox provider 0.0.2 (https://github.com/samsung-cnct/terraform-provider-coreosbox/releases)
+  - Terraform 0.8.6
+  - Terraform execute provider 0.0.4 (https://github.com/samsung-cnct/terraform-provider-execute/releases)  
+  - Terraform coreosbox provider 0.0.3 (https://github.com/samsung-cnct/terraform-provider-coreosbox/releases)
 - kubectl 1.3.x
 - helm alpha.5 or later
 
