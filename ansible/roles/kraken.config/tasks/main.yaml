@@ -27,6 +27,10 @@
   with_items:
     - "{{ kraken_config.clusters }}"
 
+- name: Do not allow multiple clusters in config
+  fail:
+    msg: "Multiple clusters are not yet supported in k2"
+  when: "{{ kraken_config.clusters | length | int > 1 }}"
 
 - name: Warn if still using old style configuration format
   debug:
