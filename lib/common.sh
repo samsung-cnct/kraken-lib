@@ -8,6 +8,7 @@ my_dir=$(dirname "${BASH_SOURCE}")
 
 # set KRAKEN_ROOT to absolute path for use in other scripts
 readonly KRAKEN_ROOT=$(cd "${my_dir}/.."; pwd)
+KRAKEN_FORCE=${KRAKEN_FORCE:-false}
 KRAKEN_VERBOSE=${KRAKEN_VERBOSE:-false}
 K2_VERBOSE=''
 KRAKEN_TF_LOG=k2_tf_debug.log
@@ -131,6 +132,9 @@ case $key in
   KRAKEN_CONFIG="$2"
   shift
   ;;
+  -f|--force)
+  KRAKEN_FORCE=true
+  ;;
   -g|--generate)
   KRAKEN_GENERATE_PATH="${2-"${HOME}/.kraken/config.yaml"}"
   if [ -n "${2+x}" ]; then
@@ -182,7 +186,9 @@ if [ -z ${KRAKEN_TAGS+x} ]; then
   KRAKEN_TAGS="all"
 fi
 
-KRAKEN_EXTRA_VARS="config_path=${KRAKEN_CONFIG} config_base=${KRAKEN_BASE} "
+KRAKEN_EXTRA_VARS="config_path=${KRAKEN_CONFIG} config_base=${KRAKEN_BASE} \
+                   config_forced=${KRAKEN_FORCE} \
+                  "
 
 if [ ! -z ${BUILD_TAG+x} ]; then
     K2_VERBOSE='-vvv'
