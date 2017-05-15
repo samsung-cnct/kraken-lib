@@ -9,7 +9,7 @@ definitions:
       kubedns:
         cluster_ip: 10.32.0.2
         dns_domain: cluster.local
-        namsepace: kube-system
+        namespace: kube-system
   helmConfigs:
     - &defaultHelm
       name: defaultHelm

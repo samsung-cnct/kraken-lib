@@ -25,7 +25,7 @@ dnsConfig:
     kubedns:
       cluster_ip: 10.32.0.2
       dns_domain: cluster.local
-      namsepace: kube-system
+      namespace: kube-system
 ```
 
 Reminder that cluster_ip and dns_domain should match dns and domain in the deployment section of the config :
