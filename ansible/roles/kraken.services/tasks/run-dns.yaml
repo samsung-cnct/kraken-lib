@@ -17,16 +17,10 @@
   set_fact:
     dns_config: "{{ kubedns | combine(cluster.dnsConfig.kubedns) | expand_config }}"
 
-- debug:
-    var: dns_config
-
 - name: Make sure generated folder for services is there
   file:
     path: "{{ config_base | expanduser }}/{{ cluster.name }}/services"
     state: directory
-
-- debug:
-    var: kubernetes_minor_versions[ cluster.name ]
 
 - name: Create the DNS Service Deployment
   template:
@@ -52,4 +46,3 @@
   command: >
       {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} apply -f {{ config_base | expanduser }}/{{ cluster.name }}/services/dns-deployment.yaml --namespace={{ dns_config.namespace }}
   register: deployment_dns_result
-

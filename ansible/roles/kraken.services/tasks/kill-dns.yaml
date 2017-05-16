@@ -17,9 +17,6 @@
   set_fact:
     dns_config: "{{ kubedns | combine(cluster.dnsConfig.kubedns) | expand_config }}"
 
-- debug:
-    var: dns_config.namespace
-
 - name: Clean up DNS
   command: >
     {{ kubectl }} --kubeconfig={{ kubeconfig }} delete -f {{ config_base | expanduser }}/{{ cluster.name }}/services/dns-deployment.yaml --namespace={{ dns_config.namespace }}

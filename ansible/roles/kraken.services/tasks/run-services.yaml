@@ -14,6 +14,12 @@
 - name: Execute appropriate helm per minor version
   set_fact:
     helm_command: "/opt/cnct/kubernetes/{{ kubernetes_minor_version }}/bin/helm"
+  when: helm_availabilities[cluster.name] == true
+
+- name: In case of helm not being available, if override was specified, override to override to latest helm
+  set_fact:
+    helm_command: "/opt/cnct/kubernetes/{{ latest_helm }}/bin/helm"
+  when: (helm_availabilities[cluster.name] == false) and (helm_overrides[cluster.name] == true)
 
 - set_fact:
     cluster_services: "{{ cluster.helmConfig.charts | default([]) }}"
@@ -41,17 +47,17 @@
 - name: create debug helm command string
   set_fact:
     helm_command: "{{ helm_command }} --debug"
-  when: (cluster.helmConfig.debug is defined) and (cluster.helmConfig.debug == True)
+  when: (cluster.helmConfig.debug is defined) and (cluster.helmConfig.debug == True) and (helm_command is defined)
 
 - name: create helm init command string
   set_fact:
     helm_init_command: "{{ helm_command }} init"
-  when: (tiller_image is undefined) or (tiller_image is none) or (tiller_image | trim == '')
+  when: ((tiller_image is undefined) or (tiller_image is none) or (tiller_image | trim == '')) and (helm_command is defined)
 
 - name: create helm init command string
   set_fact:
     helm_init_command: "{{ helm_command }} init --tiller-image {{ tiller_image }}"
-  when: (tiller_image is defined) and (tiller_image is not none) and (tiller_image | trim != '')
+  when: (tiller_image is defined) and (tiller_image is not none) and (tiller_image | trim != '') and (helm_command is defined)
 
 - name: Set api_servers fact
   set_fact:
@@ -71,7 +77,7 @@
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
   register: init_dry_out
-  when: (cluster.helmConfig.debug is defined) and (cluster.helmConfig.debug == True)
+  when: (cluster.helmConfig.debug is defined) and (cluster.helmConfig.debug == True) and (helm_command is defined)
 
 - debug: var=init_dry_out.stdout_lines
 
@@ -83,6 +89,7 @@
     HELM_HOME: "{{ helm_home }}"
   retries: 60
   delay: 1
+  when: helm_command is defined
 
 - name: Wait for tiller to be ready
   command: "{{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} --namespace=kube-system get deploy tiller-deploy -o json"
@@ -91,6 +98,7 @@
   retries: 600
   delay: 1
   changed_when: false
+  when: helm_command is defined
 
 - name: Remove helm repositories
   command: >
@@ -99,7 +107,7 @@
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
   with_items: "{{ cluster_repos }}"
-  when: cluster_repos is defined
+  when: (cluster_repos is defined) and (helm_command is defined)
   ignore_errors: yes
 
 - name: Add helm repositories
@@ -109,7 +117,7 @@
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
   with_items: "{{ cluster_repos }}"
-  when: cluster_repos is defined
+  when: cluster_repos is defined and (helm_command is defined)
 
 - name: Save all config values to files
   template: src=service-values.yaml.jinja2
@@ -130,7 +138,7 @@
     HELM_HOME: "{{ helm_home }}"
   with_items: "{{ cluster_services }}"
   register: install_dry_out
-  when: (cluster_services is defined) and (cluster.helmConfig.debug is defined) and (cluster.helmConfig.debug == True)
+  when: (cluster_services is defined) and (cluster.helmConfig.debug is defined) and (cluster.helmConfig.debug == True) and (helm_command is defined)
 
 - debug: var=install_dry_out.results
 
@@ -145,4 +153,4 @@
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
   with_items: "{{ cluster_services }}"
-  when: cluster_services is defined
+  when: (cluster_services is defined) and (helm_command is defined)

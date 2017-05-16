@@ -1,4 +1,5 @@
 ---
+
 - name: Include configuration variables from defaults file
   include_vars:
     file: "{{ role_path }}/files/config.yaml"
@@ -68,6 +69,10 @@
   when: (item.1.apiServerConfig is defined) or (item.0.providerConfig.provider == 'gke')
   vars:
     masterVersion: "{{ item.1.kubeConfig.version }}"
+
+- include: helm-versioning.yaml
+  with_items:
+    - "{{ kraken_config.clusters }}"
 
 - include: setup.yaml
   with_items:
