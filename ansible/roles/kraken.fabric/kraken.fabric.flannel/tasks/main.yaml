@@ -3,18 +3,16 @@
   set_fact:
     cluster: "{{ a_cluster }}"
 
-- name: Look up and set k8s minor version for this cluster
-  set_fact:
-    kubernetes_minor_version: "{{ kubernetes_minor_versions[cluster.name] }}"
-
 - name: Execute appropriate kubectl per minor version
   set_fact:
     kubectl: "/opt/cnct/kubernetes/{{ kubernetes_minor_version }}/bin/kubectl"
+  vars:
+    kubernetes_minor_version: "{{ kubernetes_minor_versions[cluster.name] }}"
 
 - name: Ensuring fabric directory exists
-  shell: >
-    mkdir -p {{ config_base | expanduser }}/{{ cluster.name }}/fabric
-  ignore_errors: yes
+  file:
+    path: "{{ config_base | expanduser }}/{{ cluster.name }}/fabric"
+    state: directory
 
 - name: Generate canal deployment file
   template: src=canal.yaml.part.jinja2
@@ -24,20 +22,17 @@
   template: src=config.yaml.part.jinja2
             dest="{{ config_base | expanduser }}/{{ cluster.name }}/fabric/config.yaml"
 
-- name: Set kubeconfig path
-  set_fact:
-    kubeconfig: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
-
-- name: Set api_servers fact
-  set_fact: 
-    api_servers: "{{ lookup('file', kubeconfig) | from_yaml | json_query('clusters[*].cluster.server') }}"
-
-- name: Wait for api server to become available in case it's not
+- name: Wait for api server
   wait_for:
     host: "{{ item | regex_replace('https://','') }}"
     port: 443
     timeout: 600
   with_items: "{{ api_servers }}"
+  vars:
+    kubefn: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
+    kubeconfig: "{{ kubefn | is_file | ternary( kubefn, '/dev/null' ) }}"
+    api_servers: "{{ lookup('file', kubeconfig) | from_yaml | json_query('clusters[*].cluster.server') }}"
+  when: "{{ not (dryrun | bool) }}"
 
 - name: check kube-networking namespace state
   command: >
@@ -45,6 +40,7 @@
   ignore_errors: yes
   changed_when: false
   register: kube_networking_namespace
+  when: "{{ not (dryrun | bool) }}"
 
 - name: Ensure the kube-networking namespace exists
   command: >
@@ -53,7 +49,7 @@
   retries: 120
   until: result|succeeded
   delay: 1
-  when: not kube_networking_namespace.rc == 0
+  when: "{{ (not (dryrun | bool)) and (kube_networking_namespace | failed) }}"
   ignore_errors: yes
 
 - name: check kube-networking namespace state
@@ -62,16 +58,19 @@
   ignore_errors: yes
   changed_when: false
   register: kube_networking_namespace
+  when: "{{ not (dryrun | bool) }}"
 
 - name: Confirm kube-networking namespace created
   fail:
     msg: "kube-networking namespace creation failed"
-  when: not kube_networking_namespace.rc == 0
+  when: "{{ (not (dryrun | bool)) and (kube_networking_namespace | failed) }}"
 
 - name: Deploy canal configuration
   command: >
     {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} apply -f {{ config_base | expanduser }}/{{ cluster.name }}/fabric/config.yaml --namespace=kube-networking
+  when: "{{ not (dryrun | bool) }}"
 
 - name: Deploy canal daemonset
   command: >
     {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} apply -f {{ config_base | expanduser }}/{{ cluster.name }}/fabric/canal.yaml --namespace=kube-networking
+  when: "{{ not (dryrun | bool) }}"

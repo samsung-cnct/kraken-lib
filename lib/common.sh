@@ -186,8 +186,14 @@ if [ -z ${KRAKEN_TAGS+x} ]; then
   KRAKEN_TAGS="all"
 fi
 
+if [[ ${KRAKEN_TAGS} == *dryrun* ]]; then
+    KRAKEN_DRYRUN=true
+else
+    KRAKEN_DRYRUN=false
+fi
+
 KRAKEN_EXTRA_VARS="config_path=${KRAKEN_CONFIG} config_base=${KRAKEN_BASE} \
-                   config_forced=${KRAKEN_FORCE} \
+                   config_forced=${KRAKEN_FORCE} dryrun=${KRAKEN_DRYRUN} \
                   "
 
 if [ ! -z ${BUILD_TAG+x} ]; then
