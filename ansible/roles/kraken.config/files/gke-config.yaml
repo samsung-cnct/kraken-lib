@@ -20,11 +20,6 @@ definitions:
         - name: stable
           url: https://kubernetes-charts.storage.googleapis.com
       charts:
-        - name: heapster
-          repo: atlas
-          chart: heapster
-          version: 0.1.0
-          namespace: kube-system
         - name: central-logging
           repo: atlas
           chart: central-logging
@@ -135,7 +130,7 @@ deployment:
       kubeAuth: *defaultKubeAuth
       nodePools:
         - name: clusternodes
-          count: 6
+          count: 2
           kubeConfig: *defaultKube
           nodeConfig: *defaultGKEClusterNode
         - name: othernodes
