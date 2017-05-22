@@ -16,29 +16,6 @@ KRAKEN_TF_LOG=k2_tf_debug.log
 # set RANDFILE to prevent creation of ${HOME}/.rnd by openssl
 export RANDFILE=$(mktemp)
 
-function parse_yaml {
-   local prefix=$2
-   local s='[[:space:]]*' w='[a-zA-Z0-9_]*' fs=$(echo @|tr @ '\034')
-   sed -ne "s|^\($s\):|\1|" \
-        -e "s|^\($s\)\($w\)$s:$s[\"']\(.*\)[\"']$s\$|\1$fs\2$fs\3|p" \
-        -e "s|^\($s\)\($w\)$s:$s\(.*\)$s\$|\1$fs\2$fs\3|p"  $1 |
-   awk -F$fs '{
-      indent = length($1)/2;
-      vname[indent] = $2;
-      for (i in vname) {if (i > indent) {delete vname[i]}}
-      if (length($3) > 0) {
-         vn=""; for (i=0; i<indent; i++) {vn=(vn)(vname[i])("_")}
-         printf("%s%s%s=\"%s\"\n", "'$prefix'",vn, $2, $3);
-      }
-   }'
-}
-
-function parse_config {
-    if [ -f ${KRAKEN_CONFIG} ]; then
-        eval $(parse_yaml ${KRAKEN_CONFIG} KRAKEN_CONFIG_)
-    fi
-}
-
 function warn {
   echo -e "\033[1;33mWARNING: $1\033[0m"
 }
@@ -76,30 +53,20 @@ function show_help {
   inf "[up].sh --config \${HOME}/.kraken/myclusterconfig.yaml"
 }
 
-function show_post_cluster_broken {
-  parse_config
-  inf "To use kubectl: "
-  inf "kubectl --kubeconfig=${KRAKEN_BASE}/${KRAKEN_CONFIG_deployment_cluster}/admin.kubeconfig <kubctl command>\n"
-  inf "For example: \nkubectl --kubeconfig=${KRAKEN_BASE}/krakenCluster/admin.kubeconfig get services --all-namespaces"
-  inf "To use helm:"
-  inf "KUBECONFIG=${KRAKEN_BASE}/${KRAKEN_CONFIG_deployment_cluster}/admin.kubeconfig helm <helm command> --home ${KRAKEN_BASE}/${KRAKEN_CONFIG_deployment_cluster}/.helm"
-  inf "For example: \nKUBECONFIG=${KRAKEN_BASE}/krakenCluster/admin.kubeconfig helm list --home ${KRAKEN_BASE}/krakenCluster/.helm\n"
-  inf "To ssh:"
-  inf "ssh <node pool name>-<number> -F ${KRAKEN_BASE}/${KRAKEN_CONFIG_deployment_cluster}/ssh_config"
-  inf "For example: \nssh masterNodes-3 -F ${KRAKEN_BASE}/krakenCluster/ssh_config"
-}
-
 function show_post_cluster {
-  parse_config
-  inf "To use kubectl: "
-  inf "kubectl --kubeconfig=${KRAKEN_BASE}/<your cluster name>/admin.kubeconfig <kubctl command>\n"
-  inf "For example: \nkubectl --kubeconfig=${KRAKEN_BASE}/krakenCluster/admin.kubeconfig get services --all-namespaces"
-  inf "To use helm:"
-  inf "KUBECONFIG=${KRAKEN_BASE}/<your cluster name>/admin.kubeconfig helm <helm command> --home ${KRAKEN_BASE}/<your cluster name>/.helm"
-  inf "For example: \nKUBECONFIG=${KRAKEN_BASE}/krakenCluster/admin.kubeconfig helm list --home ${KRAKEN_BASE}/krakenCluster/.helm\n"
-  inf "To ssh:"
-  inf "ssh <node pool name>-<number> -F ${KRAKEN_BASE}/<your cluster name>/ssh_config"
-  inf "For example: \nssh masterNodes-3 -F ${KRAKEN_BASE}/krakenCluster/ssh_config"
+  if [ -f ${KRAKEN_BASE}/help.txt ]; then
+      inf "$(< ${KRAKEN_BASE}/help.txt)"
+  else
+      inf "To use kubectl: "
+      inf "kubectl --kubeconfig=${KRAKEN_BASE}/<your cluster name>/admin.kubeconfig <kubctl command>\n"
+      inf "For example: \nkubectl --kubeconfig=${KRAKEN_BASE}/krakenCluster/admin.kubeconfig get services --all-namespaces"
+      inf "To use helm:"
+      inf "KUBECONFIG=${KRAKEN_BASE}/<your cluster name>/admin.kubeconfig helm <helm command> --home ${KRAKEN_BASE}/<your cluster name>/.helm"
+      inf "For example: \nKUBECONFIG=${KRAKEN_BASE}/krakenCluster/admin.kubeconfig helm list --home ${KRAKEN_BASE}/krakenCluster/.helm\n"
+      inf "To ssh:"
+      inf "ssh <node pool name>-<number> -F ${KRAKEN_BASE}/<your cluster name>/ssh_config"
+      inf "For example: \nssh masterNodes-3 -F ${KRAKEN_BASE}/krakenCluster/ssh_config"
+  fi
 }
 
 

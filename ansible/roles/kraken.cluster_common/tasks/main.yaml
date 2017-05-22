@@ -8,3 +8,8 @@
   loop_control:
     loop_var: a_cluster
   when: a_cluster.providerConfig.type == 'cloudinit'
+
+- name: Generate shell command help text
+  template:
+    src: templates/help.txt.jinja2
+    dest: "{{ config_base | expanduser }}/help.txt"
