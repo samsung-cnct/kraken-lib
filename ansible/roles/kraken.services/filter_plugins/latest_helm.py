@@ -8,7 +8,7 @@ def latest_helm(data):
         path = item['path']
         version_number = path.split('/')[4][1:]
         versions.append(version_number)
-        
+
     max_version = versions[0]
 
     for version in versions:
@@ -18,7 +18,7 @@ def latest_helm(data):
     return max_version
 
 class FilterModule(object):
-    ''' Unicorn filter that seems to be just a name for now so fuzzy shiny unicorns ahoy '''
+    ''' Returns the latest version of helm available in the filesystem '''
     def filters(self):
         return {
             'latest_helm': latest_helm

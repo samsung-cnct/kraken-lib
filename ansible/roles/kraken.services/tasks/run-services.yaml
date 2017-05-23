@@ -16,7 +16,7 @@
     helm_command: "/opt/cnct/kubernetes/{{ kubernetes_minor_version }}/bin/helm"
   when: helm_availabilities[cluster.name] == true
 
-- name: In case of helm not being available, if override was specified, override to override to latest helm
+- name: In case of helm not being available, if override was specified, override to latest helm
   set_fact:
     helm_command: "/opt/cnct/kubernetes/{{ latest_helm }}/bin/helm"
   when: (helm_availabilities[cluster.name] == false) and (helm_overrides[cluster.name] == true)
