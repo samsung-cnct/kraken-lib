@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1",
+
+  "description": "AWS Node Mount Configuration",
+  "properties": {
+    "device": {
+      "description": "The device to be mounted",
+      "type": "text"
+    },
+    "path": {
+      "description": "The path to mount the device to",
+      "type": "text"
+    },
+    "forceFormat": {
+      "description": "Whether the mount should be formatted after every boot",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "device",
+    "path",
+    "forceFormat"
+  ],
+  "type": "object"
+
+}

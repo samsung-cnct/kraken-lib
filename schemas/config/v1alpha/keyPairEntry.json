@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1",
+
+  "description": "Key Pairs Entry for use in K2",
+  "properties": {
+    "name": {
+      "description": "Name given to the key entry for identification in other k2 configuration areas",
+      "type": "text"
+    },
+    "kind": {
+      "description": "Type configuration node this is"
+      "enum": [ "keyPair" ],
+      "type": "text"
+    },
+    "publicKeyFile": {
+      "description": "Location of the public key on the host running K2",
+      "type": "text"
+    },
+    "privateKeyFile": {
+      "description": "Location of the private key on the host running K2",
+      "type": "text"
+    },
+    "providerConfig": {
+      "description": "Provider Specific information about key pairs",
+      "oneOf": [
+        { "$ref": "gkeKeyPairConfig.json" }
+      ]
+    }
+  },
+  "required": [
+    "name",
+    "kind",
+  ],
+  "type": "object"
+
+}

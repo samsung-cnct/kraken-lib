@@ -1,0 +1,69 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1",
+
+  "title": "A single cluster configuration",
+  "description": "A set of one or more nodePools, along with any shared configuration between them",
+  "properties": {
+    "name": {
+      "description": "Name of this cluster",
+      "type": "string"
+    },
+    "network": {
+      "description": "Internal IP address range (CIDR) for services",
+      "format": "cidr",
+      "type": "string"
+    },
+    "dns": {
+      "description": "Internal IP address of the DNS service",
+      "format": "ipv4",
+      "type": "string"
+    },
+    "domain": {
+      "description": "Domain name for cluster (internal resolution)",
+      "format": "hostname",
+      "type": "string"
+    },
+    "providerConfig": {
+      "description": "Provider (e.g. AWS, GKE, etc.) configuration",
+      "$ref": "providerConfig.json"
+    },
+    "nodePools": {
+      "description": "A list of nodePool",
+      "items": {
+        "$ref": "nodePool.json"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "fabricConfig": {
+      "description": "Fabric config for the kubernetes overlay network",
+      "$ref": "fabricConfig.json"
+    },
+    "kubeAuth": {
+      "description": "AAA (Authentication, Authorization and Accounting) settings for the cluster",
+      "$ref": "kubeAuth.json"
+    },
+    "helmConfig": {
+      "description": "Helm config for installing kubernetes resources",
+      "$ref": "helmConfig.json"
+    },
+    "dnsConfig": {
+      "description": "DNS Configuration for the cluster",
+      "$ref": "dnsConfig.json"
+    }
+  },
+  "required": [
+    "name",
+    "network",
+    "dns",
+    "domain",
+    "providerConfig",
+    "nodePools",
+    "fabricConfig",
+    "kubeAuth",
+    "helmConfig",
+    "dnsConfig"
+  ],
+  "type": "object"
+}

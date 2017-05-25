@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1",
+
+  "title": "kvStore configuration",
+  "description": "kvStore configuration",
+  "oneOf": [
+    { "$ref": "etcdConfig.json" }
+  ],
+  "type": "object"
+}

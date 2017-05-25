@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1",
+
+  "title": "A Kubernetes deployment",
+  "description": "Describes the deployment of one or more Kubernetes clusters",
+  "properties": {
+    "clusters": {
+      "description": "A list of cluster configurations",
+      "items": {
+        "$ref": "cluster.json"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "readiness": {
+      "description": "A list of parameters to determine cluster readiness",
+      "items": {
+        "$ref": "readiness.json"
+      },
+      "type": "object"
+    }
+  },
+  "required": [
+    "clusters",
+    "readiness"
+  ],
+  "type": "object"
+}

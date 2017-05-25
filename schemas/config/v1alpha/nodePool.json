@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1",
+
+  "title": "Nodepool configuration",
+  "description": "A set of one or more nodes which share the same configuration",
+  "properties": {
+    "name": {
+      "description": "Name of the nodePool",
+      "type": "string"
+    },
+    "count": {
+      "description": "Number of nodes in the nodePool",
+      "type": "number"
+    },
+    "kvStoreConfig": { "$ref": "kvStoreConfig.json" },
+    "apiServerConfig": { "$ref": "apiServerConfig.json" },
+    "kubeConfig": { "$ref": "kubeConfig.json" },
+    "containerConfig": { "$ref": "containerConfig.json" },
+    "osConfig": { "$ref": "osConfig.json" },
+    "nodeConfig": { "$ref": "nodeConfig.json" },
+    "keyPair": { "$ref": "keyPair.json" }
+  },
+  "required": [
+    "name",
+    "count",
+    "containerConfig",
+    "osConfig",
+    "nodeConfig",
+    "keyPair"
+  ],
+  "type": "object"
+}

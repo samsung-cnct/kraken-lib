@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1",
+  "description": "AWS Subnet Configuration",
+  "properties": {
+    "name": {
+      "description": "The name of the subnet, for use within k2 configurations",
+      "type": "text"
+    },
+    "az": {
+      "description": "The name of the subnet within aws",
+      "type": "text"
+    },
+    "cidr": {
+      "description": "The cidr to associate to the subnet (within the VPC)",
+      "type": "text"
+    }
+  },
+  "required": [
+    "name",
+    "az",
+    "cidr"
+  ],
+  "type": "object"
+}

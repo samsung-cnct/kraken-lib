@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1",
+
+  "title": "A Kubernetes configuration",
+  "description": "The location and version of a container containing the Kubernetes hyperkube binary.",
+  "properties": {
+    "name": {
+      "description": "Name of the Kubernetes configuration",
+      "type": "string"
+    },
+    "kind": {
+      "description": "Type of kubeconfig",
+      "oneOf": ["kubernetes"],
+      "type": "string"
+    },
+    "hyperkubeLocation": {
+      "description": "Location of the Kubernetes container.",
+      "format": "uri",
+      "type": "string"
+    },
+    "version": {
+      "description": "Version of the hyperkube binary.",
+      "format": "symver",
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "kind",
+    "hyperkubeLocation",
+    "version"
+  ],
+  "type": "object"
+
+}

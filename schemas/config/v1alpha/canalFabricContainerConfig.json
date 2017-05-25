@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1",
+
+  "description": "Canal Fabric Container Options configuration",
+  "properties": {
+    "version": {
+      "description": "Version of the container",
+      "type": "text"
+    },
+    "location": {
+      "description": "Container image location",
+      "type": "text"
+    }
+  },
+  "required": [
+    "version",
+    "location"
+  ],
+  "type": "object"
+
+}

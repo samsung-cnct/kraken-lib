@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1",
+
+  "description": "Canal Fabric Network configuration",
+  "properties": {
+    "network": {
+      "description": "Network CIDR for pods in the fabric",
+      "type": "text"
+    },
+    "subnetLen": {
+      "description": "The size of a subnet to assign to any given node",
+      "type": "text"
+    },
+    "subnetMin": {
+      "description": "The lowest subnet that can be handed out to a node",
+      "type": "text"
+    },
+    "subnetMax": {
+      "description": "The highest subnet that can be handed out to a node",
+      "type": "text"
+    },
+    "backend": {
+      "description": "Network CIDR for pods in the fabric",
+      "oneOf": [
+        { "$ref": "canalFabricNetworkVxlan.json" }
+      ],
+      "type": "object"
+    },
+  },
+  "required": [
+    "network",
+    "subnetLen",
+    "subnetMin",
+    "subnetMax",
+    "backend"
+  ],
+  "type": "object"
+
+}

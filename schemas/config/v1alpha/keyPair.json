@@ -1,0 +1,10 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1",
+
+  "description": "Key Pairs used in K2",
+  "items": { "$ref": "keyPairEntry.json" },
+  "minItems": 1,
+  "type": "array"
+
+}

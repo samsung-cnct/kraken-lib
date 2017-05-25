@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1",
+
+  "description": "Kubernetes Authentication Entry",
+  "properties": {
+    "authz": {
+      "description": "Authz settings for entry",
+      "type": "text"
+    },
+    "authn": { "$ref": "kubeAuthAuthnEntry.json" }
+  },
+  "required": [
+    "authn"
+  ],
+  "type": "object"
+
+}
