@@ -46,25 +46,6 @@
     path: "{{ helm_home }}"
     state: directory
 
-- name: Collect all services
-  command: >
-    {{ kubectl }} --kubeconfig={{ kubeconfig }} get services --all-namespaces -o json
-  register: added_services
-  when: kraken_action == 'down' and kubeconfig | is_file
-  ignore_errors: yes
-
-- name: Register services fact
-  set_fact:
-    added_services_map: "{{ added_services.stdout | from_json }}"
-  when: kraken_action == 'down'
-  ignore_errors: yes
-
-- name: Set services info
-  set_fact:
-    the_services: "{{ added_services_map.items()[0][1] }}"
-  when: kraken_action == 'down'
-  ignore_errors: yes
-
 - name: Clean up releases
   command: >
     {{ helm_command }} delete --purge {{ item.name }}
@@ -80,11 +61,36 @@
     {{ kubectl }} --kubeconfig={{ kubeconfig }} delete deployment {{ tiller }} --namespace=kube-system
   when: tiller_present | succeeded and not tiller_present | skipped
 
+- name: Collect all services
+  command: >
+    {{ kubectl }} --kubeconfig={{ kubeconfig }} get services --all-namespaces -o json
+  register: added_services
+  when: kraken_action == 'down' and kubeconfig | is_file
+  ignore_errors: yes
+
+- name: Register services fact
+  set_fact:
+    added_services_map: "{{ added_services.stdout | from_json }}"
+  when: kraken_action == 'down'
+  ignore_errors: yes
+
+- name: Set services info
+  set_fact:
+    the_services: "{{ added_services_map['items'] }}"
+  when: kraken_action == 'down'
+  ignore_errors: yes
+
+- name: Set load balanced service data
+  set_fact:
+    load_balanced_services: "{{ the_services|json_query('[?status.loadBalancer.ingress[0].hostname != null].{namespace: metadata.namespace, name: metadata.name}') }}"
+  when: kraken_action == 'down'
+  ignore_errors: yes
+
 - name: Clean up services
   command: >
-    {{ kubectl }} --kubeconfig={{ kubeconfig }} delete --namespace {{ item.metadata.namespace }} svc {{ item.metadata.name }}
-  with_items: "{{ the_services }}"
-  when: kraken_action == 'down' and item.status.loadBalancer.ingress[0].hostname is defined
+    {{ kubectl }} --kubeconfig={{ kubeconfig }} delete --namespace {{ item.namespace }} svc {{ item.name }}
+  with_items: "{{ load_balanced_services }}"
+  when: kraken_action == 'down'
   ignore_errors: yes
 
 - name: Delete all service namespaces
