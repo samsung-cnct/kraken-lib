@@ -18,6 +18,11 @@
       "items": { "type": "string" },
       "type": "array"
     },
+    "label": {
+      "description": "List of AWS labels to associate with the kubernetes node",
+      "items": { "$ref": "awsKubeNodeLabel.json" },
+      "type": "array"
+    },
     "tags": {
       "description": "List of AWS tags to associate with the node",
       "items": { "$ref": "awsNodeTag.json" },
