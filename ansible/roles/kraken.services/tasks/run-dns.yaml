@@ -13,6 +13,7 @@
 - set_fact:
     kubeconfig: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
 
+
 - name: Merge User DNS Config with Default DNS Config
   set_fact:
     dns_config: "{{ kubedns | combine(cluster.dnsConfig.kubedns) | expand_config }}"
@@ -21,6 +22,16 @@
   file:
     path: "{{ config_base | expanduser }}/{{ cluster.name }}/services"
     state: directory
+
+- name: Generate kubedns RBAC policy file
+  template:
+    src: "{{ item }}"
+    dest: "{{ config_base | expanduser }}/{{ cluster.name }}/auth/rbac-dns-policy.yaml"
+  with_first_found:
+    - files:
+      - "{{ kubernetes_minor_versions[ cluster.name ] }}/rbac-dns-policy.yaml.jinja2"
+      - rbac-dns-policy.yaml.jinja2
+  when: "cluster.kubeAuth.authz.rbac is defined"
 
 - name: Create the DNS Service Deployment
   template:
@@ -41,6 +52,18 @@
     port: 443
     timeout: 600
   with_items: "{{ api_servers }}"
+
+- name: Remove existing kubedns RBAC policy
+  command: >
+    {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} delete -f {{ config_base | expanduser }}/{{ cluster.name }}/auth/rbac-dns-policy.yaml
+  ignore_errors: yes
+  when: "cluster.kubeAuth.authz.rbac is defined"
+
+- name: Bootstrap kubedns RBAC policy
+  command: >
+    {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} apply -f {{ config_base | expanduser }}/{{ cluster.name }}/auth/rbac-dns-policy.yaml
+  register: job_rbac_dns_results
+  when: "cluster.kubeAuth.authz.rbac is defined"
 
 - name: Install DNS
   command: >
