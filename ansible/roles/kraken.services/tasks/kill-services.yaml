@@ -40,6 +40,7 @@
   register: tiller_present
   when: kubeconfig | is_file
   ignore_errors: yes
+  failed_when: false
 
 - name: Create Helm home
   file:
@@ -54,12 +55,13 @@
     HELM_HOME: "{{ helm_home }}"
   with_items: "{{ cluster_services }}"
   ignore_errors: yes
-  when: tiller_present | succeeded and not tiller_present | skipped and (helm_command is defined)
+  when: "'Error' not in tiller_present.stderr and not tiller_present | skipped  and (helm_command is defined) "
 
 - name: Clean up tiller if present
   command: >
     {{ kubectl }} --kubeconfig={{ kubeconfig }} delete deployment {{ tiller }} --namespace=kube-system
-  when: tiller_present | succeeded and not tiller_present | skipped
+  when: "'Error' not in tiller_present.stderr and not tiller_present | skipped "
+  ignore_errors: yes 
 
 - name: Collect all services
   command: >

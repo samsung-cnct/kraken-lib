@@ -41,6 +41,7 @@
   changed_when: false
   register: kube_networking_namespace
   when: "{{ not (dryrun | bool) }}"
+  failed_when: false
 
 - name: Ensure the kube-networking namespace exists
   command: >
@@ -49,7 +50,9 @@
   retries: 120
   until: result|succeeded
   delay: 1
-  when: "{{ (not (dryrun | bool)) and (kube_networking_namespace | failed) }}"
+  when:
+    - "{{ (not (dryrun | bool)) }}"
+    - "'Error' in kube_networking_namespace.stderr "
   ignore_errors: yes
 
 - name: check kube-networking namespace state
@@ -59,11 +62,14 @@
   changed_when: false
   register: kube_networking_namespace
   when: "{{ not (dryrun | bool) }}"
+  failed_when: false
 
 - name: Confirm kube-networking namespace created
   fail:
     msg: "kube-networking namespace creation failed"
-  when: "{{ (not (dryrun | bool)) and (kube_networking_namespace | failed) }}"
+  when:
+    - "{{ (not (dryrun | bool)) }}"
+    - "'Error' in kube_networking_namespace.stderr "
 
 - name: Deploy canal configuration
   command: >

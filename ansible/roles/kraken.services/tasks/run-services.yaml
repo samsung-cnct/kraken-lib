@@ -109,6 +109,7 @@
   with_items: "{{ cluster_repos }}"
   when: (cluster_repos is defined) and (helm_command is defined)
   ignore_errors: yes
+  failed_when: false 
 
 - name: Add helm repositories
   command: >
