@@ -52,17 +52,18 @@ You will need the following installed on your machine:
   - pip
   - boto
   - netaddr
-- Ansible 2.2.x
+- Ansible ([see k2-tools](https://github.com/samsung-cnct/k2-tools/blob/master/requirements.txt) for the version)
 - Cloud SDKs
   - aws cli
   - gcloud SDK
-- Terraform and providers
-  - Terraform 0.8.6
-  - Terraform execute provider 0.0.4 (https://github.com/samsung-cnct/terraform-provider-execute/releases)  
-  - Terraform coreosbox provider 0.0.3 (https://github.com/samsung-cnct/terraform-provider-coreosbox/releases)
-- kubectl 1.3.x
-- helm alpha.5 or later
+- Terraform and Providers ([see k2-tools](https://github.com/samsung-cnct/k2-tools/blob/master/Dockerfile) for the versions)
+  - Terraform
+  - Terraform Execute Provider (https://github.com/samsung-cnct/terraform-provider-execute/releases)  
+  - Terraform Coreosbox Provider (https://github.com/samsung-cnct/terraform-provider-coreosbox/releases)
+- kubectl
+- helm
 
+For the specific version of python modules (including Ansible) which are expected, see [k2-tools](https://github.com/samsung-cnct/k2-tools/blob/master/requirements.txt). For the versions of all other dependecies, see the k2-tools [Dockerfile](https://github.com/samsung-cnct/k2-tools/blob/master/Dockerfile).
 
 ## The K2 image
 
