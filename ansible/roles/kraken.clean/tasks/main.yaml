@@ -1,9 +1,26 @@
 ---
+- name: Register safe cluster name directory query
+  set_fact:
+# /x style rendering of the below:
+# [?     # Accept only elements that match the following critia
+#   !    # NOT.
+#    starts_with() # JMESPath test if the first argument starts with the second
+#     '{{ }}'      # Pass a string literal to JMESPath which is computed by
+                   # jinja2 templating
+#             @    # The item JMESPath is considering
+#   In other words, return (an iterator) that generates a list of the input
+# items which do not start the real path of the config base.  Since the action
+# is to delete the directory, this protects the config base from deletion.
+    cluster_name_test: "[?!starts_with('{{config_base | realpath }}', @)]"
+
 - name: clean the generated folder
   file:
-    path: "{{ config_base | expanduser }}/{{ a_cluster.name }}"
+    path: "{{ cluster_dir }}"
     state: absent
   with_items:
     - "{{ kraken_config.clusters }}"
   loop_control:
     loop_var: a_cluster
+  vars:
+    cluster_dir: "{{ (config_base + '/' + a_cluster.name) | realpath }}"
+  when: ( [cluster_dir] | json_query(cluster_name_test) | list != [] )
