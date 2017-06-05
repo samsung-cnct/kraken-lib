@@ -14,13 +14,35 @@
     path: "{{ config_base | expanduser }}/{{ cluster.name }}/fabric"
     state: directory
 
+- name: Leagacy non-versioned fabric check
+  set_fact:
+    fabricConfigVal: "{{ cluster.fabricConfig }}"
+  when: cluster.fabricConfig.kind == 'fabric'
+
+- name: Load the correct fabric config for the kuberenetes version
+  set_fact:
+    fabricConfigVal: "{{ cluster.fabricConfig.kubeVersion.versions[ kubernetes_minor_version ] if cluster.fabricConfig.kubeVersion.versions[ kubernetes_minor_version ] is defined else cluster.fabricConfig.kubeVersion.default }}"
+  vars:
+    kubernetes_minor_version: "{{ kubernetes_minor_versions[cluster.name] }}"
+  when: cluster.fabricConfig.kind == 'versionedFabric'
+
 - name: Generate canal deployment file
-  template: src=canal.yaml.part.jinja2
-            dest="{{ config_base | expanduser }}/{{ cluster.name }}/fabric/canal.yaml"
+  template:
+    src: "{{ item }}"
+    dest: "{{ config_base | expanduser }}/{{ cluster.name }}/fabric/canal.yaml"
+  with_first_found:
+    - files:
+      - "{{ kubernetes_minor_versions[ cluster.name ] }}/canal.yaml.part.jinja2"
+      - canal.yaml.part.jinja2
 
 - name: Generate canal configuration file
-  template: src=config.yaml.part.jinja2
-            dest="{{ config_base | expanduser }}/{{ cluster.name }}/fabric/config.yaml"
+  template:
+    src: "{{ item }}"
+    dest: "{{ config_base | expanduser }}/{{ cluster.name }}/fabric/config.yaml"
+  with_first_found:
+    - files:
+      - "{{ kubernetes_minor_versions[ cluster.name ] }}/config.yaml.part.jinja2"
+      - config.yaml.part.jinja2
 
 - name: Wait for api server
   wait_for:

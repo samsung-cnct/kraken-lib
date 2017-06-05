@@ -25,7 +25,7 @@ spec:
         # Runs the flannel daemon to enable vxlan networking between
         # container hosts.
         - name: flannel
-          image: {{cluster.fabricConfig.options.containers.flannel.location}}:{{cluster.fabricConfig.options.containers.flannel.version}}
+          image: {{fabricConfigVal.options.containers.flannel.location}}:{{fabricConfigVal.options.containers.flannel.version}}
           env:
             # The location of the etcd cluster.
             - name: FLANNELD_ETCD_ENDPOINTS
@@ -77,7 +77,7 @@ spec:
         # container programs network policy and local routes on each
         # host.
         - name: calico-node
-          image: {{cluster.fabricConfig.options.containers.calicoNode.location}}:{{cluster.fabricConfig.options.containers.calicoNode.version}}
+          image: {{fabricConfigVal.options.containers.calicoNode.location}}:{{fabricConfigVal.options.containers.calicoNode.version}}
           env:
             # The location of the etcd cluster.
             - name: ETCD_ENDPOINTS
@@ -123,7 +123,7 @@ spec:
         # This container installs the Calico CNI binaries
         # and CNI network config file on each node.
         - name: install-calico-cni
-          image: {{cluster.fabricConfig.options.containers.calicoCni.location}}:{{cluster.fabricConfig.options.containers.calicoCni.version}}
+          image: {{fabricConfigVal.options.containers.calicoCni.location}}:{{fabricConfigVal.options.containers.calicoCni.version}}
           imagePullPolicy: Always
           command: ["/install-cni.sh"]
           env:
@@ -214,12 +214,12 @@ spec:
       containers:
         # Writes basic flannel configuration to etcd.
         - name: configure-flannel
-          image: {{cluster.fabricConfig.options.containers.etcd.location}}:{{cluster.fabricConfig.options.containers.etcd.version}}
+          image: {{fabricConfigVal.options.containers.etcd.location}}:{{fabricConfigVal.options.containers.etcd.version}}
           command:
           - "etcdctl"
           - "set"
           - "/coreos.com/network/config"
-          - '{ "Network": "{{cluster.fabricConfig.options.network.network}}", "SubnetLen": {{cluster.fabricConfig.options.network.subnetLen}}, "SubnetMin": "{{cluster.fabricConfig.options.network.subnetMin}}", "SubnetMax": "{{cluster.fabricConfig.options.network.subnetMax}}", "Backend": {"Type": "{{cluster.fabricConfig.options.network.backend.type}}"} }'
+          - '{ "Network": "{{fabricConfigVal.options.network.network}}", "SubnetLen": {{fabricConfigVal.options.network.subnetLen}}, "SubnetMin": "{{fabricConfigVal.options.network.subnetMin}}", "SubnetMax": "{{fabricConfigVal.options.network.subnetMax}}", "Backend": {"Type": "{{fabricConfigVal.options.network.backend.type}}"} }'
           env:
             # The location of the etcd cluster.
             - name: ETCDCTL_PEERS
@@ -282,7 +282,7 @@ spec:
       hostNetwork: true
       containers:
         - name: calico-policy-controller
-          image: {{cluster.fabricConfig.options.containers.kubePolicyController.location}}:{{cluster.fabricConfig.options.containers.kubePolicyController.version}}
+          image: {{fabricConfigVal.options.containers.kubePolicyController.location}}:{{fabricConfigVal.options.containers.kubePolicyController.version}}
           env:
             # The location of the Calico etcd cluster.
             - name: ETCD_ENDPOINTS

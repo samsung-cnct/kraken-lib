@@ -3,13 +3,30 @@
     cluster: "{{ cluster_node_tuple.0 }}"
     node: "{{ cluster_node_tuple.1 }}"
 
+- name: Leagacy non-versioned fabric check
+  set_fact:
+    fabricConfigVal: "{{ cluster.fabricConfig }}"
+  when: cluster.fabricConfig.kind == 'fabric'
+
+- name: Load the correct fabric config for the kuberenetes version
+  set_fact:
+    fabricConfigVal: "{{ cluster.fabricConfig.kubeVersion.versions[ kubernetes_minor_version ] if cluster.fabricConfig.kubeVersion.versions[ kubernetes_minor_version ] is defined else cluster.fabricConfig.kubeVersion.default }}"
+  vars:
+    kubernetes_minor_version: "{{ kubernetes_minor_versions[cluster.name] }}"
+  when: cluster.fabricConfig.kind == 'versionedFabric'
+
 - name: Generate master api-server.yaml
   template: src=api-server-manifest.yaml.jinja2
     dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ node.name }}.api-server.yaml.manifest"
 
 - name: Generate master controller-manager.yaml
-  template: src=controller-manager-manifest.yaml.jinja2
-    dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ node.name }}.controller-manager.yaml.manifest"
+  template:
+    src: "{{ item }}"
+    dest: "{{ config_base | expanduser }}/{{ cluster.name }}/{{ node.name }}.controller-manager.yaml.manifest"
+  with_first_found:
+    - files:
+      - "{{ kubernetes_minor_versions[ cluster.name ] }}/controller-manager-manifest.yaml.jinja2"
+      - controller-manager-manifest.yaml.jinja2
 
 - name: Generate master kube-proxy.yaml
   template: src=kube-proxy-manifest.yaml.jinja2
