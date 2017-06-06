@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1/awsNodeProviderConfig.json",
+
+  "description": "AWS Provider Configuration",
+  "properties": {
+    "provider": {
+      "description": "Identifies who the provider is for configuration",
+      "enum": [ "aws" ],
+      "type": "string"
+    },
+    "type": {
+      "description": "Identifies what aws machine type should be used (m3.medium, etc.)",
+      "type": "string"
+    },
+    "subnet": {
+      "description": "Identifies what subnets should be used.  These are names of subnets created elsewhere in the configuration",
+      "items": { "type": "string" },
+      "type": "array"
+    },
+    "tags": {
+      "description": "List of AWS tags to associate with the node",
+      "items": { "$ref": "awsNodeTag.json" },
+      "type": "array"
+    },
+    "storage": {
+      "description": "List of storage devices to attach to the node",
+      "items": { "$ref": "awsStorageDevice.json" },
+      "type": "array"
+    }
+  },
+  "required": [
+    "provider",
+    "type",
+    "subnet"
+  ],
+  "type": "object"
+
+}

@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1/gkeProviderConfig.json",
+
+  "description": "GKE Provider Configuration",
+  "properties": {
+    "name": {
+      "description": "The name of the configuration, for use within k2 configurations",
+      "type": "string"
+    },
+    "kind": {
+      "description": "The type of configuration this object it",
+      "enum": [
+        "provider"
+      ],
+      "type": "string"
+    },
+    "provider": {
+      "description": "The name of the provider for this provider setting",
+      "enum": [
+        "gke"
+      ],
+      "type": "string"
+    },
+    "type": {
+      "description": "How are nodes configured - SHOULD BE MOVED TO NODE PROVIDER CONFIG?",
+      "enum": [
+        "autonomous"
+      ],
+      "type": "string"
+    },
+    "project": {
+      "description": "Name of GKE project",
+      "type": "string"
+    },
+    "keypair": {
+      "description": "Keypair for use with nodes - SHOULD BE MOVED TO NODE PROVIDER CONFIG?",
+      "$ref": "http://judkins.house/apis/k2/v1/keyPair.json"
+    },
+    "zone": {
+      "description": "Zones for the cluster",
+      "$ref": "http://judkins.house/apis/k2/v1/gkeZoneConfig.json"
+    }
+  },
+  "required": [
+    "name",
+    "provider",
+    "type",
+    "project",
+    "keypair",
+    "zone"
+  ],
+  "type": "object"
+
+}

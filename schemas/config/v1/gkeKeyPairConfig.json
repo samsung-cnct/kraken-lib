@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1/gkeKeyPairConfig.json",
+
+  "description": "GKE key pair configuration",
+  "properties": {
+    "serviceAccount": {
+      "description": "The service account id",
+      "type": "string"
+    },
+    "serviceAccountKeyFile": {
+      "description": "The service account key file",
+      "type": "string"
+    }
+  },
+
+  "required": [
+    "serviceAccount",
+    "serviceAccountKeyFile"
+  ],
+
+  "type": "object"
+}

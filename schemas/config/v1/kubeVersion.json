@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1/kubeVersion.json",
+
+  "description": "Canal fabric configurations for multiple versions of Kubernets",
+  "properties": {
+    "default": { "$ref": "http://judkins.house/apis/k2/v1/canalFabricConfig.json" },
+    "versions": {
+      "description": "Dictionary of configuration objects where the kubernetes version is the key",
+      "type": "object"
+    }
+  },
+
+  "required": [
+  ],
+
+  "type": "object"
+}

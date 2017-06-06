@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1/config.json",
+
+  "title": "k2 configuration file",
+  "description": "Describes one or more Kubernetes clusters",
+
+  "properties": {
+    "version": {
+      "description": "The k2 configuration version determines which schema is used to validate the configuration file",
+      "type": "string"
+    },
+    "definitions": { "$ref": "definitions.json" },
+    "deployment": { "$ref": "deployment.json" }
+  },
+  "required": [
+    "version",
+    "deployment"
+  ],
+  "type": "object"
+
+}

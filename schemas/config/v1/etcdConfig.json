@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1/etcdConfig.json",
+
+  "description": "etcd configuration",
+  "properties": {
+    "name": {
+      "description": "Name of etcd configuration",
+      "type": "string"
+    },
+    "type": {
+      "description": "Type of kvStore",
+      "enum": [ "etcd" ],
+      "type": "string"
+    },
+    "clientPorts": {
+      "description": "Ports used to listen for client requests",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "clusterToken": {
+      "description": "Token used during etcd cluster formation",
+      "type": "string"
+    },
+    "peerPorts": {
+      "description": "Ports used for peer to peer communication",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "ssl": {
+      "description": "Whether or not SSL is used for etcd traffic",
+      "type": "boolean"
+    },
+    "version": {
+      "description": "Version of etcd container which will be run",
+      "type": "string"
+    }
+  },
+
+  "required": [
+    "type",
+    "clientPorts",
+    "clusterToken",
+    "peerPorts",
+    "ssl",
+    "version"
+  ],
+
+  "type": "object"
+}

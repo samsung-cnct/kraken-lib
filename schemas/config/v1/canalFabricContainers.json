@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1/canalFabricContainers.json",
+
+  "description": "Canal Fabric Container Options configuration",
+  "properties": {
+    "kubePolicyController": { "$ref": "http://judkins.house/apis/k2/v1/canalFabricContainerConfig.json" },
+    "etcd": { "$ref": "http://judkins.house/apis/k2/v1/canalFabricContainerConfig.json" },
+    "calicoCni": { "$ref": "http://judkins.house/apis/k2/v1/canalFabricContainerConfig.json" },
+    "calicoNode": { "$ref": "http://judkins.house/apis/k2/v1/canalFabricContainerConfig.json" },
+    "flannel": { "$ref": "http://judkins.house/apis/k2/v1/canalFabricContainerConfig.json" }
+  },
+
+  "required": [
+    "kubePolicyController",
+    "etcd",
+    "calicoCni",
+    "calicoNode",
+    "flannel"
+  ],
+
+  "type": "object"
+}

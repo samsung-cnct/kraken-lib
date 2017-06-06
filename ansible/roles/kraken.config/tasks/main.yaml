@@ -21,6 +21,45 @@
     kraken_config: "{{ kraken_config_defaults.deployment | combine(kraken_config_user.deployment) | expand_config }}"
   when: config_file | is_file
 
+- name: Fail if still using old style configuration format
+  fail:
+    msg: >-
+         The configuration file ({{ config_file }}) does not have an API
+         version and must be updated to the new configuration file format.
+  when: kraken_config_user.version is undefined
+
+- name: Set schema fact(s)
+  set_fact:
+    schema_filename: "../schemas/config/{{ kraken_config_user.version }}/config.json"
+    subschema_dir: "../schemas/config/{{ kraken_config_user.version }}/"
+
+- name: Stat schema file
+  stat:
+    path: "{{ schema_filename }}"
+  register: schema_file
+
+- name: Check if k2 configuration file API version is supported
+  fail:
+    msg: >-
+         API version {{ kraken_config_user.version }} is not supported.
+         Check that your configuration file ({{ config_file }}) conforms
+         to a supported format.
+  when: schema_file.stat.exists == false
+
+- name: Validate k2 configuration under schema
+  jsonschema:
+    config_filename: "{{ config_file }}"      
+    schema_filename: "{{ schema_filename }}"
+    subschema_dir: "{{ subschema_dir }}"
+  register: validation
+
+- name: Fail if configuration file is invalid
+  fail:
+    msg: >-
+         Configuration file ({{ config_file }}) is not a valid instance
+         of API version {{ kraken_config_user.version }}.
+  when: not validation.result.is_valid
+
 - name: Verify all clusters in the clusters list have names
   fail:
     msg: "Make sure that all 'clusters.name' are defined in {{ config_file }}"
@@ -32,17 +71,6 @@
   fail:
     msg: "Multiple clusters are not yet supported in k2"
   when: "{{ kraken_config.clusters | length | int > 1 }}"
-
-- name: Warn if still using old style configuration format
-  debug:
-    msg: >-
-         k2 is migrating to a new configuration file format. The configuration
-         file ({{ config_file }}) appears to be using the old style format. If
-         you would like to continue using this configuration file you can
-         checkout the k2 version tagged 0.0, however, it is strongly recommended
-         that you generate a new configuration file, and then modify it as
-         appropriate for your environment.
-  when: kraken_config_user.version is undefined
 
 - name: Ensure each nodePool corresponds to exactly one of the node roles (i.e. etcd, master, or node)
   fail:

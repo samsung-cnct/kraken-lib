@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1/kubeNodeLabel.json",
+
+  "description": "Kubernetes Node Label",
+  "properties": {
+    "name": {
+      "description": "The Kubernetes node label's key",
+      "type": "string"
+    },
+    "value": {
+      "description": "The Kubernetes node label's value",
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "value"
+  ],
+  "type": "object"
+}

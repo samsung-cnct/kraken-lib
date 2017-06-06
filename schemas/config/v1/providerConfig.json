@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1/providerConfig.json",
+
+  "description": "Provider Configurations",
+  "oneOf": [
+    { "$ref": "http://judkins.house/apis/k2/v1/awsProviderConfig.json" },
+    { "$ref": "http://judkins.house/apis/k2/v1/gkeProviderConfig.json" }
+  ],
+
+  "type": "object"
+}

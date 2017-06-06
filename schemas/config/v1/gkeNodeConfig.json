@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1/gkeNodeConfig.json",
+
+  "description": "GKE Node Configuration",
+  "properties": {
+    "name": {
+      "description": "Name of node for use by k2",
+      "type": "string"
+    },
+    "kind": {
+      "description": "Type of config this is",
+      "enum": ["node"],
+      "type": "string"
+    },
+    "providerConfig": { "$ref": "http://judkins.house/apis/k2/v1/gkeNodeProviderConfig.json" }
+  },
+
+  "required": [
+    "name",
+    "providerConfig"
+  ],
+
+  "type": "object"
+}

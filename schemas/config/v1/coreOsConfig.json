@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1/coreOsConfig.json",
+
+  "description": "CoreOS Configuration",
+  "properties": {
+    "name": {
+      "description": "The name of the configuration",
+      "type": "string"
+    },
+    "kind": {
+      "description": "The kind of configuration",
+      "enum": ["os"],
+      "type": "string"
+    },
+    "type": {
+      "description": "The type of configuration (coreos)",
+      "enum": ["coreOs"],
+      "type": "string"
+    },
+    "version": {
+      "description": "The image tag of CoreOS to deploy",
+      "type": "string"
+    },
+    "channel": {
+      "description": "The channel of CoreOS to pick",
+      "enum": ["stable", "beta", "alpha"],
+      "type": "string",
+      "default": "stable"
+    },
+    "rebootStrategy": {
+      "description": "Should CoreOS update itself, and if so, how should it manage upgrades?",
+      "enum": ["off", "reboot", "etcd-lock", "best-effort"],
+      "type": "string"
+    },
+    "locksmith": { "$ref": "http://judkins.house/apis/k2/v1/coreOsLocksmithConfig.json" }
+  },
+
+  "required": [
+    "name",
+    "type",
+    "version",
+    "rebootStrategy"
+  ],
+  "type": "object"
+
+}

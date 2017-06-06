@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1/loadBalancerConfig.json",
+
+  "title": "Load balancer configuration",
+  "description": "Load balancer configuration for Kubernetes API servers",
+  "properties": {
+    "name": {
+      "description": "Name of the load balancer configuration",
+      "type": "string"
+    },
+    "type": {
+      "description": "Type of load balancer",
+      "enum": [ "cloud", "flipbit" ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "type": "object"
+
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1/kubeAuthAuthnEntry.json",
+
+  "description": "Kubernetes Authentication Authn Entry",
+  "properties": {
+    "basic": {
+      "description": "Users to be created",
+      "items": { "$ref": "http://judkins.house/apis/k2/v1/kubeAuthBasicUser.json" },
+      "type": "array"
+    },
+    "default_basic_user": {
+      "description": "Default user for kubeauth file",
+      "type": "string"
+    }
+  },
+
+  "required": [
+  ],
+
+  "type": "object"
+}

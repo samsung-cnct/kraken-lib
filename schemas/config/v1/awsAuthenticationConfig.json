@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1/awsAuthenticationConfig.json",
+  "description": "AWS ACL Configuration",
+
+  "properties": {
+    "accessKey": {
+      "description": "The AWS access key for the API",
+      "type": ["string", "null"]
+    },
+    "accessSecret": {
+      "description": "The AWS access secret for the API",
+      "type": ["string", "null"]
+    },
+    "credentialsFile": {
+      "description": "The AWS credentials file for the API",
+      "type": ["string", "null"]
+    },
+    "credentialsProfile": {
+      "description": "The profile to use within the credentials file",
+      "type": ["string", "null"]
+    }
+  },
+
+  "required": [
+    "accessKey",
+    "accessSecret",
+    "credentialsFile",
+    "credentialsProfile"
+  ],
+
+  "type": "object"
+}

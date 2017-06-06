@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1/kubeAuthBasicUser.json",
+
+  "description": "Kubernetes Authentication Basic User Entry",
+  "properties": {
+    "user": {
+      "description": "The username for the account",
+      "type": "string"
+    },
+    "password": {
+      "description": "The password for the user account",
+      "type": "string"
+    }
+  },
+
+  "required": [
+    "user",
+    "password"
+  ],
+
+  "type": "object"
+}

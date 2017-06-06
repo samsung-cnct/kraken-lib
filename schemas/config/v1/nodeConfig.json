@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1/nodeConfig.json",
+
+  "description": "Node Configurations",
+  "items": {
+    "anyOf": [
+      { "$ref": "http://judkins.house/apis/k2/v1/awsNodeConfig.json" },
+      { "$ref": "http://judkins.house/apis/k2/v1/gkeNodeConfig.json" }
+    ]
+  }
+
+}

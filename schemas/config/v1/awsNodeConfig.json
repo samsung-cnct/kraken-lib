@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1/awsNodeConfig.json",
+
+  "description": "AWS Node Configuration",
+  "properties": {
+    "name": {
+      "description": "Name of node for use by k2",
+      "type": "string"
+    },
+    "kind": {
+      "description": "Type of config this is",
+      "enum": ["node"],
+      "type": "string"
+    },
+    "mounts": {
+      "description": "Additional mounts made in the node",
+      "items": { "$ref": "awsNodeMountConfig.json" },
+      "type": "array"
+    },
+    "providerConfig": { "$ref": "awsNodeProviderConfig.json" }
+  },
+  "required": [
+    "name",
+    "providerConfig"
+  ],
+  "type": "object"
+
+}
