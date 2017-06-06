@@ -1,0 +1,43 @@
+---
+#
+# expects:
+#    cluster
+#    kubeconfig
+#    kubernetes_minor_versions
+#
+- name: Make sure generated folder for RBAC policy is there
+  file:
+    path: "{{ config_base | expanduser }}/{{ cluster.name }}/auth"
+    state: directory
+
+- name: Generate default RBAC policy file
+  template:
+    src: "{{ item }}"
+    dest: "{{ config_base | expanduser }}/{{ cluster.name }}/auth/rbac-default-policy.yaml"
+  with_first_found:
+    - files:
+      - "{{ kubernetes_minor_versions[ cluster.name ] }}/rbac-default-policy.yaml.jinja2"
+      - rbac-default-policy.yaml.jinja2
+  with_items: "{{ cluster.nodePools }}"
+  when: item.etcdConfig is defined
+
+- name: Generate canal RBAC policy file
+  template:
+    src: "{{ item }}"
+    dest: "{{ config_base | expanduser }}/{{ cluster.name }}/auth/rbac-canal-policy.yaml"
+  with_first_found:
+    - files:
+      - "{{ kubernetes_minor_versions[ cluster.name ] }}/rbac-canal-policy.yaml"
+      - rbac-canal-policy.yaml
+  with_items: "{{ cluster.nodePools }}"
+  when: item.etcdConfig is defined
+
+- name: Bootstrap RBAC policy
+  command: >
+    {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} apply -f {{ config_base | expanduser }}/{{ cluster.name }}/auth/rbac-default-policy.yaml
+  register: job_rbac_bootstrap_result
+
+- name: Bootstrap canal RBAC policy
+  command: >
+    {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} apply -f {{ config_base | expanduser }}/{{ cluster.name }}/auth/rbac-canal-policy.yaml
+  register: job_rbac_canal_results

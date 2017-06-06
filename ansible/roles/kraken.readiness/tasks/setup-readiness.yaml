@@ -1,4 +1,11 @@
 ---
+#
+# Expects:
+#    cluster
+#    
+#    kraken_config
+#    kubernetes_minor_versions
+#
 - name: Setup readiness type
   set_fact:
     readiness_type: "{{ kraken_config.readiness.type | default('exact') }}"
@@ -28,10 +35,5 @@
 - name: Set kubeconfig path
   set_fact:
     kubeconfig: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
-
-- include: generate-admin-cert.yaml
-
-- include: generate-admin-kubeconfig.yaml
-  when: kraken_endpoint is defined
 
 - include: do-wait.yaml

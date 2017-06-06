@@ -1,4 +1,11 @@
 ---
+#
+# Expects
+#   cluster
+#   kubeconfig
+#
+#   kubernetes_minor_versions
+#
 - name: Look up and set k8s minor version for this cluster
   set_fact:
     kubernetes_minor_version: "{{ kubernetes_minor_versions[cluster.name] }}"
@@ -19,7 +26,7 @@
   set_fact:
     api_servers: "{{ lookup('file', kubeconfig) | from_yaml | json_query('clusters[*].cluster.server') }}"
 
-- name: Wait for api server to become available in case it's not
+- name: Wait for api server to become available in case it is not
   wait_for:
     host: "{{ item | regex_replace('https://','') }}"
     port: 443
@@ -30,17 +37,18 @@
   set_fact:
     wait_api_end_timestamp: "{{ lookup('pipe','date +%Y%m%d%H%M%S') }}"
 
+- name: Set time factor
+  set_fact:
+    wait_interval: 10
+
 - name: Set remaining time fact
   set_fact:
-    remaining_time: "{{ readiness_wait | int - (wait_api_end_timestamp | int - wait_api_start_timestamp | int ) }}"
-
-- include: bootstrap-default-rbac-policy.yaml
-  when: "cluster.kubeAuth.authz.rbac is defined"
+    remaining_time: "{{ ((readiness_wait | int - (wait_api_end_timestamp | int - wait_api_start_timestamp | int )) / wait_interval | int ) | int }}"
 
 - name: Get all nodes
   command: >
     {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} get nodes --no-headers=true
   register: job_get_nodes_result
   until: "{{ job_get_nodes_result.stdout_lines | length }} >= needed_nodes | int"
-  retries: "{{ remaining_time }}"
-  delay: 1
+  retries: "{{ remaining_time | int }}"
+  delay: "{{ wait_interval | int }}"

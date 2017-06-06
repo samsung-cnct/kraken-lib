@@ -4,10 +4,10 @@
     openssl genrsa -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user.key 2048
       creates={{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user.key
 
-- name: Generate end-user admin csr
+- name: Generate end-user admin csr 
   command: >
     openssl req -new -key {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user.key
-      -subj "/CN=kraken-ca" -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user.csr
+      -subj {{ (cluster.kubeAuth.authz.rbac is defined) | ternary("/O=system:masters/CN=kraken-ca","/CN=kraken-ca") }} -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user.csr
         creates={{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user.csr
 
 - name: Generate end-user admin crt

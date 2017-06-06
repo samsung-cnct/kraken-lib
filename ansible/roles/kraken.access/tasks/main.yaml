@@ -1,0 +1,7 @@
+---
+- include: setup-certs.yaml
+  with_items:
+    - "{{ kraken_config.clusters }}"
+  loop_control:
+    loop_var: a_cluster
+  when: a_cluster.providerConfig.type == 'cloudinit'

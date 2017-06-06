@@ -16,8 +16,13 @@
   when: cluster.fabricConfig.kind == 'versionedFabric'
 
 - name: Generate master api-server.yaml
-  template: src=api-server-manifest.yaml.jinja2
-    dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ node.name }}.api-server.yaml.manifest"
+  template: 
+    src: "{{ item }}"
+    dest: "{{ config_base | expanduser }}/{{ cluster.name }}/{{ node.name }}.api-server.yaml.manifest"
+  with_first_found:
+    - files:
+      - "{{ kubernetes_minor_versions[ cluster.name ] }}/api-server-manifest.yaml.jinja2"
+      - api-server-manifest.yaml.jinja2
 
 - name: Generate master controller-manager.yaml
   template:

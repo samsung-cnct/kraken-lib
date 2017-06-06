@@ -19,11 +19,19 @@
       }
     - {
         role: 'roles/kraken.provider/kraken.provider.selector',
-        tags: [ 'provider', 'ssh', 'readiness', 'services', 'all', 'provider_only']
+        tags: [ 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun', 'provider_only']
       }
     - {
         role: 'roles/kraken.ssh/kraken.ssh.selector',
-        tags: [ 'ssh', 'all', 'ssh_only' ]
+        tags: [ 'ssh', 'all', 'dryrun', 'ssh_only' ]
+      }
+    - {
+        role: 'roles/kraken.access',
+        tags: [ 'readiness', 'services', 'all', 'dryrun', 'access_only' ]
+      }
+    - {
+        role: 'roles/kraken.rbac',
+        tags: [ 'readiness', 'services', 'all', 'rbac_only' ]
       }
     - {
         role: 'roles/kraken.readiness',

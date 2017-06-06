@@ -8,11 +8,11 @@ def expected_masters(config_data, readiness_type, readiness_value):
       total_nodes += node['count']
 
   if readiness_type == 'exact':
-    return total_masters
+    return total_nodes
   elif readiness_type == 'percent':
-    return int(round(percentage(readiness_value, total_masters)))
+    return int(round(percentage(readiness_value, total_nodes)))
   elif readiness_type == 'delta':
-    return int(total_masters) - int(readiness_value)
+    return int(total_nodes) - int(readiness_value)
   else:
     raise errors.AnsibleFilterError(
             'expected_nodes plugin error: {0} is not a recognized readiness type'.format(

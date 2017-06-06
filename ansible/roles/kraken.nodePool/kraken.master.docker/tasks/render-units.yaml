@@ -8,5 +8,10 @@
     dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ node.name }}.units.kraken-apiserver-ssl.part"
 
 - name: Generate master.units.kubelet.part
-  template: src=units.kubelet.part.jinja2
-    dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ node.name }}.units.kubelet.part"
+  template:
+    src: "{{ item }}"
+    dest: "{{ config_base | expanduser }}/{{ cluster.name }}/{{ node.name }}.units.kubelet.part"
+  with_first_found:
+    - files:
+      - "{{ kubernetes_minor_versions[ cluster.name ] }}/units.kubelet.part.jinja2"
+      - units.kubelet.part.jinja2

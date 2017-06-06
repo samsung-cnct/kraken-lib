@@ -15,7 +15,7 @@
       -key {{ config_base | expanduser }}/{{ cluster.name }}/certs/ca-key.pem
       -days 7300
       -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/ca.pem
-      -subj "/CN=kraken-ca"
+      -subj {{ (cluster.kubeAuth.authz.rbac is defined) | ternary("/O=system:masters/CN=kraken-ca","/CN=kraken-ca") }}
     creates={{ config_base | expanduser }}/{{ cluster.name }}/certs/ca.pem
 
 - name: Generate nodePool .write_files.cert-authority.part files

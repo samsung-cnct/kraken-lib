@@ -1,0 +1,18 @@
+---
+#
+# expects:
+#    kubernetes_minor_versions
+#    kraken_endpoint
+#
+- set_fact:
+    cluster: "{{ a_cluster }}"
+
+- name: Set kubeconfig path
+  set_fact:
+    kubeconfig: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
+
+- include: generate-admin-cert.yaml
+
+- include: generate-admin-kubeconfig.yaml
+  when: kraken_endpoint is defined
+
