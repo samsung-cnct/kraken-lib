@@ -18,8 +18,6 @@
     - files:
       - "{{ kubernetes_minor_versions[ cluster.name ] }}/rbac-default-policy.yaml.jinja2"
       - rbac-default-policy.yaml.jinja2
-  with_items: "{{ cluster.nodePools }}"
-  when: item.etcdConfig is defined
 
 - name: Generate canal RBAC policy file
   template:
@@ -27,10 +25,8 @@
     dest: "{{ config_base | expanduser }}/{{ cluster.name }}/auth/rbac-canal-policy.yaml"
   with_first_found:
     - files:
-      - "{{ kubernetes_minor_versions[ cluster.name ] }}/rbac-canal-policy.yaml"
-      - rbac-canal-policy.yaml
-  with_items: "{{ cluster.nodePools }}"
-  when: item.etcdConfig is defined
+      - "{{ kubernetes_minor_versions[ cluster.name ] }}/rbac-canal-policy.yaml.jinja2"
+      - rbac-canal-policy.yaml.jinja2
 
 - name: Bootstrap RBAC policy
   command: >

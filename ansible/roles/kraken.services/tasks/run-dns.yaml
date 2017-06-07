@@ -53,12 +53,6 @@
     timeout: 600
   with_items: "{{ api_servers }}"
 
-- name: Remove existing kubedns RBAC policy
-  command: >
-    {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} delete -f {{ config_base | expanduser }}/{{ cluster.name }}/auth/rbac-dns-policy.yaml
-  ignore_errors: yes
-  when: "cluster.kubeAuth.authz.rbac is defined"
-
 - name: Bootstrap kubedns RBAC policy
   command: >
     {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} apply -f {{ config_base | expanduser }}/{{ cluster.name }}/auth/rbac-dns-policy.yaml

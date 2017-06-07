@@ -28,17 +28,6 @@
   set_fact:
     repetitions: "{{ (( readiness_wait | int ) / rep_interval | int ) | int }}"
 
-#- name: Fetch k8s api server address
-#  set_fact:
-#    api_servers: "{{ lookup('file', kubeconfig) | from_yaml | json_query('clusters[*].cluster.server') }}"
-#
-#- name: Wait for api server port to become available in case it is not
-#  wait_for:
-#    host: "{{ item | regex_replace('https://','') }}"
-#    port: 443
-#    timeout: "{{ readiness_wait }}"
-#  with_items: "{{ api_servers }}"
-
 - name: Wait for api server response before continuing
   command: >
     {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} get nodes --no-headers=true
