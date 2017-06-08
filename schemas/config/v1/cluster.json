@@ -7,7 +7,9 @@
   "properties": {
     "name": {
       "description": "Name of this cluster",
-      "type": "string"
+      "type": "string",
+      "maxLength": 13,
+      "minLength": 1
     },
     "network": {
       "description": "Internal IP address range (CIDR) for services",

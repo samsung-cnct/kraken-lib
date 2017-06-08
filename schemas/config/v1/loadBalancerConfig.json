@@ -7,7 +7,8 @@
   "properties": {
     "name": {
       "description": "Name of the load balancer configuration",
-      "type": "string"
+      "type": "string",
+      "maxLength": 32
     },
     "type": {
       "description": "Type of load balancer",
