@@ -90,14 +90,14 @@ podTemplate(label: 'k2', containers: [
         container('docker') {
             // add a docker rmi/docker purge/etc
             stage('docker build') {
-                sh 'docker build -t quay.io/samsung-cnct/k2:latest docker/'
+                sh 'docker build -t quay.io/samsung_cnct/k2:latest docker/'
             }
 
             //only push from master.   assume we are on samsung-cnct fork
             //  ToDo:  check for correct fork
             stage('docker push') {
                 if (env.BRANCH_NAME == "master") {
-                    sh 'docker push quay.io/samsung-cnct/k2:latest'
+                    sh 'docker push quay.io/samsung_cnct/k2:latest'
                 } else {
                     echo 'not master branch, not pushing to docker repo'
                 }
