@@ -13,6 +13,8 @@ def is_empty(data):
         return data.strip() == ""
     if isinstance(data, StrictUndefined):
         return True
+    if data is None:
+        return True
     return False
 
 class FilterModule(object):
@@ -21,4 +23,3 @@ class FilterModule(object):
         return {
             'is_empty': is_empty
         }
-

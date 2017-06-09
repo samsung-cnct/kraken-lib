@@ -427,7 +427,23 @@ Then run:
 docker run $K2OPTS quay.io/samsung_cnct/k2:latest ./upgrade.sh --config $HOME/.kraken/${CLUSTER}.yaml
 ```
 
-Refer to [Kuberntes release versioning](https://github.com/kubernetes/kubernetes/blob/release-1.5.4/docs/design/versioning.md#supported-releases) for questions about supported versions
+### Handling unsupported versions of helm
+Currently, and for the foreseeable future, new helm releases will be shipped after new Kubernetes releases, resulting in helm possibly not being supported for the latest Kubernetes version.
+You have two options.
+
+#### Option 1: Overriding helm in K2 config file
+In the K2 config file, set the cluster level key `helmOverride` to `true` if you wish to use the latest version of helm that is available. Warning: since this would be using a version of helm that does not support your k8s version, this may result in unexpected behavior.
+Set `helmOverride` to `false` if you would like to run K2 without helm.
+
+#### Option 2: Overriding helm via environment variable
+This will automatically happen if you are trying to run a cluster with a Kubernetes version that does not have helm support, and you did not set helmOverride in the K2 config file.
+K2 will halt and, via fail message, prompt you to set a cluster specific helm override env variable to true or false.
+
+```bash
+export helm_override_<CLUSTER>=<TRUE/FALSE>
+```
+Now, run cluster up again, and K2 will use the override condition you specified.
+
 
 ## Destroying a Kubernetes Cluster
 

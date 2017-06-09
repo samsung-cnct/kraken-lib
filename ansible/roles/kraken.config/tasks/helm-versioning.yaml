@@ -5,13 +5,11 @@
   set_fact:
     kubernetes_minor_version: "{{ kubernetes_minor_versions[cluster.name] }}"
 
-- name: Set helm override env variable key to contain the cluster name
+- name: Set overall helm_override to env var if it has been set, config var if not
   set_fact:
+    helm_override: "{{ (lookup('env', helm_override_key) != '') | ternary(lookup('env', helm_override_key), cluster.helmOverride) }}"
+  vars:
     helm_override_key: "helm_override_{{cluster.name}}"
-
-- name: Get helm override environment variable
-  set_fact:
-    helm_override: "{{ lookup('env', helm_override_key) }}"
 
 - name: Check if helm version exists
   stat: path=/opt/cnct/kubernetes/{{ kubernetes_minor_version }}/bin/helm
@@ -21,28 +19,25 @@
   set_fact:
     helm_available: "{{ helm_available.stat.exists }}"
 
-- name: Stop and print out message if helm is not available and helm_override has not been set
+- name: Stop and print out message if helm is not available and helm_override has not been set in either env or config
   fail:
     msg: "This version of Kubernetes does not currently have helm support. If you would like to continue without using helm, execute following command:
-    export {{ helm_override_key }}=false && ./up.sh
+    export {{ helm_override_key }}=false and then run cluster up again.
     If you would like to use the latest version of helm instead, execute:
-    export {{ helm_override_key }}=true && ./up.sh
-    WARNING: You may have to specify your config file path if it is not located in the default path."
-  when: helm_available == false and helm_override == ""
+    export {{ helm_override_key }}=true and then run your cluster up again."
+  when: helm_available == false and helm_override == "" and kraken_action != "down"
+  vars:
+    helm_override_key: "helm_override_{{cluster.name}}"
 
 - name: Keep track of helm overrides by cluster name
   set_fact:
-    helm_overrides: "{{ helm_overrides | default({}) | combine
-      (
-        {cluster.name: helm_override }
-      )
-    }}"
+    helm_overrides: "{{ helm_overrides | default({}) | combine(key_val) }}"
   when: helm_override != ""
+  vars:
+    key_val: "{{ { cluster.name : helm_override } }}"
 
 - name: Keep track of helm availability by cluster name
   set_fact:
-    helm_availabilities: "{{ helm_availabilities | default({}) | combine
-      (
-        {cluster.name: helm_available }
-      )
-    }}"
+    helm_availabilities: "{{ helm_availabilities | default({}) | combine(key_val) }}"
+  vars:
+    key_val: "{{ { cluster.name: helm_available } }}"
