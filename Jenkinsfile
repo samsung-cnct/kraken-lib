@@ -6,7 +6,7 @@ podTemplate(label: 'k2', containers: [
   ], volumes: [
     hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
     hostPathVolume(hostPath: '/var/lib/docker/scratch', mountPath: '/mnt/scratch'),
-    secretVolume(mountPath: '/home/jenkins/.docker/', secretName: 'coffeepac-quay-robot-dockercfg')
+    secretVolume(mountPath: '/home/jenkins/.docker/', secretName: 'samsung-cnct-quay-robot-dockercfg')
   ]) {
     node('k2') {
         container('k2-tools'){
@@ -90,14 +90,14 @@ podTemplate(label: 'k2', containers: [
         container('docker') {
             // add a docker rmi/docker purge/etc
             stage('docker build') {
-                sh 'docker build -t quay.io/coffeepac/k2:jenkins docker/'
+                sh 'docker build -t quay.io/samsung-cnct/k2:latest docker/'
             }
 
             //only push from master.   assume we are on samsung-cnct fork
             //  ToDo:  check for correct fork
             stage('docker push') {
-                if (env.BRANCH == "master") {
-                    sh 'docker push quay.io/coffeepac/k2:jenkins'
+                if (env.BRANCH_NAME == "master") {
+                    sh 'docker push quay.io/samsung-cnct/k2:latest'
                 } else {
                     echo 'not master branch, not pushing to docker repo'
                 }
