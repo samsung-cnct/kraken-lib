@@ -35,6 +35,7 @@
   until: "{{ rbac_get_nodes_result.stdout_lines | length }} >= 1 | int"
   retries: "{{ repetitions | int }}"
   delay: "{{ rep_interval | int }}"
+  when: "(not (dryrun | bool))"
 
 - include: bootstrap-default-rbac-policy.yaml
   when: "cluster.kubeAuth.authz.rbac is defined"
