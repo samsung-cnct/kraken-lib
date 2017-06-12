@@ -7,7 +7,7 @@
 
 - name: Set overall helm_override to env var if it has been set, config var if not
   set_fact:
-    helm_override: "{{ (lookup('env', helm_override_key) != '') | ternary(lookup('env', helm_override_key), cluster.helmOverride) }}"
+    helm_override: "{{ (lookup('env', helm_override_key) != '') | ternary(lookup('env', helm_override_key), cluster.helmOverride | default('')) }}"
   vars:
     helm_override_key: "helm_override_{{cluster.name}}"
 
