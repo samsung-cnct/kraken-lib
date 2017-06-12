@@ -1,8 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/dockerContainerConfig.json",
+  "title": "Docker Runtime Configuration",
+  "description": "Describes the configuration of a Docker runtime.",
 
-  "description": "Container specific configuration",
   "properties": {
     "name": {
       "description": "Name of the docker configuration (e.g. prodDockerConfig, betaDockerConfig, etc.)",

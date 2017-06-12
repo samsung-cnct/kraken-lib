@@ -1,8 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/etcdConfig.json",
+  "title": "etcd configuration",
+  "description": "Describes the configuration of etcd.",
 
-  "description": "etcd configuration",
   "properties": {
     "name": {
       "description": "Name of etcd configuration",

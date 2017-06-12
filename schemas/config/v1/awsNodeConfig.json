@@ -1,8 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/awsNodeConfig.json",
+  "title": "AWS Node Configuration",
+  "description": "Describes node configuration, some of which is specific to AWS (e.g. [instance types](https://aws.amazon.com/ec2/instance-types/)).",
 
-  "description": "AWS Node Configuration",
   "properties": {
     "name": {
       "description": "Name of node for use by k2",
@@ -10,7 +11,7 @@
     },
     "kind": {
       "description": "Type of config this is",
-      "enum": ["node"],
+      "enum": [ "node" ],
       "type": "string"
     },
     "mounts": {
@@ -20,10 +21,11 @@
     },
     "providerConfig": { "$ref": "awsNodeProviderConfig.json" }
   },
+
   "required": [
     "name",
     "providerConfig"
   ],
-  "type": "object"
 
+  "type": "object"
 }

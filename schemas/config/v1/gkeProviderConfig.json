@@ -1,8 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/gkeProviderConfig.json",
+  "title": "GKE Provider Configuration",
+  "description": "Describes GKE specific provider configuration.",
 
-  "description": "GKE Provider Configuration",
   "properties": {
     "name": {
       "description": "The name of the configuration, for use within k2 configurations",
@@ -35,13 +36,14 @@
     },
     "keypair": {
       "description": "Keypair for use with nodes - SHOULD BE MOVED TO NODE PROVIDER CONFIG?",
-      "$ref": "http://judkins.house/apis/k2/v1/keyPair.json"
+      "$ref": "keyPair.json"
     },
     "zone": {
       "description": "Zones for the cluster",
-      "$ref": "http://judkins.house/apis/k2/v1/gkeZoneConfig.json"
+      "$ref": "gkeZoneConfig.json"
     }
   },
+
   "required": [
     "name",
     "provider",
@@ -50,6 +52,6 @@
     "keypair",
     "zone"
   ],
-  "type": "object"
 
+  "type": "object"
 }

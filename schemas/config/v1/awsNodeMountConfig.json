@@ -1,8 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/awsNodeMountConfig.json",
+  "title": "Node Mount Configuration",
+  "description": "Describes a mount for a node.",
 
-  "description": "AWS Node Mount Configuration",
   "properties": {
     "device": {
       "description": "The device to be mounted",
@@ -17,11 +18,12 @@
       "type": "boolean"
     }
   },
+
   "required": [
     "device",
     "path",
     "forceFormat"
   ],
-  "type": "object"
 
+  "type": "object"
 }

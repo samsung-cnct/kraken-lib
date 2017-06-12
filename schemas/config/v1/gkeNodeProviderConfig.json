@@ -1,8 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/gkeNodeProviderConfig.json",
-
+  "title": "TODO: cf AWS prov cfg" ,
   "description": "GKE Node Provider Configuration",
+
   "properties": {
     "diskSize": {
       "description": "The amount of disk that should be allocated to the node, in GB",

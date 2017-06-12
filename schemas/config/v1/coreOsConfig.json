@@ -1,8 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/coreOsConfig.json",
+  "title": "CoreOS Configuration",
+  "description": "Describes the configuration of CoreOS.",
 
-  "description": "CoreOS Configuration",
   "properties": {
     "name": {
       "description": "The name of the configuration",
@@ -33,7 +34,7 @@
       "enum": ["off", "reboot", "etcd-lock", "best-effort"],
       "type": "string"
     },
-    "locksmith": { "$ref": "http://judkins.house/apis/k2/v1/coreOsLocksmithConfig.json" }
+    "locksmith": { "$ref": "coreOsLocksmithConfig.json" }
   },
 
   "required": [
@@ -42,6 +43,6 @@
     "version",
     "rebootStrategy"
   ],
-  "type": "object"
 
+  "type": "object"
 }

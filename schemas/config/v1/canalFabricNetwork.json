@@ -1,8 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/canalFabricNetwork.json",
+  "title": "Canal Fabric Network configuration",
+  "description": "Describes the configuration of a Canal network fabric.",
 
-  "description": "Canal Fabric Network configuration",
   "properties": {
     "network": {
       "description": "Network CIDR for pods in the fabric",
@@ -23,7 +24,7 @@
     "backend": {
       "description": "Network CIDR for pods in the fabric",
       "anyOf": [
-        { "$ref": "http://judkins.house/apis/k2/v1/canalFabricNetworkVxlan.json" }
+        { "$ref": "canalFabricNetworkVxlan.json" }
       ],
       "type": "object"
     }

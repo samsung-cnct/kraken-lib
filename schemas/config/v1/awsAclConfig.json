@@ -1,7 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/awsAclConfig.json",
-  "description": "AWS ACL Configuration",
+  "title": "AWS Network Access Control List (ACL) Rule",
+  "description": "Describes an AWS network ACL rule. See the VPC [documentation](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_ACLs.html) for more information.",
 
   "properties": {
     "protocol": {

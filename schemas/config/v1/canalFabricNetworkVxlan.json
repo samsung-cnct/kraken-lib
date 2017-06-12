@@ -1,8 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/canalFabricNetworkVxlan.json",
+  "title": "Canal Fabric VXLan Network configuration",
+  "description": "Canal Fabric VXLan Network configuration.",
 
-  "description": "Canal Fabric VXLan Network configuration",
   "properties": {
     "type": {
       "description": "Indicates that it is vxlan",
@@ -10,9 +11,10 @@
       "type": "string"
     }
   },
+
   "required": [
     "type"
   ],
-  "type": "object"
 
+  "type": "object"
 }

@@ -1,8 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/gkeKeyPairConfig.json",
+  "title": "GKE Service Account Configuration",
+  "description": "Describes a GKE service account used to authenticate management of GKE resources. See the [documentation](https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances) for more information.",
 
-  "description": "GKE key pair configuration",
   "properties": {
     "serviceAccount": {
       "description": "The service account id",

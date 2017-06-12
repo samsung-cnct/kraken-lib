@@ -1,8 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/kubeVersionedCanalFabric.json",
+  "title": "kubeVersioned Fabric configuration",
+  "description": "Fabric configurations for multiple versions of Kubernetes",
 
-  "description": "Canal fabric configurations for multiple versions of Kubernets",
   "properties": {
     "name": {
       "description": "name for the kube-versioned canal fabric configuration - used for referencing",

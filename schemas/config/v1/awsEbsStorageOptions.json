@@ -1,8 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/awsEbsStorageOptions.json",
+  "title": "AWS EBS Storage Options",
+  "description": "Describes AWS EBS storage options",
 
-  "description": "AWS EBS Storage Options",
   "properties": {
     "device_name": {
       "description": "The name of the device on the node (sde, sdg, etc)",

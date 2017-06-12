@@ -1,8 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/kubeAuthBasicUser.json",
-
+  "title": "Kubernetes Authentication Basic User Entry",
   "description": "Kubernetes Authentication Basic User Entry",
+
   "properties": {
     "user": {
       "description": "The username for the account",

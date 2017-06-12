@@ -1,8 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/coreOsLocksmithConfig.json",
+  "title": "CoreOS Locksmith Configuration",
+  "description": "Describes the configuration of CoreOS Locksmith (used to manage [updates](https://coreos.com/os/docs/latest/update-strategies.html).",
 
-  "description": "CoreOS Locksmith Configuration",
   "properties": {
     "endpoint": {
       "description": "The etcd endpoint",

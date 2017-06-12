@@ -1,9 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/nodePool.json",
+  "title": "nodePool Configuration",
+  "description": "Describes a set of one or more nodes which share the same configuration.",
 
-  "title": "Nodepool configuration",
-  "description": "A set of one or more nodes which share the same configuration",
   "properties": {
     "name": {
       "description": "Name of the nodePool",
@@ -13,18 +13,17 @@
       "description": "Number of nodes in the nodePool",
       "type": "number"
     },
-    "kvStoreConfig": { "$ref": "http://judkins.house/apis/k2/v1/kvStoreConfig.json" },
-    "apiServerConfig": { "$ref": "http://judkins.house/apis/k2/v1/apiServerConfig.json" },
-    "kubeConfig": { "$ref": "http://judkins.house/apis/k2/v1/kubeConfig.json" },
-    "containerConfig": { "$ref": "http://judkins.house/apis/k2/v1/containerConfig.json" },
-    "osConfig": { "$ref": "http://judkins.house/apis/k2/v1/osConfig.json" },
-    "nodeConfig": { "$ref": "http://judkins.house/apis/k2/v1/nodeConfig.json" },
-    "keyPair": { "$ref": "http://judkins.house/apis/k2/v1/keyPair.json" }
+    "kvStoreConfig": { "$ref": "kvStoreConfig.json" },
+    "apiServerConfig": { "$ref": "apiServerConfig.json" },
+    "kubeConfig": { "$ref": "kubeConfig.json" },
+    "containerConfig": { "$ref": "containerConfig.json" },
+    "osConfig": { "$ref": "osConfig.json" },
+    "nodeConfig": { "$ref": "nodeConfig.json" },
+    "keyPair": { "$ref": "keyPair.json" }
   },
   "required": [
     "name",
     "count"
   ],
   "type": "object"
-
 }

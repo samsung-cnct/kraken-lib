@@ -4,7 +4,6 @@
 
   "description": "Container runtime specific configuration",
   "anyOf": [
-    { "$ref": "http://judkins.house/apis/k2/v1/dockerContainerConfig.json" }
+    { "$ref": "dockerContainerConfig.json" }
   ]
-
 }

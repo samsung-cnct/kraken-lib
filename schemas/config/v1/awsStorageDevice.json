@@ -1,8 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/awsStorageDevice.json",
+  "title": "AWS Storage Device",
+  "description": "Describes an AWS storage device.",
 
-  "description": "AWS Storage Device",
   "properties": {
     "type": {
       "description": "The type of storage",
@@ -15,9 +16,11 @@
       ]
     }
   },
+
   "required": [
     "type",
     "opts"
   ],
+
   "type": "object"
 }

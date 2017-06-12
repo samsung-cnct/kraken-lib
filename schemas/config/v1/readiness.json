@@ -1,9 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/readiness.json",
+  "title": "Cluster Readiness Configuration",
+  "description": "Options to determine when a cluster is ready.",
 
-  "title": "Cluster Readiness configuration",
-  "description": "Options to determine when a cluster is ready ",
   "properties": {
     "type": {
       "description": "The type of test that should be used to determine if a cluster is ready",

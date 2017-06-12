@@ -1,8 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/awsSecurityConfig.json",
-
+  "title": "AWS Security Configuration",
   "description": "AWS Security Configuration",
+
   "properties": {
     "protocol": {
       "description": "The protocol for this Security Rule",
@@ -23,11 +24,13 @@
       "type": "number"
     }
   },
+
   "required": [
     "protocol",
     "cidr_blocks",
     "from_port",
     "to_port"
   ],
+
   "type": "object"
 }

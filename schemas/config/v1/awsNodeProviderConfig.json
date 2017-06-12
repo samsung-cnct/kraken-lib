@@ -1,8 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/awsNodeProviderConfig.json",
+  "title": "AWS Provider Configuration",
+  "description": "Describes AWS specific provider configuration",
 
-  "description": "AWS Provider Configuration",
   "properties": {
     "provider": {
       "description": "Identifies who the provider is for configuration",
@@ -29,11 +30,12 @@
       "type": "array"
     }
   },
+
   "required": [
     "provider",
     "type",
     "subnet"
   ],
-  "type": "object"
 
+  "type": "object"
 }

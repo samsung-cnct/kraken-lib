@@ -1,8 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/awsProviderConfig.json",
+  "title": "AWS Provider Configuration",
+  "description": "Describes AWS specific provider configuration.",
 
-  "description": "AWS Provider Configuration",
   "properties": {
     "name": {
       "description": "The name of the configuration, for use within k2 configurations",
@@ -38,35 +39,35 @@
     },
     "subnet": {
       "description": "List of subnets to use within a region for the cluster",
-      "items": { "$ref": "http://judkins.house/apis/k2/v1/awsSubnetConfig.json" },
+      "items": { "$ref": "awsSubnetConfig.json" },
       "minItems": 1,
       "type": "array"
     },
     "egressAcl": {
       "description": "List of egress ACLs to create for the VPC",
-      "items": { "$ref": "http://judkins.house/apis/k2/v1/awsAclConfig.json" },
+      "items": { "$ref": "awsAclConfig.json" },
       "minItems": 1,
       "type": "array"
     },
     "ingressAcl": {
       "description": "List of ingress ACLs to create for the VPC",
-      "items": { "$ref": "http://judkins.house/apis/k2/v1/awsAclConfig.json" },
+      "items": { "$ref": "awsAclConfig.json" },
       "minItems": 1,
       "type": "array"
     },
     "ingressSecurity": {
       "description": "List of ingress security rules to create for the VPC",
-      "items": { "$ref": "http://judkins.house/apis/k2/v1/awsSecurityConfig.json" },
+      "items": { "$ref": "awsSecurityConfig.json" },
       "minItems": 1,
       "type": "array"
     },
     "egressSecurity": {
       "description": "List of egress security rules to create for the VPC",
-      "items": { "$ref": "http://judkins.house/apis/k2/v1/awsSecurityConfig.json" },
+      "items": { "$ref": "awsSecurityConfig.json" },
       "minItems": 1,
       "type": "array"
     },
-    "authentication": { "$ref": "http://judkins.house/apis/k2/v1/awsAuthenticationConfig.json" }
+    "authentication": { "$ref": "awsAuthenticationConfig.json" }
 
   },
 

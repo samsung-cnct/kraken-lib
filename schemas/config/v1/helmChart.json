@@ -1,9 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/helmChart.json",
-
   "title": "Helm repo configuration",
   "description": "Configuration for a helm chart for use in K2",
+
   "properties": {
     "name": {
       "description": "friendly name for the chart",
@@ -22,6 +22,7 @@
       "type": "string"
     }
   },
+
   "required": [
     "name",
     "repo",

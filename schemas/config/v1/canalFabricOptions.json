@@ -1,11 +1,12 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/canalFabricOptions.json",
+  "title": "Canal Fabric Options configuration",
+  "description": "Canal Fabric Options configuration.",
 
-  "description": "Canal Fabric Options configuration",
   "properties": {
-    "containers": { "$ref": "http://judkins.house/apis/k2/v1/canalFabricContainers.json" },
-    "network": { "$ref": "http://judkins.house/apis/k2/v1/canalFabricNetwork.json" }
+    "containers": { "$ref": "canalFabricContainers.json" },
+    "network": { "$ref": "canalFabricNetwork.json" }
   },
 
   "required": [

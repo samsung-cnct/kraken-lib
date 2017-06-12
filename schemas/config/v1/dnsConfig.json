@@ -1,8 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/dnsConfig.json",
-
   "title": "Cluster DNS configuration",
+  "description": "Describes the configuration of a DNS service for the cluster.",
+
   "properties": {
     "name": {
       "description": "Name of cluster DNS configuration",
@@ -13,7 +14,7 @@
       "enum": ["dns"],
       "type": "string"
     },
-    "kubedns": { "$ref": "http://judkins.house/apis/k2/v1/kubeDns.json" }
+    "kubedns": { "$ref": "kubeDns.json" }
   },
 
   "required": [

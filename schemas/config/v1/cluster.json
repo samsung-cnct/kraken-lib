@@ -1,9 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/cluster.json",
-
   "title": "A single cluster configuration",
-  "description": "A set of one or more nodePools, along with any shared configuration between them",
+  "description": "A set of one or more nodePools, along with any shared configuration between them.",
+
   "properties": {
     "name": {
       "description": "Name of this cluster",
@@ -28,33 +28,34 @@
     },
     "providerConfig": {
       "description": "Provider (e.g. AWS, GKE, etc.) configuration",
-      "$ref": "http://judkins.house/apis/k2/v1/providerConfig.json"
+      "$ref": "providerConfig.json"
     },
     "nodePools": {
       "description": "A list of nodePool",
       "items": {
-        "$ref": "http://judkins.house/apis/k2/v1/nodePool.json"
+        "$ref": "nodePool.json"
       },
       "minItems": 1,
       "type": "array"
     },
     "fabricConfig": {
       "description": "Fabric config for the kubernetes overlay network",
-      "$ref": "http://judkins.house/apis/k2/v1/fabricConfig.json"
+      "$ref": "fabricConfig.json"
     },
     "kubeAuth": {
       "description": "AAA (Authentication, Authorization and Accounting) settings for the cluster",
-      "$ref": "http://judkins.house/apis/k2/v1/kubeAuthConfig.json"
+      "$ref": "kubeAuthConfig.json"
     },
     "helmConfig": {
       "description": "Helm config for installing kubernetes resources",
-      "$ref": "http://judkins.house/apis/k2/v1/helmConfig.json"
+      "$ref": "helmConfig.json"
     },
     "dnsConfig": {
       "description": "DNS Configuration for the cluster",
-      "$ref": "http://judkins.house/apis/k2/v1/dnsConfig.json"
+      "$ref": "dnsConfig.json"
     }
   },
+
   "required": [
     "name",
     "network",
@@ -67,6 +68,6 @@
     "helmConfig",
     "dnsConfig"
   ],
-  "type": "object"
 
+  "type": "object"
 }

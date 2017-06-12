@@ -1,8 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/kubeNodeLabel.json",
+  "title": "Kubernetes Node Label",
+  "description": "Describes a Kubernetes node label. For more information on labels, see the [documentation](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/).",
 
-  "description": "Kubernetes Node Label",
   "properties": {
     "name": {
       "description": "The Kubernetes node label's key",
@@ -13,9 +14,11 @@
       "type": "string"
     }
   },
+
   "required": [
     "name",
     "value"
   ],
+
   "type": "object"
 }
