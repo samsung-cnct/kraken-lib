@@ -3,14 +3,21 @@
   "id": "http://judkins.house/apis/k2/v1/canalFabricConfig.json",
   "title": "Canal Fabric Configuration",
   "description": "Describes the configuration of a Canal fabric.",
+
   "properties": {
     "name": {
-      "description": "name for the canal fabric configuration - used for referencing",
+      "description": "Name of the Canal Fabric Configuration.",
+      "type": "string"
+    },
+    "kind": {
+      "description": "The kind of configuration object.",
+      "enum": [ "fabric" ],
       "type": "string"
     },
     "type": {
-      "description": "The type of the fabric being used",
-      "enum": [ "canal" ]
+      "description": "The type of the fabric being used.",
+      "enum": [ "canal" ],
+      "type": "string"
     },
     "options": { "$ref": "canalFabricOptions.json" }
   },

@@ -5,9 +5,9 @@
   "description": "Describes the configuration of a network fabric for use with kubernetes.",
 
   "properties": {
-    "anyOf": [
+    "oneOf": [
       { "$ref": "canalFabricConfig.json" },
-      { "$ref": "kubeVersionedCanalFabric.json" }
+      { "$ref": "kubeVersionedFabric.json" }
     ]
   },
 

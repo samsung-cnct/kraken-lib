@@ -5,14 +5,28 @@
   "description": "Allows different configurations to be defined depending on the Kubernetes version.",
 
   "properties": {
-    "default": { "$ref": "canalFabricConfig.json" },
+    "default": {
+      "oneOf": [
+        { "$ref": "canalFabricConfig.json" }
+      ]
+    },
     "versions": {
       "description": "Dictionary of configuration objects where the kubernetes version is the key",
+      "patternProperties": {
+        "^v.*": {
+          "oneOf": [
+            { "$ref": "canalFabricConfig.json" }
+          ]
+        }
+      },
+      "additionalProperties": false,
       "type": "object"
     }
   },
 
   "required": [
+    "default",
+    "versions"
   ],
 
   "type": "object"
