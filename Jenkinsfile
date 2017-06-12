@@ -1,5 +1,5 @@
 podTemplate(label: 'k2', containers: [
-    containerTemplate(name: 'jnlp', image: 'jenkinsci/jnlp-slave:2.62-alpine', args: '${computer.jnlpmac} ${computer.name}'),
+    containerTemplate(name: 'jnlp', image: 'jenkinsci/jnlp-slave:3.7-1-alpine', args: '${computer.jnlpmac} ${computer.name}'),
     containerTemplate(name: 'k2-tools', image: 'quay.io/samsung_cnct/k2-tools:latest', ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi'),
     containerTemplate(name: 'e2e-tester', image: 'quay.io/samsung_cnct/e2etester:0.2', ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi'),
     containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true)
