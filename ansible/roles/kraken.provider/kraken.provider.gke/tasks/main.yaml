@@ -7,10 +7,16 @@
   file:
     path: "{{ config_base | expanduser }}/{{ cluster.name }}"
     state: directory
+    
+- name: Render a deployment manager template for created-cluster.yaml in advance
+  template: src=deploymentmanager-create.yaml.jinja2
+   dest="{{ config_base | expanduser }}/{{ cluster.name }}/deploymentmanager-create.yaml"
 
 - include: authenticate.yaml
+  when: not ( dryrun | bool )
 - include: process-cluster.yaml
-  when: (kraken_action == 'up')
+  when: kraken_action == 'up' and not ( dryrun | bool )
 - include: destroy-cluster.yaml
-  when: kraken_action == 'down'
+  when: kraken_action == 'down' and not ( dryrun | bool )
 - include: deauthenticate.yaml
+  when: not ( dryrun | bool )
