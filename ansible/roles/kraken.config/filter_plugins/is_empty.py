@@ -11,10 +11,13 @@ def is_empty(data):
         return data == {}
     if isinstance(data, AnsibleUnicode):
         return data.strip() == ""
+    if isinstance(data, list):
+        return data == []
     if isinstance(data, StrictUndefined):
         return True
     if data is None:
         return True
+
     return False
 
 class FilterModule(object):

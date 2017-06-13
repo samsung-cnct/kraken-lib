@@ -1,0 +1,22 @@
+---
+
+- name: Set list of nodepools to be updated
+  set_fact:
+    nodepools_to_update: "{{ update_nodepools.split(',') }}"
+
+- name: Fail when no nodepools were passed to update
+  fail:
+    msg: "Argument empty. Please pass --nodepools <comma,separated,list,of,nodepools> to update action."
+  when: update_nodepools == ""
+
+- name: Update nodepools, if needed
+  command: >
+    gcloud container clusters upgrade {{ cluster.name }}
+      --node-pool {{ item.name }}
+      --cluster-version {{ item.kubeConfig.version | replace("v","")}}
+      --project {{ cluster.providerConfig.project }}
+      --zone {{ cluster.providerConfig.zone.primaryZone }}
+      --no-async
+      --quiet
+  when: (item.kubeConfig is defined) and (item.kubeConfig.version is defined) and (item.name in nodepools_to_update)
+  with_items: "{{ cluster.nodePools }}"

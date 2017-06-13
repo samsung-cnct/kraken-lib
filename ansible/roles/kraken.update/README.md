@@ -1,7 +1,7 @@
 Role Name
 =========
 
-kraken.upgrade
+kraken.update
 
 Requirements
 ------------

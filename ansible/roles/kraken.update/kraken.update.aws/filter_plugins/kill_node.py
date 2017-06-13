@@ -40,10 +40,10 @@ class FilterModule(object):
             print "Unexpected error: %s" % e
             raise
 
-    def current_node_count(self, config_path):
+    def current_node_count(self, config_path, nodepool_label):
         config.load_kube_config(config_file=config_path)
         api_instance = kubernetes.client.CoreV1Api()
-        label_selector = 'nodepool=master'
+        label_selector = 'nodepool=%s' % nodepool_label
         timeout_seconds = 30
 
         try:
@@ -57,14 +57,14 @@ class FilterModule(object):
 
     # delete and terminate node, then wait until node recreates itself by running a check on current node count versus expected node count
     # update this so that it tries to do each part, and breaks if any part fails with a good error message
-    def delete_and_terminate_node_filter(self, node_name, instance_id, expected_count, kubeconfig, aws_region):
-        current_count = int(self.current_node_count(kubeconfig))
+    def delete_and_terminate_node_filter(self, node_name, instance_id, expected_count, kubeconfig, aws_region, nodepool_label):
+        current_count = int(self.current_node_count(kubeconfig, nodepool_label))
 
         while current_count != int(expected_count):
             print "Available Nodes: %s/%s" % (current_count, expected_count)
             print "Pausing for node creation"
             time.sleep(60)
-            current_count = int(self.current_node_count(kubeconfig))
+            current_count = int(self.current_node_count(kubeconfig, nodepool_label))
 
         try:
             self.terminate_node(instance_id, aws_region)
@@ -77,12 +77,12 @@ class FilterModule(object):
         except Exception:
             return False
 
-        current_count = int(self.current_node_count(kubeconfig))
+        current_count = int(self.current_node_count(kubeconfig, nodepool_label))
         print "Available Nodes: %s/%s" % (current_count, expected_count)
         while current_count != int(expected_count):
             print "Pausing for node creation"
             time.sleep(60)
-            current_count = int(self.current_node_count(kubeconfig))
+            current_count = int(self.current_node_count(kubeconfig, nodepool_label))
             print "Available Nodes: %s/%s" % (current_count, expected_count)
-        print "Node has been upgraded."
+        print "Node has been updated."
         return True

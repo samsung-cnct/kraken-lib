@@ -12,6 +12,7 @@ KRAKEN_FORCE=${KRAKEN_FORCE:-false}
 KRAKEN_VERBOSE=${KRAKEN_VERBOSE:-false}
 K2_VERBOSE=''
 KRAKEN_TF_LOG=k2_tf_debug.log
+UPDATE_NODEPOOLS=''
 
 # set RANDFILE to prevent creation of ${HOME}/.rnd by openssl
 export RANDFILE=$(mktemp)
@@ -44,6 +45,7 @@ function show_help {
   inf "Usage: \n"
   inf "[up|down].sh --generate <path to file> - Generate a sensible defaults config at <path to file>"
   inf "[up|down].sh --output <path to cluster state output> --config <path to cluster config file> --tags <only run roles tagged with>"
+  inf "[update].sh --nodepools <comma,separated,nodepools>"
 
   inf "\nFor example:"
   inf "[up].sh --generate"
@@ -51,6 +53,7 @@ function show_help {
   inf ""
   inf "[up].sh --output \${HOME}/.kraken/myclusterstate --config \${HOME}/.kraken/myclusterconfig.yaml --tags config,services"
   inf "[up].sh --config \${HOME}/.kraken/myclusterconfig.yaml"
+
 }
 
 function show_post_cluster {
@@ -76,12 +79,12 @@ function show_post_cluster_error {
   exit 1
 }
 
-function show_upgrade {
-  inf "Node versions have all been successfully upgraded."
+function show_update {
+  inf "Node versions have all been successfully updated."
 }
 
-function show_upgrade_error {
-  warn "The cluster has not been completely upgraded.  Some nodes may still be in the previous version."
+function show_update_error {
+  warn "The cluster has not been completely updated.  Some nodes may still be in the previous version."
   exit 1
 }
 
@@ -101,6 +104,10 @@ case $key in
   ;;
   -f|--force)
   KRAKEN_FORCE=true
+  ;;
+  -n|--nodepools)
+  UPDATE_NODEPOOLS="$2"
+  shift
   ;;
   -g|--generate)
   KRAKEN_GENERATE_PATH="${2-"${HOME}/.kraken/config.yaml"}"
@@ -161,6 +168,7 @@ fi
 
 KRAKEN_EXTRA_VARS="config_path=${KRAKEN_CONFIG} config_base=${KRAKEN_BASE} \
                    config_forced=${KRAKEN_FORCE} dryrun=${KRAKEN_DRYRUN} \
+                   update_nodepools=${UPDATE_NODEPOOLS} \
                   "
 
 if [ ! -z ${BUILD_TAG+x} ]; then

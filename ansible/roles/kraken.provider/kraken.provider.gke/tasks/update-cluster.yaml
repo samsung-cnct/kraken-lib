@@ -1,14 +1,5 @@
 ---
-- name: Update master, if needed
-  command: >
-    gcloud container clusters upgrade {{ cluster.name }}
-      --master
-      --project {{ cluster.providerConfig.project }}
-      --zone {{ cluster.providerConfig.zone.primaryZone }}
-      --no-async
-      --quiet
-  when: (cluster.providerConfig.kubeConfig is defined) and (cluster.providerConfig.kubeConfig.version is defined)
-
+  
 - name: Update nodepools, if needed
   command: >
     gcloud container clusters upgrade {{ cluster.name }}

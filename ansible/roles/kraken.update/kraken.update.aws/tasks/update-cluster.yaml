@@ -1,0 +1,47 @@
+---
+
+- set_fact:
+    cluster: "{{ a_cluster }}"
+
+- name: Look up and set k8s minor version for this cluster
+  set_fact:
+    kubernetes_minor_version: "{{ kubernetes_minor_versions[cluster.name] }}"
+
+- name: Execute appropriate kubectl per minor version
+  set_fact:
+    kubectl: "/opt/cnct/kubernetes/{{ kubernetes_minor_version }}/bin/kubectl"
+
+- set_fact:
+    aws_region: "{{ cluster.providerConfig.region }}"
+    kubeconfig: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
+
+- name: Gather EC2 facts
+  ec2_remote_facts:
+    region: "{{ cluster.providerConfig.region }}"
+    aws_access_key: "{{ cluster.providerConfig.authentication.accessKey or omit }}"
+    aws_secret_key: "{{ cluster.providerConfig.authentication.accessSecret or omit }}"
+    profile: "{{ cluster.providerConfig.authentication.credentialsProfile or omit }}"
+  register: instance_info
+
+- name: Warn if EC2 facts returns empty
+  debug:
+    msg: "Failed to look up EC2 information. Check your AWS credentials, or try restarting Docker."
+  when: (instance_info | is_empty)
+
+- name: Make a list of nodepools in this cluster
+  set_fact:
+    cluster_nodepool_names: "{{ cluster.nodePools | map(attribute='name') | list }}"
+
+- name: Fail when nodepools passed do not exist
+  fail:
+    msg: "You passed a nodepool that does not exist in this cluster. Please make sure to pass --nodepools <comma,separated,list,of,nodepools> to update action."
+  when: item not in cluster_nodepool_names
+  with_items:
+    - "{{nodepools_to_update}}"
+
+- include: update-nodes.yaml
+  with_items:
+    - "{{ cluster.nodePools }}"
+  loop_control:
+    loop_var: a_nodepool
+  when: a_nodepool.name in nodepools_to_update

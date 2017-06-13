@@ -4,6 +4,7 @@
 - name: etcd nodePools
   include_role:
     name: '{{ playbook_dir }}/roles/kraken.nodePool/kraken.etcd.docker'
+  when: (kraken_action != 'update')
 
 - name: master nodePools
   include_role:
@@ -27,4 +28,3 @@
   when: cluster_node_tuple.0.providerConfig.type == 'cloudinit'
         and cluster_node_tuple.0.kubeAuth.authn.oidc is defined
         and cluster_node_tuple.1.containerConfig.runtime not in ['docker']
-
