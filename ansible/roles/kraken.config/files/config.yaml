@@ -302,19 +302,19 @@ definitions:
       type: cloudinit
       resourcePrefix:
       vpc: 10.0.0.0/16
-      region: us-east-2
+      region: us-east-1
       subnet:
         -
           name: zone-1
-          az: us-east-2a
+          az: us-east-1a
           cidr: 10.0.0.0/18
         -
           name: zone-2
-          az: us-east-2b
+          az: us-east-1b
           cidr: 10.0.64.0/18
         -
           name: zone-3
-          az: us-east-2c
+          az: us-east-1c
           cidr: 10.0.128.0/17
       egressAcl:
         -

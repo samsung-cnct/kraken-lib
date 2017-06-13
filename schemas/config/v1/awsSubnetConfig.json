@@ -9,13 +9,15 @@
       "type": "string"
     },
     "az": {
-      "description": "The name of the subnet within aws",
-      "type": "string"
+      "description": "Name of the Availability Zone (AZ) in AWS. Regions and AZs are documented [here](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-available-regions).",
+      "type": "string",
+      "default": "us-east-1a"
     },
     "cidr": {
       "description": "The cidr to associate to the subnet (within the VPC)",
       "format": "cidr",
-      "type": "string"
+      "type": "string",
+      "default": "10.0.0.0/18"
     }
   },
   "required": [
