@@ -15,7 +15,7 @@
     - "{{ kraken_config.clusters }}"
   loop_control:
     loop_var: a_cluster
-  when: a_cluster.providerConfig.provider == 'gke' and not ( dryrun | bool )
+  when: a_cluster.providerConfig.provider == 'gke'
 
 - name: Error Provider
   include_role:

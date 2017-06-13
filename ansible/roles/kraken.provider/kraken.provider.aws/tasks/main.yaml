@@ -4,11 +4,11 @@
     cluster: "{{ a_cluster }}"
 
 - name: Set ssl_cert_common_name
-  set_fact:
+  set_fact: 
     ssl_cert_common_name: "*.{{ cluster.providerConfig.region }}.elb.amazonaws.com"
+
 
 - include: aws-certs.yaml
   when: kraken_action == 'up'
 - include: aws-template.yaml
 - include: aws-action.yaml
-  when: not ( dryrun | bool )
