@@ -5,10 +5,7 @@
   "description": "Kubernetes Authentication Entry",
 
   "properties": {
-    "authz": {
-      "description": "Authz settings for entry",
-      "type": "object"
-    },
+    "authz": { "$ref": "kubeAuthAuthzEntry.json" },
     "authn": { "$ref": "kubeAuthAuthnEntry.json" }
   },
   

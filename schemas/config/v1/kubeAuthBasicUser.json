@@ -6,11 +6,15 @@
 
   "properties": {
     "user": {
-      "description": "The username for the account",
+      "description": "The username for the account.",
       "type": "string"
     },
     "password": {
-      "description": "The password for the user account",
+      "description": "The password for the user account.",
+      "type": "string"
+    },
+    "group": {
+      "description": "The groups for the user account.",
       "type": "string"
     }
   },

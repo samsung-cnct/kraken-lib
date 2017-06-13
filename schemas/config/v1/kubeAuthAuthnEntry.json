@@ -6,17 +6,19 @@
 
   "properties": {
     "basic": {
-      "description": "Users to be created",
+      "description": "List of user/password to be created.",
       "items": { "$ref": "kubeAuthBasicUser.json" },
       "type": "array"
     },
     "default_basic_user": {
-      "description": "Default user for kubeauth file",
+      "description": "Default user for kubeauth file.",
       "type": "string"
     }
   },
 
   "required": [
+    "basic",
+    "default_basic_user"
   ],
 
   "type": "object"

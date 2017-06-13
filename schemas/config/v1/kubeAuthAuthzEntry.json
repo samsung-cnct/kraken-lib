@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1/kubeAuthAuthzEntry.json",
+  "title": "Kubernetes Authentication Authz Entry",
+  "description": "Kubernetes Authentication Authz Entry",
+
+  "properties": {
+    "rbac": {
+      "description": "Kubernetes RBAC configuration.",
+      "properties": {
+        "super_user": {
+          "description": "Determines the authorization-rbac-super-user flag used to start the apiserver in versions of kubernetes <= 1.5",
+          "type": "string",
+          "default": "placeholder"
+        }
+      },
+      "required": [
+      ],
+      "type": "object"
+    }
+  },
+
+  "required": [
+  ],
+
+  "type": "object"
+}
