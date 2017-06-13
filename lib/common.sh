@@ -158,6 +158,9 @@ fi
 
 if [ -z ${KRAKEN_TAGS+x} ]; then
   KRAKEN_TAGS="all"
+  warn "$KRAKEN_TAGS not specified. Using 'all' as tags"
+else
+  warn "Using '${KRAKEN_TAGS}' as tags "
 fi
 
 if [[ ${KRAKEN_TAGS} == *dryrun* ]]; then

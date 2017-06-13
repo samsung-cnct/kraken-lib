@@ -3,15 +3,15 @@
   roles:
     - {
         role: 'kraken.config',
-        tags: [ 'config', 'always', 'config_only' ]
+        tags: [ 'always', 'config_only' ]
       }
     - {
         role: 'roles/kraken.services',
-        tags: [ 'services', 'all', 'services_only' ]
+        tags: [ 'services', 'all' ]
       }
     - {
         role: 'roles/kraken.provider/kraken.provider.selector',
-        tags: [ 'provider', 'all', 'provider_only' ]
+        tags: [ 'provider', 'all', ]
       }
     - {
         role: 'roles/kraken.clean',
