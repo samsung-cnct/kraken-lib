@@ -32,7 +32,7 @@
   command: >
     {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} get nodes --no-headers=true
   register: rbac_get_nodes_result
-  until: "{{ rbac_get_nodes_result.stdout_lines | length }} >= 1 | int"
+  until: rbac_get_nodes_result.stdout_lines | length >= 1 | int
   retries: "{{ repetitions | int }}"
   delay: "{{ rep_interval | int }}"
   when: "(not (dryrun | bool))"

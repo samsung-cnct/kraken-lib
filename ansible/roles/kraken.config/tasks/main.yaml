@@ -85,7 +85,7 @@
 - name: Do not allow multiple clusters in config
   fail:
     msg: "Multiple clusters are not yet supported in k2"
-  when: "{{ kraken_config.clusters | length | int > 1 }}"
+  when: kraken_config.clusters | length > 1 | int
 
 - name: Ensure each nodePool corresponds to exactly one of the node roles (i.e. etcd, master, or node)
   fail:
