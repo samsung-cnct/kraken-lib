@@ -48,10 +48,25 @@
 
 - name: Validate k2 configuration under schema
   jsonschema:
-    config_filename: "{{ config_file }}"      
+    config_filename: "{{ config_file }}"
     schema_filename: "{{ schema_filename }}"
     subschema_dir: "{{ subschema_dir }}"
   register: validation
+
+- name: Set deprecation fact
+  set_fact:
+    deprecated: "{{ validation.result.schema.deprecated | default(false) }}"
+
+- name: Check for deprecated version
+  fail:
+    msg: >-
+      Configuration file {{ config_file }} uses an API version {{ kraken_config_user.version }}
+      which has been deprecated. It is strongly recommended that you update your configuration
+      file before proceeding.  If you would like to proceed anyway, run up again with --force,
+      but note that support for this API version will be dropped in the near future.
+  when:
+    - deprecated == true
+    - config_forced == 'false'
 
 - name: Fail if configuration file is invalid
   fail:
