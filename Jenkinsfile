@@ -1,5 +1,5 @@
 podTemplate(label: 'k2', containers: [
-    containerTemplate(name: 'jnlp', image: 'jenkinsci/jnlp-slave:3.7-1-alpine', args: '${computer.jnlpmac} ${computer.name}'),
+    containerTemplate(name: 'jnlp', image: 'quay.io/samsung_cnct/custom-jnlp:0.1', args: '${computer.jnlpmac} ${computer.name}'),
     containerTemplate(name: 'k2-tools', image: 'quay.io/samsung_cnct/k2-tools:latest', ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi'),
     containerTemplate(name: 'e2e-tester', image: 'quay.io/samsung_cnct/e2etester:0.2', ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi'),
     containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true)
@@ -16,20 +16,20 @@ podTemplate(label: 'k2', containers: [
             }
 
             stage('fetch credentials') {
-                sh 'build-scripts/fetch-credentials.sh'
+                ksh 'build-scripts/fetch-credentials.sh'
             }
 
             // Dry Run Test
             stage('aws config generation') {
-                sh './up.sh --generate cluster/aws/config.yaml'
+                ksh './up.sh --generate cluster/aws/config.yaml'
             }
 
             stage('update generated aws config') {
-                sh "build-scripts/update-generated-config.sh cluster/aws/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
+                ksh "build-scripts/update-generated-config.sh cluster/aws/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
             }
 
             stage('create k2 templates - dryrun') {
-                sh 'PWD=`pwd` && ./up.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/ -t dryrun'
+                ksh 'PWD=`pwd` && ./up.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/ -t dryrun'
             }
 
             // Unit tests go here
@@ -37,27 +37,27 @@ podTemplate(label: 'k2', containers: [
             parallel (
                 aws: {
                     stage('aws config generation') {
-                        sh './up.sh --generate cluster/aws/config.yaml'
+                        ksh './up.sh --generate cluster/aws/config.yaml'
                     }
 
                     stage('update generated aws config') {
-                        sh "build-scripts/update-generated-config.sh cluster/aws/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
+                        ksh "build-scripts/update-generated-config.sh cluster/aws/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
                     }
 
                     try {
                         stage('create k2 cluster') {
-                            sh 'PWD=`pwd` && ./up.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/'
+                            ksh 'PWD=`pwd` && ./up.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/'
                         }
 
                         container('e2e-tester') {
                             stage('run e2e tests') {
-                                sh "PWD=`pwd` && build-scripts/conformance-tests.sh v1.6.4 ${env.JOB_BASE_NAME}-${env.BUILD_ID} /mnt/scratch"
+                                ksh "PWD=`pwd` && build-scripts/conformance-tests.sh v1.6.4 ${env.JOB_BASE_NAME}-${env.BUILD_ID} /mnt/scratch"
                             }
                         }
                     } finally {
                         container('k2-tools') {
                             stage('destroy k2 cluster') {
-                                sh 'PWD=`pwd` && ./down.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/ || true'
+                                ksh 'PWD=`pwd` && ./down.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/ || true'
                                 junit "output/artifacts/*.xml"
                             }
                         }
@@ -65,21 +65,21 @@ podTemplate(label: 'k2', containers: [
                 },
                 gke: {
                     stage('gke config generation') {
-                        sh 'mkdir -p cluster/gke'
-                        sh 'cp ansible/roles/kraken.config/files/gke-config.yaml cluster/gke/config.yaml'
+                        ksh 'mkdir -p cluster/gke'
+                        ksh 'cp ansible/roles/kraken.config/files/gke-config.yaml cluster/gke/config.yaml'
                     }
 
                     stage('update generated gke config') {
-                        sh "build-scripts/update-generated-config.sh cluster/gke/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
+                        ksh "build-scripts/update-generated-config.sh cluster/gke/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
                     }
 
                     try {
                         stage('create gke cluster') {
-                            sh 'PWD=`pwd` && ./up.sh --config $PWD/cluster/gke/config.yaml --output $PWD/cluster/gke/'
+                            ksh 'PWD=`pwd` && ./up.sh --config $PWD/cluster/gke/config.yaml --output $PWD/cluster/gke/'
                         }
                     } finally {
                         stage('destroy gke cluster') {
-                            sh 'PWD=`pwd` && ./down.sh --config $PWD/cluster/gke/config.yaml --output $PWD/cluster/gke/'
+                            ksh 'PWD=`pwd` && ./down.sh --config $PWD/cluster/gke/config.yaml --output $PWD/cluster/gke/'
                         }
                     }
 
@@ -90,14 +90,14 @@ podTemplate(label: 'k2', containers: [
         container('docker') {
             // add a docker rmi/docker purge/etc
             stage('docker build') {
-                sh 'docker build -t quay.io/samsung_cnct/k2:latest docker/'
+                ksh 'docker build -t quay.io/samsung_cnct/k2:latest docker/'
             }
 
             //only push from master.   assume we are on samsung-cnct fork
             //  ToDo:  check for correct fork
             stage('docker push') {
                 if (env.BRANCH_NAME == "master") {
-                    sh 'docker push quay.io/samsung_cnct/k2:latest'
+                    ksh 'docker push quay.io/samsung_cnct/k2:latest'
                 } else {
                     echo 'not master branch, not pushing to docker repo'
                 }
@@ -105,5 +105,29 @@ podTemplate(label: 'k2', containers: [
         }
     }
   }
+
+def ksh(command) {
+  if (env.CONTAINER_NAME) {
+    if ((command instanceof String) || (command instanceof GString)) {
+      command = kubectl(command)
+    }
+
+    if (command instanceof LinkedHashMap) {
+      command["script"] = kubectl(command["script"])
+    }
+  }
+
+  sh(command)
+}
+
+def kubectl(command) {
+  "kubectl exec -i ${env.HOSTNAME} -c ${env.CONTAINER_NAME} -- /bin/sh -c 'cd ${env.WORKSPACE} && ${command}'"
+}
+
+def customContainer(String name, Closure body) {
+  withEnv(["CONTAINER_NAME=$name"]) {
+    body()
+  }
+}
 
 // vi: ft=groovy
