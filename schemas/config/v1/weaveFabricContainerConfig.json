@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1/weaveFabricContainerConfig.json",
+
+  "description": "Weave Fabric Container Options configuration",
+  "properties": {
+    "version": {
+      "description": "Version of the container",
+      "type": "string"
+    },
+    "location": {
+      "description": "Container image location",
+      "type": "string"
+    }
+  },
+  "required": [
+    "version",
+    "location"
+  ],
+  "type": "object"
+}

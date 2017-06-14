@@ -16,7 +16,7 @@
     },
     "type": {
       "description": "The type of the fabric being used.",
-      "enum": [ "canal" ],
+      "enum": [ "canal", "weave" ],
       "type": "string"
     },
     "kubeVersion": {
@@ -25,7 +25,8 @@
       "properties": {
         "default": {
           "oneOf": [
-            { "$ref": "canalFabricConfig.json" }
+            { "$ref": "canalFabricConfig.json" },
+            { "$ref": "weaveFabricConfig.json" }
           ]
         },
         "versions": {
@@ -33,7 +34,8 @@
           "patternProperties": {
             "^v.*": {
               "oneOf": [
-                { "$ref": "canalFabricConfig.json" }
+                { "$ref": "canalFabricConfig.json" },
+                { "$ref": "weaveFabricConfig.json" }
               ]
             }
           },

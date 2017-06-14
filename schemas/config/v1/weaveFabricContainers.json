@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1/weaveFabricContainers.json",
+
+  "description": "Weave Fabric Container Options configuration",
+  "properties": {
+    "weave": { "$ref": "weaveFabricContainerConfig.json" },
+    "weave_npc": { "$ref": "weaveFabricContainerConfig.json" }
+  },
+
+  "required": [
+    "weave",
+    "weave_npc"
+  ],
+
+  "type": "object"
+}

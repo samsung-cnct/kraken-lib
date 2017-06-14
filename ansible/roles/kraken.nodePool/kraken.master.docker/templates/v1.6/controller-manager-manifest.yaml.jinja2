@@ -16,8 +16,10 @@ spec:
     - --cloud-provider={{ cluster.providerConfig.provider }}
     - --service-account-private-key-file=/etc/kubernetes/ssl/service-account-key.pem
     - --root-ca-file=/etc/kubernetes/ssl/ca.pem
-    - --cluster-cidr={{ fabricConfigVal.options.network.network }}
+{% if fabricConfigVal.type == 'canal' %}
     - --allocate-node-cidrs=true
+    - --cluster-cidr=fabricConfigVal.options.network.network
+{% endif %}
     livenessProbe:
       httpGet:
         host: 127.0.0.1
