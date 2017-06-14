@@ -88,7 +88,7 @@ podTemplate(label: 'k2', containers: [
         }
 
         container('docker') {
-            // add a docker rmi/docker purge/etc
+            // add a docker rmi/docker purge/etc.  
             stage('docker build') {
                 ksh 'docker build -t quay.io/samsung_cnct/k2:latest docker/'
             }
