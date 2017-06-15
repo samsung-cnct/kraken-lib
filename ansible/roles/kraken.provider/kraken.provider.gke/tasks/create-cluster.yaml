@@ -1,12 +1,4 @@
 ---
-- name: Retrive default auth from kube basic authn list
-  set_fact:
-    default_kube_basic_auth: "{{ cluster.kubeAuth.authn.basic | selectattr('user', 'match', '^'+cluster.kubeAuth.authn.default_basic_user+'$') | first }}"
-
-- name: Render a deployment manager template
-  template: src=deploymentmanager-create.yaml.jinja2
-   dest="{{ config_base | expanduser }}/{{ cluster.name }}/deploymentmanager-create.yaml"
-
 - name: Deploy cluster
   command: >
     gcloud deployment-manager deployments create {{ cluster.name }}-k2-deployment
