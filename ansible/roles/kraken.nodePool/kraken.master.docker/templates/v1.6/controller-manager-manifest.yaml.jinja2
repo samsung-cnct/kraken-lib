@@ -18,7 +18,7 @@ spec:
     - --root-ca-file=/etc/kubernetes/ssl/ca.pem
 {% if fabricConfigVal.type == 'canal' %}
     - --allocate-node-cidrs=true
-    - --cluster-cidr=fabricConfigVal.options.network.network
+    - --cluster-cidr={{ fabricConfigVal.options.network.network }}
 {% endif %}
     livenessProbe:
       httpGet:

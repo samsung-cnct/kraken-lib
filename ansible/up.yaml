@@ -39,7 +39,7 @@
       }
     - {
         role: 'roles/kraken.fabric/kraken.fabric.selector',
-        tags: [ 'assembler', 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun' ]
+        tags: [ 'assembler', 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun', 'fabric_only' ]
       }
     - {
         role: 'roles/kraken.services',

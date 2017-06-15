@@ -3,6 +3,10 @@
   set_fact:
     cluster: "{{ a_cluster }}"
 
+- name: Set kubeconfig fact
+  set_fact:
+    kubefn: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
+
 - name: Execute appropriate kubectl per minor version
   set_fact:
     kubectl: "/opt/cnct/kubernetes/{{ kubernetes_minor_version }}/bin/kubectl"
@@ -53,22 +57,22 @@
     - files:
       - "{{ kubernetes_minor_versions[ cluster.name ] }}/config.yaml.part.jinja2"
       - config.yaml.part.jinja2
-
-- name: Wait for api server
-  wait_for:
-    host: "{{ item | regex_replace('https://','') }}"
-    port: 443
-    timeout: 600
-  with_items: "{{ api_servers }}"
-  vars:
-    kubefn: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
-    kubeconfigfile: "{{ ( kubefn | is_file ) | ternary( kubefn, '/dev/null' ) }}"
-    api_servers: "{{ lookup('file', kubeconfigfile) | from_yaml | json_query('clusters[*].cluster.server') }}"
-  when: not ( dryrun | bool )
+#
+# Look into actual need for this task later...removed now to get stuff working again
+#
+#- name: Wait for api server
+#  wait_for:
+#    host: "{{ item | regex_replace('https://','') }}"
+#    port: 443
+#    timeout: 600
+#  with_items: "{{ api_servers }}"
+#  vars:
+#    api_servers: "{{ lookup('file', kubeconfigfile) | from_yaml | json_query('clusters[*].cluster.server') }}"
+#  when: not ( dryrun | bool )
 
 - name: check kube-networking namespace state
   command: >
-    {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} get namespace kube-networking
+    {{ kubectl }} --kubeconfig={{ kubefn | expanduser }} get namespace kube-networking
   ignore_errors: yes
   changed_when: false
   register: kube_networking_namespace
@@ -77,7 +81,7 @@
 
 - name: Ensure the kube-networking namespace exists
   command: >
-    {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} create namespace kube-networking
+    {{ kubectl }} --kubeconfig={{ kubefn | expanduser }} create namespace kube-networking
   register: result
   retries: 120
   until: result|succeeded
@@ -89,7 +93,7 @@
 
 - name: check kube-networking namespace state
   command: >
-    {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} get namespace kube-networking
+    {{ kubectl }} --kubeconfig={{ kubefn | expanduser }} get namespace kube-networking
   ignore_errors: yes
   changed_when: false
   register: kube_networking_namespace
@@ -105,7 +109,7 @@
 
 - name: Deploy canal RBAC policy
   command: >
-    {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} apply -f {{ config_base | expanduser }}/{{ cluster.name }}/auth/rbac-canal-policy.yaml
+    {{ kubectl }} --kubeconfig={{ kubefn | expanduser }} apply -f {{ config_base | expanduser }}/{{ cluster.name }}/auth/rbac-canal-policy.yaml
   register: job_rbac_canal_results
   when:
     - "cluster.kubeAuth.authz.rbac is defined"
@@ -113,10 +117,10 @@
 
 - name: Deploy canal configuration
   command: >
-    {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} apply -f {{ config_base | expanduser }}/{{ cluster.name }}/fabric/config.yaml --namespace=kube-networking
+    {{ kubectl }} --kubeconfig={{ kubefn | expanduser }} apply -f {{ config_base | expanduser }}/{{ cluster.name }}/fabric/config.yaml --namespace=kube-networking
   when: not ( dryrun | bool )
 
 - name: Deploy canal daemonset
   command: >
-    {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} apply -f {{ config_base | expanduser }}/{{ cluster.name }}/fabric/canal.yaml --namespace=kube-networking
+    {{ kubectl }} --kubeconfig={{ kubefn | expanduser }} apply -f {{ config_base | expanduser }}/{{ cluster.name }}/fabric/canal.yaml --namespace=kube-networking
   when: not ( dryrun | bool )
