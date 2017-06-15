@@ -25,10 +25,6 @@ definitions:
           chart: heapster
           version: 0.1.0
           namespace: kube-system
-        - name: central-logging
-          repo: atlas
-          chart: central-logging
-          version: 0.2.0
   fabricConfigs:
     - &defaultCanalFabric
       name: defaultCanalFabric
@@ -152,7 +148,7 @@ definitions:
     - &defaultKube
       name: defaultKube
       kind: kubernetes
-      version: v1.5.6
+      version: v1.6.4
       hyperkubeLocation: gcr.io/google_containers/hyperkube
   containerConfigs:
     - &defaultDocker
@@ -404,7 +400,7 @@ definitions:
             user: "admin"
         default_basic_user: "admin"
    - &rbacKubeAuth
-      authz: 
+      authz:
         rbac:
           # super_user is required until kubernetes 1.5 is no longer supported by k2.
           # It is not used by kubernetes 1.6 or later.
@@ -464,7 +460,7 @@ deployment:
           nodeConfig: *defaultAwsSpecialNode
           keyPair: *defaultKeyPair
       fabricConfig: *kubeVersionedFabric
-      kubeAuth: *defaultKubeAuth
+      kubeAuth: *rbacKubeAuth
       helmConfig: *defaultHelm
       dnsConfig: *defaultDns
       helmOverride:

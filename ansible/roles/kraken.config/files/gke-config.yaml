@@ -19,11 +19,7 @@ definitions:
           url: http://atlas.cnct.io
         - name: stable
           url: https://kubernetes-charts.storage.googleapis.com
-      charts:
-        - name: central-logging
-          repo: atlas
-          chart: central-logging
-          version: 0.2.0
+      charts: []
   fabricConfigs:
     - &defaultCanalFabric
       name: defaultCanalFabric
@@ -119,7 +115,7 @@ definitions:
     - &defaultKube
       name: defaultKube
       kind: kubernetes
-      version: v1.5.6
+      version: v1.6.4
       hyperkubeLocation: gcr.io/google_containers/hyperkube
   containerConfigs:
     - &defaultDocker
@@ -202,7 +198,7 @@ deployment:
       dns: 10.32.0.2
       domain: cluster.local
       providerConfig: *defaultGKE
-      kubeAuth: *defaultKubeAuth
+      kubeAuth: *rbacKubeAuth
       nodePools:
         - name: clusternodes
           count: 2
