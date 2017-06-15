@@ -4,7 +4,7 @@
 - name: Get oidc provider values from cluster services
   set_fact:
     oidc_provider_values: "{{ item.get('values') }}"
-  with_items: "{{ cluster.helmConfigs.charts | default([]) }}"
+  with_items: "{{ cluster.helmConfig.charts | default([]) }}"
   when: item.name == "{{ cluster.kubeAuth.authn.oidc.service_name }}"
 
 ## TO DO :
