@@ -128,6 +128,11 @@ fabric_only,services_only
 - roles/kraken.assembler
 - roles/kraken.fabric/kraken.fabric.selector
 
+### fabric_only
+ **: Render and execute kubernetes config yamls for creating the nework fabric.  Useful for development and production upgrades of a network **
+- roles/kraken.fabric/kraken.fabric.selector
+
+
 ### provider
  **: Render and spins up kubernetes cluster on cloud such as AWS or GKE.**
 - roles/kraken.config
