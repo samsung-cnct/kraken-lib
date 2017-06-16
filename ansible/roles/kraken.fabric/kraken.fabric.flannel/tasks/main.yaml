@@ -40,6 +40,15 @@
       - rbac-canal-policy.yaml.jinja2
   when: "cluster.kubeAuth.authz.rbac is defined"
 
+- name: Generate Network Namespace Fie
+  template:
+    src: "{{ item }}"
+    dest: "{{ config_base | expanduser }}/{{ cluster.name }}/fabric/namespace.yaml"
+  with_first_found:
+    - files:
+      - "{{ kubernetes_minor_versions[ cluster.name ] }}/namespace.yaml.part.jinja2"
+      - namespace.yaml.part.jinja2
+
 - name: Generate canal deployment file
   template:
     src: "{{ item }}"
@@ -57,55 +66,11 @@
     - files:
       - "{{ kubernetes_minor_versions[ cluster.name ] }}/config.yaml.part.jinja2"
       - config.yaml.part.jinja2
-#
-# Look into actual need for this task later...removed now to get stuff working again
-#
-#- name: Wait for api server
-#  wait_for:
-#    host: "{{ item | regex_replace('https://','') }}"
-#    port: 443
-#    timeout: 600
-#  with_items: "{{ api_servers }}"
-#  vars:
-#    api_servers: "{{ lookup('file', kubeconfigfile) | from_yaml | json_query('clusters[*].cluster.server') }}"
-#  when: not ( dryrun | bool )
 
-- name: check kube-networking namespace state
+- name: Deploy Networking Namespace
   command: >
-    {{ kubectl }} --kubeconfig={{ kubefn | expanduser }} get namespace kube-networking
-  ignore_errors: yes
-  changed_when: false
-  register: kube_networking_namespace
+    {{ kubectl }} --kubeconfig={{ kubefn | expanduser }} apply -f {{ config_base | expanduser }}/{{ cluster.name }}/fabric/namespace.yaml
   when: not ( dryrun | bool )
-  failed_when: false
-
-- name: Ensure the kube-networking namespace exists
-  command: >
-    {{ kubectl }} --kubeconfig={{ kubefn | expanduser }} create namespace kube-networking
-  register: result
-  retries: 120
-  until: result|succeeded
-  delay: 1
-  when:
-    - not ( dryrun | bool )
-    - "'Error' in kube_networking_namespace.stderr "
-  ignore_errors: yes
-
-- name: check kube-networking namespace state
-  command: >
-    {{ kubectl }} --kubeconfig={{ kubefn | expanduser }} get namespace kube-networking
-  ignore_errors: yes
-  changed_when: false
-  register: kube_networking_namespace
-  when: not ( dryrun | bool )
-  failed_when: false
-
-- name: Confirm kube-networking namespace created
-  fail:
-    msg: "kube-networking namespace creation failed"
-  when:
-    - not ( dryrun | bool )
-    - "'Error' in kube_networking_namespace.stderr "
 
 - name: Deploy canal RBAC policy
   command: >
