@@ -385,9 +385,9 @@ Using the EC2 instance list you can SSH into VMs and do further debugging.
 
 ## Changing configuration
 
-Some changes to the cluster configuration can be made by re-running K2.
+Some changes to the cluster configuration can be made by first making appropriate changes in the config file, and then running the K2 update command as described below. *Please be aware of which changes can be safely made to your cluster.*
 
-### Things that should not be changed by re-running K2
+### Things that should not be changed with K2 update
 
 - cluster name
 ```
@@ -396,7 +396,10 @@ clusters:
 ```
 - etcd settings (beyond machine type)
 
-### Things that can be changed (sometimes with some manual intervention)
+*Warning*
+Repeatedly running `./up.sh` or `./update.sh` can result in etcd nodes being destroyed and regenerated automatically, which will break your cluster's control plane. This is because in the K2 generated config file, the CoreOS version is set to `current`. When CoreOS releases a new version, Terraform will register this change and destroy and re-create etcd nodes. We are working on fixing this, but please be aware that this is a possible issue.
+
+### Things that can be changed with K2 update
 
 - nodepools
 - nodepool counts and instance types
@@ -404,40 +407,36 @@ clusters:
 - Kubernetes version
 - location of the hyperkube container
 
-If you change these settings, some manuals step may be needed. For example, you may need to terminate existing nodes to have new nodes spun up with updated configurations.
+### Updating Nodepools
 
-In order to effect these changes, make appropriate adjustments to the configuration file and re-run the command that created the cluster.
+There are some differences between clusters hosted on AWS versus clusters hosted on GKE.
 
-In other words:
-
-```bash
-docker run $K2OPTS quay.io/samsung_cnct/k2:latest ./up.sh --config $HOME/.kraken/${CLUSTER}.yaml
-```
-
-### Updating Kubernetes Version of Nodes
 #### AWS
-As mentioned above, before you can update the Kubernetes version, you will first need to update your configuration file with the intended version. However, on AWS, your nodes will still reflect the version they had upon creation. With the `update` command, K2 will delete nodes one by one, waiting for updated replacement nodes to come online before deleting the next node. This will ensure no information gets lost and the control plane remains up and running. Please be patient; this process may take a while.
-You will need to run the `update` command and with the `--nodepools` or `-n` flag specify which of your cluster nodepools you would like to upgrade, for example
+On AWS, your nodes will still reflect the version they had upon creation. When you run the `update` command, K2 will delete nodes one by one, waiting for updated replacement nodes to come online before deleting the next node. This will ensure no information gets lost and the control plane remains up and running.
 
- ```bash
-docker run $K2OPTS quay.io/samsung_cnct/k2:latest ./update.sh --config $HOME/.kraken/${CLUSTER}.yaml --nodepools master,clusterNodes,specialNodes
-```
-
-You may update all or some of your control plane and cluster nodes (but not etcd nodes).
+You may update all or some of your control plane and cluster nodes (but not etcd nodes, as mentioned above).
 
 #### GKE
-On GKE nodes, it is not possible to update the control plane. Cluster node updates are possible. The mechanics of deleting and updating nodes are handled by GKE in this case, not K2. As for AWS, update your configuration file with each nodepool's intended Kubernetes version. The nodepools to be updated can be passed with the same `--nodepools`/`-n` flag on the `update` action. Again, this process may take a while.
+On GKE nodes, it is not possible to update the control plane. Cluster node updates are possible. The mechanics of deleting and updating nodes are handled by GKE in this case, not K2.
 
+#### Running K2 update
+You can specify different versions of Kubernetes in each nodepool. This may affect the compatibility of your cluster's K2 services (see below). You can also update nodepool counts and instance types. The update action has a required `--nodepools` or `-n` flag followed by a comma-separated list of the names of the nodepools you wish to update. Please be patient; this process may take a while.
+
+- Step 1: Make appropriate changes to configuration file
+- Step 2: Run
 ```bash
-docker run $K2OPTS quay.io/samsung_cnct/k2:latest ./update.sh --config $HOME/.kraken/${CLUSTER}.yaml --nodepools clusternodes,othernodes
+docker run $K2OPTS quay.io/samsung_cnct/k2:latest ./update.sh --config $HOME/.kraken/${CLUSTER}.yaml --nodepools clusterNodes,specialNodes
 ```
+
+## Kubernetes versioning for K2 services
+K2 will use the versions of helm and kubectl appropriate for the Kubernetes version of each cluster. It does so by determining each cluster's currently-set Kubernetes minor version. Because nodepools can have different versions from each other, the minor version is set according to the version of the control plane nodepool in AWS clusters. For GKE clusters, K2 uses the Kubernetes version of the last nodepool in the nodePools list.
 
 ### Handling unsupported versions of helm
 Currently, and for the foreseeable future, new helm releases will be shipped after new Kubernetes releases, resulting in helm possibly not being supported for the latest Kubernetes version.
 You have two options.
 
 #### Option 1: Overriding helm in K2 config file
-In the K2 config file, set the cluster level key `helmOverride` to `true` if you wish to use the latest version of helm that is available. Warning: since this would be using a version of helm that does not support your k8s version, this may result in unexpected behavior.
+In the K2 config file, set the cluster level key `helmOverride` to `true` if you wish to use the latest version of helm that is available. Warning: since this would be using a version of helm that does not support your cluster's k8s version, this may result in unexpected behavior.
 Set `helmOverride` to `false` if you would like to run K2 without helm.
 
 #### Option 2: Overriding helm via environment variable
@@ -445,7 +444,7 @@ This will automatically happen if you are trying to run a cluster with a Kuberne
 K2 will halt and, via fail message, prompt you to set a cluster specific helm override env variable to true or false.
 
 ```bash
-export helm_override_<CLUSTER>=<TRUE/FALSE>
+export helm_override_<CLUSTER_NAME>=<TRUE/FALSE>
 ```
 Now, run cluster up again, and K2 will use the override condition you specified.
 
