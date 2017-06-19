@@ -13,7 +13,7 @@
 
 - name: In case of helm not being available, always override to latest helm
   set_fact:
-    helm_command: "/opt/cnct/kubernetes/{{ latest_helm }}/bin/helm"
+    helm_command: "/opt/cnct/kubernetes/latest/bin/helm"
   when: (helm_availabilities[cluster.name] == false)
 
 - name: Execute appropriate kubectl per minor version
@@ -61,7 +61,7 @@
   command: >
     {{ kubectl }} --kubeconfig={{ kubeconfig }} delete deployment {{ tiller }} --namespace=kube-system
   when: "'Error' not in tiller_present.stderr and not tiller_present | skipped "
-  ignore_errors: yes 
+  ignore_errors: yes
 
 - name: Collect all services
   command: >

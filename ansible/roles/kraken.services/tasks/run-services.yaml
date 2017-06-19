@@ -18,7 +18,7 @@
 
 - name: In case of helm not being available, if override was specified, override to latest helm
   set_fact:
-    helm_command: "/opt/cnct/kubernetes/{{ latest_helm }}/bin/helm"
+    helm_command: "/opt/cnct/kubernetes/latest/bin/helm"
   when: (helm_availabilities[cluster.name] == false) and (helm_overrides[cluster.name] == true)
 
 - set_fact:
@@ -97,7 +97,7 @@
   with_items: "{{ cluster_repos }}"
   when: (cluster_repos is defined) and (helm_command is defined)
   ignore_errors: yes
-  failed_when: false 
+  failed_when: false
 
 - name: Add helm repositories
   command: >

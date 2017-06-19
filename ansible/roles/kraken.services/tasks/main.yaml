@@ -1,15 +1,4 @@
 ---
-- name: Find all helm options available in case helm was overridden
-  find:
-    paths: "/opt/cnct/kubernetes"
-    patterns: "helm"
-    recurse: yes
-  register: helm_option_paths
-
-- name: Get latest helm version
-  set_fact:
-    latest_helm: "{{ helm_option_paths | latest_helm }}"
-
 - include: generate-oidc-cert.yaml
   with_items:
     - "{{ kraken_config.clusters }}"
