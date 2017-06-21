@@ -1,0 +1,3619 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Welcome to k2’s config file documentation! &#8212; k2 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-k2-s-config-file-documentation">
+<h1>Welcome to k2’s config file  documentation!<a class="headerlink" href="#welcome-to-k2-s-config-file-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="kubernetes-api-server-configuration">
+<h2>Kubernetes API server configuration<a class="headerlink" href="#kubernetes-api-server-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/apiServerConfig.json">http://judkins.house/apis/k2/v1/apiServerConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">kvStore (e.g. etcd) for API servers</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>name</strong></li>
+</ul>
+</td>
+<td colspan="2">Name of the API server configuration</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li><strong>loadBalancer</strong></li>
+</ul>
+</td>
+<td colspan="2">What sort of load balancer system should be used</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>enum</td>
+<td>cloud, flipbit</td>
+</tr>
+<tr class="row-even"><td colspan="3"><ul class="first last simple">
+<li><strong>state</strong></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td colspan="3"><ul class="first last simple">
+<li><strong>events</strong></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="aws-network-access-control-list-acl-rule">
+<h2>AWS Network Access Control List (ACL) Rule<a class="headerlink" href="#aws-network-access-control-list-acl-rule" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/awsAclConfig.json">http://judkins.house/apis/k2/v1/awsAclConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Describes an AWS network ACL rule. See the VPC [documentation](<a class="reference external" href="http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_ACLs.html">http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_ACLs.html</a>) for more information.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li><strong>protocol</strong></li>
+</ul>
+</td>
+<td colspan="2">The protocol for this ACL</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>enum</td>
+<td>TCP, UDP, -1, ICMP</td>
+</tr>
+<tr class="row-even"><td rowspan="2"><ul class="first last simple">
+<li><strong>rule_no</strong></li>
+</ul>
+</td>
+<td colspan="2">The number of the rule for ordering</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>number</em></td>
+</tr>
+<tr class="row-even"><td rowspan="3"><ul class="first last simple">
+<li><strong>action</strong></li>
+</ul>
+</td>
+<td colspan="2">The action that should be implemented (accept/deny)</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-even"><td>enum</td>
+<td>allow, deny</td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li><strong>cidr_block</strong></li>
+</ul>
+</td>
+<td colspan="2">The cidr to associate this rule to</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>format</td>
+<td>cidr</td>
+</tr>
+<tr class="row-even"><td rowspan="2"><ul class="first last simple">
+<li><strong>from_port</strong></li>
+</ul>
+</td>
+<td colspan="2">The from port number, 0 for all</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>number</em></td>
+</tr>
+<tr class="row-even"><td rowspan="2"><ul class="first last simple">
+<li><strong>to_port</strong></li>
+</ul>
+</td>
+<td colspan="2">The to port number, 0 for all</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>number</em></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="aws-security-credentials-configuration">
+<h2>AWS Security Credentials Configuration<a class="headerlink" href="#aws-security-credentials-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/awsAuthenticationConfig.json">http://judkins.house/apis/k2/v1/awsAuthenticationConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Describes AWS security credential configuration. See the [documentation](<a class="reference external" href="http://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html">http://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html</a>)</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>accessKey</strong></li>
+</ul>
+</td>
+<td colspan="2">The AWS access key for the API</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em> / <em>null</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>accessSecret</strong></li>
+</ul>
+</td>
+<td colspan="2">The AWS access secret for the API</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em> / <em>null</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>credentialsFile</strong></li>
+</ul>
+</td>
+<td colspan="2">The AWS credentials file for the API</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em> / <em>null</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>credentialsProfile</strong></li>
+</ul>
+</td>
+<td colspan="2">The profile to use within the credentials file</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em> / <em>null</em></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="aws-ebs-storage-options">
+<h2>AWS EBS Storage Options<a class="headerlink" href="#aws-ebs-storage-options" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/awsEbsStorageOptions.json">http://judkins.house/apis/k2/v1/awsEbsStorageOptions.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Describes AWS EBS storage options</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>device_name</strong></li>
+</ul>
+</td>
+<td colspan="2">The name of the device on the node (sde, sdg, etc)</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>volume_type</strong></li>
+</ul>
+</td>
+<td colspan="2">The storage type on EBS (gp2, etc)</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>volume_size</strong></li>
+</ul>
+</td>
+<td colspan="2">The size of the storage, in gigabytes</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>number</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>delete_on_termination</strong></li>
+</ul>
+</td>
+<td colspan="2">Whether or not to delete the volume after the node is terminated</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>boolean</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>snapshot_id</strong></li>
+</ul>
+</td>
+<td colspan="2">The id of a snapshot to recover from</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em> / <em>null</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>encrypted</strong></li>
+</ul>
+</td>
+<td colspan="2">Whether or not the volume is encrypted within AWS</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>boolean</em></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="kubernetes-node-label">
+<h2>Kubernetes Node Label<a class="headerlink" href="#kubernetes-node-label" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/kubeNodeLabel.json">http://judkins.house/apis/k2/v1/kubeNodeLabel.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Describes a Kubernetes node label. For more information on labels, see the [documentation](<a class="reference external" href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/">https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/</a>).</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>name</strong></li>
+</ul>
+</td>
+<td colspan="2">The Kubernetes node label’s key</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>value</strong></li>
+</ul>
+</td>
+<td colspan="2">The Kubernetes node label’s value</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="aws-node-configuration">
+<h2>AWS Node Configuration<a class="headerlink" href="#aws-node-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/awsNodeConfig.json">http://judkins.house/apis/k2/v1/awsNodeConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Describes node configuration, some of which is specific to AWS (e.g. [instance types](<a class="reference external" href="https://aws.amazon.com/ec2/instance-types/">https://aws.amazon.com/ec2/instance-types/</a>)).</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>name</strong></li>
+</ul>
+</td>
+<td colspan="2">Name of node for use by k2</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li>kind</li>
+</ul>
+</td>
+<td colspan="2">Type of config this is</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>enum</td>
+<td>node</td>
+</tr>
+<tr class="row-even"><td rowspan="4"><ul class="first last simple">
+<li>mounts</li>
+</ul>
+</td>
+<td colspan="2">Additional mounts made in the node</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>array</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">items</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">awsNodeMountConfig.json</span></td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li><strong>providerConfig</strong></li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">awsNodeProviderConfig.json</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="node-mount-configuration">
+<h2>Node Mount Configuration<a class="headerlink" href="#node-mount-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/awsNodeMountConfig.json">http://judkins.house/apis/k2/v1/awsNodeMountConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Describes a mount for a node.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>device</strong></li>
+</ul>
+</td>
+<td colspan="2">The device to be mounted</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>path</strong></li>
+</ul>
+</td>
+<td colspan="2">The path to mount the device to</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>forceFormat</strong></li>
+</ul>
+</td>
+<td colspan="2">Whether the mount should be formatted after every boot</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>boolean</em></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="aws-provider-configuration">
+<h2>AWS Provider Configuration<a class="headerlink" href="#aws-provider-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="4"><a class="reference external" href="http://judkins.house/apis/k2/v1/awsNodeProviderConfig.json">http://judkins.house/apis/k2/v1/awsNodeProviderConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="4">Describes AWS specific provider configuration</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="3"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="4">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li><strong>provider</strong></li>
+</ul>
+</td>
+<td colspan="3">Identifies who the provider is for configuration</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td colspan="2"><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>enum</td>
+<td colspan="2">aws</td>
+</tr>
+<tr class="row-even"><td rowspan="2"><ul class="first last simple">
+<li><strong>type</strong></li>
+</ul>
+</td>
+<td colspan="3">Identifies what aws machine type should be used (m3.medium, etc.)</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>string</em></td>
+</tr>
+<tr class="row-even"><td rowspan="4"><ul class="first last simple">
+<li><strong>subnet</strong></li>
+</ul>
+</td>
+<td colspan="3">Identifies what subnets should be used.  These are names of subnets created elsewhere in the configuration</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>array</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">items</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-even"><td rowspan="4"><ul class="first last simple">
+<li>tags</li>
+</ul>
+</td>
+<td colspan="3">List of AWS tags to associate with the node</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>array</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">items</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">awsNodeTag.json</span></td>
+</tr>
+<tr class="row-even"><td rowspan="4"><ul class="first last simple">
+<li>storage</li>
+</ul>
+</td>
+<td colspan="3">List of storage devices to attach to the node</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>array</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">items</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">awsStorageDevice.json</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="aws-node-tag">
+<h2>AWS Node Tag<a class="headerlink" href="#aws-node-tag" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/awsNodeTag.json">http://judkins.house/apis/k2/v1/awsNodeTag.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Describes an [AWS node tag](<a class="reference external" href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Using_Tags.html">http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Using_Tags.html</a>).</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>key</strong></li>
+</ul>
+</td>
+<td colspan="2">The AWS tag’s key name</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>value</strong></li>
+</ul>
+</td>
+<td colspan="2">The AWS tag’s value</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id1">
+<h2>AWS Provider Configuration<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/awsProviderConfig.json">http://judkins.house/apis/k2/v1/awsProviderConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Describes AWS specific provider configuration.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>name</strong></li>
+</ul>
+</td>
+<td colspan="2">The name of the configuration, for use within k2 configurations</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li>kind</li>
+</ul>
+</td>
+<td colspan="2">The type of configuration this object it</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>enum</td>
+<td>provider</td>
+</tr>
+<tr class="row-even"><td rowspan="3"><ul class="first last simple">
+<li><strong>provider</strong></li>
+</ul>
+</td>
+<td colspan="2">The name of the provider for this provider setting</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-even"><td>enum</td>
+<td>aws</td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li><strong>type</strong></li>
+</ul>
+</td>
+<td colspan="2">How are nodes configured - SHOULD BE MOVED TO NODE PROVIDER CONFIG?</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>enum</td>
+<td>cloudinit</td>
+</tr>
+<tr class="row-even"><td rowspan="2"><ul class="first last simple">
+<li><strong>resourcePrefix</strong></li>
+</ul>
+</td>
+<td colspan="2">Any prefix that should be prepended to resources in AWS to make them easier to identify</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>string</em> / <em>null</em></td>
+</tr>
+<tr class="row-even"><td rowspan="4"><ul class="first last simple">
+<li><strong>vpc</strong></li>
+</ul>
+</td>
+<td colspan="2">CIDR for the VPC for the cluster</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-even"><td>default</td>
+<td>10.0.0.0/16</td>
+</tr>
+<tr class="row-odd"><td>format</td>
+<td>cidr</td>
+</tr>
+<tr class="row-even"><td rowspan="3"><ul class="first last simple">
+<li><strong>region</strong></li>
+</ul>
+</td>
+<td colspan="2">Region to create resources in (us-east-1, us-west-2, etc)</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-even"><td>default</td>
+<td>us-east-1</td>
+</tr>
+<tr class="row-odd"><td rowspan="5"><ul class="first last simple">
+<li><strong>subnet</strong></li>
+</ul>
+</td>
+<td colspan="2">List of subnets to use within a region for the cluster</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>array</em></td>
+</tr>
+<tr class="row-odd"><td colspan="2">items</td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">awsSubnetConfig.json</span></td>
+</tr>
+<tr class="row-odd"><td>minItems</td>
+<td>1</td>
+</tr>
+<tr class="row-even"><td rowspan="5"><ul class="first last simple">
+<li><strong>egressAcl</strong></li>
+</ul>
+</td>
+<td colspan="2">List of egress ACLs to create for the VPC</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>array</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">items</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">awsAclConfig.json</span></td>
+</tr>
+<tr class="row-even"><td>minItems</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td rowspan="5"><ul class="first last simple">
+<li><strong>ingressAcl</strong></li>
+</ul>
+</td>
+<td colspan="2">List of ingress ACLs to create for the VPC</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>array</em></td>
+</tr>
+<tr class="row-odd"><td colspan="2">items</td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">awsAclConfig.json</span></td>
+</tr>
+<tr class="row-odd"><td>minItems</td>
+<td>1</td>
+</tr>
+<tr class="row-even"><td rowspan="5"><ul class="first last simple">
+<li><strong>ingressSecurity</strong></li>
+</ul>
+</td>
+<td colspan="2">List of ingress security rules to create for the VPC</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>array</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">items</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">awsSecurityConfig.json</span></td>
+</tr>
+<tr class="row-even"><td>minItems</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td rowspan="5"><ul class="first last simple">
+<li><strong>egressSecurity</strong></li>
+</ul>
+</td>
+<td colspan="2">List of egress security rules to create for the VPC</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>array</em></td>
+</tr>
+<tr class="row-odd"><td colspan="2">items</td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">awsSecurityConfig.json</span></td>
+</tr>
+<tr class="row-odd"><td>minItems</td>
+<td>1</td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li><strong>authentication</strong></li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">awsAuthenticationConfig.json</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="aws-security-configuration">
+<h2>AWS Security Configuration<a class="headerlink" href="#aws-security-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="4"><a class="reference external" href="http://judkins.house/apis/k2/v1/awsSecurityConfig.json">http://judkins.house/apis/k2/v1/awsSecurityConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="4">AWS Security Configuration</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="3"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="4">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li><strong>protocol</strong></li>
+</ul>
+</td>
+<td colspan="3">The protocol for this Security Rule</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td colspan="2"><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>enum</td>
+<td colspan="2">TCP, UDP, -1, ICMP</td>
+</tr>
+<tr class="row-even"><td rowspan="4"><ul class="first last simple">
+<li><strong>cidr_blocks</strong></li>
+</ul>
+</td>
+<td colspan="3">The cidr to associate this rule to</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>array</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">items</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-even"><td rowspan="2"><ul class="first last simple">
+<li><strong>from_port</strong></li>
+</ul>
+</td>
+<td colspan="3">The from port number</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>number</em></td>
+</tr>
+<tr class="row-even"><td rowspan="2"><ul class="first last simple">
+<li><strong>to_port</strong></li>
+</ul>
+</td>
+<td colspan="3">The to port number</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>number</em></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="aws-storage-device">
+<h2>AWS Storage Device<a class="headerlink" href="#aws-storage-device" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="4"><a class="reference external" href="http://judkins.house/apis/k2/v1/awsStorageDevice.json">http://judkins.house/apis/k2/v1/awsStorageDevice.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="4">Describes an AWS storage device.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="3"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="4">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>type</strong></li>
+</ul>
+</td>
+<td colspan="3">The type of storage</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td colspan="2"><em>string</em></td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li><strong>opts</strong></li>
+</ul>
+</td>
+<td>anyOf</td>
+<td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">awsEbsStorageOptions.json</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="aws-subnet-configurationn">
+<h2>AWS Subnet Configurationn<a class="headerlink" href="#aws-subnet-configurationn" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/awsSubnetConfig.json">http://judkins.house/apis/k2/v1/awsSubnetConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Describes an [AWS subnet](<a class="reference external" href="http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Subnets.html">http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Subnets.html</a>).</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>name</strong></li>
+</ul>
+</td>
+<td colspan="2">The name of the subnet, for use within k2 configurations</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li><strong>az</strong></li>
+</ul>
+</td>
+<td colspan="2">Name of the Availability Zone (AZ) in AWS. Regions and AZs are documented [here](<a class="reference external" href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-available-regions">http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-available-regions</a>).</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>default</td>
+<td>us-east-1a</td>
+</tr>
+<tr class="row-even"><td rowspan="4"><ul class="first last simple">
+<li><strong>cidr</strong></li>
+</ul>
+</td>
+<td colspan="2">The cidr to associate to the subnet (within the VPC)</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-even"><td>default</td>
+<td>10.0.0.0/18</td>
+</tr>
+<tr class="row-odd"><td>format</td>
+<td>cidr</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="canal-fabric-configuration">
+<h2>Canal Fabric Configuration<a class="headerlink" href="#canal-fabric-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/canalFabricConfig.json">http://judkins.house/apis/k2/v1/canalFabricConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Describes the configuration of a Canal fabric.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>name</strong></li>
+</ul>
+</td>
+<td colspan="2">Name of the Canal Fabric Configuration.</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li>kind</li>
+</ul>
+</td>
+<td colspan="2">The kind of configuration object.</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>enum</td>
+<td>fabric</td>
+</tr>
+<tr class="row-even"><td rowspan="3"><ul class="first last simple">
+<li><strong>type</strong></li>
+</ul>
+</td>
+<td colspan="2">The type of the fabric being used.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-even"><td>enum</td>
+<td>canal</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li><strong>options</strong></li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">canalFabricOptions.json</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="canal-fabric-container-options">
+<h2>Canal Fabric Container Options<a class="headerlink" href="#canal-fabric-container-options" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/canalFabricContainerConfig.json">http://judkins.house/apis/k2/v1/canalFabricContainerConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Describes a Canal fabric container.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>version</strong></li>
+</ul>
+</td>
+<td colspan="2">Version of the container</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>location</strong></li>
+</ul>
+</td>
+<td colspan="2">Container image location</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="canal-fabric-containers">
+<h2>Canal Fabric Containers<a class="headerlink" href="#canal-fabric-containers" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="2"><a class="reference external" href="http://judkins.house/apis/k2/v1/canalFabricContainers.json">http://judkins.house/apis/k2/v1/canalFabricContainers.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="2">Describes all of the containers necessary to implement a Canal fabric.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">properties</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li><strong>kubePolicyController</strong></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">canalFabricContainerConfig.json</span></td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li><strong>etcd</strong></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">canalFabricContainerConfig.json</span></td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li><strong>calicoCni</strong></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">canalFabricContainerConfig.json</span></td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li><strong>calicoNode</strong></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">canalFabricContainerConfig.json</span></td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li><strong>flannel</strong></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">canalFabricContainerConfig.json</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="canal-fabric-network-configuration">
+<h2>Canal Fabric Network configuration<a class="headerlink" href="#canal-fabric-network-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="4"><a class="reference external" href="http://judkins.house/apis/k2/v1/canalFabricNetwork.json">http://judkins.house/apis/k2/v1/canalFabricNetwork.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="4">Describes the configuration of a Canal network fabric.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="3"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="4">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li><strong>network</strong></li>
+</ul>
+</td>
+<td colspan="3">Network CIDR for pods in the fabric</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td colspan="2"><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>format</td>
+<td colspan="2">cidr</td>
+</tr>
+<tr class="row-even"><td rowspan="2"><ul class="first last simple">
+<li><strong>subnetLen</strong></li>
+</ul>
+</td>
+<td colspan="3">The size of a subnet to assign to any given node</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>string</em></td>
+</tr>
+<tr class="row-even"><td rowspan="2"><ul class="first last simple">
+<li><strong>subnetMin</strong></li>
+</ul>
+</td>
+<td colspan="3">The lowest subnet that can be handed out to a node</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>string</em></td>
+</tr>
+<tr class="row-even"><td rowspan="2"><ul class="first last simple">
+<li><strong>subnetMax</strong></li>
+</ul>
+</td>
+<td colspan="3">The highest subnet that can be handed out to a node</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>string</em></td>
+</tr>
+<tr class="row-even"><td rowspan="3"><ul class="first last simple">
+<li><strong>backend</strong></li>
+</ul>
+</td>
+<td colspan="3">Network CIDR for pods in the fabric</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td>anyOf</td>
+<td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">canalFabricNetworkVxlan.json</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="canal-fabric-vxlan-network-configuration">
+<h2>Canal Fabric VXLan Network configuration<a class="headerlink" href="#canal-fabric-vxlan-network-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/canalFabricNetworkVxlan.json">http://judkins.house/apis/k2/v1/canalFabricNetworkVxlan.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Canal Fabric VXLan Network configuration.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li><strong>type</strong></li>
+</ul>
+</td>
+<td colspan="2">Indicates that it is vxlan</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>enum</td>
+<td>vxlan</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="canal-fabric-options-configuration">
+<h2>Canal Fabric Options configuration<a class="headerlink" href="#canal-fabric-options-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="2"><a class="reference external" href="http://judkins.house/apis/k2/v1/canalFabricOptions.json">http://judkins.house/apis/k2/v1/canalFabricOptions.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="2">Canal Fabric Options configuration.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">properties</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li><strong>containers</strong></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">canalFabricContainers.json</span></td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li><strong>network</strong></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">canalFabricNetwork.json</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="a-single-cluster-configuration">
+<h2>A single cluster configuration<a class="headerlink" href="#a-single-cluster-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/cluster.json">http://judkins.house/apis/k2/v1/cluster.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">A set of one or more nodePools, along with any shared configuration between them.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="4"><ul class="first last simple">
+<li><strong>name</strong></li>
+</ul>
+</td>
+<td colspan="2">Name of this cluster</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>maxLength</td>
+<td>13</td>
+</tr>
+<tr class="row-even"><td>minLength</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li><strong>network</strong></li>
+</ul>
+</td>
+<td colspan="2">Internal IP address range (CIDR) for services</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>format</td>
+<td>cidr</td>
+</tr>
+<tr class="row-even"><td rowspan="3"><ul class="first last simple">
+<li><strong>dns</strong></li>
+</ul>
+</td>
+<td colspan="2">Internal IP address of the DNS service</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-even"><td>format</td>
+<td>ipv4</td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li><strong>domain</strong></li>
+</ul>
+</td>
+<td colspan="2">Domain name for cluster (internal resolution)</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>format</td>
+<td>hostname</td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li><strong>providerConfig</strong></li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">providerConfig.json</span></td>
+</tr>
+<tr class="row-odd"><td rowspan="5"><ul class="first last simple">
+<li><strong>nodePools</strong></li>
+</ul>
+</td>
+<td colspan="2">A list of nodePool</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>array</em></td>
+</tr>
+<tr class="row-odd"><td colspan="2">items</td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">nodePool.json</span></td>
+</tr>
+<tr class="row-odd"><td>minItems</td>
+<td>1</td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li><strong>fabricConfig</strong></li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">fabricConfig.json</span></td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li><strong>kubeAuth</strong></li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">kubeAuthConfig.json</span></td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li><strong>helmConfig</strong></li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">helmConfig.json</span></td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li><strong>dnsConfig</strong></li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">dnsConfig.json</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="k2-configuration-file">
+<h2>k2 configuration file<a class="headerlink" href="#k2-configuration-file" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/config.json">http://judkins.house/apis/k2/v1/config.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Describes one or more Kubernetes clusters</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>version</strong></li>
+</ul>
+</td>
+<td colspan="2">The k2 configuration version determines which schema is used to validate the configuration file</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li>definitions</li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">definitions.json</span></td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li><strong>deployment</strong></li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">deployment.json</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/containerConfig.json">http://judkins.house/apis/k2/v1/containerConfig.json</a></td>
+</tr>
+<tr class="row-even"><td>anyOf</td>
+<td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">dockerContainerConfig.json</span></td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="coreos-configuration">
+<h2>CoreOS Configuration<a class="headerlink" href="#coreos-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/coreOsConfig.json">http://judkins.house/apis/k2/v1/coreOsConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Describes the configuration of CoreOS.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>name</strong></li>
+</ul>
+</td>
+<td colspan="2">The name of the configuration</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li>kind</li>
+</ul>
+</td>
+<td colspan="2">The kind of configuration</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>enum</td>
+<td>os</td>
+</tr>
+<tr class="row-even"><td rowspan="3"><ul class="first last simple">
+<li><strong>type</strong></li>
+</ul>
+</td>
+<td colspan="2">The type of configuration (coreos)</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-even"><td>enum</td>
+<td>coreOs</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>version</strong></li>
+</ul>
+</td>
+<td colspan="2">The image tag of CoreOS to deploy</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="4"><ul class="first last simple">
+<li>channel</li>
+</ul>
+</td>
+<td colspan="2">The channel of CoreOS to pick</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>enum</td>
+<td>stable, beta, alpha</td>
+</tr>
+<tr class="row-even"><td>default</td>
+<td>stable</td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li><strong>rebootStrategy</strong></li>
+</ul>
+</td>
+<td colspan="2">Should CoreOS update itself, and if so, how should it manage upgrades?</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>enum</td>
+<td>off, reboot, etcd-lock, best-effort</td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li>locksmith</li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">coreOsLocksmithConfig.json</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="coreos-locksmith-configuration">
+<h2>CoreOS Locksmith Configuration<a class="headerlink" href="#coreos-locksmith-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/coreOsLocksmithConfig.json">http://judkins.house/apis/k2/v1/coreOsLocksmithConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Describes the configuration of CoreOS Locksmith (used to manage [updates](<a class="reference external" href="https://coreos.com/os/docs/latest/update-strategies.html">https://coreos.com/os/docs/latest/update-strategies.html</a>).</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li>endpoint</li>
+</ul>
+</td>
+<td colspan="2">The etcd endpoint</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li>etcd_cafile</li>
+</ul>
+</td>
+<td colspan="2">The filename and path to the certificate authority</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li>etcd_certfile</li>
+</ul>
+</td>
+<td colspan="2">The filename and path to the certificate (public key)</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li>etcd_keyfile</li>
+</ul>
+</td>
+<td colspan="2">The filename and path to the private key</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="definitions">
+<h2>Definitions<a class="headerlink" href="#definitions" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/definitions.json">http://judkins.house/apis/k2/v1/definitions.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">A dict containing JSON snippets which are referenced within the config for clarity or brevity.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="6"><ul class="first last simple">
+<li>helmConfigs</li>
+</ul>
+</td>
+<td colspan="2"><em>Helm configurations</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">A list of Helm configurations referenced within the configuration file.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>array</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">items</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">helmConfig.json</span></td>
+</tr>
+<tr class="row-even"><td>minItems</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td rowspan="6"><ul class="first last simple">
+<li>fabricConfigs</li>
+</ul>
+</td>
+<td colspan="2"><em>Fabric configurations</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">A list of fabric configurations referenced within the configuration file.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>array</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">items</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">fabricConfig.json</span></td>
+</tr>
+<tr class="row-even"><td>minItems</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td rowspan="6"><ul class="first last simple">
+<li>loadBalancerConfigs</li>
+</ul>
+</td>
+<td colspan="2"><em>Load Balancer configurations</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">A list of Load Balancer configurations referenced within the configuration file.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>array</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">items</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">loadBalancerConfig.json</span></td>
+</tr>
+<tr class="row-even"><td>minItems</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td rowspan="6"><ul class="first last simple">
+<li>kvStoreConfigs</li>
+</ul>
+</td>
+<td colspan="2"><em>kvStore configurations</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">A list of kvStore (e.g. etcd) configurations referenced within the configuration file.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>array</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">items</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">kvStoreConfig.json</span></td>
+</tr>
+<tr class="row-even"><td>minItems</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td rowspan="6"><ul class="first last simple">
+<li>apiServerConfigs</li>
+</ul>
+</td>
+<td colspan="2"><em>API server configurations</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">A list of API server configurations referenced within the configuration file.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>array</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">items</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">apiServerConfig.json</span></td>
+</tr>
+<tr class="row-even"><td>minItems</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td rowspan="6"><ul class="first last simple">
+<li>kubeConfigs</li>
+</ul>
+</td>
+<td colspan="2"><em>Kubernetes configurations</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">A list of Kubernetes configurations referenced within the configuration file.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>array</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">items</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">kubeConfig.json</span></td>
+</tr>
+<tr class="row-even"><td>minItems</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td rowspan="6"><ul class="first last simple">
+<li>containerConfigs</li>
+</ul>
+</td>
+<td colspan="2"><em>Container configurations</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">A list of container configurations referenced within the configuration file.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>array</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">items</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">containerConfig.json</span></td>
+</tr>
+<tr class="row-even"><td>minItems</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td rowspan="6"><ul class="first last simple">
+<li>osConfigs</li>
+</ul>
+</td>
+<td colspan="2"><em>OS configurations</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">A list of OS configurations referenced within the configuration file.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>array</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">items</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">osConfig.json</span></td>
+</tr>
+<tr class="row-even"><td>minItems</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td rowspan="6"><ul class="first last simple">
+<li>nodeConfigs</li>
+</ul>
+</td>
+<td colspan="2"><em>Node configurations</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">A list of (provider specific) node configurations referenced within the configuration file.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>array</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">items</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">nodeConfig.json</span></td>
+</tr>
+<tr class="row-even"><td>minItems</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td rowspan="6"><ul class="first last simple">
+<li>providerConfigs</li>
+</ul>
+</td>
+<td colspan="2"><em>Provider configurations</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">A list of provider (e.g. AWS, GKE, etc.) configurations referenced within the configuration file.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>array</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">items</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">providerConfig.json</span></td>
+</tr>
+<tr class="row-even"><td>minItems</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td rowspan="6"><ul class="first last simple">
+<li>keyPairs</li>
+</ul>
+</td>
+<td colspan="2"><em>Key pairs</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">A list of key pairs referenced within the configuration file.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>array</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">items</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">keyPair.json</span></td>
+</tr>
+<tr class="row-even"><td>minItems</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="a-kubernetes-deployment">
+<h2>A Kubernetes deployment<a class="headerlink" href="#a-kubernetes-deployment" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/deployment.json">http://judkins.house/apis/k2/v1/deployment.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Describes the deployment of one or more Kubernetes clusters.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="6"><ul class="first last simple">
+<li><strong>clusters</strong></li>
+</ul>
+</td>
+<td colspan="2">A list of cluster configurations</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>array</em></td>
+</tr>
+<tr class="row-odd"><td colspan="2">items</td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">cluster.json</span></td>
+</tr>
+<tr class="row-odd"><td>maxItems</td>
+<td>1</td>
+</tr>
+<tr class="row-even"><td>minItems</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li>readiness</li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">readiness.json</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="cluster-dns-configuration">
+<h2>Cluster DNS configuration<a class="headerlink" href="#cluster-dns-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/dnsConfig.json">http://judkins.house/apis/k2/v1/dnsConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Describes the configuration of a DNS service for the cluster.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>name</strong></li>
+</ul>
+</td>
+<td colspan="2">Name of cluster DNS configuration</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li>kind</li>
+</ul>
+</td>
+<td colspan="2">Type of cluster DNS configuration</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>enum</td>
+<td>dns</td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li><strong>kubedns</strong></li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">kubeDns.json</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="docker-runtime-configuration">
+<h2>Docker Runtime Configuration<a class="headerlink" href="#docker-runtime-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/dockerContainerConfig.json">http://judkins.house/apis/k2/v1/dockerContainerConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Describes the configuration of a Docker runtime.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li><strong>name</strong></li>
+</ul>
+</td>
+<td colspan="2">Name of the docker configuration (e.g. prodDockerConfig, betaDockerConfig, etc.)</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>default</td>
+<td>defaultDockerConfig</td>
+</tr>
+<tr class="row-even"><td rowspan="3"><ul class="first last simple">
+<li>kind</li>
+</ul>
+</td>
+<td colspan="2">Type of configuration</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-even"><td>enum</td>
+<td>container</td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li><strong>runtime</strong></li>
+</ul>
+</td>
+<td colspan="2">Type of container runtime</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>enum</td>
+<td>docker</td>
+</tr>
+<tr class="row-even"><td rowspan="3"><ul class="first last simple">
+<li><strong>type</strong></li>
+</ul>
+</td>
+<td colspan="2">Type of docker installation</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-even"><td>enum</td>
+<td>distro, tgz</td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li>uri</li>
+</ul>
+</td>
+<td colspan="2">If type is tgz, then uri identifies how to obtain a tgz file containing the docker binaries</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>default</td>
+<td>distro</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="etcd-configuration">
+<h2>etcd configuration<a class="headerlink" href="#etcd-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="4"><a class="reference external" href="http://judkins.house/apis/k2/v1/etcdConfig.json">http://judkins.house/apis/k2/v1/etcdConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="4">Describes the configuration of etcd.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="3"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="4">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li>name</li>
+</ul>
+</td>
+<td colspan="3">Name of etcd configuration</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td colspan="2"><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li><strong>type</strong></li>
+</ul>
+</td>
+<td colspan="3">Type of kvStore</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td colspan="2"><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>enum</td>
+<td colspan="2">etcd</td>
+</tr>
+<tr class="row-even"><td rowspan="5"><ul class="first last simple">
+<li><strong>clientPorts</strong></li>
+</ul>
+</td>
+<td colspan="3">Ports used to listen for client requests</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>array</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">items</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td>type</td>
+<td><em>number</em></td>
+</tr>
+<tr class="row-even"><td>minItems</td>
+<td colspan="2">1</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>clusterToken</strong></li>
+</ul>
+</td>
+<td colspan="3">Token used during etcd cluster formation</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td colspan="2"><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="5"><ul class="first last simple">
+<li><strong>peerPorts</strong></li>
+</ul>
+</td>
+<td colspan="3">Ports used for peer to peer communication</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td colspan="2"><em>array</em></td>
+</tr>
+<tr class="row-odd"><td colspan="3">items</td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td>type</td>
+<td><em>number</em></td>
+</tr>
+<tr class="row-odd"><td>minItems</td>
+<td colspan="2">1</td>
+</tr>
+<tr class="row-even"><td rowspan="2"><ul class="first last simple">
+<li><strong>ssl</strong></li>
+</ul>
+</td>
+<td colspan="3">Whether or not SSL is used for etcd traffic</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>boolean</em></td>
+</tr>
+<tr class="row-even"><td rowspan="2"><ul class="first last simple">
+<li><strong>version</strong></li>
+</ul>
+</td>
+<td colspan="3">Version of etcd container which will be run</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>string</em></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="fabric-configuration">
+<h2>Fabric Configuration<a class="headerlink" href="#fabric-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="2"><a class="reference external" href="http://judkins.house/apis/k2/v1/fabricConfig.json">http://judkins.house/apis/k2/v1/fabricConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="2">Describes the configuration of a network fabric for use with kubernetes.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">properties</td>
+</tr>
+<tr class="row-odd"><td colspan="2"><ul class="first last simple">
+<li>oneOf</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="gke-service-account-configuration">
+<h2>GKE Service Account Configuration<a class="headerlink" href="#gke-service-account-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/gkeKeyPairConfig.json">http://judkins.house/apis/k2/v1/gkeKeyPairConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Describes a GKE service account used to authenticate management of GKE resources. See the [documentation](<a class="reference external" href="https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances">https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances</a>) for more information.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>serviceAccount</strong></li>
+</ul>
+</td>
+<td colspan="2">The service account id</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>serviceAccountKeyFile</strong></li>
+</ul>
+</td>
+<td colspan="2">The service account key file</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="gke-node-configuration">
+<h2>GKE Node Configuration<a class="headerlink" href="#gke-node-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/gkeNodeConfig.json">http://judkins.house/apis/k2/v1/gkeNodeConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Describes node configuration, some of which is specific to GKE (e.g. [machine types](<a class="reference external" href="https://cloud.google.com/compute/docs/machine-types">https://cloud.google.com/compute/docs/machine-types</a>).</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>name</strong></li>
+</ul>
+</td>
+<td colspan="2">Name of node for use by k2</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li>kind</li>
+</ul>
+</td>
+<td colspan="2">Type of config this is</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>enum</td>
+<td>node</td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li><strong>providerConfig</strong></li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">gkeNodeProviderConfig.json</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="todo-cf-aws-prov-cfg">
+<h2>TODO: cf AWS prov cfg<a class="headerlink" href="#todo-cf-aws-prov-cfg" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="4"><a class="reference external" href="http://judkins.house/apis/k2/v1/gkeNodeProviderConfig.json">http://judkins.house/apis/k2/v1/gkeNodeProviderConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="4">GKE Node Provider Configuration</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="3"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="4">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>diskSize</strong></li>
+</ul>
+</td>
+<td colspan="3">The amount of disk that should be allocated to the node, in GB</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td colspan="2"><em>number</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>machineType</strong></li>
+</ul>
+</td>
+<td colspan="3">The machine type that should be used for the node (n1-standard-1, etc.)</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td colspan="2"><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="4"><ul class="first last simple">
+<li><strong>scopes</strong></li>
+</ul>
+</td>
+<td colspan="3">The scopes given to the node</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td colspan="2"><em>array</em></td>
+</tr>
+<tr class="row-odd"><td colspan="3">items</td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td>type</td>
+<td><em>string</em></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="gke-provider-configuration">
+<h2>GKE Provider Configuration<a class="headerlink" href="#gke-provider-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/gkeProviderConfig.json">http://judkins.house/apis/k2/v1/gkeProviderConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Describes GKE specific provider configuration.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>name</strong></li>
+</ul>
+</td>
+<td colspan="2">The name of the configuration, for use within k2 configurations</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li>kind</li>
+</ul>
+</td>
+<td colspan="2">The type of configuration this object it</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>enum</td>
+<td>provider</td>
+</tr>
+<tr class="row-even"><td rowspan="3"><ul class="first last simple">
+<li><strong>provider</strong></li>
+</ul>
+</td>
+<td colspan="2">The name of the provider for this provider setting</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-even"><td>enum</td>
+<td>gke</td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li><strong>type</strong></li>
+</ul>
+</td>
+<td colspan="2">How are nodes configured - SHOULD BE MOVED TO NODE PROVIDER CONFIG?</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>enum</td>
+<td>autonomous</td>
+</tr>
+<tr class="row-even"><td rowspan="2"><ul class="first last simple">
+<li><strong>project</strong></li>
+</ul>
+</td>
+<td colspan="2">Name of GKE project</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li><strong>keypair</strong></li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">keyPair.json</span></td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li><strong>zone</strong></li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">gkeZoneConfig.json</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="gke-zone-configuration">
+<h2>GKE Zone Configuration<a class="headerlink" href="#gke-zone-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="4"><a class="reference external" href="http://judkins.house/apis/k2/v1/gkeZoneConfig.json">http://judkins.house/apis/k2/v1/gkeZoneConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="4">GKE Zone Configuration</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="3"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="4">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>primaryZone</strong></li>
+</ul>
+</td>
+<td colspan="3">The main zone for the k2 cluster</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td colspan="2"><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="4"><ul class="first last simple">
+<li><strong>additionalZones</strong></li>
+</ul>
+</td>
+<td colspan="3">Additional Zones that the cluster should also exist in</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td colspan="2"><em>array</em></td>
+</tr>
+<tr class="row-odd"><td colspan="3">items</td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td>type</td>
+<td><em>string</em></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="helm-repo-configuration">
+<h2>Helm repo configuration<a class="headerlink" href="#helm-repo-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/helmChart.json">http://judkins.house/apis/k2/v1/helmChart.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Configuration for a helm chart for use in K2</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>name</strong></li>
+</ul>
+</td>
+<td colspan="2">friendly name for the chart</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>repo</strong></li>
+</ul>
+</td>
+<td colspan="2">repository to pull this chart from - referenced by helm application</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>chart</strong></li>
+</ul>
+</td>
+<td colspan="2">Actual name of chart in the repository - referenced by helm application</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>version</strong></li>
+</ul>
+</td>
+<td colspan="2">Version of the chart to deploy - referenced by helm application</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="helm-configuration">
+<h2>Helm configuration<a class="headerlink" href="#helm-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/helmConfig.json">http://judkins.house/apis/k2/v1/helmConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Configuration for helm for use in K2</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>name</strong></li>
+</ul>
+</td>
+<td colspan="2">Name of the helm configuration</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li>kind</li>
+</ul>
+</td>
+<td colspan="2">Kind of kubernetes package manager</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="4"><ul class="first last simple">
+<li><strong>repos</strong></li>
+</ul>
+</td>
+<td colspan="2">List of helm repositories we want installed</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>array</em></td>
+</tr>
+<tr class="row-odd"><td colspan="2">items</td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">helmRepo.json</span></td>
+</tr>
+<tr class="row-odd"><td rowspan="4"><ul class="first last simple">
+<li><strong>charts</strong></li>
+</ul>
+</td>
+<td colspan="2">List of helm charts we want installed</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>array</em></td>
+</tr>
+<tr class="row-odd"><td colspan="2">items</td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">helmChart.json</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id2">
+<h2>Helm repo configuration<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/helmRepo.json">http://judkins.house/apis/k2/v1/helmRepo.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Configuration for a helm repo for use in K2</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>name</strong></li>
+</ul>
+</td>
+<td colspan="2">name for the repository - referenced by helm application</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>url</strong></li>
+</ul>
+</td>
+<td colspan="2">URL to the helm repository</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="key-pairs-entry-for-use-in-k2">
+<h2>Key Pairs Entry for use in K2<a class="headerlink" href="#key-pairs-entry-for-use-in-k2" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="4"><a class="reference external" href="http://judkins.house/apis/k2/v1/keyPair.json">http://judkins.house/apis/k2/v1/keyPair.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="4">Key Pairs Entry for use in K2</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="3"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="4">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>name</strong></li>
+</ul>
+</td>
+<td colspan="3">Name given to the key entry for identification in other k2 configuration areas</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td colspan="2"><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li>kind</li>
+</ul>
+</td>
+<td colspan="3">Type configuration node this is</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td colspan="2"><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>enum</td>
+<td colspan="2">keyPair</td>
+</tr>
+<tr class="row-even"><td rowspan="2"><ul class="first last simple">
+<li>publickeyFile</li>
+</ul>
+</td>
+<td colspan="3">Location of the public key on the host running K2</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>string</em></td>
+</tr>
+<tr class="row-even"><td rowspan="2"><ul class="first last simple">
+<li>privatekeyFile</li>
+</ul>
+</td>
+<td colspan="3">Location of the private key on the host running K2</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>string</em></td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li>providerConfig</li>
+</ul>
+</td>
+<td>anyOf</td>
+<td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">gkeKeyPairConfig.json</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="kubernetes-authentication-authn-entry">
+<h2>Kubernetes Authentication Authn Entry<a class="headerlink" href="#kubernetes-authentication-authn-entry" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/kubeAuthAuthnEntry.json">http://judkins.house/apis/k2/v1/kubeAuthAuthnEntry.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Kubernetes Authentication Authn Entry</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="4"><ul class="first last simple">
+<li><strong>basic</strong></li>
+</ul>
+</td>
+<td colspan="2">List of user/password to be created.</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>array</em></td>
+</tr>
+<tr class="row-odd"><td colspan="2">items</td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">kubeAuthBasicUser.json</span></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>default_basic_user</strong></li>
+</ul>
+</td>
+<td colspan="2">Default user for kubeauth file.</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="kubernetes-authentication-authz-entry">
+<h2>Kubernetes Authentication Authz Entry<a class="headerlink" href="#kubernetes-authentication-authz-entry" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="4"><a class="reference external" href="http://judkins.house/apis/k2/v1/kubeAuthAuthzEntry.json">http://judkins.house/apis/k2/v1/kubeAuthAuthzEntry.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="4">Kubernetes Authentication Authz Entry</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="3"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="4">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="6"><ul class="first last simple">
+<li>rbac</li>
+</ul>
+</td>
+<td colspan="3">Kubernetes RBAC configuration.</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-odd"><td colspan="3">properties</td>
+</tr>
+<tr class="row-even"><td rowspan="3"><ul class="first last simple">
+<li>super_user</li>
+</ul>
+</td>
+<td colspan="2">Determines the authorization-rbac-super-user flag used to start the apiserver in versions of kubernetes &lt;= 1.5</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-even"><td>default</td>
+<td>placeholder</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="kubernetes-authentication-basic-user-entry">
+<h2>Kubernetes Authentication Basic User Entry<a class="headerlink" href="#kubernetes-authentication-basic-user-entry" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/kubeAuthBasicUser.json">http://judkins.house/apis/k2/v1/kubeAuthBasicUser.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Kubernetes Authentication Basic User Entry</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>user</strong></li>
+</ul>
+</td>
+<td colspan="2">The username for the account.</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>password</strong></li>
+</ul>
+</td>
+<td colspan="2">The password for the user account.</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li>group</li>
+</ul>
+</td>
+<td colspan="2">The groups for the user account.</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="kubernetes-authentication-entry">
+<h2>Kubernetes Authentication Entry<a class="headerlink" href="#kubernetes-authentication-entry" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="2"><a class="reference external" href="http://judkins.house/apis/k2/v1/kubeAuthConfig.json">http://judkins.house/apis/k2/v1/kubeAuthConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="2">Kubernetes Authentication Entry</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">properties</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li>authz</li>
+</ul>
+</td>
+<td><span class="xref std std-ref">kubeAuthAuthzEntry.json</span></td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li><strong>authn</strong></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">kubeAuthAuthnEntry.json</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="a-kubernetes-configuration">
+<h2>A Kubernetes configuration<a class="headerlink" href="#a-kubernetes-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/kubeConfig.json">http://judkins.house/apis/k2/v1/kubeConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">The location and version of a container containing the Kubernetes hyperkube binary.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>name</strong></li>
+</ul>
+</td>
+<td colspan="2">Name of the Kubernetes configuration</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li>kind</li>
+</ul>
+</td>
+<td colspan="2">Type of kubeconfig</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>enum</td>
+<td>kubernetes</td>
+</tr>
+<tr class="row-even"><td rowspan="3"><ul class="first last simple">
+<li>hyperkubeLocation</li>
+</ul>
+</td>
+<td colspan="2">Location of the Kubernetes container.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-even"><td>format</td>
+<td>uri</td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li><strong>version</strong></li>
+</ul>
+</td>
+<td colspan="2">Version of the hyperkube binary.</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>format</td>
+<td>symver</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="kubernetes-dns-configurations">
+<h2>Kubernetes DNS Configurations<a class="headerlink" href="#kubernetes-dns-configurations" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/kubeDns.json">http://judkins.house/apis/k2/v1/kubeDns.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Describes the configuration of DNS for the Kubernetes cluster.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>cluster_ip</strong></li>
+</ul>
+</td>
+<td colspan="2">This should be the same as the IP set in the deployment.clusters[x].dns in the main configuration file</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>dns_domain</strong></li>
+</ul>
+</td>
+<td colspan="2">This should be the same as the domain set in deployment.clusters[x].domain in the main configuration file</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li>namespace</li>
+</ul>
+</td>
+<td colspan="2">Kubernetes is expecting DNS to be in kube-system</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="kubeversioned-fabric-configuration">
+<h2>kubeVersioned Fabric configuration<a class="headerlink" href="#kubeversioned-fabric-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="17%" />
+<col width="17%" />
+<col width="17%" />
+<col width="17%" />
+<col width="17%" />
+<col width="17%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="6"><a class="reference external" href="http://judkins.house/apis/k2/v1/kubeVersionedFabric.json">http://judkins.house/apis/k2/v1/kubeVersionedFabric.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="6">Fabric configurations for multiple versions of Kubernetes</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="5"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="6">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>name</strong></li>
+</ul>
+</td>
+<td colspan="5">Name of the kubeVersioned fabric configuration.</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td colspan="4"><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li><strong>kind</strong></li>
+</ul>
+</td>
+<td colspan="5">The kind of configuration object.</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td colspan="4"><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>enum</td>
+<td colspan="4">versionedFabric</td>
+</tr>
+<tr class="row-even"><td rowspan="3"><ul class="first last simple">
+<li><strong>type</strong></li>
+</ul>
+</td>
+<td colspan="5">The type of the fabric being used.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="4"><em>string</em></td>
+</tr>
+<tr class="row-even"><td>enum</td>
+<td colspan="4">canal, weave</td>
+</tr>
+<tr class="row-odd"><td rowspan="11"><ul class="first last simple">
+<li><strong>kubeVersion</strong></li>
+</ul>
+</td>
+<td colspan="5">Allows different configurations to be defined depending on the Kubernetes version.</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td colspan="4"><em>object</em></td>
+</tr>
+<tr class="row-odd"><td colspan="5">properties</td>
+</tr>
+<tr class="row-even"><td rowspan="2"><ul class="first last simple">
+<li><strong>default</strong></li>
+</ul>
+</td>
+<td rowspan="2">oneOf</td>
+<td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">canalFabricConfig.json</span></td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">weaveFabricConfig.json</span></td>
+</tr>
+<tr class="row-even"><td rowspan="6"><ul class="first last simple">
+<li><strong>versions</strong></li>
+</ul>
+</td>
+<td colspan="4">Dictionary of configuration objects where the kubernetes version is the key</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="3"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="4">patternProperties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li>^v.*</li>
+</ul>
+</td>
+<td rowspan="2">oneOf</td>
+<td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">canalFabricConfig.json</span></td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">weaveFabricConfig.json</span></td>
+</tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="3">False</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="kvstore-configuration">
+<h2>kvStore Configuration<a class="headerlink" href="#kvstore-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/kvStoreConfig.json">http://judkins.house/apis/k2/v1/kvStoreConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Describes a kvStore (e.g. etcd) configuration.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td>oneOf</td>
+<td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">etcdConfig.json</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="load-balancer-configuration">
+<h2>Load balancer configuration<a class="headerlink" href="#load-balancer-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/loadBalancerConfig.json">http://judkins.house/apis/k2/v1/loadBalancerConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Load balancer configuration for Kubernetes API servers</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li>name</li>
+</ul>
+</td>
+<td colspan="2">Name of the load balancer configuration</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>maxLength</td>
+<td>32</td>
+</tr>
+<tr class="row-even"><td rowspan="3"><ul class="first last simple">
+<li><strong>type</strong></li>
+</ul>
+</td>
+<td colspan="2">Type of load balancer</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-even"><td>enum</td>
+<td>cloud, flipbit</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="node-configuration">
+<h2>Node Configuration<a class="headerlink" href="#node-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="100%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference external" href="http://judkins.house/apis/k2/v1/nodeConfig.json">http://judkins.house/apis/k2/v1/nodeConfig.json</a></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="nodepool-configuration">
+<h2>nodePool Configuration<a class="headerlink" href="#nodepool-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/nodePool.json">http://judkins.house/apis/k2/v1/nodePool.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Describes a set of one or more nodes which share the same configuration.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>name</strong></li>
+</ul>
+</td>
+<td colspan="2">Name of the nodePool</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>count</strong></li>
+</ul>
+</td>
+<td colspan="2">Number of nodes in the nodePool</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>number</em></td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li>kvStoreConfig</li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">kvStoreConfig.json</span></td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li>apiServerConfig</li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">apiServerConfig.json</span></td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li>kubeConfig</li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">kubeConfig.json</span></td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li>containerConfig</li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">containerConfig.json</span></td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li>osConfig</li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">osConfig.json</span></td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li>nodeConfig</li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">nodeConfig.json</span></td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li>keyPair</li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">keyPair.json</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="os-configuration">
+<h2>OS Configuration<a class="headerlink" href="#os-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/osConfig.json">http://judkins.house/apis/k2/v1/osConfig.json</a></td>
+</tr>
+<tr class="row-even"><td>anyOf</td>
+<td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">coreOsConfig.json</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="provider-configuration">
+<h2>Provider Configuration<a class="headerlink" href="#provider-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/providerConfig.json">http://judkins.house/apis/k2/v1/providerConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Describes the provider specific (e.g. AWS, GKE, etc.) configuration.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td rowspan="2">oneOf</td>
+<td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">awsProviderConfig.json</span></td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">gkeProviderConfig.json</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="cluster-readiness-configuration">
+<h2>Cluster Readiness Configuration<a class="headerlink" href="#cluster-readiness-configuration" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/readiness.json">http://judkins.house/apis/k2/v1/readiness.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Options to determine when a cluster is ready.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>type</strong></li>
+</ul>
+</td>
+<td colspan="2">The type of test that should be used to determine if a cluster is ready</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>value</strong></li>
+</ul>
+</td>
+<td colspan="2">The value for the test</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>number</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>wait</strong></li>
+</ul>
+</td>
+<td colspan="2">The number of seconds to wait for the test to complete</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>number</em></td>
+</tr>
+</tbody>
+</table>
+</div>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/weaveFabricConfig.json">http://judkins.house/apis/k2/v1/weaveFabricConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Weave Fabric configuration</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>name</strong></li>
+</ul>
+</td>
+<td colspan="2">name for the weave fabric configuration - used for referencing</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td colspan="3"><ul class="first last simple">
+<li><strong>type</strong></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li><strong>options</strong></li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">weaveFabricOptions.json</span></td>
+</tr>
+</tbody>
+</table>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/weaveFabricContainerConfig.json">http://judkins.house/apis/k2/v1/weaveFabricContainerConfig.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="3">Weave Fabric Container Options configuration</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="3">properties</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>version</strong></li>
+</ul>
+</td>
+<td colspan="2">Version of the container</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li><strong>location</strong></li>
+</ul>
+</td>
+<td colspan="2">Container image location</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+</tbody>
+</table>
+<table border="1" class="docutils">
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="2"><a class="reference external" href="http://judkins.house/apis/k2/v1/weaveFabricContainers.json">http://judkins.house/apis/k2/v1/weaveFabricContainers.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="2">Weave Fabric Container Options configuration</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">properties</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li><strong>weave</strong></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">weaveFabricContainerConfig.json</span></td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li><strong>weave_npc</strong></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">weaveFabricContainerConfig.json</span></td>
+</tr>
+</tbody>
+</table>
+<table border="1" class="docutils">
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td colspan="2"><a class="reference external" href="http://judkins.house/apis/k2/v1/weaveFabricOptions.json">http://judkins.house/apis/k2/v1/weaveFabricOptions.json</a></td>
+</tr>
+<tr class="row-even"><td colspan="2">Weave Fabric Options configuration</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>object</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">properties</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li><strong>containers</strong></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">weaveFabricContainers.json</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="#">
+              <img class="logo" src="_static/k2.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Welcome to k2’s config file  documentation!</a><ul>
+<li><a class="reference internal" href="#kubernetes-api-server-configuration">Kubernetes API server configuration</a></li>
+<li><a class="reference internal" href="#aws-network-access-control-list-acl-rule">AWS Network Access Control List (ACL) Rule</a></li>
+<li><a class="reference internal" href="#aws-security-credentials-configuration">AWS Security Credentials Configuration</a></li>
+<li><a class="reference internal" href="#aws-ebs-storage-options">AWS EBS Storage Options</a></li>
+<li><a class="reference internal" href="#kubernetes-node-label">Kubernetes Node Label</a></li>
+<li><a class="reference internal" href="#aws-node-configuration">AWS Node Configuration</a></li>
+<li><a class="reference internal" href="#node-mount-configuration">Node Mount Configuration</a></li>
+<li><a class="reference internal" href="#aws-provider-configuration">AWS Provider Configuration</a></li>
+<li><a class="reference internal" href="#aws-node-tag">AWS Node Tag</a></li>
+<li><a class="reference internal" href="#id1">AWS Provider Configuration</a></li>
+<li><a class="reference internal" href="#aws-security-configuration">AWS Security Configuration</a></li>
+<li><a class="reference internal" href="#aws-storage-device">AWS Storage Device</a></li>
+<li><a class="reference internal" href="#aws-subnet-configurationn">AWS Subnet Configurationn</a></li>
+<li><a class="reference internal" href="#canal-fabric-configuration">Canal Fabric Configuration</a></li>
+<li><a class="reference internal" href="#canal-fabric-container-options">Canal Fabric Container Options</a></li>
+<li><a class="reference internal" href="#canal-fabric-containers">Canal Fabric Containers</a></li>
+<li><a class="reference internal" href="#canal-fabric-network-configuration">Canal Fabric Network configuration</a></li>
+<li><a class="reference internal" href="#canal-fabric-vxlan-network-configuration">Canal Fabric VXLan Network configuration</a></li>
+<li><a class="reference internal" href="#canal-fabric-options-configuration">Canal Fabric Options configuration</a></li>
+<li><a class="reference internal" href="#a-single-cluster-configuration">A single cluster configuration</a></li>
+<li><a class="reference internal" href="#k2-configuration-file">k2 configuration file</a></li>
+<li><a class="reference internal" href="#coreos-configuration">CoreOS Configuration</a></li>
+<li><a class="reference internal" href="#coreos-locksmith-configuration">CoreOS Locksmith Configuration</a></li>
+<li><a class="reference internal" href="#definitions">Definitions</a></li>
+<li><a class="reference internal" href="#a-kubernetes-deployment">A Kubernetes deployment</a></li>
+<li><a class="reference internal" href="#cluster-dns-configuration">Cluster DNS configuration</a></li>
+<li><a class="reference internal" href="#docker-runtime-configuration">Docker Runtime Configuration</a></li>
+<li><a class="reference internal" href="#etcd-configuration">etcd configuration</a></li>
+<li><a class="reference internal" href="#fabric-configuration">Fabric Configuration</a></li>
+<li><a class="reference internal" href="#gke-service-account-configuration">GKE Service Account Configuration</a></li>
+<li><a class="reference internal" href="#gke-node-configuration">GKE Node Configuration</a></li>
+<li><a class="reference internal" href="#todo-cf-aws-prov-cfg">TODO: cf AWS prov cfg</a></li>
+<li><a class="reference internal" href="#gke-provider-configuration">GKE Provider Configuration</a></li>
+<li><a class="reference internal" href="#gke-zone-configuration">GKE Zone Configuration</a></li>
+<li><a class="reference internal" href="#helm-repo-configuration">Helm repo configuration</a></li>
+<li><a class="reference internal" href="#helm-configuration">Helm configuration</a></li>
+<li><a class="reference internal" href="#id2">Helm repo configuration</a></li>
+<li><a class="reference internal" href="#key-pairs-entry-for-use-in-k2">Key Pairs Entry for use in K2</a></li>
+<li><a class="reference internal" href="#kubernetes-authentication-authn-entry">Kubernetes Authentication Authn Entry</a></li>
+<li><a class="reference internal" href="#kubernetes-authentication-authz-entry">Kubernetes Authentication Authz Entry</a></li>
+<li><a class="reference internal" href="#kubernetes-authentication-basic-user-entry">Kubernetes Authentication Basic User Entry</a></li>
+<li><a class="reference internal" href="#kubernetes-authentication-entry">Kubernetes Authentication Entry</a></li>
+<li><a class="reference internal" href="#a-kubernetes-configuration">A Kubernetes configuration</a></li>
+<li><a class="reference internal" href="#kubernetes-dns-configurations">Kubernetes DNS Configurations</a></li>
+<li><a class="reference internal" href="#kubeversioned-fabric-configuration">kubeVersioned Fabric configuration</a></li>
+<li><a class="reference internal" href="#kvstore-configuration">kvStore Configuration</a></li>
+<li><a class="reference internal" href="#load-balancer-configuration">Load balancer configuration</a></li>
+<li><a class="reference internal" href="#node-configuration">Node Configuration</a></li>
+<li><a class="reference internal" href="#nodepool-configuration">nodePool Configuration</a></li>
+<li><a class="reference internal" href="#os-configuration">OS Configuration</a></li>
+<li><a class="reference internal" href="#provider-configuration">Provider Configuration</a></li>
+<li><a class="reference internal" href="#cluster-readiness-configuration">Cluster Readiness Configuration</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Samsung CNCT.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
