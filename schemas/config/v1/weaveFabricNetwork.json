@@ -2,6 +2,7 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/weaveFabricNetwork.json",
   "title": "Weave Fabric Network configuration",
+  "$$target": "weaveFabricNetwork.json",
   "description": "Describes the configuration of a Weave network fabric.",
 
   "properties": {
