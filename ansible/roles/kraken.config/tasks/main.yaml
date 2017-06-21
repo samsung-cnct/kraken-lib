@@ -129,3 +129,14 @@
   loop_control:
     loop_var: a_cluster
   when: "a_cluster.kubeAuth.authn.oidc is defined"
+
+# version_query and version_outfile are passed in by the caller
+- name: Collect versions
+  set_fact:
+    query_max_version: "{{ kraken_config | json_query('clusters[].nodePools[].kubeConfig.version') | max_semver }}"
+
+- name: Write out version
+  template:
+    src: query_max_version.jinja2
+    dest: "{{ version_outfile | realpath }}"
+  when: kraken_action == 'max_k8s_version'
