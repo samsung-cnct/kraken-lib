@@ -12,6 +12,7 @@ Table of Contents
     * <a href="#report-bug">Report a bug</a>
     * <a href="#request-feature">Request a new feature</a>
     * <a href="#contribute-code">Contribute code</a>
+        * <a href="#recommended-dev-tooling">Recommended Dev Tooling</a>
     * <a href="#contribute-documentation">Contribute documentation</a>
     * <a href="#pull-requests">Pull requests</a>
         * <a href="#create-pull-request">Create a pull request</a>
@@ -96,6 +97,47 @@ GitHub.
        going to touch and how everything is going to fit together.
     3. K2 committers will iterate with you on the design to make sure you are on the right track.
     4. Implement your issue, create a pull request (see below), and iterate from there.
+
+
+### Recommended Dev Tooling 
+The recommended K2 Developer Tool can be accessed in the `/hack` directory and is called `dockerdev`, a tool that pulls down a  [k2-tools](https://github.com/samsung-cnct/k2-tools) image. 
+The container will provide you with a console that contains the correct environment for developing and running k2. The intent is to mitigate version issues and 
+requirements, allowing you the Developer to focus on coding and not worry on dependencies.
+
+#### Developer Workflow with K2-Tools
+Here we document how a developer would use k2-tools to work with a cluster.
+
+##### Assumptions
+* You have used either K2 or k2cli to generate a config file.
+* You have pulled the latest k2 master branch on your machine, and are working on a fork. 
+
+```
+docker pull quay.io/samsung_cnct/k2-tools
+```
+
+* You are currently on the your local k2 github fork directory
+
+##### Steps
+* Generate latest configuration file, for example:
+
+```
+k2cli generate
+```
+
+* Next we should create a docker container that points to you (and mount your k2 workspace) cluster config (generated earlier)
+
+```
+hack/dockerdev -c <PATH_TO_CONFIGS>/<YOUR_CONFIG>.yaml
+```
+
+* After some time, you will be in the bash terminal of the container, bring up your cluster
+as you would normally when developing k2 (including any flags you require).:
+
+```
+/up.sh -c <PATH_TO_CONFIGS>/<YOUR_CONFIG>.yaml
+```
+
+At this point since you have mounted your workspace, you should be able to make changes to k2 here and even access git commands.
 
 ### Testing
 
