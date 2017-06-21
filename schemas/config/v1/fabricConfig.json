@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/fabricConfig.json",
+  "$$target": "fabricConfig.json",
   "title": "Fabric Configuration",
   "description": "Describes the configuration of a network fabric for use with kubernetes.",
 
@@ -11,6 +12,5 @@
       { "$ref": "kubeVersionedFabric.json" }
     ]
   },
-
   "type": "object"
 }

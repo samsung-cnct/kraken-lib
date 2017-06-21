@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/osConfig.json",
+  "$$target": "osConfig.json",
   "title": "OS Configuration",
   "description": "Describes the OS configuration for a node.",
 

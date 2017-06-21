@@ -1,31 +1,37 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/awsNodeProviderConfig.json",
+  "$$target": "awsNodeProviderConfig.json",
   "title": "AWS Provider Configuration",
-  "description": "Describes AWS specific provider configuration",
+  "description": "Describes AWS specific provider configuration.",
 
   "properties": {
     "provider": {
-      "description": "Identifies who the provider is for configuration",
+      "description": "Identifies who the provider is for configuration.",
       "enum": [ "aws" ],
       "type": "string"
     },
     "type": {
-      "description": "Identifies what aws machine type should be used (m3.medium, etc.)",
+      "description": "Identifies what aws machine type should be used (m3.medium, etc.).",
       "type": "string"
     },
     "subnet": {
-      "description": "Identifies what subnets should be used.  These are names of subnets created elsewhere in the configuration",
+      "description": "Identifies what subnets should be used.  These are names of subnets created elsewhere in the configuration.",
       "items": { "type": "string" },
       "type": "array"
     },
     "tags": {
-      "description": "List of AWS tags to associate with the node",
+      "description": "List of AWS tags to associate with the node.",
       "items": { "$ref": "awsNodeTag.json" },
       "type": "array"
     },
+    "labels": {
+      "description": "List of Kubernetes labels to associate with the node.",
+      "items": { "$ref": "kubeNodeLabel.json" },
+      "type": "array"
+    },
     "storage": {
-      "description": "List of storage devices to attach to the node",
+      "description": "List of storage devices to attach to the node.",
       "items": { "$ref": "awsStorageDevice.json" },
       "type": "array"
     }

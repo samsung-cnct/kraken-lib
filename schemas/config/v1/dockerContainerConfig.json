@@ -1,34 +1,36 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/dockerContainerConfig.json",
+  "$$target": "dockerContainerConfig.json",
   "title": "Docker Runtime Configuration",
   "description": "Describes the configuration of a Docker runtime.",
 
   "properties": {
     "name": {
-      "description": "Name of the docker configuration (e.g. prodDockerConfig, betaDockerConfig, etc.)",
+      "description": "Name of the docker configuration (e.g. prodDockerConfig, betaDockerConfig, etc.).",
       "type": "string",
       "default": "defaultDockerConfig"
     },
     "kind": {
-      "description": "Type of configuration",
+      "description": "Type of configuration.",
       "enum": [ "container" ],
       "type": "string"
     },
     "runtime": {
-      "description": "Type of container runtime",
+      "description": "Type of container runtime.",
       "enum": [ "docker" ],
-      "type": "string"
+      "type": "string",
+      "default": "docker"
     },
     "type": {
-      "description": "Type of docker installation",
+      "description": "Type of docker installation.",
       "enum": [ "distro", "tgz" ],
-      "type": "string"
-    },
-    "uri": {
-      "description": "If type is tgz, then uri identifies how to obtain a tgz file containing the docker binaries",
       "type": "string",
       "default": "distro"
+    },
+    "uri": {
+      "description": "If type is tgz, then uri identifies how to obtain a tgz file containing the docker binaries.",
+      "type": "string"
     }
   },
 

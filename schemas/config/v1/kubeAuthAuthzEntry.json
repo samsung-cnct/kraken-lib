@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/kubeAuthAuthzEntry.json",
+  "$$target": "kubeAuthAuthzEntry.json",
   "title": "Kubernetes Authentication Authz Entry",
   "description": "Kubernetes Authentication Authz Entry",
 

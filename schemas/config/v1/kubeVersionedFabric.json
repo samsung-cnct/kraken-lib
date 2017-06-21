@@ -1,8 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/kubeVersionedFabric.json",
+  "$$target": "kubeVersionedFabric.json",
   "title": "kubeVersioned Fabric configuration",
-  "description": "Fabric configurations for multiple versions of Kubernetes",
+  "description": "Fabric configurations for multiple versions of Kubernetes.",
 
   "properties": {
     "name": {

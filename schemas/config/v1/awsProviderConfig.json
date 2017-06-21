@@ -1,70 +1,71 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/awsProviderConfig.json",
+  "$$target": "awsProviderConfig.json",
   "title": "AWS Provider Configuration",
   "description": "Describes AWS specific provider configuration.",
 
   "properties": {
     "name": {
-      "description": "The name of the configuration, for use within k2 configurations",
+      "description": "The name of the configuration, for use within k2 configurations.",
       "type": "string"
     },
     "kind": {
-      "description": "The type of configuration this object it",
+      "description": "The type of configuration this object it.",
       "enum": [ "provider" ],
       "type": "string"
     },
     "provider": {
-      "description": "The name of the provider for this provider setting",
+      "description": "The name of the provider for this provider setting.",
       "enum": [ "aws" ],
       "type": "string"
     },
     "type": {
-      "description": "How are nodes configured - SHOULD BE MOVED TO NODE PROVIDER CONFIG?",
+      "description": "Type of machine image deployment.",
       "enum": [ "cloudinit" ],
       "type": "string"
     },
     "resourcePrefix": {
-      "description": "Any prefix that should be prepended to resources in AWS to make them easier to identify",
+      "description": "Any prefix that should be prepended to resources in AWS to make them easier to identify.",
       "type": [ "string", "null" ]
     },
     "vpc": {
-      "description": "CIDR for the VPC for the cluster",
+      "description": "CIDR for the VPC for the cluster.",
       "format": "cidr",
       "type": "string",
       "default": "10.0.0.0/16"
     },
     "region": {
-      "description": "Region to create resources in (us-east-1, us-west-2, etc)",
+      "description": "Region to create resources in (us-east-1, us-west-2, etc.).",
       "type": "string",
       "default": "us-east-1"
     },
     "subnet": {
-      "description": "List of subnets to use within a region for the cluster",
+      "description": "List of subnets to use within a region for the cluster.",
       "items": { "$ref": "awsSubnetConfig.json" },
       "minItems": 1,
       "type": "array"
     },
     "egressAcl": {
-      "description": "List of egress ACLs to create for the VPC",
+      "description": "List of egress ACLs to create for the VPC.",
       "items": { "$ref": "awsAclConfig.json" },
       "minItems": 1,
       "type": "array"
     },
     "ingressAcl": {
-      "description": "List of ingress ACLs to create for the VPC",
+      "description": "List of ingress ACLs to create for the VPC.",
       "items": { "$ref": "awsAclConfig.json" },
       "minItems": 1,
       "type": "array"
     },
     "ingressSecurity": {
-      "description": "List of ingress security rules to create for the VPC",
+      "description": "List of ingress security rules to create for the VPC.",
       "items": { "$ref": "awsSecurityConfig.json" },
       "minItems": 1,
       "type": "array"
     },
     "egressSecurity": {
-      "description": "List of egress security rules to create for the VPC",
+      "description": "List of egress security rules to create for the VPC.",
       "items": { "$ref": "awsSecurityConfig.json" },
       "minItems": 1,
       "type": "array"

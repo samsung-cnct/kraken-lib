@@ -1,12 +1,13 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/keyPair.json",
+  "$$target": "keyPair.json",
   "title": "Key Pairs Entry for use in K2",
-  "description": "Key Pairs Entry for use in K2",
+  "description": "Key Pairs Entry for use in K2.",
 
   "properties": {
     "name": {
-      "description": "Name given to the key entry for identification in other k2 configuration areas",
+      "description": "Name given to the key entry for identification in other k2 configuration areas.",
       "type": "string"
     },
     "kind": {
@@ -15,15 +16,15 @@
       "type": "string"
     },
     "publickeyFile": {
-      "description": "Location of the public key on the host running K2",
+      "description": "Location of the public key on the host running K2.",
       "type": "string"
     },
     "privatekeyFile": {
-      "description": "Location of the private key on the host running K2",
+      "description": "Location of the private key on the host running K2.",
       "type": "string"
     },
     "providerConfig": {
-      "description": "Provider Specific information about key pairs",
+      "description": "Provider Specific information about key pairs.",
       "anyOf": [
         { "$ref": "gkeKeyPairConfig.json" }
       ]

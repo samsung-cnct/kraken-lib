@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/definitions.json",
+  "$$target": "definitions.json",
   "title": "Definitions",
   "description": "A dict containing JSON snippets which are referenced within the config for clarity or brevity.",
 

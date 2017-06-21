@@ -1,7 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/etcdConfig.json",
-  "title": "etcd configuration",
+  "$$target": "etcdConfig.json",
+  "title": "etcd Configuration",
   "description": "Describes the configuration of etcd.",
 
   "properties": {
@@ -15,16 +16,18 @@
       "type": "string"
     },
     "clientPorts": {
-      "description": "Ports used to listen for client requests",
+      "description": "Ports used to listen for client requests.",
       "items": {
         "type": "number"
       },
       "minItems": 1,
-      "type": "array"
+      "type": "array",
+      "default": [ 2379, 4001 ]
     },
     "clusterToken": {
       "description": "Token used during etcd cluster formation",
-      "type": "string"
+      "type": "string",
+      "default": "espouse-monger-rarely"
     },
     "peerPorts": {
       "description": "Ports used for peer to peer communication",
@@ -32,7 +35,8 @@
         "type": "number"
       },
       "minItems": 1,
-      "type": "array"
+      "type": "array",
+      "default": [ 2380 ]
     },
     "ssl": {
       "description": "Whether or not SSL is used for etcd traffic",

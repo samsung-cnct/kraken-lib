@@ -1,37 +1,38 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/cluster.json",
+  "$$target": "cluster.json",
   "title": "A single cluster configuration",
   "description": "A set of one or more nodePools, along with any shared configuration between them.",
 
   "properties": {
     "name": {
-      "description": "Name of this cluster",
+      "description": "Name of this cluster.",
       "type": "string",
       "maxLength": 13,
       "minLength": 1
     },
     "network": {
-      "description": "Internal IP address range (CIDR) for services",
+      "description": "Internal IP address range (CIDR) for services.",
       "format": "cidr",
       "type": "string"
     },
     "dns": {
-      "description": "Internal IP address of the DNS service",
+      "description": "Internal IP address of the DNS service.",
       "format": "ipv4",
       "type": "string"
     },
     "domain": {
-      "description": "Domain name for cluster (internal resolution)",
+      "description": "Domain name for cluster (internal resolution).",
       "format": "hostname",
       "type": "string"
     },
     "providerConfig": {
-      "description": "Provider (e.g. AWS, GKE, etc.) configuration",
+      "description": "Provider (e.g. AWS, GKE, etc.) configuration.",
       "$ref": "providerConfig.json"
     },
     "nodePools": {
-      "description": "A list of nodePool",
+      "description": "A list of nodePools.",
       "items": {
         "$ref": "nodePool.json"
       },
@@ -39,19 +40,19 @@
       "type": "array"
     },
     "fabricConfig": {
-      "description": "Fabric config for the kubernetes overlay network",
+      "description": "Fabric config for the kubernetes overlay network.",
       "$ref": "fabricConfig.json"
     },
     "kubeAuth": {
-      "description": "AAA (Authentication, Authorization and Accounting) settings for the cluster",
+      "description": "AAA (Authentication, Authorization and Accounting) settings for the cluster.",
       "$ref": "kubeAuthConfig.json"
     },
     "helmConfig": {
-      "description": "Helm config for installing kubernetes resources",
+      "description": "Helm config for installing kubernetes resources.",
       "$ref": "helmConfig.json"
     },
     "dnsConfig": {
-      "description": "DNS Configuration for the cluster",
+      "description": "DNS Configuration for the cluster.",
       "$ref": "dnsConfig.json"
     }
   },

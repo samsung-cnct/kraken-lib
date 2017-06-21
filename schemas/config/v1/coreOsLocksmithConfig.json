@@ -1,25 +1,29 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/coreOsLocksmithConfig.json",
+  "$$target": "coreOsLocksmithConfig.json",
   "title": "CoreOS Locksmith Configuration",
   "description": "Describes the configuration of CoreOS Locksmith (used to manage [updates](https://coreos.com/os/docs/latest/update-strategies.html).",
 
   "properties": {
     "endpoint": {
-      "description": "The etcd endpoint",
+      "description": "The etcd endpoint.",
       "type": "string"
     },
     "etcd_cafile": {
-      "description": "The filename and path to the certificate authority",
-      "type": "string"
+      "description": "The filename and path to the certificate authority.",
+      "type": "string",
+      "default": "/etc/etcd/ssl/client-ca.pem"
     },
     "etcd_certfile": {
-      "description": "The filename and path to the certificate (public key)",
-      "type": "string"
+      "description": "The filename and path to the certificate (public key).",
+      "type": "string",
+      "default": "/etc/etcd/ssl/client.pem"
     },
     "etcd_keyfile": {
-      "description": "The filename and path to the private key",
-      "type": "string"
+      "description": "The filename and path to the private key.",
+      "type": "string",
+      "default": "/etc/etcd/ssl/client-key.pem"
     }
   },
 

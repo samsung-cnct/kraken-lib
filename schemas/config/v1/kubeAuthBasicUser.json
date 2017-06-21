@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/kubeAuthBasicUser.json",
+  "$$target": "kubeAuthBasicUser.json",
   "title": "Kubernetes Authentication Basic User Entry",
   "description": "Kubernetes Authentication Basic User Entry",
 

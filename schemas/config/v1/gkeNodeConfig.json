@@ -1,16 +1,17 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/gkeNodeConfig.json",
+  "$$target": "gkeNodeConfig.json",
   "title": "GKE Node Configuration",
   "description": "Describes node configuration, some of which is specific to GKE (e.g. [machine types](https://cloud.google.com/compute/docs/machine-types).",
 
   "properties": {
     "name": {
-      "description": "Name of node for use by k2",
+      "description": "Name of node for use by k2.",
       "type": "string"
     },
     "kind": {
-      "description": "Type of config this is",
+      "description": "Type of config this is.",
       "enum": [ "node" ],
       "type": "string"
     },

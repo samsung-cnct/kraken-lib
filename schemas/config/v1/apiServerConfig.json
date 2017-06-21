@@ -1,9 +1,10 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/apiServerConfig.json",
-
+  "$$target": "apiServerConfig.json",
   "title": "Kubernetes API server configuration",
   "description": "kvStore (e.g. etcd) for API servers",
+
   "properties": {
     "name": {
       "description": "Name of the API server configuration",

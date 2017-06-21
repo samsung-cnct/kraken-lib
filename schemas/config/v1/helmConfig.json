@@ -1,27 +1,28 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/helmConfig.json",
-  "title": "Helm configuration",
-  "description": "Configuration for helm for use in K2",
+  "$$target": "helmConfig.json",
+  "title": "Helm Configuration",
+  "description": "Configuration for helm for use in K2.",
 
   "properties": {
     "name": {
-      "description": "Name of the helm configuration",
+      "description": "Name of the helm configuration.",
       "type": "string"
     },
     "kind": {
-      "description": "Kind of kubernetes package manager",
+      "description": "Kind of kubernetes package manager.",
       "type": "string"
     },
     "repos": {
-      "description": "List of helm repositories we want installed",
+      "description": "List of helm repositories we want installed.",
       "items": {
         "$ref": "helmRepo.json"
       },
       "type": "array"
     },
     "charts": {
-      "description": "List of helm charts we want installed",
+      "description": "List of helm charts we want installed.",
       "items": {
         "$ref": "helmChart.json"
       },

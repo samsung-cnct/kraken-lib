@@ -1,16 +1,17 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/awsNodeTag.json",
+  "$$target": "awsNodeTag.json",
   "title": "AWS Node Tag",
   "description": "Describes an [AWS node tag](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Using_Tags.html).",
 
   "properties": {
     "key": {
-      "description": "The AWS tag's key name",
+      "description": "The AWS tag's key name.",
       "type": "string"
     },
     "value": {
-      "description": "The AWS tag's value",
+      "description": "The AWS tag's value.",
       "type": "string"
     }
   },

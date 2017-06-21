@@ -1,16 +1,17 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/helmRepo.json",
+  "$$target": "helmRepo.json",
   "title": "Helm repo configuration",
-  "description": "Configuration for a helm repo for use in K2",
+  "description": "Configuration for a helm repo for use in K2.",
 
   "properties": {
     "name": {
-      "description": "name for the repository - referenced by helm application",
+      "description": "Name for the repository - referenced by helm application.",
       "type": "string"
     },
     "url": {
-      "description": "URL to the helm repository",
+      "description": "URL to the helm repository.",
       "type": "string"
     }
   },

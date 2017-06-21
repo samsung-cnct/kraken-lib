@@ -1,20 +1,20 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/canalFabricNetworkVxlan.json",
+  "$$target": "canalFabricNetworkVxlan.json",
   "title": "Canal Fabric VXLan Network configuration",
   "description": "Canal Fabric VXLan Network configuration.",
 
   "properties": {
     "type": {
-      "description": "Indicates that it is vxlan",
+      "description": "Indicates that it is vxlan.",
       "enum": [ "vxlan" ],
-      "type": "string"
+      "type": "string",
+      "default": "vxlan"
     }
   },
-
   "required": [
     "type"
   ],
-
   "type": "object"
 }

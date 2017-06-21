@@ -1,13 +1,12 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/providerConfig.json",
+  "$$target": "providerConfig.json",
   "title": "Provider Configuration",
   "description": "Describes the provider specific (e.g. AWS, GKE, etc.) configuration.",
 
   "oneOf": [
     { "$ref": "awsProviderConfig.json" },
     { "$ref": "gkeProviderConfig.json" }
-  ],
-
-  "type": "object"
+  ]
 }

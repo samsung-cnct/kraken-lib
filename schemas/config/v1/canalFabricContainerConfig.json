@@ -1,15 +1,17 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/canalFabricContainerConfig.json",
+  "$$target": "canalFabricContainerConfig.json",
   "title": "Canal Fabric Container Options",
   "description": "Describes a Canal fabric container.",
+
   "properties": {
     "version": {
-      "description": "Version of the container",
+      "description": "Tag of the container image (usually this is the version).",
       "type": "string"
     },
     "location": {
-      "description": "Container image location",
+      "description": "Container image location.",
       "type": "string"
     }
   },

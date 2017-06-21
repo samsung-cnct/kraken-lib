@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/awsAuthenticationConfig.json",
+  "$$target": "awsAuthenticationConfig.json",
   "title": "AWS Security Credentials Configuration",
   "description": "Describes AWS security credential configuration. See the [documentation](http://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html)",
 

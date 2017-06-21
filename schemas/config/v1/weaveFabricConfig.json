@@ -1,15 +1,17 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/weaveFabricConfig.json",
+  "$$target": "weaveFabricConfig.json",
+  "title": "Weave Fabric",
+  "description": "Describes configuration of Weave network fabric.",
 
-  "description": "Weave Fabric configuration",
   "properties": {
     "name": {
-      "description": "name for the weave fabric configuration - used for referencing",
+      "description": "Name for the weave fabric configuration - used for referencing.",
       "type": "string"
     },
     "type": {
-      "description": "The type of the fabric being used",
+      "description": "The type of the fabric being used.",
       "enum": [ "weave" ]
     },
     "options": { "$ref": "weaveFabricOptions.json" }

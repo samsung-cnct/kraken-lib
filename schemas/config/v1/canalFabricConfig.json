@@ -2,6 +2,7 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/canalFabricConfig.json",
   "title": "Canal Fabric Configuration",
+  "$$target": "canalFabricConfig.json",
   "description": "Describes the configuration of a Canal fabric.",
 
   "properties": {
@@ -12,12 +13,14 @@
     "kind": {
       "description": "The kind of configuration object.",
       "enum": [ "fabric" ],
-      "type": "string"
+      "type": "string",
+      "default": "fabric"
     },
     "type": {
       "description": "The type of the fabric being used.",
       "enum": [ "canal" ],
-      "type": "string"
+      "type": "string",
+      "default": "canal"
     },
     "options": { "$ref": "canalFabricOptions.json" }
   },

@@ -1,29 +1,33 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/canalFabricNetwork.json",
+  "$$target": "canalFabricNetwork.json",
   "title": "Canal Fabric Network configuration",
   "description": "Describes the configuration of a Canal network fabric.",
 
   "properties": {
     "network": {
-      "description": "Network CIDR for pods in the fabric",
+      "description": "Network CIDR for pods in the fabric.",
       "format": "cidr",
       "type": "string"
     },
     "subnetLen": {
-      "description": "The size of a subnet to assign to any given node",
-      "type": "string"
+      "description": "The size of a subnet to assign to any given node.",
+      "type": "number",
+      "minimum": 1,
+      "maximum": 32,
+      "default": 22
     },
     "subnetMin": {
-      "description": "The lowest subnet that can be handed out to a node",
+      "description": "The lowest subnet that can be handed out to a node.",
       "type": "string"
     },
     "subnetMax": {
-      "description": "The highest subnet that can be handed out to a node",
+      "description": "The highest subnet that can be handed out to a node.",
       "type": "string"
     },
     "backend": {
-      "description": "Network CIDR for pods in the fabric",
+      "description": "Network CIDR for pods in the fabric.",
       "anyOf": [
         { "$ref": "canalFabricNetworkVxlan.json" }
       ],

@@ -1,24 +1,25 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/helmChart.json",
-  "title": "Helm repo configuration",
-  "description": "Configuration for a helm chart for use in K2",
+  "$$target": "helmChart.json",
+  "title": "Helm Chart",
+  "description": "Configuration for a helm chart for use in K2.",
 
   "properties": {
     "name": {
-      "description": "friendly name for the chart",
+      "description": "Friendly name for the chart.",
       "type": "string"
     },
     "repo": {
-      "description": "repository to pull this chart from - referenced by helm application",
+      "description": "Repository to pull this chart from - referenced by helm application.",
       "type": "string"
     },
     "chart": {
-      "description": "Actual name of chart in the repository - referenced by helm application",
+      "description": "Actual name of chart in the repository - referenced by helm application.",
       "type": "string"
     },
     "version": {
-      "description": "Version of the chart to deploy - referenced by helm application",
+      "description": "Version of the chart to deploy - referenced by helm application.",
       "type": "string"
     }
   },

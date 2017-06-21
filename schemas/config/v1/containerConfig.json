@@ -1,8 +1,10 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/containerConfig.json",
+  "$$target": "containerConfig.json",
+  "title": "Container Configuration",
+  "description": "Container runtime specific configuration.",
 
-  "description": "Container runtime specific configuration",
   "anyOf": [
     { "$ref": "dockerContainerConfig.json" }
   ]

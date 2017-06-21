@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/nodeConfig.json",
+  "$$target": "nodeConfig.json",
   "title": "Node Configuration",
   "description": "Describes the configuration of a node within a nodePool.",
 

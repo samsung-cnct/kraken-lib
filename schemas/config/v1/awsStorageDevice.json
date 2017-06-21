@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/awsStorageDevice.json",
+  "$$target": "awsStorageDevice.json",
   "title": "AWS Storage Device",
   "description": "Describes an AWS storage device.",
 
@@ -10,7 +11,7 @@
       "type": "string"
     },
     "opts": {
-      "description": "The options for the storage device provider",
+      "description": "The options for the storage device provider.",
       "anyOf": [
         { "$ref": "awsEbsStorageOptions.json" }
       ]

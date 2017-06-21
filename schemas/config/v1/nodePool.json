@@ -1,16 +1,17 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/nodePool.json",
+  "$$target": "nodePool.json",
   "title": "nodePool Configuration",
   "description": "Describes a set of one or more nodes which share the same configuration.",
 
   "properties": {
     "name": {
-      "description": "Name of the nodePool",
+      "description": "Name of the nodePool.",
       "type": "string"
     },
     "count": {
-      "description": "Number of nodes in the nodePool",
+      "description": "Number of nodes in the nodePool.",
       "type": "number"
     },
     "kvStoreConfig": { "$ref": "kvStoreConfig.json" },
@@ -23,7 +24,8 @@
   },
   "required": [
     "name",
-    "count"
+    "count",
+    "nodeConfig"
   ],
   "type": "object"
 }
