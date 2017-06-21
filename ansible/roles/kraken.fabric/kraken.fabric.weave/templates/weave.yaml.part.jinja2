@@ -5,8 +5,11 @@
 #--------------------------
 #
 # This manifest installs weave-net cni on kubernetes clusters v1.5 and earlier.
-#
 
+#
+# Further details about configuring and environment variables found here:
+# https://www.weave.works/docs/net/latest/kube-addon/
+#
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
@@ -34,6 +37,11 @@ spec:
           image: {{fabricConfigVal.options.containers.weave.location}}:{{fabricConfigVal.options.containers.weave.version}}
           command:
             - /home/weave/launch.sh
+          env:
+          - name: IPALLOC_RANGE
+            value: {{fabricConfigVal.options.network.network}}
+          - name: CONN_LIMIT
+            value: {{fabricConfigVal.options.network.nodeConnectionLimit}}
           livenessProbe:
             initialDelaySeconds: 30
             httpGet:

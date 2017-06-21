@@ -86,11 +86,14 @@ definitions:
       options:
         containers:
           weave:
-            version: 1.9.7
+            version: 1.9.8
             location: weaveworks/weave-kube
           weave_npc:
-            version: 1.9.7
+            version: 1.9.8
             location: weaveworks/weave-npc
+        network:
+          network: 10.128.0.0/10
+          nodeConnectionLimit: 30
     - &defaultWeaveFabric16
       name: defaultWeaveFabric16
       kind: fabric
@@ -98,11 +101,14 @@ definitions:
       options:
         containers:
           weave:
-            version: 1.9.7
+            version: 1.9.8
             location: weaveworks/weave-kube
           weave_npc:
-            version: 1.9.7
+            version: 1.9.8
             location: weaveworks/weave-npc
+        network:
+          network: 10.128.0.0/10
+          nodeConnectionLimit: 30
     - &kubeVersionedWeaveFabric
       name: kubeVersionedWeaveFabric
       kind: versionedFabric

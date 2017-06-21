@@ -8,6 +8,7 @@ generated/
 .kraken/
 .rnd
 .srl
+.pyc
 .terraform.d/
 clusters/
 ansible/cluster_changes.txt

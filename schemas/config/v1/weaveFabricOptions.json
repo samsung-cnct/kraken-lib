@@ -4,11 +4,13 @@
 
   "description": "Weave Fabric Options configuration",
   "properties": {
-    "containers": { "$ref": "weaveFabricContainers.json" }
+    "containers": { "$ref": "weaveFabricContainers.json" },
+    "network": { "$ref": "weaveFabricNetwork.json" }
   },
 
   "required": [
-    "containers"
+    "containers",
+    "network"
   ],
 
   "type": "object"
