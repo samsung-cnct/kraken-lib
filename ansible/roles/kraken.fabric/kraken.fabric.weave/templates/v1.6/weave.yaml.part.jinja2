@@ -75,7 +75,7 @@ spec:
             - name: IPALLOC_RANGE
               value: {{fabricConfigVal.options.network.network}}
             - name: CONN_LIMIT
-              value: {{fabricConfigVal.options.network.nodeConnectionLimit}}
+              value: '{{fabricConfigVal.options.network.nodeConnectionLimit}}'
           livenessProbe:
             initialDelaySeconds: 30
             httpGet:
