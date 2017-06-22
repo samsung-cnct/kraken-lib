@@ -18,6 +18,6 @@ source "${my_dir}/lib/common.sh"
 # setup a sigint trap
 trap control_c SIGINT
 
-DISPLAY_SKIPPED_HOSTS=0 ansible-playbook ${K2_VERBOSE} -i ansible/inventory/localhost ansible/update.yaml --extra-vars "${KRAKEN_EXTRA_VARS}kraken_action=update" --tags "${KRAKEN_TAGS}" || show_update_error
+DISPLAY_SKIPPED_HOSTS=0 ansible-playbook ${K2_VERBOSE} -i ansible/inventory/localhost ansible/update.yaml --extra-vars "${KRAKEN_EXTRA_VARS}kraken_action=update" || show_update_error
 
 show_update

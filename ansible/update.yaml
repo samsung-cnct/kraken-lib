@@ -7,5 +7,4 @@
   roles:
     - {
         role: '{{ playbook_dir }}/roles/kraken.update/kraken.update.selector',
-        tags: [ 'provider', 'ssh', 'readiness', 'services', 'all', 'provider_only']
       }
