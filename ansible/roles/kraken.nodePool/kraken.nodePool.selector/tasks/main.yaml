@@ -3,16 +3,16 @@
 ---
 - name: etcd nodePools
   include_role:
-    name: '{{ playbook_dir }}/roles/kraken.nodePool/kraken.etcd.docker'
+    name: '{{ playbook_dir }}/roles/kraken.nodePool/kraken.nodePool.etcd'
   when: (kraken_action != 'update')
 
 - name: master nodePools
   include_role:
-    name: '{{ playbook_dir }}/roles/kraken.nodePool/kraken.master.docker'
+    name: '{{ playbook_dir }}/roles/kraken.nodePool/kraken.nodePool.master'
 
 - name: node nodePools
   include_role:
-    name: '{{ playbook_dir }}/roles/kraken.nodePool/kraken.node.docker'
+    name: '{{ playbook_dir }}/roles/kraken.nodePool/kraken.nodePool.node'
 
 - name: Error Provider
   include_role:
