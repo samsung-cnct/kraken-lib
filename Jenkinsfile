@@ -51,7 +51,7 @@ podTemplate(label: 'k2', containers: [
 
                         customContainer('e2e-tester') {
                             stage('run e2e tests') {
-                                kubesh "PWD=`pwd` && build-scripts/conformance-tests.sh v1.6.4 ${env.JOB_BASE_NAME}-${env.BUILD_ID} /mnt/scratch"
+                                kubesh "PWD=`pwd` && build-scripts/conformance-tests.sh v1.6.6 ${env.JOB_BASE_NAME}-${env.BUILD_ID} /mnt/scratch"
                             }
                         }
                     } finally {
@@ -88,7 +88,7 @@ podTemplate(label: 'k2', containers: [
         }
 
         customContainer('docker') {
-            // add a docker rmi/docker purge/etc.  
+            // add a docker rmi/docker purge/etc.
             stage('docker build') {
                 kubesh 'docker build -t quay.io/samsung_cnct/k2:latest docker/'
             }
