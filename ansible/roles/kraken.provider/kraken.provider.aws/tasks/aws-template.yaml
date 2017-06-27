@@ -10,6 +10,7 @@
     state: directory
   with_items:
     - vpc
+    - route53
     - keypair
     - subnet
     - cluster_secgroup
@@ -26,6 +27,7 @@
             dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ item.dest }}/module.tf"
   with_items:
     - { source: kraken.provider.aws.module.vpc.tf.jinja2, dest: vpc }
+    - { source: kraken.provider.aws.module.route53.tf.jinja2, dest: route53 }
     - { source: kraken.provider.aws.module.keypair.tf.jinja2, dest: keypair }
     - { source: kraken.provider.aws.module.subnet.tf.jinja2, dest: subnet }
     - { source: kraken.provider.aws.module.cluster_secgroup.tf.jinja2, dest: cluster_secgroup }

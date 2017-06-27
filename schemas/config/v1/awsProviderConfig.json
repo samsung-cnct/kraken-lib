@@ -29,12 +29,13 @@
       "description": "Any prefix that should be prepended to resources in AWS to make them easier to identify.",
       "type": [ "string", "null" ]
     },
-    "vpc": {
+    "vpc": { 
       "description": "CIDR for the VPC for the cluster.",
       "format": "cidr",
       "type": "string",
       "default": "10.0.0.0/16"
     },
+    "existing_vpc": { "$ref": "awsVpcConfig.json" },
     "region": {
       "description": "Region to create resources in (us-east-1, us-west-2, etc.).",
       "type": "string",

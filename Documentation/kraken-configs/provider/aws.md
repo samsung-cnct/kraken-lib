@@ -10,6 +10,7 @@
 | type            | Optional     | String        | Type of provider. cloudinit or autonomous. Autonomous providers do not require cloud init configuration. Defaults to cloudinit |
 | resourcePrefix  | Optional     | String        | String prefix to use for AWS resource naming |
 | vpc             | __Required__ | String        | VPC CIDR block |
+| existing_vpc    | Optional     | Object Array  | pre-existing VPC to land cluster in |
 | region          | __Required__ | String        | region you want your cluster to be created in.  Currently we only support one AWS region per cluster |
 | subnet          | __Required__ | Object Array  | Subnet describes the AWS subnets to be created per AZ |
 | egressAcl       | __Required__ | Object Array  | Array of VPC egresses |
@@ -18,6 +19,17 @@
 | ingressSecurity | __Required__ | Object Array  | Array of Security group ingresses |
 | egressSecurity  | __Required__ | Object Array  | Array of Secuirty group egresses |
 | cert            | Optional     | Object        | Loadbalancer certificates info |
+
+## existing_vpc
+| Key Name | Required     | Type   | Description|
+| -------- | ------------ | ------ | --- |
+| id       | __Required__ | String | id of an existing VPC from the AWS console |
+| route_table_id | __Required__ | String | id of a route table in the linked VPC |
+| default_security_group_id | __Required__ | String | id of the default security group for the linked VPC |
+
+It is important to note that K2 will not auto-detect any existing networking infrastructure in the VPC.  K2 assumes
+that you have configured things correctly and will throw an error on a resource conflict.  The listed route_table_id
+must have a valid route to an internet gateway.  K2 has each node pull images from public repositories.  
 
 ## subnets options
 | Key Name | Required     | Type   | Description|

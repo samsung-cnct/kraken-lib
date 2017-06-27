@@ -14,6 +14,14 @@ module "vpc" {
   vpc_name  = "{{cluster.name}}"
 }
 
+module "route53" {
+  source = "./route53"
+
+  vpc_id = "${module.vpc.id}"
+  vpc_name  = "{{cluster.name}}"
+}
+
+
 module "keypair" {
   source = "./keypair"
 
@@ -42,7 +50,7 @@ module "etcd" {
   vpc_id = "${module.vpc.id}"
   etcds_name  = "{{cluster.name}}"
   cidr_block = "{{cluster.providerConfig.vpc}}"
-  route53_zone_id = "${module.vpc.route53_zone_id}"
+  route53_zone_id = "${module.route53.route53_zone_id}"
 {% for node in cluster.nodePools %}
 {% if node.etcdConfig is defined %}
   {{node.keyPair.name}}_{{node.name}}_key = "${module.keypair.{{node.keyPair.name}}_keyname}"
@@ -74,7 +82,7 @@ module "master" {
 {% endfor %}
 {% endif %}
 {% endfor %}
-  route53_zone_id = "${module.vpc.route53_zone_id}"
+  route53_zone_id = "${module.route53.route53_zone_id}"
   kubernetes_sec_group = "${module.cluster_secgroup.id}"
 }
 
@@ -107,5 +115,5 @@ output "kraken_endpoint" {
 }
 
 output "kraken_private_zone_id" {
-  value = "${module.vpc.route53_zone_id}"
+  value = "${module.route53.route53_zone_id}"
 }

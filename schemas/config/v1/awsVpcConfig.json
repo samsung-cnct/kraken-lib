@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1/awsVpcConfig.json",
+  "$$target": "awsVpcConfig.json",
+  "title": "AWS VPC Configuration",
+  "description": "Describes an existing AWS VPC configuration to install a Kubernetes cluster into.",
+
+  "properties": {
+    "id": {
+      "description": "id of a pre-created VPC",
+      "type": "string"
+    },
+    "route_table_id": {
+      "description": "id of a pre-created route table that exists in the provided vpc.id",
+      "type": "string"
+    },
+    "default_security_group_id": {
+      "description": "id of the pre-created default security group for the provided vpc.id",
+      "type": "string"
+    }
+  },
+  
+  "required": [
+    "id",
+    "route_table_id",
+    "default_security_group_id"
+  ],
+
+  "type": "object"
+}

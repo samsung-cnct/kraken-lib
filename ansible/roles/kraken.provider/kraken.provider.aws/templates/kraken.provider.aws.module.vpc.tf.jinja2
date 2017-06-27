@@ -1,3 +1,5 @@
+{% if cluster.providerConfig.existing_vpc is not defined %}
+
 # AWS VPC block
 variable "cidr_block" {}
 variable "vpc_name" {}
@@ -24,14 +26,6 @@ resource "aws_vpc" "vpc" {
     Name = "${var.vpc_name}_vpc",
     KubernetesCluster = "${var.vpc_name}"
   }
-}
-
-# A VPC-only route53 zone and record
-resource "aws_route53_zone" "private_zone" {
-  name          = "${var.vpc_name}.internal"
-  comment       = "A VPC-only zone for ${var.vpc_name} kubernetes cluster"
-  vpc_id        = "${aws_vpc.vpc.id}"
-  force_destroy = true
 }
 
 # DHCP options sets
@@ -114,6 +108,20 @@ output "default_security_group_id" {
   value = "${aws_vpc.vpc.default_security_group_id}"
 }
 
-output "route53_zone_id" {
-  value = "${aws_route53_zone.private_zone.zone_id}"
+{% else %}
+variable "cidr_block" {}
+variable "vpc_name" {}
+
+output "id" {
+  value = "{{cluster.providerConfig.existing_vpc.id}}"
 }
+
+output "route_table_id" {
+  value = "{{cluster.providerConfig.existing_vpc.route_table_id}}"
+}
+
+output "default_security_group_id" {
+  value = "{{cluster.providerConfig.existing_vpc.default_security_group_id}}"
+}
+
+{% endif %}
