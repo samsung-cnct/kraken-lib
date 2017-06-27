@@ -87,6 +87,13 @@
     msg: "Multiple clusters are not yet supported in k2"
   when: kraken_config.clusters | length > 1 | int
 
+- include: check-clusters-lock.yaml
+  with_items:
+    - "{{ kraken_config.clusters }}"
+  loop_control:
+    loop_var: a_cluster
+  when: kraken_action =='up'
+
 - name: Ensure each nodePool corresponds to exactly one of the node roles (i.e. etcd, master, or node)
   fail:
     msg: "({{ i.0.name }}, {{ i.1.name }}) corresponds to more than one node role"
@@ -105,7 +112,7 @@
       (
         { item.0.name: masterVersion[0:(masterVersion.find('.', 3 ))] }
       )
-    }}"
+     }}"
   with_subelements:
     - "{{ kraken_config.clusters }}"
     - nodePools

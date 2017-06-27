@@ -1,0 +1,7 @@
+---
+- include: mark-clusters-status.yaml
+  with_items:
+    - "{{ kraken_config.clusters }}"
+  loop_control:
+    loop_var: a_cluster
+  when: (kraken_action == 'up' or kraken_action == 'update') and not ( dryrun | bool )

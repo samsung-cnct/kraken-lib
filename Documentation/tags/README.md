@@ -83,6 +83,7 @@ fabric_only,services_only
 | roles.kraken.readiness | O | X | O |
 | roles.kraken.fabric/kraken.fabric.selector | O | X | O |
 | roles.kraken.services | O |  O | X |
+| roles.kraken.post | O | X | X |
 | roles.kraken.clean |  X | O | X |
 
 ## List of tags and usage for ansible roles
@@ -103,6 +104,7 @@ fabric_only,services_only
 - roles/kraken.readiness
 - roles/kraken.fabric/kraken.fabric.selector
 - roles/kraken.services
+- roles/kraken.post
 
 ### dryrun
  **: Execute all codepaths to build any physical resources without spinning up actual cluster.**
@@ -121,7 +123,7 @@ fabric_only,services_only
 - roles/kraken.config
 
 ### assembler
- **: Render and then assemble all of the part files for cloud-config to make XXXX.cloud-config for each nodePool **
+**: Render and then assemble all of the part files for cloud-config to make XXXX.cloud-config for each nodePool**
 - roles/kraken.config
 - roles/kraken.cluster_common
 - roles/kraken.nodePool/kraken.nodePool.selector
@@ -129,18 +131,19 @@ fabric_only,services_only
 - roles/kraken.fabric/kraken.fabric.selector
 
 ### fabric_only
- **: Render and execute kubernetes config yamls for creating the nework fabric.  Useful for development and production upgrades of a network **
+ **: Render and execute kubernetes config yamls for creating the nework fabric.** Useful for development and production upgrades of a network **
 - roles/kraken.fabric/kraken.fabric.selector
 
 
 ### provider
- **: Render and spins up kubernetes cluster on cloud such as AWS or GKE.**
+ **: Render and spins up actual kubernetes cluster on cloud such as AWS or GKE.**
 - roles/kraken.config
 - roles/kraken.cluster_common
 - roles/kraken.nodePool/kraken.nodePool.selector
 - roles/kraken.assembler
 - roles/kraken.provider/kraken.provider.selector
 - roles/kraken.fabric/kraken.fabric.selector
+- roles/kraken.post
 
 ### ssh_only
 **: To regenerate the ssh config without doing other stuff**
@@ -177,6 +180,7 @@ fabric_only,services_only
 - roles/kraken.rbac
 - roles/kraken.readiness
 - roles/kraken.fabric/kraken.fabric.selector
+- roles/kraken.post
 
 ### services
 **: To test services which installs kraken service on kubernetes cluster, it spins up actual cluster except for ssh setup for nodes**
@@ -190,3 +194,12 @@ fabric_only,services_only
 - roles/kraken.readiness
 - roles/kraken.fabric/kraken.fabric.selector
 - roles/kraken.services
+- roles/kraken.post
+
+### post_only
+**: To test touching cluster.status.lock file on config base directory.**
+- roles/kraken.post
+
+### clean_only
+**:To test removing  config base directory and cluser.status.lock file**
+- roles/kraken.clean

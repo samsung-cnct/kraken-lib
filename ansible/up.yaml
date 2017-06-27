@@ -45,3 +45,7 @@
         role: 'roles/kraken.services',
         tags: [ 'services', 'all' ]
       }
+    - {
+        role: 'roles/kraken.post',
+        tags: [ 'all','provider','readiness','services','post_only' ]
+      }

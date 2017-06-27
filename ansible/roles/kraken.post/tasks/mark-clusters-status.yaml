@@ -1,0 +1,17 @@
+---
+  - set_fact:
+      cluster: "{{ a_cluster }}"
+
+  - name: Make sure generated folder for cluster is there
+    file:
+      path: "{{ config_base | expanduser }}/{{ cluster.name }}"
+      state: directory
+
+  - name: Touch cluster.status.lock file in config_base
+    file:
+      path: "{{ config_base | expanduser }}/{{ cluster.name }}/cluster.status.lock"
+      state: touch
+      mode: "u=rw,g=r,o=r"
+
+  - name: Loggin when the cluster is created on cluster.status.lock file
+    shell: echo "{{ cluster.name }} cluster is successfully created at:" "$(date)"> "{{ config_base | expanduser }}/{{ cluster.name }}/cluster.status.lock"
