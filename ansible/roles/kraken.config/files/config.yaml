@@ -167,7 +167,7 @@ definitions:
       name: defaultCoreOs
       kind: os
       type: coreOs
-      version: 1409.2.0
+      version: 1409.5.0
       channel: stable
       rebootStrategy: "off"
   nodeConfigs:

@@ -46,7 +46,7 @@ function run_hack_e2e_go() {
   
   # run everything that we can in 
   cd ${KUBE_ROOT}
-  GINKGO_PARALLEL=y go run hack/e2e.go --v --test --test_args="${common_test_args[*]} ${test_args[*]}" --check_version_skew=false
+  GINKGO_PARALLEL=y go run hack/e2e.go -- --v --test --test_args="${common_test_args[*]} ${test_args[*]}" --check-version-skew=false
 }
 
 echo
