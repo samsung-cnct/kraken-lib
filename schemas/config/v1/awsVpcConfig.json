@@ -11,18 +11,24 @@
       "type": "string"
     },
     "route_table_id": {
-      "description": "id of a pre-created route table that exists in the provided vpc.id",
+      "description": "DEPRECATED: id of a pre-created route table that exists in the provided vpc.id",
       "type": "string"
     },
     "default_security_group_id": {
       "description": "id of the pre-created default security group for the provided vpc.id",
       "type": "string"
+    },
+    "subnet": {
+      "description": "list of subnet ids that are part of the provided vpc.id",
+      "items": { "$ref": "awsPreexistingSubnetConfig.json" },
+      "minItems": 1,
+      "type": "array"
     }
   },
   
   "required": [
     "id",
-    "route_table_id",
+    "subnet",
     "default_security_group_id"
   ],
 

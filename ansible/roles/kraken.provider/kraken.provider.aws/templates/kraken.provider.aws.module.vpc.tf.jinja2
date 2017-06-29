@@ -1,8 +1,9 @@
-{% if cluster.providerConfig.existing_vpc is not defined %}
-
 # AWS VPC block
 variable "cidr_block" {}
 variable "vpc_name" {}
+
+{% if cluster.providerConfig.existing_vpc is not defined %}
+
 variable "dns_suffix" {
   type = "map"
   default = {
@@ -109,15 +110,12 @@ output "default_security_group_id" {
 }
 
 {% else %}
-variable "cidr_block" {}
-variable "vpc_name" {}
-
 output "id" {
   value = "{{cluster.providerConfig.existing_vpc.id}}"
 }
 
 output "route_table_id" {
-  value = "{{cluster.providerConfig.existing_vpc.route_table_id}}"
+  value = "ThisShouldnotBeUsed"
 }
 
 output "default_security_group_id" {

@@ -42,7 +42,7 @@
       "default": "us-east-1"
     },
     "subnet": {
-      "description": "List of subnets to use within a region for the cluster.",
+      "description": "List of subnets to use within a region for the cluster.  Should be omitted and will be ignored if existing_vpc hash is specified.",
       "items": { "$ref": "awsSubnetConfig.json" },
       "minItems": 1,
       "type": "array"
@@ -82,7 +82,6 @@
     "resourcePrefix",
     "vpc",
     "region",
-    "subnet",
     "egressAcl",
     "ingressAcl",
     "egressSecurity",
