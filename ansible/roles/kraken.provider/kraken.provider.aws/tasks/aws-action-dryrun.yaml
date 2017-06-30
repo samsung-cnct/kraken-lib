@@ -1,0 +1,17 @@
+---
+- name: Get modules for terraform dryrun
+  command: >
+    terraform get -no-color -update=true {{ config_base | expanduser }}/{{ cluster.name }}
+  args:
+    chdir: "{{ config_base | expanduser }}/{{ cluster.name }}"
+
+- name: Run terraform dryrun {{ kraken_action }}
+  command: >
+    terraform plan -input=false -no-color {{ config_base | expanduser }}/{{ cluster.name }}
+  args:
+    chdir: "{{ config_base | expanduser }}/{{ cluster.name }}"
+  when: (kraken_action == 'up') or (kraken_action == 'update')
+  register: up_result
+  until: up_result.rc == 0
+  retries: "{{ action_retries }}"
+  delay: 15
