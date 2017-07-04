@@ -88,6 +88,19 @@ function show_update_error {
   exit 1
 }
 
+# check if ansible return failure
+# if failure, send to crash app
+function crash_test {
+  RESULT=$?
+  if [ $RESULT -ne 0 ]; then
+    /k2-crash-app/k2-crash-application $log_file
+    show_post_cluster_error 
+  else
+    show_post_cluster
+  fi
+  exit $RESULT
+}
+
 function control_c() {
   warn "Interrupted!"
   show_post_cluster_error
