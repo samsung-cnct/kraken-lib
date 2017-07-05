@@ -88,8 +88,15 @@ MAPPINGS="${MAPPINGS} -v ${MYHOME}/.kraken:${MYHOME}/.kraken"
 MAPPINGS="${MAPPINGS} -v ${MYHOME}/.ssh:${MYHOME}/.ssh"
 MAPPINGS="${MAPPINGS} -v ${MYHOME}/.aws:${MYHOME}/.aws"
 
-# Map a bashrc file
+# Map a bashrc and history file
 MAPPINGS="${MAPPINGS} -v ${GITROOT}/lib/bashrc:${MYHOME}/.bashrc"
+MAPPINGS="${MAPPINGS} -v ${MYHOME}/.dockerdev_history:${MYHOME}/.bash_history"
+
+# Ensure the history file exists
+if ! [ -f ${MYHOME}/.dockerdev_history ]; then
+    touch ${MYHOME}/.dockerdev_history
+fi
+
 
 echo -e "Mappings:\n$(tr ' ' '\n' <<< "$MAPPINGS" | grep -e -v '-v' | sort)"
 echo ""
