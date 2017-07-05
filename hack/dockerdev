@@ -14,6 +14,19 @@ realpath() {
     echo ${REALDIR}/${REALFILE}
 }
 
+show_help() {
+    echo " Usage:"
+    echo "     $0 [options]"
+    echo ""
+    echo " Options:"
+    echo "     -c,--config <filename>    config.yaml file to use"
+    echo "                               default: $HOME/.kraken/default.yaml"
+    echo "     -h,--help                 this text"
+    echo "     -i,--image   <imagename>  k2-tools docker image to use"
+    echo "                               default: quay.io/samsung_cnct/k2-tools"
+    echo "     -m,--home <path>          specify the path to be used for \$HOME"
+}
+
 if [[ -z "$(which envsubst)" ]]; then
     cat << EOF
 OSX doesn't have envsubst by default. Please install gettext:
@@ -23,11 +36,18 @@ EOF
     exit 1
 fi
 
-while getopts c:i:r: opt; do
-    case $opt in
-        c) CONFIGFILE="${OPTARG}";;
-        i) IMAGE="${OPTARG}";;
-        r) MYHOME="${OPTARG}";;
+# Parse command line options
+GETOPT=$(getopt -q -o c:fhi:m: --long config:,fresh,help,image:,home: -n $0 -- "$@")
+eval set -- "$GETOPT"
+
+while true; do
+    case $1 in
+        -c|--config) CONFIGFILE="$2" ; shift 2 ;;
+        -h|--help)  show_help ; exit 1 ;;
+        -i|--image) IMAGE="$2" ; shift 2 ;;
+        -m|--home) MYHOME="$2" ; shift 2 ;;
+        --) shift ; break ;;
+        *) show_help ; exit 1 ;;
     esac
 done
 
@@ -48,7 +68,7 @@ if ! [[ -f ${CONFIGFILE} ]]; then
 fi
 
 CONFIGFILE=$(realpath ${CONFIGFILE})
-MAPPINGS="-v ${CONFIGFILE}:${CONFIGFILE}"
+MAPPINGS="$MAPPINGS -v ${CONFIGFILE}:${CONFIGFILE}"
 
 # Add any file that exists in the config yaml to the docker maps
 for d in $(sed -e 's/[^:]\+://' -e "s/^[ ]*\([\"']\)\(.*\)\1\$/\2/g" $CONFIGFILE); do
