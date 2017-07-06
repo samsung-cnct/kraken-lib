@@ -21,6 +21,7 @@ show_help() {
     echo " Options:"
     echo "     -c,--config <filename>    config.yaml file to use"
     echo "                               default: $HOME/.kraken/default.yaml"
+    echo "     -f,--fresh                freshen the docker image from the repo"
     echo "     -h,--help                 this text"
     echo "     -i,--image   <imagename>  k2-tools docker image to use"
     echo "                               default: quay.io/samsung_cnct/k2-tools"
@@ -44,6 +45,7 @@ while true; do
     case $1 in
         -c|--config) CONFIGFILE="$2" ; shift 2 ;;
         -h|--help)  show_help ; exit 1 ;;
+        -f|--fresh) FRESHEN=1 ; shift ;;
         -i|--image) IMAGE="$2" ; shift 2 ;;
         -m|--home) MYHOME="$2" ; shift 2 ;;
         --) shift ; break ;;
@@ -97,6 +99,11 @@ if ! [ -f ${MYHOME}/.dockerdev_history ]; then
     touch ${MYHOME}/.dockerdev_history
 fi
 
+
+if [ -n "${FRESHEN}" ]; then
+    echo "Refreshing image: ${IMAGE}"
+    docker pull ${IMAGE}
+fi
 
 echo -e "Mappings:\n$(tr ' ' '\n' <<< "$MAPPINGS" | grep -e -v '-v' | sort)"
 echo ""
