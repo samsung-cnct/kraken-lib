@@ -88,18 +88,55 @@ function show_update_error {
   exit 1
 }
 
-# check if ansible return failure
+# check if ansible return failure on up
 # if failure, send to crash app
-function crash_test {
+function crash_test_up {
   RESULT=$?
   if [ $RESULT -ne 0 ]; then
-    /k2-crash-app/k2-crash-application $log_file
+    if [ -f "$K2_CRASH_APP" ]; then
+      ${K2_CRASH_APP} ${LOG_FILE}
+    else 
+      echo "k2-crash-application not found, to capture the data from k2 failures, please install"
+    fi
     show_post_cluster_error 
   else
     show_post_cluster
   fi
   exit $RESULT
 }
+
+# check if ansible return failure on down
+# if failure, send to crash app
+function crash_test_down {
+  RESULT=$?
+  if [ $RESULT -ne 0 ]; then
+    if [ -f "$K2_CRASH_APP" ]; then
+      ${K2_CRASH_APP} ${LOG_FILE}
+    else 
+      echo "k2-crash-application not found, to capture the data from k2 failures, please install"
+    fi
+  fi
+  exit $RESULT
+}
+
+# check if ansible return failure on update
+# if failure, send to crash app
+function crash_test_update {
+  RESULT=$?
+  if [ $RESULT -ne 0 ]; then
+    if [ -f "$K2_CRASH_APP" ]; then
+      ${K2_CRASH_APP} ${LOG_FILE}
+    else 
+      echo "k2-crash-application not found, to capture the data from k2 failures, please install"
+    fi
+    show_update_error
+  else
+    show_update
+  fi
+  exit $RESULT
+}
+
+
 
 function control_c() {
   warn "Interrupted!"
