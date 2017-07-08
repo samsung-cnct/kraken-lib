@@ -3,9 +3,6 @@
     cluster: "{{ cluster_node_tuple.0 }}"
     node: "{{ cluster_node_tuple.1 }}"
 
-- debug:
-    msg: "cluster.name {{ cluster.name }}"
-
 - name: Generate master writefiles kubeconfig
   template: src=write_files.kubeconfig.part.jinja2
     dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ node.name }}.write_files.kubeconfig.part"

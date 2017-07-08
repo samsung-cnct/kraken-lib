@@ -67,8 +67,6 @@
   register: init_dry_out
   when: (cluster.helmConfig.debug is defined) and (cluster.helmConfig.debug == True) and (helm_command is defined)
 
-- debug: var=init_dry_out.stdout_lines
-
 - name: Init helm
   command: >
     {{ helm_init_command }}
@@ -128,8 +126,6 @@
   with_items: "{{ cluster_services }}"
   register: install_dry_out
   when: (cluster_services is defined) and (cluster.helmConfig.debug is defined) and (cluster.helmConfig.debug == True) and (helm_command is defined)
-
-- debug: var=install_dry_out.results
 
 - name: Install charts
   command: >
