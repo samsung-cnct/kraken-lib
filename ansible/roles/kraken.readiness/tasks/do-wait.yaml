@@ -6,49 +6,17 @@
 #
 #   kubernetes_minor_versions
 #
-- name: Look up and set k8s minor version for this cluster
+- name:
   set_fact:
     kubernetes_minor_version: "{{ kubernetes_minor_versions[cluster.name] }}"
-
-- name: Execute appropriate kubectl per minor version
-  set_fact:
     kubectl: "/opt/cnct/kubernetes/{{ kubernetes_minor_version }}/bin/kubectl"
-
-- name: Get needed number of nodes
-  set_fact:
     needed_nodes: "{{ cluster | expected_nodes(readiness_type, readiness_value) }}"
-
-- name: Get timestamp before api server wait
-  set_fact:
-    wait_api_start_timestamp: "{{ lookup('pipe','date +%Y%m%d%H%M%S') }}"
-
-- name: Fetch k8s api server address
-  set_fact:
-    api_servers: "{{ lookup('file', kubeconfig) | from_yaml | json_query('clusters[*].cluster.server') }}"
-
-- name: Wait for api server to become available in case it is not
-  wait_for:
-    host: "{{ item | regex_replace('https://','') }}"
-    port: 443
-    timeout: "{{ readiness_wait }}"
-  with_items: "{{ api_servers }}"
-
-- name: Get timestamp after api server wait
-  set_fact:
-    wait_api_end_timestamp: "{{ lookup('pipe','date +%Y%m%d%H%M%S') }}"
-
-- name: Set time factor
-  set_fact:
-    wait_interval: 10
-
-- name: Set remaining time fact
-  set_fact:
-    remaining_time: "{{ ((readiness_wait | int - (wait_api_end_timestamp | int - wait_api_start_timestamp | int )) / wait_interval | int ) | int }}"
+    retry_interval: 10
 
 - name: Get all nodes
   command: >
     {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} get nodes --no-headers=true
   register: job_get_nodes_result
   until: job_get_nodes_result.stdout_lines | length >= needed_nodes | int
-  retries: "{{ remaining_time | int }}"
-  delay: "{{ wait_interval | int }}"
+  retries: "{{ (( readiness_wait | int ) / retry_interval | int ) | int }}"
+  delay: "{{ retry_interval }}"

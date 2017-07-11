@@ -42,17 +42,6 @@
       - "{{ kubernetes_minor_versions[ cluster.name ] }}/dns.yaml.jinja2"
       - dns.yaml.jinja2
 
-- name: Set api_servers fact
-  set_fact:
-    api_servers: "{{ lookup('file', kubeconfig) | from_yaml | json_query('clusters[*].cluster.server') }}"
-
-- name: Wait for api server to become available in case it is not already
-  wait_for:
-    host: "{{ item | regex_replace('https://','') }}"
-    port: 443
-    timeout: 600
-  with_items: "{{ api_servers }}"
-
 - name: Bootstrap kubedns RBAC policy
   command: >
     {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} apply -f {{ config_base | expanduser }}/{{ cluster.name }}/auth/rbac-dns-policy.yaml
