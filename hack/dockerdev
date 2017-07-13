@@ -28,12 +28,22 @@ show_help() {
     echo "     -m,--home <path>          specify the path to be used for \$HOME"
 }
 
+# Mac related support checks
 if [[ -z "$(which envsubst)" ]]; then
-    cat << EOF
+    cat <<< "
 OSX doesn't have envsubst by default. Please install gettext:
     brew install gettext
     brew link --force gettext
-EOF
+"
+    exit 1
+fi
+getopt -T > /dev/null
+if [[ $? -ne 4 ]]; then
+    cat <<< "
+OSX has a very old getopt. Please install a newer one:
+    brew install gnu-getopt
+    and follow the instructions.
+"
     exit 1
 fi
 
