@@ -73,7 +73,8 @@ The easiest way to get started with K2 directly is to use a K2 container image
 
 ## Preparing the environment  
 
-Configure a volume environment variable for use below. Ensure that each of these files or directories exist:
+Add/Configure the environment variables below; K2OPTS is used to pass docker the specified docker volumes(note -v in the K2OPTS variable). Ensure that each of these files or directories exist:
+
 
 ```
 KRAKEN=${HOME}/.kraken          # This is the default output directory for K2
