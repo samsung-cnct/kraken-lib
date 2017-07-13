@@ -8,7 +8,7 @@ set -o nounset
 set -o pipefail
 
 my_dir=$(dirname "${BASH_SOURCE}")
-VERSIONFILE=$(mktemp /tmp/$0.XXXXXX)
+VERSIONFILE=$(mktemp /tmp/computed_kubectl.XXXXXX)
 rm ${VERSIONFILE}
 trap '{ rm -f -- "${VERSIONFILE}"; }' INT TERM HUP EXIT
 # Call separate script to hide our args from lib/common.sh
