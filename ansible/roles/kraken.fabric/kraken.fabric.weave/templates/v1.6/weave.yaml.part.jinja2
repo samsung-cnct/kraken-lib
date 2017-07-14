@@ -116,7 +116,9 @@ spec:
       restartPolicy: Always
       tolerations:
       - key: node-role.kubernetes.io/master
+        operator: Equal
         effect: NoSchedule
+      - operator: Exists
       serviceAccountName: weave-net
       securityContext:
         seLinuxOptions: {}

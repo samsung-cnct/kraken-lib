@@ -38,7 +38,7 @@
       docker://{{ node.kubeConfig.hyperkubeLocation }}:{{ node.kubeConfig.version }} \
       --exec=/hyperkube -- kubelet \
       --api_servers=http://127.0.0.1:8080 \
-      --register-schedulable=false \
+      --register-with-taints=node-role.kubernetes.io/master=:NoSchedule \
       --allow-privileged=true \
       --pod-manifest-path=/etc/kubernetes/manifests \
       --kubeconfig=/etc/kubernetes/kubeconfig.yaml \

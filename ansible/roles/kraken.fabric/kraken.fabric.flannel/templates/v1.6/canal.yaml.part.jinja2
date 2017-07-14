@@ -1,7 +1,7 @@
 ---
 #--------------------------
 # SOURCE OF THIS FILE: https://github.com/projectcalico/canal/blob/master/k8s-install/1.6/canal.yaml
-# 5/19/2017 mikeln - for samsung-cnct 
+# 5/19/2017 mikeln - for samsung-cnct
 #--------------------------
 # This manifest installs the calico/node container, as well
 # as the Calico CNI plugins and network config on
@@ -35,6 +35,10 @@ spec:
         # Mark the pod as a critical add-on for rescheduling.
         - key: "CriticalAddonsOnly"
           operator: "Exists"
+        - key: node-role.kubernetes.io/master
+          operator: Equal
+          effect: NoSchedule
+        - operator: Exists
       containers:
         # Runs calico/node container on each Kubernetes node.  This
         # container programs network policy and routes on each
