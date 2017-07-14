@@ -158,7 +158,7 @@ definitions:
       kind: keyPair
       providerConfig:
         serviceAccount: patrickrobot@k8s-work.iam.gserviceaccount.com
-        serviceAccountKeyFile:  ~/.config/gcloud/patrickRobot.json
+        serviceAccountKeyFile:  $HOME/.config/gcloud/patrickRobot.json
   kubeAuth:
    - &defaultKubeAuth
       authz: {}
