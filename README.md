@@ -311,18 +311,29 @@ You can try having helm install a new service, such as the Kubernetes dashboard
 ##### Find Kubernetes Dashboard Version
 
 ```bash
+docker run $K2OPTS -e HELM_HOME=$HOME/.kraken/${CLUSTER}/.helm -e KUBECONFIG=$HOME/.kraken/${CLUSTER}/admin.kubeconfig quay.io/samsung_cnct/k2:latest helm registry list quay.io | grep kubernetes-dashboard
+
+quay.io/samsung_cnct/kubernetes-dashboard      0.1.0-0
+```
+
+This indicates that the chart to install is `samsung_cnct/kubernetes-dashboard` from the `quay.io` registry.
+
+
+Or for the legacy repo (deprecated)
+
+```bash
 docker run $K2OPTS -e HELM_HOME=$HOME/.kraken/${CLUSTER}/.helm -e KUBECONFIG=$HOME/.kraken/${CLUSTER}/admin.kubeconfig quay.io/samsung_cnct/k2:latest helm search kubernetes-dashboard
 
 NAME                      	VERSION	DESCRIPTION                      
 atlas/kubernetes-dashboard	0.1.0  	A kubernetes dashboard Helm chart
 ```
 
-This indicates that the file to install is `atlas/kubernetes-dashboard`.
+In this case the chart to install is `kubernetes-dashboard` from the `atlas` repo.
 
 ##### Install Kubernetes Dashboard
 
 ```bash
-docker run $K2OPTS -e HELM_HOME=$HOME/.kraken/${CLUSTER}/.helm -e KUBECONFIG=$HOME/.kraken/${CLUSTER}/admin.kubeconfig quay.io/samsung_cnct/k2:latest helm install --namespace kube-system atlas/kubernetes-dashboard
+docker run $K2OPTS -e HELM_HOME=$HOME/.kraken/${CLUSTER}/.helm -e KUBECONFIG=$HOME/.kraken/${CLUSTER}/admin.kubeconfig quay.io/samsung_cnct/k2:latest helm registry install --namespace kube-system samsung_cnct/kubernetes-dashboard
 ```
 
 ```bash

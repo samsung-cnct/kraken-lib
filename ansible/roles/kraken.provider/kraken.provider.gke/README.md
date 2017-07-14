@@ -59,8 +59,8 @@ deployment:
     services:
       -
         name: podpincher
-        repo: atlas
-        chart: podpincher
+        registry: quay.io
+        chart: samsung_cnct/podpincher
         version: 0.1.0
 ```
 

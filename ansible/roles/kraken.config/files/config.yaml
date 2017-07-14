@@ -21,10 +21,11 @@ definitions:
           url: https://kubernetes-charts.storage.googleapis.com
       charts:
         - name: heapster
-          repo: atlas
-          chart: heapster
-          version: 0.1.0
+          registry: quay.io
+          chart: samsung_cnct/heapster
+          version: 0.1.0-0
           namespace: kube-system
+          
   fabricConfigs:
     - &defaultCanalFabric
       name: defaultCanalFabric

@@ -14,6 +14,10 @@
       "description": "Repository to pull this chart from - referenced by helm application.",
       "type": "string"
     },
+    "registry": {
+      "description": "Registry to pull this chart from - referenced by helm application.",
+      "type": "string"
+    },
     "chart": {
       "description": "Actual name of chart in the repository - referenced by helm application.",
       "type": "string"
@@ -26,9 +30,15 @@
 
   "required": [
     "name",
-    "repo",
     "chart",
     "version"
+  ],
+
+  "oneOf": [
+      { "required":
+          [ "repo" ] },
+      { "required":
+          [ "registry" ] }
   ],
 
   "type": "object"

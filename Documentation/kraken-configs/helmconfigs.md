@@ -6,7 +6,7 @@ These are helm charts to be installed on cluster startup
 ### Root Options
 | Key Name | Required     | Type         | Description|
 | -------- | ------------ | ------------ | --- |
-| repos    | __Required__ | Object array | Array of helm repositories |
+| repos    | Optional     | Object array | Array of helm repositories |
 | charts   | __Required__ | Object array | Array of helm charts |
 
 ### Repos Options
@@ -16,14 +16,14 @@ These are helm charts to be installed on cluster startup
 | url      | __Required__ | String | Repository address |
 
 ### Charts Options
-| Key Name  | Required     | Type   | Description|
-| --------- | ------------ | ------ | --- |
-| name      | __Required__ | String | Chart release name |
-| repo      | __Required__ | String | Repository name for the chart |
-| chart     | __Required__ | String | Chart name |
-| version   | __Required__ | String | Chart version |
-| namespace | Optional     | String | Kubernetes namespace to install chart into. Defaults to 'default' |
-| values    | Optional     | Object | Chart values |
+| Key Name                 | Required     | Type   | Description|
+| ---------                | ------------ | ------ | --- |
+| name                     | __Required__ | String | Chart release name |
+| repo __OR__ registry     | __Required__ | String | Repository name for the chart |
+| chart                    | __Required__ | String | Chart name |
+| version                  | __Required__ | String | Chart version |
+| namespace                | Optional     | String | Kubernetes namespace to install chart into. Defaults to 'default' |
+| values                   | Optional     | Object | Chart values |
 
 ###  Example
 ```yaml
@@ -38,8 +38,8 @@ helmConfigs:
         url: https://kubernetes-charts.storage.googleapis.com
     charts:
       - name: heapster
-        repo: atlas
-        chart: heapster
+        registry: quay.io
+        chart: samsung_cnct/heapster
         version: 0.1.0
         namespace: kube-system
       - name: central-logging
