@@ -42,6 +42,7 @@
       --exec=/hyperkube -- kubelet \
       --api_servers=https://apiserver.{{ cluster.name }}.internal \
       --register-node=true \
+      {% if node.nodeConfig.taints is defined %}--register-with-taints={% set comma = joiner(",") %}{% for taint in node.nodeConfig.taints  %}{{ comma() }}{{taint.key}}={{taint.value}}:{{taint.effect}}{% endfor %}{% endif %} \
       --node-labels=nodepool={{node.name}} \
       --allow-privileged=true \
       --pod-manifest-path=/etc/kubernetes/manifests \

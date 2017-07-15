@@ -5,6 +5,7 @@
 | -------------- | ------------ | ----------   | ---------------- |
 | mounts         |              | Object Array |                  |
 | providerConfig |              | Object       | provider details |
+| taints         |  Optional    | Object Array | restrict node to only allow pods that tolerate the taints |
 
 ## Mounts Options
 | Key Name       | Required     | Type         | Description  |
@@ -19,17 +20,24 @@
 | provider       | __Required__ | String       | provider     |
 | type           | __Required__ | String       | type of node to be launched - will vary depending on provider |
 | subnet         | __Required__ | String Array | Describes AWS subnets to be created per AZ |
-| label           |   Optional   | Object Array | Array of labels to apply to kubernetes nodes. ( defaultAwsMasterNode, defaultAwsClusterNode, defaultAwsSpecialNode) |
+| label          |   Optional   | Object Array | Array of labels to apply to kubernetes nodes. ( defaultAwsMasterNode, defaultAwsClusterNode, defaultAwsSpecialNode) |
 | tags           |   Optional   | Object Array | Array of tags to apply to node. |
 | storage        | __Required__ | Object Array | Array of storage volume specs. |
 
-## Storage Options
+## [Taints Options](https://kubernetes.io/docs/user-guide/kubectl/v1.7/#taint)
+| Key Name       | Required     | Type         | Description  |
+| -------------- | ------------ | ----------   | ------------ |
+| key            | __Required__ | string       | must match key when adding toleration to pod |
+| value          | __Required__ | string       | Can be "" if no value desired |
+| effect         | __Required__ | string       | must be NoSchedule, PreferNoSchedule or NoExecute |
+
+### Storage Options
 | Key Name | Required | Type | Description|
 | --- | --- | --- | --- |
 | type  | __Required__ | String | Storage volume type. root_block_device (only one supported), ebs_block_device or ephemeral_block_device |
 | opts  | __Required__ | Object | Storage options |
 
-## storage.opts Options
+### storage.opts Options
 | Key Name | Required | Type | Description|
 | --- | --- | --- | --- |
 | volume_type | __Required__ | String | The type of volume. Can be "standard", "gp2", or "io1". Only supported by root and ebs volumes |
@@ -185,6 +193,13 @@ nodeConfigs:
             delete_on_termination: true
             snapshot_id:
             encrypted: false
+    taints:
+      - key: firstKey
+        value: firstValue
+        effect: PreferNoSchedule
+      - key: secondKey
+        value: ""
+        effect: NoSchedule
   - &defaultAwsSpecialNode
     name: defaultAwsSpecialNode
     kind: node

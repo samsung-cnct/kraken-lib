@@ -20,9 +20,15 @@
       "items": { "$ref": "awsNodeMountConfig.json" },
       "type": "array"
     },
-    "providerConfig": { "$ref": "awsNodeProviderConfig.json" }
+   "providerConfig": {
+      "$ref": "awsNodeProviderConfig.json"
+    },
+    "taints": {
+      "description": "List of AWS taints to associate with the kubernetes node",
+      "items": { "$ref": "kubeNodeTaint.json" },
+      "type": "array"
+    }
   },
-
   "required": [
     "name",
     "providerConfig"

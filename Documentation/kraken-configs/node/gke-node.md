@@ -1,4 +1,8 @@
 # Node Configurations for node on GKE
+| Key Name       | Required     | Type         | Description      |
+| -------------- | ------------ | ----------   | ---------------- |
+| name           | __Required__ | string       | name of node     |
+| providerConfig | __Required__ | Object       | provider details |
 
 ## ProviderConfig Options
 | Key Name       | Required     | Type         | Description  |
@@ -22,13 +26,13 @@
 | minNodeCount | __Required__ | Integer | Minimum number of nodes in the NodePool. Must be >= 1 and <= maxNodeCount. |
 | maxNodeCount | __Required__ | Integer | Maximum number of nodes in the NodePool. Must be >= minNodeCount. There has to enough quota to scale up the cluster. |
 
-## label options
+### label options
 | Key Name | Required | Type | Description|
 | --- | --- | --- | --- |
 | name | __Required__ | String | label name |
 | value | __Required__ | String | label value |
 
-## metadata options
+### metadata options
 | Key Name | Required | Type | Description|
 | --- | --- | --- | --- |
 | name | __Required__ | String | metadata name |

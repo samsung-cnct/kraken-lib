@@ -15,7 +15,9 @@
       "enum": [ "node" ],
       "type": "string"
     },
-    "providerConfig": { "$ref": "gkeNodeProviderConfig.json" }
+    "providerConfig": {
+      "$ref": "gkeNodeProviderConfig.json"
+    }
   },
 
   "required": [
