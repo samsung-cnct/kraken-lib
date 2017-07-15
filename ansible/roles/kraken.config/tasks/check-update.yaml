@@ -1,0 +1,123 @@
+---
+- name: Fail when nothing got passed to update action
+  fail:
+    msg: "You must pass an action to update, either --addnodepools <nodepool,names>; --rmnodepools <nodepool,names> or --nodepools <nodepool,names>"
+  when:
+    add_nodepools == "" and remove_nodepools == "" and update_nodepools == ""
+- set_fact:
+    cluster: "{{ a_cluster }}"
+
+- name: Set kubeconfig path
+  set_fact:
+    kubeconfig: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
+
+- name: Set minor k8s version
+  set_fact:
+    kubernetes_minor_version: "{{ item.kubeConfig.version[0:(item.kubeConfig.version.find('.', 3 ))] }}"
+  with_items:
+    - "{{ cluster.nodePools }}"
+  when: (item.apiServerConfig is defined) or (cluster.providerConfig.provider == 'gke')
+
+- name: Get kubectl
+  set_fact:
+    kubectl: "/opt/cnct/kubernetes/{{ kubernetes_minor_version }}/bin/kubectl"
+
+- name: Get currently deployed nodepools
+  command: >
+    {{ kubectl }} --kubeconfig={{ kubeconfig }} get nodes -o jsonpath='{range .items[*]}{.metadata.labels.nodepool}{"\n"}{end}'
+  register: current_nodepools
+
+- name: Create list of current nodepool names
+  set_fact:
+    current_nodepools: "{{ current_nodepools.stdout_lines | unique }}"
+
+- name: Make empty list for non etcd nodepool information
+  set_fact:
+    config_nodepool_data: []
+
+- name: Only add non etcd nodepools
+  set_fact:
+    config_nodepool_data: "{{ config_nodepool_data }} + [item]"
+  with_items:
+    - "{{ cluster.nodePools }}"
+  when: item.kubeConfig is defined
+
+- name: Create list of nodepool names specified in config file
+  set_fact:
+    config_nodepools: "{{ config_nodepool_data | map(attribute='name') | list | unique }}"
+
+- name: Create list of names of nodepools to remove
+  set_fact:
+    nodepools_to_remove: "{{ remove_nodepools.split(',') }}"
+
+- name: Create list of names of nodepools to add
+  set_fact:
+    nodepools_to_add: "{{ add_nodepools.split(',') }}"
+
+- name: Do not allow control plane nodepool to be added of removed
+  fail:
+    msg: "You are attempting to add or remove a control plane nodepool. This is not permitted, as it would irretrievably break your cluster."
+  with_items:
+    - "{{ config_nodepool_data }}"
+  when: (item.apiServerConfig is defined) and ((item.name in nodepools_to_remove) or item.name in nodepools_to_add)
+
+- name: Create expected nodepools list
+  set_fact:
+    expected_nodepools: "{{ (add_nodepools == '') | ternary([], nodepools_to_add) }}"
+
+# Expected nodepools are the current, running, nodepools plus the ones specified in the addnodepools flag, minus the ones specified in rmnodepools flag. This is as opposed to config nodepools. The two should match.
+- name: Set expected nodepools
+  set_fact:
+    expected_nodepools: "{{ expected_nodepools }} + [item]"
+  with_items:
+    - "{{ current_nodepools }}"
+  when:
+    item not in nodepools_to_remove
+
+- name: Compare expected and config nodepools
+  set_fact:
+    extra_nodepools_in_config: "{{ config_nodepools | difference(expected_nodepools) }}"
+
+- name: Fail if config file does not match specified nodepools
+  fail:
+    msg: "It looks like you were trying to remove the nodepool {{ item }}, but your configuration file does not reflect this change. Please update your configuration file accordingly and try again."
+  with_items:
+    - "{{ extra_nodepools_in_config }}"
+  when: item in nodepools_to_remove
+
+- name: Fail if nodepools were added to config but not specified
+  fail:
+    msg: "It looks like you were trying to add the nodepool {{ item }}, but you need to specify this change in your update command, for example: --addnodepool {{ item }}"
+  with_items:
+    - "{{ extra_nodepools_in_config }}"
+
+- name: Compare config and expected nodepools
+  set_fact:
+    extra_nodepools_in_expected: "{{ expected_nodepools | difference(config_nodepools) }}"
+
+- name: Fail if config file does not match specified nodepools
+  fail:
+    msg: "It looks like you were trying to add the nodepool {{ item }}, but your configuration file does not reflect this change. Please update your configuration file accordingly and try again."
+  with_items:
+    - "{{ extra_nodepools_in_expected }}"
+  when: item in nodepools_to_add
+#
+- name: Fail if nodepools were removed from config but not specified
+  fail:
+    msg: "It looks like you were trying to remove the nodepool {{ item }}, but you need to specify this change in your update command: --rmnodepools {{ item }}."
+  with_items:
+    - "{{ extra_nodepools_in_expected }}"
+
+- name: Fail upon attempt to remove a nodepool that does not exist
+  fail:
+    msg: "The nodepool {{ item }} doesn't exist. Please check your configuration file carefully."
+  with_items:
+    - "{{ nodepools_to_remove }}"
+  when: item not in current_nodepools and remove_nodepools != ""
+
+- name: Fail when nodepool exists already
+  fail:
+    msg: "The nodepool {{ item }} already exists. If you wish to update configuration in this nodepool, please pass '--nodepools {{ item }}' to the update action instead."
+  with_items:
+    - "{{ nodepools_to_add }}"
+  when: item in current_nodepools and add_nodepools !=""

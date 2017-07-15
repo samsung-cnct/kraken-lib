@@ -124,6 +124,13 @@
   with_items:
     - "{{ kraken_config.clusters }}"
 
+- include: check-update.yaml
+  with_items:
+    - "{{ kraken_config.clusters }}"
+  loop_control:
+    loop_var: a_cluster
+  when: kraken_action == 'update'
+
 - include: setup.yaml
   with_items:
     - "{{ kraken_config.clusters }}"

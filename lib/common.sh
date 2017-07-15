@@ -13,6 +13,8 @@ KRAKEN_VERBOSE=${KRAKEN_VERBOSE:-false}
 K2_VERBOSE=''
 KRAKEN_TF_LOG=k2_tf_debug.log
 UPDATE_NODEPOOLS=''
+ADD_NODEPOOLS=''
+REMOVE_NODEPOOLS=''
 
 # set RANDFILE to prevent creation of ${HOME}/.rnd by openssl
 export RANDFILE=$(mktemp)
@@ -159,6 +161,14 @@ case $key in
   UPDATE_NODEPOOLS="$2"
   shift
   ;;
+  -a|--addnodepools)
+  ADD_NODEPOOLS="$2"
+  shift
+  ;;
+  -r|--rmnodepools)
+  REMOVE_NODEPOOLS="$2"
+  shift
+  ;;
   -g|--generate)
   KRAKEN_GENERATE_PATH="${2-"${HOME}/.kraken/config.yaml"}"
   if [ -n "${2+x}" ]; then
@@ -222,6 +232,8 @@ fi
 KRAKEN_EXTRA_VARS="config_path=${KRAKEN_CONFIG} config_base=${KRAKEN_BASE} \
                    config_forced=${KRAKEN_FORCE} dryrun=${KRAKEN_DRYRUN} \
                    update_nodepools=${UPDATE_NODEPOOLS} \
+                   add_nodepools=${ADD_NODEPOOLS} \
+                   remove_nodepools=${REMOVE_NODEPOOLS} \
                   "
 
 if [ ! -z ${BUILD_TAG+x} ]; then
