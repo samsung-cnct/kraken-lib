@@ -3,6 +3,10 @@
   set_fact:
     cluster: "{{ a_cluster }}"
 
+# because BOTO2 doesn't support AWS_SHARED_CREDENTIALS_FILE environment variable, do some mangling
+- include: aws_config.yaml
+  when: cluster.providerConfig.provider == 'aws'
+
 - name: Gather inventory of all cluster nodes
   ec2_remote_facts:
     region: "{{ cluster.providerConfig.region }}"

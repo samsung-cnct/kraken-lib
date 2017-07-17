@@ -113,6 +113,10 @@
     vpcid: "{{ terraform_state_show.stdout }}"
   when: kraken_action == 'down'
 
+# because BOTO2 doesn't support AWS_SHARED_CREDENTIALS_FILE environment variable, do some mangling
+- include: aws_config.yaml
+  when: cluster.providerConfig.provider == 'aws'
+
 - name: Wait for ELBs to be deleted
   action:
     module: ec2_elb_facts
