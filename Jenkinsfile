@@ -90,7 +90,7 @@ podTemplate(label: 'k2', containers: [
         customContainer('docker') {
             // add a docker rmi/docker purge/etc.
             stage('docker build') {
-                kubesh 'docker build -t quay.io/samsung_cnct/k2:latest docker/'
+                kubesh 'docker build --no-cache -t quay.io/samsung_cnct/k2:latest docker/'
             }
 
             //only push from master.   assume we are on samsung-cnct fork
