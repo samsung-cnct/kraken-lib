@@ -1,8 +1,25 @@
+// Configuration variables
+repo_org               = "samsung_cnct"
+
+aws_cloud_test_timeout = 8   // Should be about 5 min
+gke_cloud_test_timeout = 60  // Should be about 4 min but can be as long as 50 for non-default versions
+e2e_test_timeout       = 18  // Should be about 15 min
+cleanup_timeout        = 60  // Should be about 6 min
+
+e2e_kubernetes_version = "v1.6.7"
+e2etester_version      = "0.2"
+custom_jnlp_version    = "0.1"
+
+jnlp_image             = "quay.io/${repo_org}/custom-jnlp:${custom_jnlp_version}"
+k2_tools_image         = "quay.io/${repo_org}/k2-tools:latest"
+e2e_tester_image       = "quay.io/${repo_org}/e2etester:${e2etester_version}"
+docker_image           = "docker"
+
 podTemplate(label: 'k2', containers: [
-    containerTemplate(name: 'jnlp', image: 'quay.io/samsung_cnct/custom-jnlp:0.1', args: '${computer.jnlpmac} ${computer.name}'),
-    containerTemplate(name: 'k2-tools', image: 'quay.io/samsung_cnct/k2-tools:latest', ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi'),
-    containerTemplate(name: 'e2e-tester', image: 'quay.io/samsung_cnct/e2etester:0.2', ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi'),
-    containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true)
+    containerTemplate(name: 'jnlp', image: jnlp_image, args: '${computer.jnlpmac} ${computer.name}'),
+    containerTemplate(name: 'k2-tools', image: k2_tools_image, ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi'),
+    containerTemplate(name: 'e2e-tester', image: e2e_tester_image, ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi'),
+    containerTemplate(name: 'docker', image: docker_image, command: 'cat', ttyEnabled: true)
   ], volumes: [
     hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
     hostPathVolume(hostPath: '/var/lib/docker/scratch', mountPath: '/mnt/scratch'),
@@ -11,100 +28,110 @@ podTemplate(label: 'k2', containers: [
     node('k2') {
         customContainer('k2-tools'){
 
-            stage('checkout') {
+            stage('Checkout') {
                 checkout scm
             }
-
-            stage('fetch credentials') {
+            stage('Configure') {
                 kubesh 'build-scripts/fetch-credentials.sh'
-            }
-
-            // Dry Run Test
-            stage('aws config generation') {
                 kubesh './up.sh --generate cluster/aws/config.yaml'
-            }
-
-            stage('update generated aws config') {
                 kubesh "build-scripts/update-generated-config.sh cluster/aws/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
-            }
-
-            stage('create k2 templates - dryrun') {
+                kubesh 'mkdir -p cluster/gke'
+                kubesh 'cp ansible/roles/kraken.config/files/gke-config.yaml cluster/gke/config.yaml'
+                kubesh "build-scripts/update-generated-config.sh cluster/gke/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
+        }
+            // Dry Run Test
+            stage('Test: Dry Run') {
                 kubesh 'PWD=`pwd` && ./up.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/ -t dryrun'
             }
 
-            // Unit tests go here
+            // Unit tests
+            stage('Test: Unit') {
+                kubesh 'true' // Add unit test call here
+            }
 
-            parallel (
-                aws: {
-                    stage('aws config generation') {
-                        kubesh './up.sh --generate cluster/aws/config.yaml'
-                    }
-
-                    stage('update generated aws config') {
-                        kubesh "build-scripts/update-generated-config.sh cluster/aws/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
-                    }
-
-                    try {
-                        stage('create k2 cluster') {
-                            kubesh 'PWD=`pwd` && ./up.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/'
-                        }
-
-                        customContainer('e2e-tester') {
-                            stage('run e2e tests') {
-                                kubesh "PWD=`pwd` && build-scripts/conformance-tests.sh v1.6.7 ${env.JOB_BASE_NAME}-${env.BUILD_ID} /mnt/scratch"
+            // Live tests
+            try {
+                try {
+                    err=false
+                    stage('Test: Cloud') {
+                        parallel (
+                            "aws": {
+                                timeout(aws_cloud_test_timeout) {
+                                    kubesh 'PWD=`pwd` && ./up.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/'
+                                }
+                            },
+                            "gke": {
+                                timeout(gke_cloud_test_timeout) {
+                                    kubesh 'PWD=`pwd` && ./up.sh --config $PWD/cluster/gke/config.yaml --output $PWD/cluster/gke/'
+                                }
                             }
-                        }
-                    } finally {
-                        customContainer('k2-tools') {
-                            stage('destroy k2 cluster') {
-                                kubesh 'PWD=`pwd` && ./down.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/ || true'
-                                junit "output/artifacts/*.xml"
-                            }
-                        }
+                        )
                     }
-                },
-                gke: {
-                    stage('gke config generation') {
-                        kubesh 'mkdir -p cluster/gke'
-                        kubesh 'cp ansible/roles/kraken.config/files/gke-config.yaml cluster/gke/config.yaml'
-                    }
-
-                    stage('update generated gke config') {
-                        kubesh "build-scripts/update-generated-config.sh cluster/gke/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
-                    }
-
-                    try {
-                        stage('create gke cluster') {
-                            kubesh 'PWD=`pwd` && ./up.sh --config $PWD/cluster/gke/config.yaml --output $PWD/cluster/gke/'
+                } catch (caughtError) {
+                    err = caughtError
+                    currentBuild.result = "FAILURE"                
+                } finally {
+                    // This keeps the stage view from deleting prior history when the E2E test isn't run
+                    if (err) {
+                        stage('Test: E2E') {
+                            echo 'E2E test not run due to stage failure.'
                         }
-                    } finally {
-                        stage('destroy gke cluster') {
-                            kubesh 'PWD=`pwd` && ./down.sh --config $PWD/cluster/gke/config.yaml --output $PWD/cluster/gke/'
-                        }
+                        throw err
                     }
-
                 }
-            )
+                timeout(e2e_test_timeout) {
+                    stage('Test: E2E') {
+                        customContainer('e2e-tester') {
+                            try {
+                                kubesh "PWD=`pwd` && build-scripts/conformance-tests.sh ${e2e_kubernetes_version} ${env.JOB_BASE_NAME}-${env.BUILD_ID} /mnt/scratch"
+                            } catch (caughtError) {
+                                err = caughtError
+                                currentBuild.result = "FAILURE"
+                            } finally {
+                                junit "output/artifacts/*.xml"
+                                if (err) {
+                                    throw err
+                                }
+                            }
+                        }
+                    }
+                }
+            } finally {
+                timeout(cleanup_timeout) {
+                    stage('Clean up') {
+                        parallel (
+                            "aws": {
+                                kubesh 'PWD=`pwd` && ./down.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/ || true'
+                            },
+                            "gke": {
+                                kubesh 'PWD=`pwd` && ./down.sh --config $PWD/cluster/gke/config.yaml --output $PWD/cluster/gke/'
+                            }
+                        )
+                    }
+                }
+            }
         }
 
         customContainer('docker') {
             // add a docker rmi/docker purge/etc.
-            stage('docker build') {
-                kubesh 'docker build --no-cache -t quay.io/samsung_cnct/k2:latest docker/'
+            stage('Build') {
+                kubesh "docker rmi quay.io/${repo_org}/k2:k2-${env.JOB_BASE_NAME}-${env.BUILD_ID} || true"
+                kubesh "docker rmi quay.io/${repo_org}/k2:latest || true"
+                kubesh "docker build --no-cache --force-rm -t quay.io/${repo_org}/k2:k2-${env.JOB_BASE_NAME}-${env.BUILD_ID} docker/"
             }
 
-            //only push from master.   assume we are on samsung-cnct fork
-            //  ToDo:  check for correct fork
-            stage('docker push') {
-                if (env.BRANCH_NAME == "master") {
-                    kubesh 'docker push quay.io/samsung_cnct/k2:latest'
+            //only push from master if we are on samsung-cnct fork
+            stage('Publish') {
+                if (env.BRANCH_NAME == "master" && env.GIT_URL ==~ "/${repo_org}/") {
+                    kubesh "docker tag quay.io/${repo_org}/k2:k2-${env.JOB_BASE_NAME}-${env.BUILD_ID} quay.io/${repo_org}/k2:latest"
+                    kubesh "docker push quay.io/${repo_org}/k2:latest"
                 } else {
                     echo 'not master branch, not pushing to docker repo'
                 }
             }
         }
     }
-  }
+}
 
 def kubesh(command) {
   if (env.CONTAINER_NAME) {
