@@ -10,7 +10,15 @@ resource "aws_subnet" "vpc_subnet_{{subnet.name}}" {
   vpc_id                  = "${var.vpc_id}"
   cidr_block              = "{{subnet.cidr}}"
   availability_zone       = "{{subnet.az}}"
+
+  # define if subnet is defined as private or public.
+  # these will be overriden if nodes are configured to be public/private.
+  {% if subnet.enablePublicIPs is defined %}
+  map_public_ip_on_launch = "{{subnet.enablePublicIPs}}"
+  {% else %}
+  # this is our default.
   map_public_ip_on_launch = true
+  {% endif %}
 
   tags {
     Name = "${var.subnets_name}_{{subnet.name}}_subnet",

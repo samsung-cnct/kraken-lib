@@ -34,6 +34,11 @@
       "description": "List of storage devices to attach to the node.",
       "items": { "$ref": "awsStorageDevice.json" },
       "type": "array"
+    },
+    "enablePublicIPs": {
+      "description": "Overrides the vpc's subnet values. Do we allow for Auto-assigned Public IPs",
+      "type": "boolean",
+      "default": "true"
     }
   },
 

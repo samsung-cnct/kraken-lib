@@ -20,6 +20,11 @@
       "format": "cidr",
       "type": "string",
       "default": "10.0.0.0/18"
+    },
+    "enablePublicIPs": {
+      "description": "Do we allow for Auto-assigned Public IPs, Our clusters default to true",
+      "type": "boolean",
+      "default": "true"
     }
   },
   "required": [

@@ -87,7 +87,14 @@ resource "aws_launch_configuration" "master_launch_config" {
   key_name                    = "${var.master_key_name}"
   instance_type               = "{{master.nodeConfig.providerConfig.type}}"
   security_groups             = ["${var.kubernetes_sec_group}"]
+
+ # Will override subnets configuration.
+  {% if master.nodeConfig.providerConfig.enablePublicIPs is defined %}
+  associate_public_ip_address = "{{master.nodeConfig.providerConfig.enablePublicIPs}}"
+  {% else %}
   associate_public_ip_address = true
+  {% endif %}
+
   iam_instance_profile        = "${aws_iam_instance_profile.kubernetes_master_profile.name}"
   user_data                   = "${file("{{ config_base | expanduser }}/{{cluster.name}}/cloud-config/{{master.name}}.cloud-config.yaml")}"
 
@@ -191,7 +198,13 @@ resource "aws_launch_configuration" "master_loadbalancer_launch_config" {
   key_name                    = "${var.master_key_name}"
   instance_type               = "{{master.nodeConfig.providerConfig.type}}"
   security_groups             = ["${var.kubernetes_sec_group}"]
+
+  # Will override subnets configuration.
+  {% if master.nodeConfig.providerConfig.enablePublicIPs is defined %}
+  associate_public_ip_address = "{{master.nodeConfig.providerConfig.enablePublicIPs}}"
+  {% else %}
   associate_public_ip_address = true
+  {% endif %}
 
   lifecycle {
     create_before_destroy = true

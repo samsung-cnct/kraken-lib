@@ -185,6 +185,7 @@ definitions:
           path: /ephemeral
           forceFormat: false
       providerConfig:
+        enablePublicIPs: true
         provider: aws
         type: t2.small
         subnet: ["zone-1", "zone-2", "zone-3"]
@@ -224,6 +225,7 @@ definitions:
           path: /ephemeral
           forceFormat: false
       providerConfig:
+        enablePublicIPs: true
         provider: aws
         type: t2.small
         subnet: ["zone-1", "zone-2", "zone-3"]
@@ -259,6 +261,7 @@ definitions:
           path: /var/lib/docker
           forceFormat: true
       providerConfig:
+        enablePublicIPs: true
         provider: aws
         type: m4.large
         subnet: ["zone-1", "zone-2", "zone-3"]
@@ -285,6 +288,7 @@ definitions:
           path: /var/lib/docker
           forceFormat: true
       providerConfig:
+        enablePublicIPs: true
         provider: aws
         type: c4.large
         subnet: ["zone-1", "zone-2", "zone-3"]
@@ -313,6 +317,7 @@ definitions:
       keypair: krakenKey
       providerConfig:
         provider: aws
+        enablePublicIPs: true
         type: m4.large
         subnet: ["zone-1", "zone-2", "zone-3"]
         tags:
@@ -343,14 +348,17 @@ definitions:
           name: zone-1
           az: us-east-1a
           cidr: 10.0.0.0/18
+          enablePublicIPs: true
         -
           name: zone-2
           az: us-east-1b
           cidr: 10.0.64.0/18
+          enablePublicIPs: true
         -
           name: zone-3
           az: us-east-1c
           cidr: 10.0.128.0/17
+          enablePublicIPs: true
       egressAcl:
         -
           protocol: "-1"

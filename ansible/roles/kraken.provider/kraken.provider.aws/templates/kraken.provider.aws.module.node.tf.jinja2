@@ -101,7 +101,14 @@ resource "aws_launch_configuration" "{{node.name}}_launch_config" {
   key_name                    = "${var.{{node.keyPair.name}}_{{node.name}}_key}"
   instance_type               = "{{node.nodeConfig.providerConfig.type}}"
   security_groups             = ["${var.kubernetes_sec_group}"]
+
+  # Will override subnets configuration.
+  {% if node.nodeConfig.providerConfig.enablePublicIPs is defined %}
+  associate_public_ip_address = "{{node.nodeConfig.providerConfig.enablePublicIPs}}"
+  {% else %}
   associate_public_ip_address = true
+  {% endif %}
+
   iam_instance_profile        = "${aws_iam_instance_profile.kubernetes_node_profile.name}"
   user_data                   = "${file("{{ config_base | expanduser }}/{{cluster.name}}/cloud-config/{{node.name}}.cloud-config.yaml")}"
 
