@@ -28,14 +28,14 @@
 #       -
 #         name: dex
 #         values:
-#           Dex:
+#           dex:
 #             Issuer: https://dex.my.cluster.io:8443
 # ...
 #
 
 - name: Retrieve issuer URL
   set_fact:
-    oidc_issuer: "{{ oidc_provider_values.Dex.Issuer }}"
+    oidc_issuer: "{{ oidc_provider_values.dex.Issuer }}"
 
 - name: Retrieve domain value from
   shell: "echo {{ oidc_issuer  }} | awk -F/ '{print $3}' | awk -F: '{print $1}'"
