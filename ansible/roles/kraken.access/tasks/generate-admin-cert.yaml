@@ -1,13 +1,34 @@
 ---
+- name: Get the Default Admin User from BasicAuth
+  set_fact:
+    a_user: "{{ cluster.kubeAuth.authn.basic | selectattr('user', 'match', '^'+cluster.kubeAuth.authn.default_basic_user+'$') | first }}"
+  when: ( cluster.kubeAuth.authn.basic is defined ) and (cluster.kubeAuth.authn.cert is undefined )
+
+- name: Get the Default Admin User from Cert
+  set_fact:
+    a_user: "{{ cluster.kubeAuth.authn.cert | selectattr('user', 'match', '^'+cluster.kubeAuth.authn.default_basic_user+'$') | first }}"
+  when: ( cluster.kubeAuth.authn.cert is defined )
+
 - name: Generate end-user admin key
   command: >
     openssl genrsa -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user.key 2048
       creates={{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user.key
 
+
+- name: Create non-rbac subj value 
+  set_fact:
+    endsubj: "/CN={{ a_user.user }}"
+  when: (cluster.kubeAuth.authz.rbac is undefined)
+
+- name: Create rbac subj value 
+  set_fact:
+    endsubj: "/CN={{ a_user.user }}/O={{ a_user.group }}"
+  when: (cluster.kubeAuth.authz.rbac is defined)
+
 - name: Generate end-user admin csr 
   command: >
     openssl req -new -key {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user.key
-      -subj {{ (cluster.kubeAuth.authz.rbac is defined) | ternary("/O=system:masters/CN=kraken-ca","/CN=kraken-ca") }} -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user.csr
+      -subj {{ endsubj }} -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user.csr
         creates={{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user.csr
 
 - name: Generate end-user admin crt

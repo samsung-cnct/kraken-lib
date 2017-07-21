@@ -8,7 +8,9 @@ resources:
       description: {{ cluster.name }} managed by k2
       masterAuth:
         username: {{ default_kube_basic_auth.user }}
+{% if cluster.kubeAuth.authn.cert is undefined  and cluster.kubeAuth.authn.basic is defined %}
         password: {{ default_kube_basic_auth.password }}
+{% endif %}
 {% if cluster.providerConfig.disableCloudLogging is defined and cluster.providerConfig.disableCloudLogging == True %}
       loggingService: none
 {% else %}

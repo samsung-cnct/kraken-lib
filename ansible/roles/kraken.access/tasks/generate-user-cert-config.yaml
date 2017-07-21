@@ -1,0 +1,88 @@
+---
+#
+# expects:
+#   a_user
+#   cluster
+#   kubeconfig
+#   
+#   kubernetes_minor_versions
+#   kraken_endpoint
+#   
+- name: Generate end-user {{ a_user.user }} key
+  command: >
+    openssl genrsa -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.key 2048
+      creates={{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.key
+
+- name: Create non-rbac subj value
+  set_fact:
+    endsubj: "/CN={{ a_user.user }}"
+  when: (cluster.kubeAuth.authz.rbac is undefined)
+
+- name: Create rbac subj value
+  set_fact:
+    endsubj: "/CN={{ a_user.user }}/O={{ a_user.group }}"
+  when: (cluster.kubeAuth.authz.rbac is defined)
+
+- name: Generate end-user {{ a_user.user }} csr 
+  command: >
+    openssl req -new -key {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.key
+      -subj {{ endsubj }} -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.csr
+        creates={{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.csr
+
+- name: Generate end-user {{ a_user.user }} crt
+  command: >
+    openssl x509 -req -in {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.csr
+      -CA {{ config_base | expanduser }}/{{ cluster.name }}/certs/ca.pem
+      -CAkey {{ config_base | expanduser }}/{{ cluster.name }}/certs/ca-key.pem
+      -CAcreateserial
+      -CAserial {{ config_base | expanduser }}/{{ cluster.name }}/certs/ca.srl
+      -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.crt -days 10000
+#
+# expects:
+#   a_user
+#   cluster
+#   kubeconfig
+#   
+#   kubernetes_minor_versions
+#   kraken_endpoint
+#   
+- name: Look up and set k8s minor version for this cluster
+  set_fact:
+    kubernetes_minor_version: "{{ kubernetes_minor_versions[cluster.name] }}"
+
+- name: Execute appropriate kubectl per minor version
+  set_fact:
+    kubectl: "/opt/cnct/kubernetes/{{ kubernetes_minor_version }}/bin/kubectl"
+
+- name: Set kubeconfig file name
+  set_fact:
+     kubeconfig: "{{ config_base | expanduser }}/{{ cluster.name }}/user-{{ a_user.user }}.kubeconfig"
+
+- name: create kubeconfig entry
+  command: >
+    {{ kubectl }} config set-cluster {{ cluster.name }}
+      --server=https://{{ kraken_endpoint }}
+      --certificate-authority={{ config_base | expanduser }}/{{ cluster.name }}/certs/ca.pem
+      --embed-certs=true
+      --kubeconfig={{ kubeconfig }}
+
+- name: create user entry
+  command: >
+    {{ kubectl }} config set-credentials {{ cluster.name }}_{{ a_user.user }}
+      --username={{ a_user.user }}
+      --client-certificate={{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.crt
+      --client-key={{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.key
+      --embed-certs=true
+      --kubeconfig={{ kubeconfig }}
+
+- name: create context entry
+  command: >
+    {{ kubectl }} config set-context {{ cluster.name }}_context
+      --cluster={{ cluster.name }}
+      --user={{ cluster.name }}_{{ a_user.user }}
+      --kubeconfig={{ kubeconfig }}
+
+- name: set current context
+  command: >
+    {{ kubectl }} config use-context {{ cluster.name }}_context
+      --kubeconfig={{ kubeconfig }}

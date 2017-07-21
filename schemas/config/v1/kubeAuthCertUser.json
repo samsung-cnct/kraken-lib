@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1/kubeAuthCertUser.json",
+  "$$target": "kubeAuthCertUser.json",
+  "title": "Kubernetes Authentication Cert User Entry",
+  "description": "Kubernetes Authentication Cert User Entry",
+
+  "properties": {
+    "user": {
+      "description": "The username for the account.",
+      "type": "string"
+    },
+    "group": {
+      "description": "The groups for the user account.",
+      "type": "string"
+    }
+  },
+
+  "required": [
+    "user"
+  ],
+
+  "type": "object"
+}

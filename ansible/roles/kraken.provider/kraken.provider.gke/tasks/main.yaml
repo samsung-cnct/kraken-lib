@@ -8,9 +8,15 @@
     path: "{{ config_base | expanduser }}/{{ cluster.name }}"
     state: directory
 
-- name: Retrive default auth from kube basic authn list
+- name: Get the Default Admin User from BasicAuth
   set_fact:
     default_kube_basic_auth: "{{ cluster.kubeAuth.authn.basic | selectattr('user', 'match', '^'+cluster.kubeAuth.authn.default_basic_user+'$') | first }}"
+  when: ( cluster.kubeAuth.authn.basic is defined ) and (cluster.kubeAuth.authn.cert is undefined )
+
+- name: Get the Default Admin User from Cert
+  set_fact:
+    default_kube_basic_auth: "{{ cluster.kubeAuth.authn.cert | selectattr('user', 'match', '^'+cluster.kubeAuth.authn.default_basic_user+'$') | first }}"
+  when: ( cluster.kubeAuth.authn.cert is defined )
 
 - name: Render a deployment manager template for created-cluster.yaml in advance
   template: src=deploymentmanager-create.yaml.jinja2

@@ -27,7 +27,9 @@ spec:
     - --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem
     - --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
     - --client-ca-file=/etc/kubernetes/ssl/ca.pem
+{% if cluster.kubeAuth.authn.basic is defined %}
     - --basic-auth-file=/etc/kubernetes/basicauth.csv
+{% endif %}
     - --service-account-key-file=/etc/kubernetes/ssl/service-account-key.pem
     - --cloud-provider={{cluster.providerConfig.provider}}
     - --logtostderr=true
@@ -54,9 +56,11 @@ spec:
     - mountPath: /etc/kubernetes/ssl
       name: ssl-certs-kubernetes
       readOnly: true
+{% if cluster.kubeAuth.authn.basic is defined %}
     - mountPath: /etc/kubernetes/basicauth.csv
       name: basic-auth-kubernetes
       readOnly: true
+{% endif %}
     - mountPath: /etc/etcd/ssl
       name: ssl-certs-etcd
       readOnly: true
@@ -64,9 +68,11 @@ spec:
       name: ssl-certs-host
       readOnly: true
   volumes:
+{% if cluster.kubeAuth.authn.basic is defined %}
   - hostPath:
       path: /etc/kubernetes/basicauth.csv
     name: basic-auth-kubernetes
+{% endif %}
   - hostPath:
       path: /etc/kubernetes/ssl
     name: ssl-certs-kubernetes

@@ -7,20 +7,31 @@
 
   "properties": {
     "basic": {
-      "description": "List of user/password to be created.",
+      "description": "List of Basic auth users to be created.",
       "items": { "$ref": "kubeAuthBasicUser.json" },
-      "type": "array"
+      "type": "array",
+      "minItems": 1
+    },
+    "cert": {
+      "description": "List of Cert auth users to be created.",
+      "items": { "$ref": "kubeAuthCertUser.json" },
+      "type": "array",
+      "minItems": 1
     },
     "default_basic_user": {
-      "description": "Default user for kubeauth file.",
+      "description": "Default admin user for kubeauth file. Must match one of the user names.",
       "type": "string"
     }
   },
 
   "required": [
-    "basic",
     "default_basic_user"
   ],
+
+  "anyOf": [
+     { "required": [ "basic" ] },
+     { "required": [ "cert"  ] }
+   ],
 
   "type": "object"
 }

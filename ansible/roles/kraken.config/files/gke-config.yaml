@@ -167,6 +167,9 @@ definitions:
           -
             password: "ChangeMe"
             user: "admin"
+        cert:
+          -
+            user: "admin"
         default_basic_user: "admin"
    - &rbacKubeAuth
       authz:
@@ -175,9 +178,8 @@ definitions:
           # It is not used by kubernetes 1.6 or later.
           super_user: "placeholder"
       authn:
-        basic:
+        cert:
           -
-            password: "ChangeMe"
             user: "admin"
             group: "system:masters"
         default_basic_user: "admin"
