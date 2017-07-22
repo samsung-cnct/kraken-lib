@@ -1,5 +1,6 @@
 // Configuration variables
-repo_org               = "samsung_cnct"
+github_org             = "samsung-cnct"
+quay_org               = "samsung_cnct"
 
 aws_cloud_test_timeout = 8   // Should be about 5 min
 gke_cloud_test_timeout = 60  // Should be about 4 min but can be as long as 50 for non-default versions
@@ -10,9 +11,9 @@ e2e_kubernetes_version = "v1.6.7"
 e2etester_version      = "0.2"
 custom_jnlp_version    = "0.1"
 
-jnlp_image             = "quay.io/${repo_org}/custom-jnlp:${custom_jnlp_version}"
-k2_tools_image         = "quay.io/${repo_org}/k2-tools:latest"
-e2e_tester_image       = "quay.io/${repo_org}/e2etester:${e2etester_version}"
+jnlp_image             = "quay.io/${quay_org}/custom-jnlp:${custom_jnlp_version}"
+k2_tools_image         = "quay.io/${quay_org}/k2-tools:latest"
+e2e_tester_image       = "quay.io/${quay_org}/e2etester:${e2etester_version}"
 docker_image           = "docker"
 
 podTemplate(label: 'k2', containers: [
@@ -115,16 +116,16 @@ podTemplate(label: 'k2', containers: [
         customContainer('docker') {
             // add a docker rmi/docker purge/etc.
             stage('Build') {
-                kubesh "docker rmi quay.io/${repo_org}/k2:k2-${env.JOB_BASE_NAME}-${env.BUILD_ID} || true"
-                kubesh "docker rmi quay.io/${repo_org}/k2:latest || true"
-                kubesh "docker build --no-cache --force-rm -t quay.io/${repo_org}/k2:k2-${env.JOB_BASE_NAME}-${env.BUILD_ID} docker/"
+                kubesh "docker rmi quay.io/${quay_org}/k2:k2-${env.JOB_BASE_NAME}-${env.BUILD_ID} || true"
+                kubesh "docker rmi quay.io/${quay_org}/k2:latest || true"
+                kubesh "docker build --no-cache --force-rm -t quay.io/${quay_org}/k2:k2-${env.JOB_BASE_NAME}-${env.BUILD_ID} docker/"
             }
 
             //only push from master if we are on samsung-cnct fork
             stage('Publish') {
-                if (env.BRANCH_NAME == "master" && env.GIT_URL ==~ "/${repo_org}/") {
-                    kubesh "docker tag quay.io/${repo_org}/k2:k2-${env.JOB_BASE_NAME}-${env.BUILD_ID} quay.io/${repo_org}/k2:latest"
-                    kubesh "docker push quay.io/${repo_org}/k2:latest"
+                if (env.BRANCH_NAME == "master" && env.CHANGE_URL ==~ "/${quay_org}/") {
+                    kubesh "docker tag quay.io/${quay_org}/k2:k2-${env.JOB_BASE_NAME}-${env.BUILD_ID} quay.io/${quay_org}/k2:latest"
+                    kubesh "docker push quay.io/${quay_org}/k2:latest"
                 } else {
                     echo 'not master branch, not pushing to docker repo'
                 }
