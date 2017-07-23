@@ -123,11 +123,11 @@ podTemplate(label: 'k2', containers: [
 
             //only push from master if we are on samsung-cnct fork
             stage('Publish') {
-                if (env.BRANCH_NAME == "master" && env.CHANGE_URL ==~ "/${quay_org}/") {
+                if (env.BRANCH_NAME == "master" && env.CHANGE_URL ==~ "/${github_org}/") {
                     kubesh "docker tag quay.io/${quay_org}/k2:k2-${env.JOB_BASE_NAME}-${env.BUILD_ID} quay.io/${quay_org}/k2:latest"
                     kubesh "docker push quay.io/${quay_org}/k2:latest"
                 } else {
-                    echo 'not master branch, not pushing to docker repo'
+                    echo "Not pushing to docker repo:\n    BRANCH_NAME='${env.BRANCH_NAME}'\n    CHANGE_URL='${env.CHANGE_URL}'"
                 }
             }
         }
