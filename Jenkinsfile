@@ -31,6 +31,9 @@ podTemplate(label: 'k2', containers: [
 
             stage('Checkout') {
                 checkout scm
+                // retrieve the URI used for checking out the source
+                // this assumes one branch with one uri
+                git_uri = scm.getRepositories()[0].getURIs()[0].toString()
             }
             stage('Configure') {
                 kubesh 'build-scripts/fetch-credentials.sh'
@@ -123,11 +126,11 @@ podTemplate(label: 'k2', containers: [
 
             //only push from master if we are on samsung-cnct fork
             stage('Publish') {
-                if (env.BRANCH_NAME == "master" && env.CHANGE_URL ==~ "/${github_org}/") {
+                if (env.BRANCH_NAME == "master" && git_uri ==~ "/${github_org}/") {
                     kubesh "docker tag quay.io/${quay_org}/k2:k2-${env.JOB_BASE_NAME}-${env.BUILD_ID} quay.io/${quay_org}/k2:latest"
                     kubesh "docker push quay.io/${quay_org}/k2:latest"
                 } else {
-                    echo "Not pushing to docker repo:\n    BRANCH_NAME='${env.BRANCH_NAME}'\n    CHANGE_URL='${env.CHANGE_URL}'"
+                    echo "Not pushing to docker repo:\n    BRANCH_NAME='${env.BRANCH_NAME}'\n    git_uri='${git_uri}'"
                 }
             }
         }
