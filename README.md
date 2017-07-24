@@ -24,6 +24,13 @@ K2 uses a single file to drive cluster configuration. This makes it easy to chec
 
 We believe solving these two problems is a baseline for effectively and efficiently nurturing a Kubernetes based infrastructure.
 
+## K2 Crash Data Collection
+To support our efforts to make K2 a fault-tolerant, reliable tool, we collect data if K2 crashes on up, down or update. If you are running K2 with the [K2-Tools](https://github.com/samsung-cnct/k2-tools) docker container and the program exits with a failure, the following data will be collected by [K2-Crash-App](https://github.com/samsung-cnct/k2-crash-application) 
+* logs
+* the failing task
+
+This data remains internal for the Samsung-CNCT team to use for data-driven development. We do not collect personal information from users. 
+
 ## K2 supported addons
 K2 also supports a number of Samsung CNCT supported addons in the form of Kubernetes Charts. These charts can be found in the [K2 Charts repository](https://github.com/samsung-cnct/k2-charts).
 These charts are tested and maintained by Samsung CNCT. They should work on any Kubernetes cluster.  
