@@ -113,6 +113,10 @@ resource "aws_instance" "{{node.name}}_{{node_idx}}" {
     {{tag.key}}       = "{{tag.value}}"
 {% endfor %}
   }
+
+  lifecycle {
+    prevent_destroy = {{ prevent_destroy }}
+  }
 } #aws_instance
 
 resource "aws_route53_record" "{{node.name}}_vm_A_record_{{node_idx}}" {

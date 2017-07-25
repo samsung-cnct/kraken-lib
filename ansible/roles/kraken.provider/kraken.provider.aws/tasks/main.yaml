@@ -1,19 +1,57 @@
 ---
-- name: rename cluster fact
+- name:
   set_fact:
     cluster: "{{ a_cluster }}"
-
-- name: Set ssl_cert_common_name
-  set_fact:
+    etcd_status_lock_filename: "{{ config_base | expanduser }}/{{ cluster.name }}/etcd.status.lock"
     ssl_cert_common_name: "*.{{ cluster.providerConfig.region }}.elb.amazonaws.com"
+
+- name: Ensure cluster directories exist
+  file:
+    path: "{{ config_base | expanduser }}/{{ cluster.name }}/"
+    state: directory
+    recurse: yes
 
 - include: aws-certs.yaml
   when: kraken_action == 'up'
 
+# Terraform resources which have prevent_destroy set to true will not be
+# destroyed, even when `terraform destroy` is called. To avoid the potential
+# for infrastructure data loss, some resources are only allowed to be deleted
+# when all of the infrastructure is being destroyed by the down action.
 - include: aws-template.yaml
+  vars:
+    prevent_destroy: "{{ 'false' if kraken_action == 'down' else 'true' }}"
+
+- stat:
+    path: etcd_status_lock_filename
+  register: etcd_status_lock_file
+
+- name: Create etcd nodes
+  include: terraform-apply-etcd.yaml
+  when:
+    - not etcd_status_lock_file.stat.exists
+    - kraken_action == 'up'
+
+- name: Create partial ssh_config in order to check etcd health
+  include_role:
+    name: kraken.ssh/kraken.ssh.aws
+
+- name: Wait for etcd nodes to form cluster
+  include: wait-for-etcd.yaml
+  with_items: "{{ cluster.nodePools }}"
+  when:
+    - item.etcdConfig is defined
+    - not etcd_status_lock_file.stat.exists
+    - kraken_action == 'up'
+    - not (dryrun | bool)
+
+- name: Ensure etcd_status_lock file exists
+  copy:
+    content: ""
+    dest: "{{ config_base | expanduser }}/{{ cluster.name }}/etcd.status.lock"
 
 - include: aws-action-dryrun.yaml
-  when:  ( dryrun | bool )
 
-- include: aws-action.yaml
-  when: not ( dryrun | bool )
+- name: Create/destroy k8s nodes
+  include: aws-action.yaml
+  when: not (dryrun | bool)

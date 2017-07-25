@@ -1,2 +1,9 @@
 ---
 action_retries: 10
+tf_retries: 2
+tf_delay: 60
+etcd_cafile: /etc/etcd/ssl/client-ca.pem
+etcd_certfile: /etc/etcd/ssl/client.pem
+etcd_keyfile: /etc/etcd/ssl/client-key.pem
+etcd_retries: 30
+etcd_delay: 10

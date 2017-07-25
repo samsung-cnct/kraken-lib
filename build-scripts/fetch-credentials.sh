@@ -12,7 +12,7 @@ set -x
 #  ssh keys
 mkdir ~/.ssh/
 aws s3 cp --recursive s3://sundry-automata/keys/common-tools-jenkins/ ~/.ssh/
-
+chmod 600 ~/.ssh/id_rsa
 
 #  aws configs
 mkdir ~/.aws/

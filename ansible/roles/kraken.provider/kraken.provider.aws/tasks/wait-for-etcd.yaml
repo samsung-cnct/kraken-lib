@@ -1,0 +1,25 @@
+---
+- set_fact:
+    ssh_config: "{{ config_base | expanduser }}/{{ cluster.name }}/ssh_config"
+    etcd_loopback_endpoints: "{% for port in item.etcdConfig.clientPorts %}{% if item.etcdConfig.ssl == true %}https{% else %}http{% endif %}://127.0.0.1:{{ port }}{{ ',' if not loop.last else '' }}{% endfor %}"
+
+# We purposely use ssh to query etcd over the loopback interface.
+# This allows us to support stricter firewall rules.
+- name: Wait for etcd cluster to form
+  command: >
+    ssh -o StrictHostKeyChecking=no
+        -o UserKnownHostsFile=/dev/null
+        -F {{ ssh_config }} {{ item.name }}-1
+        etcdctl --ca-file={{ etcd_cafile }}
+                --cert-file={{ etcd_certfile }}
+                --key-file={{ etcd_keyfile }}
+                -- endpoints={{ etcd_loopback_endpoints }}
+                   cluster-health
+  register: etcd_result
+  until: etcd_result | succeeded
+  retries: "{{ etcd_retries }}"
+  delay: "{{ etcd_delay }}"
+
+- debug:
+    var: etcd_result
+    verbosity: 1

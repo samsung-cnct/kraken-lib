@@ -1,10 +1,9 @@
 ---
-- name: Get modules
+- name: Get terraform modules
   command: >
     terraform get -no-color -update=true {{ config_base | expanduser }}/{{ cluster.name }}
   args:
     chdir: "{{ config_base | expanduser }}/{{ cluster.name }}"
-  ignore_errors: yes
 
 - name: Run cluster {{ kraken_action }}
   command: >
