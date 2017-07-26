@@ -10,6 +10,7 @@ definitions:
         cluster_ip: 10.32.0.2
         dns_domain: cluster.local
         namespace: kube-system
+
   helmConfigs:
     - &defaultHelm
       name: defaultHelm
@@ -123,6 +124,7 @@ definitions:
         default: *defaultWeaveFabric
         versions:
           v1.6: *defaultWeaveFabric16
+
   kvStoreConfigs:
     - &defaultEtcd
       name: etcd
@@ -142,6 +144,7 @@ definitions:
       peerPorts: [2382]
       ssl: true
       version: v3.1.0
+
   apiServerConfigs:
     - &defaultApiServer
       name: defaultApiServer
@@ -151,18 +154,21 @@ definitions:
         etcd: *defaultEtcd
       events:
         etcd: *defaultEtcdEvents
+
   kubeConfigs:
     - &defaultKube
       name: defaultKube
       kind: kubernetes
       version: v1.6.7
       hyperkubeLocation: gcr.io/google_containers/hyperkube
+
   containerConfigs:
     - &defaultDocker
       name: defaultDocker
       kind: container
       runtime: docker
       type: distro
+
   osConfigs:
     - &defaultCoreOs
       name: defaultCoreOs
@@ -171,6 +177,7 @@ definitions:
       version: 1409.5.0
       channel: stable
       rebootStrategy: "off"
+
   nodeConfigs:
     - &defaultAwsEtcdNode
       name: defaultAwsEtcdNode
@@ -334,6 +341,7 @@ definitions:
               delete_on_termination: true
               snapshot_id:
               encrypted: false
+
   providerConfigs:
     - &defaultAws
       name: defaultAws

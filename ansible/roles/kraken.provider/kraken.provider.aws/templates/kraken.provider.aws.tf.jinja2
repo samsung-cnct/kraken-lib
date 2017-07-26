@@ -80,6 +80,11 @@ module "master" {
 {% for subnet in node.nodeConfig.providerConfig.subnet %}
   {{subnet}}_subnet_id = "${module.subnet.{{subnet}}_subnet_id}"
 {% endfor %}
+{% if node.apiServerConfig.loadBalancerConfigs is defined %}
+  {% for subnet in node.apiServerConfig.loadBalancerConfigs.subnet %}
+  {{subnet}}_subnet_id = "${module.subnet.{{subnet}}_subnet_id}"
+  {% endfor %}
+{% endif %}
 {% endif %}
 {% endfor %}
   route53_zone_id = "${module.route53.route53_zone_id}"

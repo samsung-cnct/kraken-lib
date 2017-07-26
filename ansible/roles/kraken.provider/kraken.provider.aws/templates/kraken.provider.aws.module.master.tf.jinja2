@@ -10,6 +10,13 @@ variable "master_key_name" {}
 {% for subnet in master.nodeConfig.providerConfig.subnet %}
 variable "{{subnet}}_subnet_id" {}
 {% endfor %}
+
+{% if master.apiServerConfig.loadBalancerConfigs is defined %}
+{% for subnet in master.apiServerConfig.loadBalancerConfigs.subnet %}
+variable "{{subnet}}_subnet_id" {}
+{% endfor %}
+{% endif %}
+
 variable "route53_zone_id" {}
 variable "kubernetes_sec_group" {}
 variable "dependency" {}
@@ -113,7 +120,7 @@ resource "aws_launch_configuration" "master_launch_config" {
 }
 
 # if masters are load-balanced with a cloud loadbalancer, we need to define an ELB and a IAM cert to use for SSL
-{% if master.apiServerConfig.loadBalancer == 'cloud'  %}
+{% if master.apiServerConfig.loadBalancer == 'cloud' %}
 
 # Client Auth doesn't work right in amazon ELB
 #resource "aws_iam_server_certificate" "master_cert" {
@@ -125,7 +132,12 @@ resource "aws_launch_configuration" "master_launch_config" {
 resource "aws_elb" "master_elb" {
   name = "${var.master_name}-master-elb"
   cross_zone_load_balancing = true
+  {% if master.apiServerConfig.loadBalancerConfigs is defined %}
+  subnets = [{% set comma = joiner(",") %}{% for subnet in master.apiServerConfig.loadBalancerConfigs.subnet %}{{ comma() }}"${var.{{subnet}}_subnet_id}"{% endfor %}]
+  {% else %}
   subnets = [{% set comma = joiner(",") %}{% for subnet in master.nodeConfig.providerConfig.subnet %}{{ comma() }}"${var.{{subnet}}_subnet_id}"{% endfor %}]
+  {% endif %}
+
   security_groups = ["${var.kubernetes_sec_group}"]
 
   listener {

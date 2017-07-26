@@ -15,6 +15,10 @@
       "enum": ["cloud", "flipbit"],
       "type": "string"
     },
+    "loadBalancerConfigs": {
+      "description": "Further configuration options for the load balancer.",
+      "$ref": "awsLoadBalancerConfig.json"
+    },
     "state": {
       "etcd": { "$ref": "kvStoreConfig.json" }
     },
