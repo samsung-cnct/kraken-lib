@@ -13,7 +13,7 @@
         etcdctl --ca-file={{ etcd_cafile }}
                 --cert-file={{ etcd_certfile }}
                 --key-file={{ etcd_keyfile }}
-                -- endpoints={{ etcd_loopback_endpoints }}
+                --endpoints={{ etcd_loopback_endpoints }}
                    cluster-health
   register: etcd_result
   until: etcd_result | succeeded
