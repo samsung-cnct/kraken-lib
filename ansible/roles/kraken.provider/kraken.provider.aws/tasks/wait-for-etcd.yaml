@@ -19,6 +19,7 @@
   until: etcd_result | succeeded
   retries: "{{ etcd_retries }}"
   delay: "{{ etcd_delay }}"
+  when: item.nodeConfig.providerConfig.enablePublicIPs is undefined or ( item.nodeConfig.providerConfig.enablePublicIPs is defined and item.nodeConfig.providerConfig.enablePublicIPs )
 
 - debug:
     var: etcd_result
