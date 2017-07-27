@@ -127,7 +127,7 @@
   register: elb_facts
   vars:
     vpc_lookup: "elbs[?vpc_id=='{{ vpcid }}']"
-  when: kraken_action == 'down' and cluster.providerConfig.provider == 'aws'
+  when: kraken_action == 'down' and cluster.providerConfig.provider == 'aws' and cluster.providerConfig.existing_vpc is not defined
   until: (elb_facts is none) or (elb_facts | json_query(vpc_lookup) is none) or (elb_facts | json_query(vpc_lookup) | length <= 1)
   retries: 120
   delay: 5
