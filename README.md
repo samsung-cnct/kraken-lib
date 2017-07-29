@@ -484,6 +484,38 @@ How zen of you - everything must come to end, including Kubernetes clusters. To 
 docker run $K2OPTS quay.io/samsung_cnct/k2:latest ./down.sh --config $HOME/.kraken/${CLUSTER}.yaml
 ```
 
+#### To Create a Small Research or Development Cluster (Non-HA)
+To spinup a small low-resource consuming cluster, alter your config to the following:
+
+Role | # | Type
+--- | ---  | ---
+Primary etcd cluster | 1 | t2.small
+Events etcd cluster | 1 | t2.small
+Master nodes | 1 | m4.large
+Cluster nodes | 1 | c4.large
+~~Special~~ ~~nodes~~ | ~~2~~ | ~~m4.large~~
+
+yaml:
+```deployment:
+  clusters:
+    - name:
+...
+      nodePools:
+        - name: etcd
+          count: 1
+...
+    - name: etcdEvents
+          count: 1
+...
+        - name: master
+          count: 1
+...
+        - name: clusterNodes
+          count: 1
+```
+
+Delete 'Special nodes'.
+
 # Docs
 Further information can be found here:
 
