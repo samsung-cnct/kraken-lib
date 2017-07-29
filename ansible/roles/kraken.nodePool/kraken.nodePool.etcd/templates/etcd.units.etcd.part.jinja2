@@ -34,7 +34,7 @@
      --mount volume=resolv-conf,target=/etc/resolv.conf \
      quay.io/coreos/etcd:{{cluster_node_tuple.1.etcdConfig.version}} \
      -- --data-dir /ephemeral/etcd \
-     --name etcd{{cluster_node_tuple.1.name}} \
+     --name etcd{{cluster_node_tuple.1.name}}${DEFAULT_IPV4} \
 {% if cluster_node_tuple.1.etcdConfig.ssl == true %}
      --peer-client-cert-auth \
      --peer-trusted-ca-file=/etc/etcd/ssl/peer-ca.pem \
