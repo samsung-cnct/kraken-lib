@@ -54,6 +54,10 @@
     "dnsConfig": {
       "description": "DNS Configuration for the cluster.",
       "$ref": "dnsConfig.json"
+    },
+    "customApiDns": {
+      "description": "Custom domain name for API server ELB.",
+      "type": "string"
     }
   },
 

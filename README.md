@@ -151,6 +151,27 @@ As well as the region and subnet selections under provider clauses.
 
 For a detailed explanation of all configuration variables, please consult [our configuration documentation](Documentation/kraken-configs/README.md)
 
+### Add a Custom Domain for the Kubernetes API server 
+If you want to add a human-readable domain name to your Kubernetes API server, uncomment `customApiDns` and add the desired domain name to your config.yaml
+
+```
+deployment:
+  clusters:
+  ...
+    customApiDns: YOURDOMAINNAME
+```
+
+Configure your custom domain name to point at your cluster's Kubernetes API server ELB. This can be found in your cluster's admin.kubeconfig file under clusters/cluster/server:
+
+```
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: ....
+    server: <Kubernetes API server ELB Address>
+  name: CLUSTER_NAME
+```
+
 
 ### Preparing AWS credentials
 
