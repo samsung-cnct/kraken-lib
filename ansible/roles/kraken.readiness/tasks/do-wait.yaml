@@ -13,10 +13,20 @@
     needed_nodes: "{{ cluster | expected_nodes(readiness_type, readiness_value) }}"
     retry_interval: 10
 
+- debug:
+    msg: >-
+      Expect {{ needed_nodes }} nodes with readiness type(value)
+      readiness_type({{ readiness_value }}).
+    verbosity: 0
+
 - name: Get all nodes
   command: >
-    {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} get nodes --no-headers=true
+    {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} get nodes --no-headers=true --v 7
   register: job_get_nodes_result
   until: job_get_nodes_result.stdout_lines | length >= needed_nodes | int
   retries: "{{ (( readiness_wait | int ) / retry_interval | int ) | int }}"
   delay: "{{ retry_interval }}"
+
+- debug:
+    var: job_get_nodes_result
+    verbosity: 0
