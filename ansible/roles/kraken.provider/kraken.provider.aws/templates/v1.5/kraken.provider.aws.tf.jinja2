@@ -1,0 +1,119 @@
+provider "aws" {
+  access_key  = "{{cluster.providerConfig.authentication.accessKey}}"
+  secret_key  = "{{cluster.providerConfig.authentication.accessSecret}}"
+  shared_credentials_file = "{{cluster.providerConfig.authentication.credentialsFile}}"
+  profile     = "{{cluster.providerConfig.authentication.credentialsProfile}}"
+  region      = "{{cluster.providerConfig.region}}"
+  max_retries = "8"
+}
+
+module "vpc" {
+  source = "./vpc"
+
+  cidr_block  = "{{cluster.providerConfig.vpc}}"
+  vpc_name  = "{{cluster.name}}"
+}
+
+module "route53" {
+  source = "./route53"
+
+  vpc_id = "${module.vpc.id}"
+  vpc_name  = "{{cluster.name}}"
+}
+
+
+module "keypair" {
+  source = "./keypair"
+
+  keypairs_name  = "{{cluster.name}}"
+}
+
+module "subnet" {
+  source = "./subnet"
+
+  vpc_id = "${module.vpc.id}"
+  subnets_name  = "{{cluster.name}}"
+  route_table_id = "${module.vpc.route_table_id}"
+}
+
+module "cluster_secgroup" {
+  source = "./cluster_secgroup"
+
+  vpc_id = "${module.vpc.id}"
+  secgroup_name  = "{{cluster.name}}"
+  default_security_group_id = "${module.vpc.default_security_group_id}"
+}
+
+module "etcd" {
+  source = "./etcd"
+
+  vpc_id = "${module.vpc.id}"
+  etcds_name  = "{{cluster.name}}"
+  cidr_block = "{{cluster.providerConfig.vpc}}"
+  route53_zone_id = "${module.route53.route53_zone_id}"
+{% for node in cluster.nodePools %}
+{% if node.etcdConfig is defined %}
+  {{node.keyPair.name}}_{{node.name}}_key = "${module.keypair.{{node.keyPair.name}}_keyname}"
+{% endif %}
+{% endfor %}
+
+{% for node in cluster.nodePools %}
+{% if node.etcdConfig is defined %}
+{% for subnet in node.nodeConfig.providerConfig.subnet %}
+  {{subnet}}_{{node.name}}_subnet_id = "${module.subnet.{{subnet}}_subnet_id}"
+{% endfor %}
+{% endif %}
+{% endfor %}
+}
+
+module "master" {
+  source = "./master"
+
+  # force dependency
+  dependency = "${module.etcd.etcd_dependency}"
+
+  vpc_id = "${module.vpc.id}"
+  master_name = "{{cluster.name}}"
+{% for node in cluster.nodePools %}
+{% if node.apiServerConfig is defined %}
+  master_key_name = "${module.keypair.{{node.keyPair.name}}_keyname}"
+{% for subnet in node.nodeConfig.providerConfig.subnet %}
+  {{subnet}}_subnet_id = "${module.subnet.{{subnet}}_subnet_id}"
+{% endfor %}
+{% endif %}
+{% endfor %}
+  route53_zone_id = "${module.route53.route53_zone_id}"
+  kubernetes_sec_group = "${module.cluster_secgroup.id}"
+}
+
+module "node" {
+  source = "./node"
+
+  # force dependency
+  dependency = "${module.master.master_dependency}"
+
+  vpc_id = "${module.vpc.id}"
+  nodes_name = "{{cluster.name}}"
+{% for node in cluster.nodePools %}
+{% if node.etcdConfig is not defined and node.apiServerConfig is not defined %}
+  {{node.keyPair.name}}_{{node.name}}_key = "${module.keypair.{{node.keyPair.name}}_keyname}"
+{% endif %}
+{% endfor %}
+
+  kubernetes_sec_group = "${module.cluster_secgroup.id}"
+{% for node in cluster.nodePools %}
+{% if node.etcdConfig is not defined and node.apiServerConfig is not defined %}
+{% for subnet in node.nodeConfig.providerConfig.subnet %}
+  {{subnet}}_{{node.name}}_subnet_id = "${module.subnet.{{subnet}}_subnet_id}"
+{% endfor %}
+{% endif %}
+{% endfor %}
+}
+
+output "kraken_endpoint" {
+  value = "${module.master.kraken_endpoint}"
+}
+
+output "kraken_private_zone_id" {
+  value = "${module.route53.route53_zone_id}"
+}

@@ -66,7 +66,7 @@ definitions:
             version: v1.8.3
             location: quay.io/calico/cni
           calicoNode:
-            version: v1.1.3
+            version: v1.2.1
             location: quay.io/calico/node
           flannel:
             version: v0.7.1
@@ -86,6 +86,7 @@ definitions:
         default: *defaultCanalFabric
         versions:
           v1.6: *defaultCanalFabric16
+          v1.7: *defaultCanalFabric16
     - &defaultWeaveFabric
       name: defaultWeaveFabric
       kind: fabric
@@ -124,7 +125,7 @@ definitions:
         default: *defaultWeaveFabric
         versions:
           v1.6: *defaultWeaveFabric16
-
+          v1.7: *defaultWeaveFabric16
   kvStoreConfigs:
     - &defaultEtcd
       name: etcd
@@ -159,7 +160,7 @@ definitions:
     - &defaultKube
       name: defaultKube
       kind: kubernetes
-      version: v1.6.7
+      version: v1.7.1
       hyperkubeLocation: gcr.io/google_containers/hyperkube
 
   containerConfigs:

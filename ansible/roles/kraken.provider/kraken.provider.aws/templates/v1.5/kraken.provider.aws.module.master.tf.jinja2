@@ -1,0 +1,309 @@
+# everything master related
+
+{% for node in cluster.nodePools %}
+{% if node.apiServerConfig is defined %}
+{% set master=node %}
+
+variable "vpc_id" {}
+variable "master_name" {}
+variable "master_key_name" {}
+{% for subnet in master.nodeConfig.providerConfig.subnet %}
+variable "{{subnet}}_subnet_id" {}
+{% endfor %}
+variable "route53_zone_id" {}
+variable "kubernetes_sec_group" {}
+variable "dependency" {}
+
+resource "coreosbox_ami" "master_ami" {
+  channel        = "{{master.osConfig.channel}}"
+  virtualization = "hvm"
+  region         = "{{cluster.providerConfig.region}}"
+  version        = "{{master.osConfig.version}}"
+}
+
+# IAM roles and policies for kubernetes cloud provider
+data "aws_iam_policy_document" "kubernetes_master_role_doc" {
+  statement {
+    actions = [
+      "sts:AssumeRole",
+    ]
+    principals = {
+      type = "Service"
+      identifiers = ["ec2.amazonaws.com"],
+    }
+    effect = "Allow"
+  }
+}
+
+resource "aws_iam_role" "kubernetes_master_role" {
+  name = "${var.master_name}_kubernetes_master_role"
+  assume_role_policy = "${data.aws_iam_policy_document.kubernetes_master_role_doc.json}"
+}
+
+data "aws_iam_policy_document" "kubernetes_master_policy_doc" {
+  statement {
+    actions = [
+      "ec2:*",
+      "elasticloadbalancing:*",
+      "route53:*",
+    ]
+    resources = [
+      "*",
+    ]
+    effect = "Allow"
+  }
+
+  statement {
+    actions = [
+      "s3:*",
+    ]
+    resources = [
+      "arn:aws:s3:::kubernetes-*",
+    ]
+    effect = "Allow"
+  }
+}
+
+resource "aws_iam_role_policy" "kubernetes_master_policy" {
+  name = "${var.master_name}_kubernetes_master_policy"
+  role = "${aws_iam_role.kubernetes_master_role.id}"
+  policy = "${data.aws_iam_policy_document.kubernetes_master_policy_doc.json}"
+}
+
+resource "aws_iam_instance_profile" "kubernetes_master_profile" {
+  name = "${var.master_name}_kubernetes_master_profile"
+  roles = ["${aws_iam_role.kubernetes_master_role.name}"]
+
+  # let profile propagate https://github.com/hashicorp/terraform/issues/7198 and https://github.com/hashicorp/terraform/pull/8813
+  provisioner "local-exec" {
+    command = "sleep 10"
+  }
+}
+
+# Launch configuration for master
+resource "aws_launch_configuration" "master_launch_config" {
+  name_prefix                 = "${var.master_name}_master"
+  image_id                    = "${coreosbox_ami.master_ami.box_string}"
+  key_name                    = "${var.master_key_name}"
+  instance_type               = "{{master.nodeConfig.providerConfig.type}}"
+  security_groups             = ["${var.kubernetes_sec_group}"]
+
+ # Will override subnets configuration.
+  {% if master.nodeConfig.providerConfig.enablePublicIPs is defined %}
+  associate_public_ip_address = "{{master.nodeConfig.providerConfig.enablePublicIPs}}"
+  {% else %}
+  associate_public_ip_address = true
+  {% endif %}
+
+  iam_instance_profile        = "${aws_iam_instance_profile.kubernetes_master_profile.name}"
+  user_data                   = "${file("{{ config_base | expanduser }}/{{cluster.name}}/cloud-config/{{master.name}}.cloud-config.yaml")}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  # storage
+{% for storage in master.nodeConfig.providerConfig.storage %}
+  {{storage.type}} {
+{% for k,v in storage.opts.iteritems() %}
+    {{k}} = "{{v}}"
+{% endfor %}
+  }
+{% endfor %}
+}
+
+# if masters are load-balanced with a cloud loadbalancer, we need to define an ELB and a IAM cert to use for SSL
+{% if master.apiServerConfig.loadBalancer == 'cloud'  %}
+
+# Client Auth doesn't work right in amazon ELB
+#resource "aws_iam_server_certificate" "master_cert" {
+#  certificate_chain = "${file("{{ config_base | expanduser }}/{{cluster.name}}/certs/ca.pem")}"
+#  certificate_body = "${file("{{ config_base | expanduser }}/{{cluster.name}}/certs/apiserver-loadbalancer.pem")}"
+#  private_key = "${file("{{ config_base | expanduser }}/{{cluster.name}}/certs/apiserver-loadbalancer-key.pem")}"
+#}
+
+resource "aws_elb" "master_elb" {
+  name = "${var.master_name}-master-elb"
+  cross_zone_load_balancing = true
+  subnets = [{% set comma = joiner(",") %}{% for subnet in master.nodeConfig.providerConfig.subnet %}{{ comma() }}"${var.{{subnet}}_subnet_id}"{% endfor %}]
+  security_groups = ["${var.kubernetes_sec_group}"]
+
+  listener {
+    instance_port = 443
+    instance_protocol = "tcp"
+    lb_port = 443
+    lb_protocol = "tcp"
+  }
+
+{% if cluster.kubeAuth.authn.oidc is defined %}
+  listener {
+    instance_port = 30443
+    instance_protocol = "tcp"
+    lb_port = 30443
+    lb_protocol = "tcp"
+  }
+
+  listener {
+    instance_port = 30080
+    instance_protocol = "tcp"
+    lb_port = 30080
+    lb_protocol = "tcp"
+  }
+
+  listener {
+    instance_port = 31080
+    instance_protocol = "tcp"
+    lb_port = 31080
+    lb_protocol = "tcp"
+  }
+{% endif %}
+
+  health_check {
+    healthy_threshold = 2
+    unhealthy_threshold = 10
+    timeout = 2
+    target = "TCP:443"
+    interval = 5
+  }
+
+  tags {
+    Name = "${var.master_name}_master_elb",
+    KubernetesCluster = "${var.master_name}"
+  }
+}
+
+resource "aws_route53_record" "master_record" {
+  zone_id = "${var.route53_zone_id}"
+  name = "apiserver.${var.master_name}.internal"
+  type = "CNAME"
+  ttl = "300"
+  records = ["${aws_elb.master_elb.dns_name}"]
+}
+
+{% if cluster.kubeAuth.authn.oidc is defined %}
+resource "aws_route53_record" "dex_record" {
+  zone_id = "${var.route53_zone_id}"
+  name = "{{ cluster.kubeAuth.authn.oidc.domain }}"
+  type = "CNAME"
+  ttl = "300"
+  records = ["${aws_elb.master_elb.dns_name}"]
+}
+{% endif %}
+
+{% else %}
+# Launch configuration for master loadbalancer
+resource "aws_launch_configuration" "master_loadbalancer_launch_config" {
+  name_prefix                 = "${var.master_name}_loadbalancer"
+  image_id                    = "${coreosbox_ami.master_ami.box_string}"
+  key_name                    = "${var.master_key_name}"
+  instance_type               = "{{master.nodeConfig.providerConfig.type}}"
+  security_groups             = ["${var.kubernetes_sec_group}"]
+
+  # Will override subnets configuration.
+  {% if master.nodeConfig.providerConfig.enablePublicIPs is defined %}
+  associate_public_ip_address = "{{master.nodeConfig.providerConfig.enablePublicIPs}}"
+  {% else %}
+  associate_public_ip_address = true
+  {% endif %}
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  #TODO
+  user_data                   = ""
+}
+
+# Autoscaling group for master loadbalancer.
+resource "aws_autoscaling_group" "master_loadbalancer_nodes" {
+  name                      = "${var.master_name}_master_loadbalancer_asg"
+  vpc_zone_identifier       = [{% set comma = joiner(",") %}{% for subnet in master.nodeConfig.providerConfig.subnet %}{{ comma() }}"${var.{{subnet}}_subnet_id}"{% endfor %}]
+  launch_configuration      = "${aws_launch_configuration.master_loadbalancer_launch_config.name}"
+  wait_for_capacity_timeout = "0"
+  force_delete              = true
+  health_check_grace_period = "30"
+  max_size                  = "1"
+  min_size                  = "1"
+  desired_capacity          = "1"
+  health_check_type         = "EC2"
+
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  tag {
+    key                 = "Name"
+    value               = "${var.master_name}_master_loadbalancer"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "KubernetesCluster"
+    value               = "${var.master_name}"
+    propagate_at_launch = true
+  }
+}
+{% endif %}
+
+# Autoscaling group for master.
+resource "aws_autoscaling_group" "master_nodes" {
+  name                      = "${var.master_name}_master_asg"
+  vpc_zone_identifier       = [{% set comma = joiner(",") %}{% for subnet in master.nodeConfig.providerConfig.subnet %}{{ comma() }}"${var.{{subnet}}_subnet_id}"{% endfor %}]
+  launch_configuration      = "${aws_launch_configuration.master_launch_config.name}"
+  wait_for_capacity_timeout = "0"
+  force_delete              = true
+  health_check_grace_period = "450"
+  max_size                  = "{{master.count}}"
+  min_size                  = "{{master.count}}"
+  desired_capacity          = "{{master.count}}"
+{% if master.apiServerConfig.loadBalancer == 'cloud'  %}
+  wait_for_elb_capacity     =  "{{master.count}}"
+  load_balancers            = ["${aws_elb.master_elb.name}"]
+{% endif %}
+{% if master.apiServerConfig.loadBalancer == 'cloud'  %}
+  health_check_type         = "ELB"
+{% else %}
+  health_check_type         = "EC2"
+{% endif %}
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  tag {
+    key                 = "Name"
+    value               = "${var.master_name}_{{master.name}}_node-autoscaled"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "k2-nodepool"
+    value               = "{{master.name}}"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "KubernetesCluster"
+    value               = "${var.master_name}"
+    propagate_at_launch = true
+  }
+
+{% for tag in master.nodeConfig.providerConfig.tags %}
+  tag {
+    key                 = "{{tag.key}}"
+    value               = "{{tag.value}}"
+    propagate_at_launch = true
+  }
+{% endfor %}
+}
+
+output "master_dependency" {
+  value = "dummy"
+}
+
+output "kraken_endpoint" {
+  value = "${aws_elb.master_elb.dns_name}"
+}
+{% endif %}
+{% endfor %}

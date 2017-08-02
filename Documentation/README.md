@@ -26,5 +26,7 @@ Kraken configuration is done through a yaml file, and is broken up into two sect
 
 ## Additional Guide For Developer
 
+* [Upgrading to newer Kubernetes](./UPGRADING_KUBERNETES.md)
+
 ### Usage For Tags
 * `tags` - [Usage for tags](tags/README.md)

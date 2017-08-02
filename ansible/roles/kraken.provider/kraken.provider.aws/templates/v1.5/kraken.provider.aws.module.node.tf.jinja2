@@ -1,0 +1,177 @@
+# everything node related
+
+variable "vpc_id" {}
+variable "nodes_name" {}
+variable "kubernetes_sec_group" {}
+{% for node in cluster.nodePools %}
+{% if node.etcdConfig is not defined and node.apiServerConfig is not defined %}
+variable "{{node.keyPair.name}}_{{node.name}}_key" {}
+{% for subnet in node.nodeConfig.providerConfig.subnet %}
+variable "{{subnet}}_{{node.name}}_subnet_id" {}
+{% endfor %}
+{% endif %}
+{% endfor %}
+variable "dependency" {}
+
+data "aws_iam_policy_document" "kubernetes_node_role_doc" {
+  statement {
+    actions = [
+      "sts:AssumeRole",
+    ]
+    principals = {
+      type = "Service"
+      identifiers = ["ec2.amazonaws.com"],
+    }
+    effect = "Allow"
+  }
+}
+
+resource "aws_iam_role" "kubernetes_node_role" {
+  name = "${var.nodes_name}_kubernetes_node_role"
+  assume_role_policy = "${data.aws_iam_policy_document.kubernetes_node_role_doc.json}"
+}
+
+data "aws_iam_policy_document" "kubernetes_node_policy_doc" {
+  statement {
+    actions = [
+      "ec2:Describe*",
+      "ec2:AttachVolume",
+      "ec2:DetachVolume",
+      "route53:*",
+      "ecr:GetAuthorizationToken",
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:GetRepositoryPolicy",
+      "ecr:DescribeRepositories",
+      "ecr:ListImages",
+      "ecr:BatchGetImage",
+    ]
+    resources = [
+      "*",
+    ]
+    effect = "Allow"
+  }
+
+  statement {
+    actions = [
+      "s3:*",
+    ]
+    resources = [
+      "arn:aws:s3:::kubernetes-*",
+    ]
+    effect = "Allow"
+  }
+}
+
+resource "aws_iam_role_policy" "kubernetes_node_policy" {
+  name = "${var.nodes_name}_kubernetes_node_policy"
+  role = "${aws_iam_role.kubernetes_node_role.id}"
+  policy = "${data.aws_iam_policy_document.kubernetes_node_policy_doc.json}"
+}
+
+resource "aws_iam_instance_profile" "kubernetes_node_profile" {
+  name = "${var.nodes_name}_kubernetes_node_profile"
+  roles = ["${aws_iam_role.kubernetes_node_role.name}"]
+
+  # let profile propagate https://github.com/hashicorp/terraform/issues/7198 and https://github.com/hashicorp/terraform/pull/8813
+  provisioner "local-exec" {
+    command = "sleep 10"
+  }
+}
+
+# information on CoreOS AMIs for node nodepools
+{% for node in cluster.nodePools %}
+{% if node.etcdConfig is not defined and node.apiServerConfig is not defined %}
+resource "coreosbox_ami" "{{node.name}}_ami" {
+  channel        = "{{node.osConfig.channel}}"
+  virtualization = "hvm"
+  region         = "{{cluster.providerConfig.region}}"
+  version        = "{{node.osConfig.version}}"
+}
+{% endif %}
+{% endfor %}
+
+
+# Launch configurations for all node pools
+{% for node in cluster.nodePools %}
+{% if node.etcdConfig is not defined and node.apiServerConfig is not defined %}
+resource "aws_launch_configuration" "{{node.name}}_launch_config" {
+  name_prefix                 = "${var.nodes_name}_{{node.name}}"
+  image_id                    = "${coreosbox_ami.{{node.name}}_ami.box_string}"
+  key_name                    = "${var.{{node.keyPair.name}}_{{node.name}}_key}"
+  instance_type               = "{{node.nodeConfig.providerConfig.type}}"
+  security_groups             = ["${var.kubernetes_sec_group}"]
+
+  # Will override subnets configuration.
+  {% if node.nodeConfig.providerConfig.enablePublicIPs is defined %}
+  associate_public_ip_address = "{{node.nodeConfig.providerConfig.enablePublicIPs}}"
+  {% else %}
+  associate_public_ip_address = true
+  {% endif %}
+
+  iam_instance_profile        = "${aws_iam_instance_profile.kubernetes_node_profile.name}"
+  user_data                   = "${file("{{ config_base | expanduser }}/{{cluster.name}}/cloud-config/{{node.name}}.cloud-config.yaml")}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  # storage
+{% for storage in node.nodeConfig.providerConfig.storage %}
+  {{storage.type}} {
+{% for k,v in storage.opts.iteritems() %}
+    {{k}} = "{{v}}"
+{% endfor %}
+  }
+{% endfor %}
+}
+{% endif %}
+{% endfor %}
+
+# Autoscaling groups for all node pools
+{% for node in cluster.nodePools %}
+{% if node.etcdConfig is not defined and node.apiServerConfig is not defined %}
+resource "aws_autoscaling_group" "{{node.name}}_nodes" {
+  name                      = "${var.nodes_name}_{{node.name}}_asg"
+  vpc_zone_identifier       = [{% set comma = joiner(",") %}{% for subnet in node.nodeConfig.providerConfig.subnet %}{{ comma() }}"${var.{{subnet}}_{{node.name}}_subnet_id}"{% endfor %}]
+  launch_configuration      = "${aws_launch_configuration.{{node.name}}_launch_config.name}"
+  wait_for_capacity_timeout = "0"
+  force_delete              = true
+  health_check_grace_period = "30"
+  max_size                  = "{{node.count}}"
+  min_size                  = "{{node.count}}"
+  desired_capacity          = "{{node.count}}"
+  health_check_type         = "EC2"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  tag {
+    key                 = "Name"
+    value               = "${var.nodes_name}_{{node.name}}_node-autoscaled"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "k2-nodepool"
+    value               = "{{node.name}}"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "KubernetesCluster"
+    value               = "${var.nodes_name}"
+    propagate_at_launch = true
+  }
+
+{% for tag in node.nodeConfig.providerConfig.tags %}
+  tag {
+    key                 = "{{tag.key}}"
+    value               = "{{tag.value}}"
+    propagate_at_launch = true
+  }
+{% endfor %}
+}
+{% endif %}
+{% endfor %}

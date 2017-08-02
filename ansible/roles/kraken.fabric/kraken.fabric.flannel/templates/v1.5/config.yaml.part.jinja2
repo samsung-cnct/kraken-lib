@@ -1,0 +1,47 @@
+# This ConfigMap can be used to configure a self-hosted Canal installation.
+# See `canal.yaml` for an example of a Canal deployment which uses
+# the config in this ConfigMap.
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: canal-config
+  namespace: kube-networking
+data:
+  # Configure this with the location of your etcd cluster.
+  etcd_endpoints: "{% if etcd.etcdConfig.ssl == true %}https{% else %}http{% endif %}://{{etcd.etcdConfig.name}}.{{cluster.name}}.internal:{{etcd.etcdConfig.clientPorts[0]}}"
+  etcd_ca_cert_file: "/etc/etcd/ssl/client-ca.pem"
+  etcd_cert_file: "/etc/etcd/ssl/client.pem"
+  etcd_key_file: "/etc/etcd/ssl/client-key.pem"
+
+  # The interface used by canal for host <-> host communication.
+  # If left blank, then the interface is chosing using the node's
+  # default route.
+  canal_iface: ""
+
+  # Whether or not to masquerade traffic to destinations not within
+  # the pod network.
+  masquerade: "true"
+
+  # The CNI network configuration to install on each node.  The special
+  # values in this config will be automatically populated.
+  cni_network_config: |-
+    {
+        "name": "canal",
+        "type": "flannel",
+        "delegate": {
+          "type": "calico",
+          "etcd_endpoints": "__ETCD_ENDPOINTS__",
+          "etcd_ca_cert_file": "/etc/etcd/ssl/client-ca.pem",
+          "etcd_cert_file": "/etc/etcd/ssl/client.pem",
+          "etcd_key_file": "/etc/etcd/ssl/client-key.pem",
+          "log_level": "info",
+          "policy": {
+              "type": "k8s",
+              "k8s_api_root": "https://__KUBERNETES_SERVICE_HOST__:__KUBERNETES_SERVICE_PORT__",
+              "k8s_api_token": "__SERVICEACCOUNT_TOKEN__"
+          },
+          "kubernetes": {
+              "kubeconfig": "/etc/kubernetes/kubeconfig.yaml"
+          }
+        }
+    }

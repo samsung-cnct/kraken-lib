@@ -1,0 +1,125 @@
+# AWS VPC block
+variable "cidr_block" {}
+variable "vpc_name" {}
+
+{% if cluster.providerConfig.existing_vpc is not defined %}
+
+variable "dns_suffix" {
+  type = "map"
+  default = {
+    us-east-1 = "ec2.internal"
+    us-east-2 = "us-east-2.compute.internal"
+    us-west-1 = "us-west-1.compute.internal"
+    us-west-2 = "us-west-2.compute.internal"
+  }
+}
+variable "region" {
+  default = "{{cluster.providerConfig.region}}"
+}
+
+resource "aws_vpc" "vpc" {
+  cidr_block           = "${var.cidr_block}"
+  instance_tenancy     = "default"
+  enable_dns_support   = true
+  enable_dns_hostnames = true
+
+  tags {
+    Name = "${var.vpc_name}_vpc",
+    KubernetesCluster = "${var.vpc_name}"
+  }
+}
+
+# DHCP options sets
+resource "aws_vpc_dhcp_options" "vpc_dhcp" {
+  domain_name         = "${lookup(var.dns_suffix, var.region)}"
+  domain_name_servers = ["AmazonProvidedDNS"]
+
+  tags {
+    Name = "${var.vpc_name}_dhcp",
+    KubernetesCluster = "${var.vpc_name}"
+  }
+}
+
+# DHCP association
+resource "aws_vpc_dhcp_options_association" "vpc_dhcp_association" {
+  vpc_id          = "${aws_vpc.vpc.id}"
+  dhcp_options_id = "${aws_vpc_dhcp_options.vpc_dhcp.id}"
+}
+
+# AWS internet gateway
+resource "aws_internet_gateway" "vpc_gateway" {
+  vpc_id = "${aws_vpc.vpc.id}"
+
+  tags {
+    Name = "${var.vpc_name}_gateway",
+    KubernetesCluster = "${var.vpc_name}"
+  }
+}
+
+# Route table
+resource "aws_route_table" "vpc_rt" {
+  vpc_id = "${aws_vpc.vpc.id}"
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = "${aws_internet_gateway.vpc_gateway.id}"
+  }
+
+  tags {
+    Name = "${var.vpc_name}_routetable",
+    KubernetesCluster = "${var.vpc_name}"
+  }
+}
+
+# VPC ACL
+resource "aws_network_acl" "vpc_acl" {
+  vpc_id = "${aws_vpc.vpc.id}"
+
+{% for egress in cluster.providerConfig.egressAcl %}
+  egress {
+{% for k,v in egress.iteritems() %}
+    {{k}} = "{{v}}"
+{% endfor %}
+  }
+{% endfor %}
+
+{% for ingress in cluster.providerConfig.ingressAcl %}
+  ingress {
+{% for k,v in ingress.iteritems() %}
+    {{k}} ="{{v}}"
+{% endfor %}
+  }
+{% endfor %}
+
+  tags {
+    Name = "${var.vpc_name}_acl",
+    KubernetesCluster = "${var.vpc_name}"
+  }
+}
+
+output "id" {
+  value = "${aws_vpc.vpc.id}"
+}
+
+output "route_table_id" {
+  value = "${aws_route_table.vpc_rt.id}"
+}
+
+output "default_security_group_id" {
+  value = "${aws_vpc.vpc.default_security_group_id}"
+}
+
+{% else %}
+output "id" {
+  value = "{{cluster.providerConfig.existing_vpc.id}}"
+}
+
+output "route_table_id" {
+  value = "ThisShouldnotBeUsed"
+}
+
+output "default_security_group_id" {
+  value = "{{cluster.providerConfig.existing_vpc.default_security_group_id}}"
+}
+
+{% endif %}

@@ -1,0 +1,60 @@
+- name: kubelet.service
+  command: start
+  content: |
+    [Unit]
+    After=docker.service
+    After=kraken-ssl.service
+    Requires=docker.service
+    Requires=kraken-ssl.service
+    [Service]
+    EnvironmentFile=/etc/network-environment
+    ExecStartPre=/usr/bin/mkdir -p /var/lib/kubelet
+    ExecStartPre=/usr/bin/mkdir -p /opt/cni/bin
+    ExecStartPre=/usr/bin/bash -c '/usr/bin/wget https://github.com/containernetworking/cni/releases/download/v0.3.0/cni-v0.3.0.tgz -O - | sudo tar -xz -C /opt/cni/bin'
+    ExecStartPre=/usr/bin/mkdir -p /etc/cni/net.d
+    ExecStart=/usr/bin/rkt run \
+      --volume etc-resolv-conf,kind=host,source=/etc/resolv.conf \
+      --volume etc-cni,kind=host,source=/etc/cni \
+      --volume etc-kubernetes,kind=host,source=/etc/kubernetes \
+      --volume etc-etcd-ssl,kind=host,source=/etc/etcd/ssl \
+      --volume etc-ssl-certs,kind=host,source=/usr/share/ca-certificates \
+      --volume var-lib-docker,kind=host,source=/var/lib/docker \
+      --volume var-lib-kubelet,kind=host,source=/var/lib/kubelet \
+      --volume os-release,kind=host,source=/usr/lib/os-release \
+      --volume run,kind=host,source=/run \
+      --volume opt-cni,kind=host,source=/opt/cni \
+      --mount volume=etc-resolv-conf,target=/etc/resolv.conf \
+      --mount volume=etc-cni,target=/etc/cni \
+      --mount volume=etc-kubernetes,target=/etc/kubernetes \
+      --mount volume=etc-etcd-ssl,target=/etc/etcd/ssl \
+      --mount volume=etc-ssl-certs,target=/etc/ssl/certs \
+      --mount volume=var-lib-docker,target=/var/lib/docker \
+      --mount volume=var-lib-kubelet,target=/var/lib/kubelet \
+      --mount volume=os-release,target=/etc/os-release \
+      --mount volume=run,target=/run \
+      --mount volume=opt-cni,target=/opt/cni \
+      --insecure-options=image \
+      --stage1-from-dir=stage1-fly.aci \
+      docker://{{ node.kubeConfig.hyperkubeLocation }}:{{ node.kubeConfig.version }} \
+      --exec=/hyperkube -- kubelet \
+      --api_servers=http://127.0.0.1:8080 \
+      --register-with-taints=node-role.kubernetes.io/master=:NoSchedule \
+      --allow-privileged=true \
+      --pod-manifest-path=/etc/kubernetes/manifests \
+      --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
+      --node-labels=nodepool={{ node.name }} \
+      --hostname-override=${DEFAULT_IPV4} \
+      --cluster-dns={{ cluster.dns }} \
+      --cluster-domain={{ cluster.domain }} \
+      --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem \
+      --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem \
+      --network-plugin=cni \
+      --network-plugin-dir=/etc/cni/net.d \
+      --cni-conf-dir=/etc/cni/net.d \
+      --cni-bin-dir=/opt/cni/bin \
+      --cloud-provider={{ cluster.providerConfig.provider }} \
+      --logtostderr=true
+    Restart=always
+    RestartSec=10
+    [Install]
+    WantedBy=multi-user.target

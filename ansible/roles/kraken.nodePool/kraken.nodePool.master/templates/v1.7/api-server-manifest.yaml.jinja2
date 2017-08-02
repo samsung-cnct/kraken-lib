@@ -1,0 +1,88 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kube-apiserver
+  namespace: kube-system
+spec:
+  hostNetwork: true
+  containers:
+  - name: kube-apiserver
+    image: {{ node.kubeConfig.hyperkubeLocation }}:{{ node.kubeConfig.version }}
+    command:
+    - /hyperkube
+    - apiserver
+    - --etcd-servers={% if node.apiServerConfig.state.etcd.ssl == true %}https{% else %}http{% endif %}://{{ node.apiServerConfig.state.etcd.name }}.{{ cluster.name }}.internal:{{ node.apiServerConfig.state.etcd.clientPorts[0] }}
+{% if node.apiServerConfig.events is defined %}
+    - --etcd-servers-overrides=/events#{% if node.apiServerConfig.events.etcd.ssl == true %}https{% else %}http{% endif %}://{{ node.apiServerConfig.events.etcd.name }}.{{ cluster.name }}.internal:{{ node.apiServerConfig.events.etcd.clientPorts[0]}}
+{% endif %}
+    - --bind-address=0.0.0.0
+    - --etcd-cafile=/etc/etcd/ssl/client-ca.pem
+    - --etcd-certfile=/etc/etcd/ssl/client.pem
+    - --etcd-keyfile=/etc/etcd/ssl/client-key.pem
+    - --allow-privileged=true
+    - --service-cluster-ip-range={{ cluster.network }}
+    - --secure-port=443
+    - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota
+    - --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem
+    - --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
+    - --client-ca-file=/etc/kubernetes/ssl/ca.pem
+{% if cluster.kubeAuth.authn.basic is defined %}
+    - --basic-auth-file=/etc/kubernetes/basicauth.csv
+{% endif %}
+    - --service-account-key-file=/etc/kubernetes/ssl/service-account-key.pem
+    - --cloud-provider={{cluster.providerConfig.provider}}
+    - --logtostderr=true
+{% if cluster.kubeAuth.authn.oidc is defined %}
+    - --oidc-issuer-url={{cluster.kubeAuth.authn.oidc.issuer}}
+    - --oidc-client-id=example-app
+    - --oidc-ca-file=/etc/kubernetes/ssl/ca.pem
+    - --oidc-username-claim=email
+    - --oidc-groups-claim=groups
+{% endif %}
+{% if cluster.kubeAuth.authz.rbac is defined %}
+    - --authorization-mode=RBAC
+    - --runtime-config=rbac.authorization.k8s.io/v1beta1=true
+    - --v=2
+{% endif %}
+    ports:
+    - containerPort: 443
+      hostPort: 443
+      name: https
+    - containerPort: 8080
+      hostPort: 8080
+      name: local
+    volumeMounts:
+    - mountPath: /etc/kubernetes/ssl
+      name: ssl-certs-kubernetes
+      readOnly: true
+{% if cluster.kubeAuth.authn.basic is defined %}
+    - mountPath: /etc/kubernetes/basicauth.csv
+      name: basic-auth-kubernetes
+      readOnly: true
+{% endif %}
+    - mountPath: /etc/etcd/ssl
+      name: ssl-certs-etcd
+      readOnly: true
+    - mountPath: /etc/ssl/certs
+      name: ssl-certs-host
+      readOnly: true
+  volumes:
+{% if cluster.kubeAuth.authn.basic is defined %}
+  - hostPath:
+      path: /etc/kubernetes/basicauth.csv
+    name: basic-auth-kubernetes
+{% endif %}
+  - hostPath:
+      path: /etc/kubernetes/ssl
+    name: ssl-certs-kubernetes
+  - hostPath:
+      path: /etc/etcd/ssl
+    name: ssl-certs-etcd
+  - hostPath:
+      path: /usr/share/ca-certificates
+    name: ssl-certs-host
+  tolerations:
+  - key: node-role.kubernetes.io/master
+    operator: Equal
+    effect: NoSchedule

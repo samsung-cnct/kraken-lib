@@ -1,0 +1,23 @@
+- name: kraken-ssl.service
+  runtime: true
+  command: start
+  content: |
+    [Unit]
+    Description=Setup Network Environment
+    Requires=kraken-networking.service
+    After=kraken-networking.service
+    [Service]
+    EnvironmentFile=/etc/network-environment
+    RemainAfterExit=yes
+    Type=oneshot
+    ExecStart=/usr/bin/rkt run \
+     --insecure-options=image \
+     --inherit-env=true \
+     --volume input,kind=host,source=/etc/ssl,readOnly=true \
+     --volume output,kind=host,source=/etc,readOnly=false \
+     --mount volume=input,target=/input \
+     --mount volume=output,target=/output \
+     --set-env=HOST_IP=${DEFAULT_IPV4} \
+     quay.io/samsung_cnct/drunkensmee:v0.5 \
+     --exec /assets/generate_worker.sh
+    ExecStopPost=/usr/bin/rkt gc --mark-only

@@ -7,7 +7,7 @@ gke_cloud_test_timeout = 60  // Should be about 4 min but can be as long as 50 f
 e2e_test_timeout       = 18  // Should be about 15 min
 cleanup_timeout        = 60  // Should be about 6 min
 
-e2e_kubernetes_version = "v1.6.7"
+e2e_kubernetes_version = "v1.7.1"
 e2etester_version      = "0.2"
 custom_jnlp_version    = "0.1"
 
