@@ -2,7 +2,7 @@
 github_org             = "samsung-cnct"
 quay_org               = "samsung_cnct"
 
-aws_cloud_test_timeout = 32  // Should be about 16 min (longer due to etcd cluster separation)
+aws_cloud_test_timeout = 32  // Should be about 16 min (or longer due to etcd cluster health checks)
 gke_cloud_test_timeout = 60  // Should be about 4 min but can be as long as 50 for non-default versions
 e2e_test_timeout       = 18  // Should be about 15 min
 cleanup_timeout        = 60  // Should be about 6 min
