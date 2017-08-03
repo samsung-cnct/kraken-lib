@@ -20,6 +20,6 @@
      --set-env=HOST_IP=${DEFAULT_IPV4} \
      --set-env=SERVICE_DNS_NAME={{ cluster_node_tuple.1.name }}.{{ cluster_node_tuple.0.name }}.internal \
      --set-env=HOST_DNS_NAME=*.{{ cluster_node_tuple.1.name }}.{{ cluster_node_tuple.0.name }}.internal \
-     quay.io/samsung_cnct/drunkensmee:v0.5 \
+     quay.io/samsung_cnct/drunkensmee:v0.6 \
      --exec /assets/generate_etcd.sh
     ExecStopPost=/usr/bin/rkt gc --mark-only
