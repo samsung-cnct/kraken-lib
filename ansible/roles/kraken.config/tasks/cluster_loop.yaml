@@ -1,0 +1,51 @@
+---
+- set_fact:
+    cluster: "{{ a_cluster }}"
+
+- name: Prevent up if cluster is already up
+  include: check-clusters-lock.yaml
+  when: kraken_action =='up'
+
+- name: Verify all clusters in the clusters list have names
+  fail:
+    msg: "Make sure that all 'clusters.name' are defined in {{ config_file }}"
+  when: cluster.name | is_empty
+
+- name: Ensure each nodePool corresponds to exactly one of the node roles (i.e. etcd, master, or node)
+  fail:
+    msg: "({{ cluster.name }}, {{ pool.name }}) corresponds to more than one node role"
+  with_items:
+    - "{{ cluster.nodePools }}"
+  loop_control:
+    loop_var: pool
+  when: (pool.etcdConfig is defined and (pool.apiServerConfig is defined or pool.kubeConfig is defined))
+         or (pool.apiServerConfig is defined and pool.kubeConfig is undefined)
+         or (pool.etcdConfig is undefined and pool.kubeConfig is undefined)
+
+- include: setup.yaml
+
+- name: Set kubernetes minor versions for each aws or gke cluster
+  set_fact:
+    kubernetes_minor_versions: "{{ kubernetes_minor_versions | default({}) |combine
+      (
+        { cluster.name: masterVersion[0:(masterVersion.find('.', 3 ))] }
+      )
+     }}"
+  with_items:
+    - "{{ cluster.nodePools }}"
+  when: (item.apiServerConfig is defined) or (cluster.providerConfig.provider == 'gke')
+  vars:
+    masterVersion: "{{ item.kubeConfig.version }}"
+
+- name: Look up and set k8s minor version for this cluster
+  set_fact:
+    kubernetes_minor_version: "{{ kubernetes_minor_versions[cluster.name] }}"
+
+- include: helm.yaml
+- include: kubectl.yaml
+
+- include: set-oidc-info.yaml
+  when: cluster.kubeAuth.authn.oidc is defined
+
+- include: check-update.yaml
+  when: kraken_action == 'update'

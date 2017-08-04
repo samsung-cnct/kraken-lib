@@ -1,6 +1,7 @@
 generated/
 **/*.retry
 .idea
+.vscode
 **/.DS_Store
 *.tgz
 .env/

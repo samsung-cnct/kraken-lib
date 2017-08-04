@@ -4,27 +4,17 @@
     msg: "You must pass an action to update, either --addnodepools <nodepool,names>; --rmnodepools <nodepool,names> or --nodepools <nodepool,names>"
   when:
     add_nodepools == "" and remove_nodepools == "" and update_nodepools == ""
-- set_fact:
-    cluster: "{{ a_cluster }}"
 
 - name: Set kubeconfig path
   set_fact:
     kubeconfig: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
 
-- name: Set minor k8s version
-  set_fact:
-    kubernetes_minor_version: "{{ item.kubeConfig.version[0:(item.kubeConfig.version.find('.', 3 ))] }}"
-  with_items:
-    - "{{ cluster.nodePools }}"
-  when: (item.apiServerConfig is defined) or (cluster.providerConfig.provider == 'gke')
-
-- name: Get kubectl
-  set_fact:
-    kubectl: "/opt/cnct/kubernetes/{{ kubernetes_minor_version }}/bin/kubectl"
 
 - name: Get currently deployed nodepools
   command: >
     {{ kubectl }} --kubeconfig={{ kubeconfig }} get nodes -o jsonpath='{range .items[*]}{.metadata.labels.nodepool}{"\n"}{end}'
+  vars:
+    kubectl: "{{ kubectl_commands[cluster.name] }}"
   register: current_nodepools
 
 - name: Create list of current nodepool names

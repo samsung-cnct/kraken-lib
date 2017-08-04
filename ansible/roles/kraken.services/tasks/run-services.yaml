@@ -1,51 +1,40 @@
 ---
-
-- set_fact:
+- name: set cluster fact
+  set_fact:
     cluster: "{{ a_cluster }}"
 
-- name: Look up and set k8s minor version for this cluster
+- name: set facts for run-services
   set_fact:
-    kubernetes_minor_version: "{{ kubernetes_minor_versions[cluster.name] }}"
-
-- name: Execute appropriate kubectl per minor version
-  set_fact:
-    kubectl: "/opt/cnct/kubernetes/{{ kubernetes_minor_version }}/bin/kubectl"
-
-- name: Execute appropriate helm per minor version
-  set_fact:
-    helm_command: "/opt/cnct/kubernetes/{{ kubernetes_minor_version }}/bin/helm"
-  when: helm_availabilities[cluster.name] == true
-
-- name: In case of helm not being available, if override was specified, override to latest helm
-  set_fact:
-    helm_command: "/opt/cnct/kubernetes/latest/bin/helm"
-  when: (helm_availabilities[cluster.name] == false) and (helm_overrides[cluster.name] == true)
-
-- set_fact:
     cluster_services: "{{ cluster.helmConfig.charts | default([]) }}"
     cluster_repos: "{{ cluster.helmConfig.repos | default([]) }}"
+    helm_command: "{{ helm_commands[cluster.name] }}"
+    kubectl: "{{ kubectl_commands[cluster.name] }}"
     kubeconfig: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
     helm_home: "{{ config_base | expanduser }}/{{ cluster.name }}/.helm"
-
-- name: Create Helm home
-  file:
-    path: "{{ helm_home }}"
-    state: directory
 
 - name: create debug helm command string
   set_fact:
     helm_command: "{{ helm_command }} --debug"
-  when: (cluster.helmConfig.debug is defined) and (cluster.helmConfig.debug == True) and (helm_command is defined)
+  when:
+    - cluster.helmConfig.debug is defined
+    - cluster.helmConfig.debug == True
+    - helm_command is defined
 
 - name: create helm init command string
   set_fact:
     helm_init_command: "{{ helm_command }} init"
-  when: ((tiller_image is undefined) or (tiller_image is none) or (tiller_image | trim == '')) and (helm_command is defined)
+  when:
+    - ((tiller_image is undefined) or (tiller_image is none) or (tiller_image | trim == ''))
+    - helm_command is defined
 
 - name: create helm init command string
   set_fact:
     helm_init_command: "{{ helm_command }} init --tiller-image {{ tiller_image }}"
-  when: (tiller_image is defined) and (tiller_image is not none) and (tiller_image | trim != '') and (helm_command is defined)
+  when:
+    - tiller_image is defined
+    - tiller_image is not none
+    - tiller_image | trim != ''
+    - helm_command is defined
 
 - name: Init helm dry-run
   command: >
@@ -54,7 +43,10 @@
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
   register: init_dry_out
-  when: (cluster.helmConfig.debug is defined) and (cluster.helmConfig.debug == True) and (helm_command is defined)
+  when:
+    - cluster.helmConfig.debug is defined
+    - cluster.helmConfig.debug == True
+    - helm_command is defined
 
 - name: Init helm
   command: >
@@ -82,7 +74,9 @@
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
   with_items: "{{ cluster_repos }}"
-  when: (cluster_repos is defined) and (helm_command is defined)
+  when:
+    - cluster_repos is defined
+    - helm_command is defined
   ignore_errors: yes
   failed_when: false
 
@@ -93,19 +87,25 @@
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
   with_items: "{{ cluster_repos }}"
-  when: cluster_repos is defined and (helm_command is defined)
+  when:
+    - cluster_repos is defined
+    - helm_command is defined
 
 - name: Save config values to files for repo charts
   template: src=service-values.yaml.jinja2
     dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ item.repo }}-{{ item.name }}.helmvalues"
   with_items: "{{ cluster_services }}"
-  when: cluster_services is defined and (item.repo is defined)
+  when:
+    - cluster_services is defined
+    - item.repo is defined
 
 - name: Save config values to files for registry charts
   template: src=service-values.yaml.jinja2
     dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ item.registry }}-{{ item.name }}.helmvalues"
   with_items: "{{ cluster_services }}"
-  when: cluster_services is defined and (item.registry is defined)
+  when:
+    - cluster_services is defined
+    - item.registry is defined
 
 - name: Install charts dry-run
   command: >
@@ -120,7 +120,11 @@
     HELM_HOME: "{{ helm_home }}"
   with_items: "{{ cluster_services }}"
   register: install_dry_out
-  when: (cluster_services is defined) and (cluster.helmConfig.debug is defined) and (cluster.helmConfig.debug == True) and (helm_command is defined)
+  when:
+    - cluster_services is defined
+    - cluster.helmConfig.debug is defined
+    - cluster.helmConfig.debug == True
+    - helm_command is defined
 
 - name: Install charts from repo
   command: >
@@ -133,7 +137,10 @@
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
   with_items: "{{ cluster_services }}"
-  when: (cluster_services is defined) and (helm_command is defined) and (item.repo is defined)
+  when:
+    - cluster_services is defined
+    - helm_command is defined
+    - item.repo is defined
 
 - name: Install charts from registry
   command: >
@@ -145,4 +152,7 @@
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
   with_items: "{{ cluster_services }}"
-  when: (cluster_services is defined) and (helm_command is defined) and (item.registry is defined)
+  when:
+    - cluster_services is defined
+    - helm_command is defined
+    - item.registry is defined

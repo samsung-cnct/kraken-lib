@@ -1,11 +1,11 @@
 # Documentation
 
-
 ## Kraken Configuration File Format
 
 Kraken configuration is done through a yaml file, and is broken up into two sections.  The top of the file will contain the definitions of the component stanzas and the bottom of the file will contain a list of clusters which are composed of the component stanzas.
 
 ### Definitions
+
 * `definitions` - [Definitions of sections](kraken-configs/definitions.md)
   * `dns` - [dns configurations](kraken-configs/dns.md)
   * `helm` - [helm charts configuration](kraken-configs/helmconfigs.md)
@@ -20,13 +20,14 @@ Kraken configuration is done through a yaml file, and is broken up into two sect
   * `keypairs` -[keyPair configuration](kraken-configs/keypair/README.md)
   * `kubeAuth` -[kubeAuth configuration](kraken-configs/kubeauth.md)
 
-### Deployment  
-* `deployment` - [The core of the configuration](kraken-configs/deployment.md)
+### Deployment
 
+* `deployment` - [The core of the configuration](kraken-configs/deployment.md)
 
 ## Additional Guide For Developer
 
 * [Upgrading to newer Kubernetes](./UPGRADING_KUBERNETES.md)
 
 ### Usage For Tags
+
 * `tags` - [Usage for tags](tags/README.md)

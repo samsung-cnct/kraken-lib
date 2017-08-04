@@ -1,7 +1,7 @@
 ---
 - set_fact:
     cluster: "{{ a_cluster }}"
-    
+
 - name: Generate dex key
   command: >
     openssl genrsa -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/dex-key.pem 2048

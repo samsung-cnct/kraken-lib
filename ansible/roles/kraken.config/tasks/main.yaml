@@ -75,74 +75,10 @@
          of API version {{ kraken_config_user.version }}.
   when: not validation.result.is_valid
 
-- name: Verify all clusters in the clusters list have names
-  fail:
-    msg: "Make sure that all 'clusters.name' are defined in {{ config_file }}"
-  when: item.name | is_empty
-  with_items:
-    - "{{ kraken_config.clusters }}"
-
 - name: Do not allow multiple clusters in config
   fail:
     msg: "Multiple clusters are not yet supported in k2"
   when: kraken_config.clusters | length > 1 | int
-
-- include: check-clusters-lock.yaml
-  with_items:
-    - "{{ kraken_config.clusters }}"
-  loop_control:
-    loop_var: a_cluster
-  when: kraken_action =='up'
-
-- name: Ensure each nodePool corresponds to exactly one of the node roles (i.e. etcd, master, or node)
-  fail:
-    msg: "({{ i.0.name }}, {{ i.1.name }}) corresponds to more than one node role"
-  with_subelements:
-    - "{{ kraken_config.clusters }}"
-    - nodePools
-  loop_control:
-    loop_var: i
-  when: (i.1.etcdConfig is defined and (i.1.apiServerConfig is defined or i.1.kubeConfig is defined))
-         or (i.1.apiServerConfig is defined and i.1.kubeConfig is undefined)
-         or (i.1.etcdConfig is undefined and i.1.kubeConfig is undefined)
-
-- name: Set kubernetes minor versions for each aws or gke cluster
-  set_fact:
-    kubernetes_minor_versions: "{{ kubernetes_minor_versions| default({}) |combine
-      (
-        { item.0.name: masterVersion[0:(masterVersion.find('.', 3 ))] }
-      )
-     }}"
-  with_subelements:
-    - "{{ kraken_config.clusters }}"
-    - nodePools
-  when: (item.1.apiServerConfig is defined) or (item.0.providerConfig.provider == 'gke')
-  vars:
-    masterVersion: "{{ item.1.kubeConfig.version }}"
-
-- include: helm-versioning.yaml
-  with_items:
-    - "{{ kraken_config.clusters }}"
-
-- include: check-update.yaml
-  with_items:
-    - "{{ kraken_config.clusters }}"
-  loop_control:
-    loop_var: a_cluster
-  when: kraken_action == 'update'
-
-- include: setup.yaml
-  with_items:
-    - "{{ kraken_config.clusters }}"
-  loop_control:
-    loop_var: a_cluster
-
-- include: set-oidc-info.yaml
-  with_items:
-    - "{{ kraken_config.clusters }}"
-  loop_control:
-    loop_var: a_cluster
-  when: "a_cluster.kubeAuth.authn.oidc is defined"
 
 # version_query and version_outfile are passed in by the caller
 - name: Collect versions
@@ -154,3 +90,9 @@
     src: query_max_version.jinja2
     dest: "{{ version_outfile | realpath }}"
   when: kraken_action == 'max_k8s_version'
+
+- include: cluster_loop.yaml
+  with_items:
+    - "{{ kraken_config.clusters }}"
+  loop_control:
+    loop_var: a_cluster

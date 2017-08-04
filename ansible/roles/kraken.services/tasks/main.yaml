@@ -4,14 +4,19 @@
     - "{{ kraken_config.clusters }}"
   loop_control:
     loop_var: a_cluster
-  when: (a_cluster.kubeAuth.authn.oidc is defined) and (kraken_action == 'up') and (a_cluster.clusterServices is defined)
+  when:
+    - a_cluster.kubeAuth.authn.oidc is defined
+    - kraken_action == 'up'
+    - a_cluster.clusterServices is defined
 
 - include: kill-dns.yaml
   with_items:
     - "{{ kraken_config.clusters }}"
   loop_control:
     loop_var: a_cluster
-  when: (kraken_action == 'down') and (a_cluster.providerConfig.provider in ['aws'])
+  when:
+    - kraken_action == 'down'
+    - a_cluster.providerConfig.provider in ['aws']
   static: no
 
 - include: run-dns.yaml
@@ -19,7 +24,9 @@
     - "{{ kraken_config.clusters }}"
   loop_control:
     loop_var: a_cluster
-  when: (kraken_action == 'up') and (a_cluster.providerConfig.provider in ['aws'])
+  when:
+    - kraken_action == 'up'
+    - a_cluster.providerConfig.provider in ['aws']
   static: no
 
 - include: kill-services.yaml
@@ -34,5 +41,7 @@
     - "{{ kraken_config.clusters }}"
   loop_control:
     loop_var: a_cluster
-  when: (kraken_action == 'up') and (a_cluster.helmConfig is defined)
+  when:
+    - kraken_action == 'up'
+    - a_cluster.helmConfig is defined
   static: no

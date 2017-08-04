@@ -1,7 +1,4 @@
 ---
-- set_fact:
-    cluster: "{{ a_cluster }}"
-
 - name: Verify cloud provider is supported
   fail:
     msg: |

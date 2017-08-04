@@ -1,0 +1,5 @@
+- name: Set kubectl command for cluster {{ cluster.name }}
+  set_fact:
+    kubectl_commands: "{{ { cluster.name : kubectl_command } | combine(kubectl_commands | default( {} )) }}"
+  vars:
+    kubectl_command: "/opt/cnct/kubernetes/{{ kubernetes_minor_version }}/bin/kubectl"
