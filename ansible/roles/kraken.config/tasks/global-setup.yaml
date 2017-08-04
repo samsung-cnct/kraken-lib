@@ -1,0 +1,15 @@
+---
+- name: Fail if multiple clusters are specified in the config
+  fail:
+    msg: "Multiple clusters are not yet supported in k2"
+  when: kraken_config.clusters | length > 1 | int
+
+- name: Determine latest kubernetes version for all clusters and nodePools
+  set_fact:
+    query_max_version: "{{ kraken_config | json_query('clusters[].nodePools[].kubeConfig.version') | max_semver }}"
+
+- name: Write latest kubernetes version to file
+  template:
+    src: query_max_version.jinja2
+    dest: "{{ version_outfile | realpath }}"
+  when: kraken_action == 'max_k8s_version'

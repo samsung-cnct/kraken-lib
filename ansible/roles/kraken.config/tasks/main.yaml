@@ -1,97 +1,33 @@
 ---
-
-- name: Include configuration variables from defaults file
+- name: Load default configuration file
   include_vars:
     file: "{{ role_path }}/files/config.yaml"
     name: kraken_config_defaults
 
-- name: Include configuration variables
+- name: Load user specified configuration file
   include_vars:
     file: "{{ config_file }}"
     name: kraken_config_user
   when: config_file | is_file
 
-- name: expand default configuration and register the config fact
+- name: Expand default configuration
   set_fact:
     kraken_config: "{{ kraken_config_defaults.deployment | expand_config }}"
   when: not config_file | is_file
 
-- name: Non-recursively combine defaults and user config expand configuration and register the config fact
+- name: Non-recursively combine and expand the defaults and user configuration
   set_fact:
     kraken_config: "{{ kraken_config_defaults.deployment | combine(kraken_config_user.deployment) | expand_config }}"
   when: config_file | is_file
 
-- name: Fail if still using old style configuration format
-  fail:
-    msg: >-
-         The configuration file ({{ config_file }}) does not have an API
-         version and must be updated to the new configuration file format.
-  when: kraken_config_user.version is undefined
+- name: Validate the config against the schema
+  include: validate-config.yaml
 
-- name: Set schema fact(s)
-  set_fact:
-    schema_filename: "../schemas/config/{{ kraken_config_user.version }}/config.json"
-    subschema_dir: "../schemas/config/{{ kraken_config_user.version }}/"
+- name: Verify and set global facts
+  include: global-setup.yaml
 
-- name: Stat schema file
-  stat:
-    path: "{{ schema_filename }}"
-  register: schema_file
-
-- name: Check if k2 configuration file API version is supported
-  fail:
-    msg: >-
-         API version {{ kraken_config_user.version }} is not supported.
-         Check that your configuration file ({{ config_file }}) conforms
-         to a supported format.
-  when: schema_file.stat.exists == false
-
-- name: Validate k2 configuration under schema
-  jsonschema:
-    config_filename: "{{ config_file }}"
-    schema_filename: "{{ schema_filename }}"
-    subschema_dir: "{{ subschema_dir }}"
-  register: validation
-
-- name: Set deprecation fact
-  set_fact:
-    deprecated: "{{ validation.result.schema.deprecated | default(false) }}"
-
-- name: Check for deprecated version
-  fail:
-    msg: >-
-      Configuration file {{ config_file }} uses an API version {{ kraken_config_user.version }}
-      which has been deprecated. It is strongly recommended that you update your configuration
-      file before proceeding.  If you would like to proceed anyway, run up again with --force,
-      but note that support for this API version will be dropped in the near future.
-  when:
-    - deprecated == true
-    - config_forced == 'false'
-
-- name: Fail if configuration file is invalid
-  fail:
-    msg: >-
-         Configuration file ({{ config_file }}) is not a valid instance
-         of API version {{ kraken_config_user.version }}.
-  when: not validation.result.is_valid
-
-- name: Do not allow multiple clusters in config
-  fail:
-    msg: "Multiple clusters are not yet supported in k2"
-  when: kraken_config.clusters | length > 1 | int
-
-# version_query and version_outfile are passed in by the caller
-- name: Collect versions
-  set_fact:
-    query_max_version: "{{ kraken_config | json_query('clusters[].nodePools[].kubeConfig.version') | max_semver }}"
-
-- name: Write out version
-  template:
-    src: query_max_version.jinja2
-    dest: "{{ version_outfile | realpath }}"
-  when: kraken_action == 'max_k8s_version'
-
-- include: cluster_loop.yaml
+- name: Verify and set per cluster facts
+  include: per-cluster-setup.yaml
   with_items:
     - "{{ kraken_config.clusters }}"
   loop_control:
