@@ -29,13 +29,6 @@
     - a_cluster.providerConfig.provider in ['aws']
   static: no
 
-- include: kill-services.yaml
-  with_items:
-    - "{{ kraken_config.clusters }}"
-  loop_control:
-    loop_var: a_cluster
-  when: a_cluster.helmConfig is defined
-
 - include: run-services.yaml
   with_items:
     - "{{ kraken_config.clusters }}"
@@ -45,3 +38,22 @@
     - kraken_action == 'up'
     - a_cluster.helmConfig is defined
   static: no
+
+- include: manage-services.yaml
+  with_items:
+    - "{{ kraken_config.clusters }}"
+  loop_control:
+    loop_var: a_cluster
+  when:
+    - kraken_action == 'update'
+    - a_cluster.helmConfig is defined
+  static: no
+
+- include: kill-services.yaml
+  with_items:
+    - "{{ kraken_config.clusters }}"
+  loop_control:
+    loop_var: a_cluster
+  when:
+    - a_cluster.helmConfig is defined
+    - kraken_action == 'down'

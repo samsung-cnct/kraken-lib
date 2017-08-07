@@ -1,0 +1,113 @@
+---
+- name: set cluster fact
+  set_fact:
+    cluster: "{{ a_cluster }}"
+
+- name: set facts for run-services
+  set_fact:
+    cluster_services: "{{ cluster.helmConfig.charts | default([]) }}"
+    cluster_repos: "{{ cluster.helmConfig.repos | default([]) }}"
+    helm_command: "{{ helm_commands[cluster.name] }}"
+    kubectl: "{{ kubectl_commands[cluster.name] }}"
+    kubeconfig: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
+    helm_home: "{{ config_base | expanduser }}/{{ cluster.name }}/.helm"
+
+- name: Get helm and tiller versions
+  command: >
+    {{ helm_command }} version --short
+  register: helm_versions
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+    HELM_HOME: "{{ helm_home }}"
+  changed_when: false
+
+- name: Upgrade tiller
+  command: >
+    {{ helm_command }} init --upgrade
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+    HELM_HOME: "{{ helm_home }}"
+  when:
+    - (helm_versions.stdout_lines | length) == 2
+    - (helm_versions.stdout_lines[0] | regex_replace(regex)) != (helm_versions.stdout_lines[1] | regex_replace(regex))
+  vars:
+    regex: "^.*: "
+
+- name: Wait for tiller to be ready
+  command: "{{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} --namespace=kube-system get deploy tiller-deploy -o json"
+  register: output
+  until: (output | succeeded) and ((output.stdout | from_json).status.availableReplicas | default(0)) > 0
+  retries: 600
+  delay: 1
+  changed_when: false
+
+- name: Remove helm repositories
+  command: >
+    {{ helm_command }} repo remove {{ item.name }}
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+    HELM_HOME: "{{ helm_home }}"
+  with_items: "{{ cluster_repos }}"
+  when:
+    - cluster_repos is defined
+    - helm_command is defined
+  ignore_errors: yes
+  failed_when: false
+
+- name: Add helm repositories
+  command: >
+    {{ helm_command }} repo add {{ item.name }} {{ item.url }}
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+    HELM_HOME: "{{ helm_home }}"
+  with_items: "{{ cluster_repos }}"
+  when:
+    - cluster_repos is defined
+    - helm_command is defined
+
+- name: Save config values to files for repo charts
+  template: src=service-values.yaml.jinja2
+    dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ item.repo }}-{{ item.name }}.helmvalues"
+  with_items: "{{ cluster_services }}"
+  when:
+    - cluster_services is defined
+    - item.repo is defined
+
+- name: Save config values to files for registry charts
+  template: src=service-values.yaml.jinja2
+    dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ item.registry }}-{{ item.name }}.helmvalues"
+  with_items: "{{ cluster_services }}"
+  when:
+    - cluster_services is defined
+    - item.registry is defined
+
+- name: Upgrade charts from repo
+  command: >
+    {{ helm_command }} upgrade {{ item.name }} {{ item.repo }}/{{ item.chart }}
+      --version {{ item.version }}
+      --namespace {{ item.namespace | default('default') }}
+      --values {{ config_base | expanduser }}/{{ cluster.name }}/{{ item.repo }}-{{ item.name }}.helmvalues
+      --install
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+    HELM_HOME: "{{ helm_home }}"
+  with_items: "{{ cluster_services }}"
+  when:
+    - cluster_services is defined
+    - helm_command is defined
+    - item.repo is defined
+
+- name: Upgrade charts from registry
+  command: >
+    {{ helm_command }} registry upgrade {{ item.registry }}/{{ item.chart }}@{{ item.version }} {{ item.name }} --
+      --namespace {{ item.namespace | default('default') }}
+      --values {{ config_base | expanduser }}/{{ cluster.name }}/{{ item.registry }}-{{ item.name | replace('/','_') }}.helmvalues
+      --install
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+    HELM_HOME: "{{ helm_home }}"
+  with_items: "{{ cluster_services }}"
+  when:
+    - cluster_services is defined
+    - helm_command is defined
+    - item.registry is defined
