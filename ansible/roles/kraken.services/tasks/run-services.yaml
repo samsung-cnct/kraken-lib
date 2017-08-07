@@ -5,13 +5,14 @@
 
 - name: set facts for run-services
   set_fact:
-    cluster_services: "{{ cluster.helmConfig.charts | default([]) }}"
+    cluster_registries: "{{ cluster.helmConfig.registries | default([]) }}"
     cluster_repos: "{{ cluster.helmConfig.repos | default([]) }}"
+    cluster_services: "{{ cluster.helmConfig.charts | default([]) }}"
     helm_command: "{{ helm_commands[cluster.name] }}"
-    kubectl: "{{ kubectl_commands[cluster.name] }}"
-    kubeconfig: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
     helm_home: "{{ config_base | expanduser }}/{{ cluster.name }}/.helm"
-
+    kubeconfig: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
+    kubectl: "{{ kubectl_commands[cluster.name] }}"
+ 
 - name: create debug helm command string
   set_fact:
     helm_command: "{{ helm_command }} --debug"
@@ -90,6 +91,15 @@
   when:
     - cluster_repos is defined
     - helm_command is defined
+
+- name: Process helm registries
+  command: >
+    {{ helm_command }} registry login -u {{ item.username }} -p {{ item.password }} {{ item.name }}
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+    HELM_HOME: "{{ helm_home }}"
+  with_items: "{{ cluster_registries }}"
+  when: cluster_registries is defined and (helm_command is defined)
 
 - name: Save config values to files for repo charts
   template: src=service-values.yaml.jinja2

@@ -21,6 +21,13 @@
       },
       "type": "array"
     },
+    "registries": {
+      "description": "List of helm app registries we want installed.",
+      "items": {
+        "$ref": "helmRegistry.json"
+      },
+      "type": "array"
+    },
     "charts": {
       "description": "List of helm charts we want installed.",
       "items": {
