@@ -105,13 +105,13 @@ If this is your first time using K2, use the K2 Docker image to generate a 'sens
 With the Docker container:
 
 ```bash
-docker run $K2OPTS quay.io/samsung_cnct/k2:latest ./up.sh --generate
+docker run $K2OPTS quay.io/samsung_cnct/k2:latest ./bin/up.sh --generate
 ```
 
 With the cloned repo:
 
 ```bash
-./up.sh --generate
+./bin/up.sh --generate
 ```
 
 This will generate a config.yaml file located at
@@ -195,7 +195,7 @@ using the local awscli tool:
 
 To bring your cluster up, run:
 ```bash
-docker run $K2OPTS quay.io/samsung_cnct/k2:latest ./up.sh --config $HOME/.kraken/${CLUSTER}.yaml
+docker run $K2OPTS quay.io/samsung_cnct/k2:latest ./bin/up.sh --config $HOME/.kraken/${CLUSTER}.yaml
 ```
 
 This will take a while, and will generate a lot of output.
@@ -280,7 +280,7 @@ Then the ssh hostnames available will be:
 To boot up a cluster per your configuration, please execute the following command:
 
 ```bash
-docker run $K2OPTS quay.io/samsung_cnct/k2:latest ./up.sh --config $HOME/.kraken/${CLUSTER}.yaml
+docker run $K2OPTS quay.io/samsung_cnct/k2:latest ./bin/up.sh --config $HOME/.kraken/${CLUSTER}.yaml
 ```
 
 Normally K2 will take a look at your configuration, generate artifacts like cloud-config files, and deploy VMs that will become your cluster.
@@ -436,9 +436,6 @@ clusters:
 ```
 - etcd settings (beyond machine type)
 
-*Warning*
-Repeatedly running `./up.sh` or `./update.sh` can result in etcd nodes being destroyed and regenerated automatically, which will break your cluster's control plane. This is because in the K2 generated config file, the CoreOS version is set to `current`. When CoreOS releases a new version, Terraform will register this change and destroy and re-create etcd nodes. We are working on fixing this, but please be aware that this is a possible issue.
-
 ### Things that can be changed with K2 update
 
 - nodepools
@@ -465,7 +462,7 @@ You can specify different versions of Kubernetes in each nodepool. This may affe
 - Step 1: Make appropriate changes to configuration file
 - Step 2: Run
 ```bash
-docker run $K2OPTS quay.io/samsung_cnct/k2:latest ./update.sh --config $HOME/.kraken/${CLUSTER}.yaml --nodepools clusterNodes,specialNodes
+docker run $K2OPTS quay.io/samsung_cnct/k2:latest ./bin/update.sh --config $HOME/.kraken/${CLUSTER}.yaml --nodepools clusterNodes,specialNodes
 ```
 
 ### Adding and deleting nodepools
@@ -474,7 +471,7 @@ If you change your configuration file to add or remove a nodepool, K2's update a
 - Step 1: Make appropriate changes to configuration file
 - Step 2: Run
 ```bash
-docker run $K2OPTS quay.io/samsung_cnct/k2:latest ./update.sh --config $HOME/.kraken/${CLUSTER}.yaml --addnodepools <nodepools,you,wish,to,add> --rmnodepools <nodepools,you,wish,to,remove>
+docker run $K2OPTS quay.io/samsung_cnct/k2:latest ./bin/update.sh --config $HOME/.kraken/${CLUSTER}.yaml --addnodepools <nodepools,you,wish,to,add> --rmnodepools <nodepools,you,wish,to,remove>
 ```
 
 ## Kubernetes versioning for K2 services
@@ -502,7 +499,7 @@ Now, run cluster up again, and K2 will use the override condition you specified.
 How zen of you - everything must come to end, including Kubernetes clusters. To destroy a cluster created with K2, please do the following:
 
 ```bash
-docker run $K2OPTS quay.io/samsung_cnct/k2:latest ./down.sh --config $HOME/.kraken/${CLUSTER}.yaml
+docker run $K2OPTS quay.io/samsung_cnct/k2:latest ./bin/down.sh --config $HOME/.kraken/${CLUSTER}.yaml
 ```
 
 #### To Create a Small Research or Development Cluster (Non-HA)

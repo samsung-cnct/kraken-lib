@@ -20,7 +20,7 @@ if [ ! -f $OUTFILE ]; then
 fi
 
 shift
-source "${my_dir}/lib/common.sh"
+source "${my_dir}/../lib/common.sh"
 
 # setup a sigint trap
 trap control_c SIGINT

@@ -1,5 +1,5 @@
 #!/bin/bash -
-#title          :computed_kubectl
+#title          :computed_kubectl.sh
 #description    :Calls a version of kubectl whose version is computed by ansible from the provided config, passing along the remaining arguments
 #author         :Samsung SDSRA
 #====================================================================

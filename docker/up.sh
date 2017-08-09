@@ -1,3 +1,3 @@
 #!/bin/bash
-cd /kraken
+cd /kraken/bin
 ./up.sh

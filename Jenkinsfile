@@ -37,7 +37,7 @@ podTemplate(label: 'k2', containers: [
             }
             stage('Configure') {
                 kubesh 'build-scripts/fetch-credentials.sh'
-                kubesh './up.sh --generate cluster/aws/config.yaml'
+                kubesh './bin/up.sh --generate cluster/aws/config.yaml'
                 kubesh "build-scripts/update-generated-config.sh cluster/aws/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
                 kubesh 'mkdir -p cluster/gke'
                 kubesh 'cp ansible/roles/kraken.config/files/gke-config.yaml cluster/gke/config.yaml'
@@ -45,7 +45,7 @@ podTemplate(label: 'k2', containers: [
         }
             // Dry Run Test
             stage('Test: Dry Run') {
-                kubesh 'PWD=`pwd` && ./up.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/ -t dryrun'
+                kubesh 'PWD=`pwd` && ./bin/up.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/ -t dryrun'
             }
 
             // Unit tests
@@ -61,12 +61,12 @@ podTemplate(label: 'k2', containers: [
                         parallel (
                             "aws": {
                                 timeout(aws_cloud_test_timeout) {
-                                    kubesh 'PWD=`pwd` && ./up.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/'
+                                    kubesh 'PWD=`pwd` && ./bin/up.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/'
                                 }
                             },
                             "gke": {
                                 timeout(gke_cloud_test_timeout) {
-                                    kubesh 'PWD=`pwd` && ./up.sh --config $PWD/cluster/gke/config.yaml --output $PWD/cluster/gke/'
+                                    kubesh 'PWD=`pwd` && ./bin/up.sh --config $PWD/cluster/gke/config.yaml --output $PWD/cluster/gke/'
                                 }
                             }
                         )
@@ -105,10 +105,10 @@ podTemplate(label: 'k2', containers: [
                     stage('Clean up') {
                         parallel (
                             "aws": {
-                                kubesh 'PWD=`pwd` && ./down.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/ || true'
+                                kubesh 'PWD=`pwd` && ./bin/down.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/ || true'
                             },
                             "gke": {
-                                kubesh 'PWD=`pwd` && ./down.sh --config $PWD/cluster/gke/config.yaml --output $PWD/cluster/gke/'
+                                kubesh 'PWD=`pwd` && ./bin/down.sh --config $PWD/cluster/gke/config.yaml --output $PWD/cluster/gke/'
                             }
                         )
                     }

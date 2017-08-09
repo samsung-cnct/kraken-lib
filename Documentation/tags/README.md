@@ -11,7 +11,7 @@ For exmple. if you can set  $KRAKEN_TAGS as 'dryrun' to run shell script without
 
 
 ```bash
-$ docker run $K2OPTS -e KRAKEN_TAGS="dryrun" quay.io/samsung_cnct/k2:latest ./up.sh --config $HOME/.kraken/${CLUSTER}.yaml
+$ docker run $K2OPTS -e KRAKEN_TAGS="dryrun" quay.io/samsung_cnct/k2:latest ./bin/up.sh --config $HOME/.kraken/${CLUSTER}.yaml
 ```
 
 Then you can verify those tags through stdout when run some commands such as 'up.sh'
@@ -24,7 +24,7 @@ WARNING: Using 'dryrun' as tags
 
 User are also able to use **multiple tags** using delimeter : ','
 ```bash
-$ docker run $K2OPTS -e KRAKEN_TAGS="fabric_only,services_only" quay.io/samsung_cnct/k2:latest ./up.sh --config $HOME/.kraken/${CLUSTER}.yaml
+$ docker run $K2OPTS -e KRAKEN_TAGS="fabric_only,services_only" quay.io/samsung_cnct/k2:latest ./bin/up.sh --config $HOME/.kraken/${CLUSTER}.yaml
 ```
 
 ### Run with tags through K2-tools image for using local k2 repository
@@ -51,7 +51,7 @@ dryrun
 
 After setting up env variables you can execute up.sh without spinning up actual cluster
 ```bash
-$ ./up.sh --config ~/.kraken/${CLUSTER}.yaml
+$ ./bin/up.sh --config ~/.kraken/${CLUSTER}.yaml
 ```
 
 Then you can verify those tags through stdout when run some commands such as 'up.sh'

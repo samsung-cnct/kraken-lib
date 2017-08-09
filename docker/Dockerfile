@@ -11,4 +11,4 @@ RUN 	apk update && \
        apk del git
 
 WORKDIR "/kraken"
-CMD ["./up.sh"]
+CMD ["./bin/up.sh"]

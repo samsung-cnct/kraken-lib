@@ -134,7 +134,7 @@ hack/dockerdev -c <PATH_TO_CONFIGS>/<YOUR_CONFIG>.yaml
 as you would normally when developing k2 (including any flags you require).:
 
 ```
-/up.sh -c <PATH_TO_CONFIGS>/<YOUR_CONFIG>.yaml
+/bin/up.sh -c <PATH_TO_CONFIGS>/<YOUR_CONFIG>.yaml
 ```
 
 At this point since you have mounted your workspace, you should be able to make changes to k2 here and even access git commands.
