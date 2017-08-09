@@ -54,7 +54,14 @@ rules:
       - watch
   - apiGroups: ["projectcalico.org"]
     resources:
+      - globalbgppeers
+    verbs:
+      - get
+      - list
+  - apiGroups: ["projectcalico.org"]
+    resources:
       - globalconfigs
+      - globalbgpconfigs
     verbs:
       - create
       - get
@@ -66,10 +73,16 @@ rules:
       - ippools
     verbs:
       - create
-      - delete
       - get
       - list
       - update
+      - watch
+  - apiGroups: ["alpha.projectcalico.org"]
+    resources:
+      - systemnetworkpolicies
+    verbs:
+      - get
+      - list
       - watch
 
 ---
