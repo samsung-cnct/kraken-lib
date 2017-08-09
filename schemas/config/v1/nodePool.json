@@ -17,6 +17,7 @@
     "kvStoreConfig": { "$ref": "kvStoreConfig.json" },
     "apiServerConfig": { "$ref": "apiServerConfig.json" },
     "kubeConfig": { "$ref": "kubeConfig.json" },
+    "bastionConfig": { "$ref": "bastionConfig.json" },
     "containerConfig": { "$ref": "containerConfig.json" },
     "osConfig": { "$ref": "osConfig.json" },
     "nodeConfig": { "$ref": "nodeConfig.json" },

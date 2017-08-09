@@ -18,7 +18,7 @@
     loop_var: a_cluster
   when: a_cluster.providerConfig.provider == 'gke'
 
-- name: Error Provider
+- name: Supported Cloud Provider Check
   include_role:
     name: '{{ playbook_dir }}/roles/kraken.error'
     kraken_component_type: provider

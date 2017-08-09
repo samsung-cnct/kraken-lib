@@ -2,19 +2,13 @@
 {% set validHostCounter = 1 %}
 {% for instance in result.instances %}
 {% if instance.state == 'running' or instance.state == 'pending' %}
-{% set privateKeyPath = cluster.nodePools | selectattr("name", "equalto", instance.tags['k2-nodepool']) | list %}
-{% if privateKeyPath[0].keyPair.privatekeyFile is defined %}
-{% if instance.public_dns_name is defined and instance.public_dns_name != "" %}
 Host {{instance.tags['k2-nodepool']}}-{{validHostCounter}}
-  HostName {{instance.public_dns_name}}
+  HostName {{instance.private_dns_name}}
   User core
   Port 22
-  IdentityFile {{privateKeyPath[0].keyPair.privatekeyFile}}
   StrictHostKeyChecking no
   UserKnownHostsFile=/dev/null
 {% endif %}
 {% set validHostCounter = validHostCounter + 1 %}
-{% endif %}
-{% endif %}
 {% endfor %}
 {% endfor %}

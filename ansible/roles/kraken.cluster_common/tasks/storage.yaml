@@ -3,8 +3,10 @@
   template: src=format-storage.part.jinja2
             dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ item.name }}.units.format-storage.part"
   with_items: "{{ cluster.nodePools }}"
+  when: item.nodeConfig.mounts is defined
 
 - name: Generate nodePool .units.mount.part files
   template: src=mount.part.jinja2
             dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ item.name }}.units.mount.part"
   with_items: "{{ cluster.nodePools }}"
+  when: item.nodeConfig.mounts is defined

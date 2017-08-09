@@ -66,7 +66,7 @@ definitions:
             version: v1.8.3
             location: quay.io/calico/cni
           calicoNode:
-            version: v1.2.1
+            version: v1.1.3
             location: quay.io/calico/node
           flannel:
             version: v0.7.1
@@ -86,7 +86,6 @@ definitions:
         default: *defaultCanalFabric
         versions:
           v1.6: *defaultCanalFabric16
-          v1.7: *defaultCanalFabric16
     - &defaultWeaveFabric
       name: defaultWeaveFabric
       kind: fabric
@@ -125,7 +124,7 @@ definitions:
         default: *defaultWeaveFabric
         versions:
           v1.6: *defaultWeaveFabric16
-          v1.7: *defaultWeaveFabric16
+
   kvStoreConfigs:
     - &defaultEtcd
       name: etcd
@@ -165,7 +164,7 @@ definitions:
     - &defaultKube
       name: defaultKube
       kind: kubernetes
-      version: v1.7.1
+      version: v1.6.7
       hyperkubeLocation: gcr.io/google_containers/hyperkube
 
   containerConfigs:
@@ -198,10 +197,10 @@ definitions:
           path: /ephemeral
           forceFormat: false
       providerConfig:
-        enablePublicIPs: true
+        enablePublicIPs: false
         provider: aws
-        type: m4.large
-        subnet: ["zone-1", "zone-2", "zone-3"]
+        type: t2.small
+        subnet: ["zone-1-private", "zone-2-private", "zone-3-private"]
         tags:
           -
             key: comments
@@ -238,10 +237,10 @@ definitions:
           path: /ephemeral
           forceFormat: false
       providerConfig:
-        enablePublicIPs: true
+        enablePublicIPs: false
         provider: aws
-        type: m4.large
-        subnet: ["zone-1", "zone-2", "zone-3"]
+        type: t2.small
+        subnet: ["zone-1-private", "zone-2-private", "zone-3-private"]
         tags:
           -
             key: comments
@@ -274,10 +273,10 @@ definitions:
           path: /var/lib/docker
           forceFormat: true
       providerConfig:
-        enablePublicIPs: true
+        enablePublicIPs: false
         provider: aws
         type: m4.large
-        subnet: ["zone-1", "zone-2", "zone-3"]
+        subnet: ["zone-1-private", "zone-2-private", "zone-3-private"]
         tags:
           -
             key: comments
@@ -301,10 +300,10 @@ definitions:
           path: /var/lib/docker
           forceFormat: true
       providerConfig:
-        enablePublicIPs: true
+        enablePublicIPs: false
         provider: aws
         type: c4.large
-        subnet: ["zone-1", "zone-2", "zone-3"]
+        subnet: ["zone-1-private", "zone-2-private", "zone-3-private"]
         tags:
           -
             key: comments
@@ -330,9 +329,9 @@ definitions:
       keypair: krakenKey
       providerConfig:
         provider: aws
-        enablePublicIPs: true
+        enablePublicIPs: false
         type: m4.large
-        subnet: ["zone-1", "zone-2", "zone-3"]
+        subnet: ["zone-1-private", "zone-2-private", "zone-3-private"]
         tags:
           -
             key: comments
@@ -347,6 +346,18 @@ definitions:
               delete_on_termination: true
               snapshot_id:
               encrypted: false
+    - &defaultAWSBastionNode
+      name: defaultAWSBastionNode
+      kind: node
+      providerConfig:
+        provider: aws
+        enablePublicIPs: true
+        type: t2.micro
+        subnet: ["zone-1-public", "zone-2-public", "zone-3-public"]
+        tags:
+          -
+            key: comments
+            value: "bastion nodes"
 
   providerConfigs:
     - &defaultAws
@@ -359,20 +370,36 @@ definitions:
       region: us-east-1
       subnet:
         -
-          name: zone-1
+          name: zone-1-private
           az: us-east-1a
           cidr: 10.0.0.0/18
-          enablePublicIPs: true
+          enablePublicIPs: false
         -
-          name: zone-2
+          name: zone-2-private
           az: us-east-1b
           cidr: 10.0.64.0/18
+          enablePublicIPs: false
+        -
+          name: zone-3-private
+          az: us-east-1c
+          cidr: 10.0.128.0/18
+          enablePublicIPs: false
+        -
+          name: zone-1-public
+          az: us-east-1a
+          cidr: 10.0.192.0/20
           enablePublicIPs: true
         -
-          name: zone-3
-          az: us-east-1c
-          cidr: 10.0.128.0/17
+          name: zone-2-public
+          az: us-east-1b
+          cidr: 10.0.208.0/20
           enablePublicIPs: true
+        -
+          name: zone-3-public
+          az: us-east-1c
+          cidr: 10.0.224.0/19
+          enablePublicIPs: true
+
       egressAcl:
         -
           protocol: "-1"
@@ -490,11 +517,17 @@ deployment:
           osConfig: *defaultCoreOs
           nodeConfig: *defaultAwsSpecialNode
           keyPair: *defaultKeyPair
+        - name: bastion
+          count: 3
+          bastionConfig: *defaultBastion
+          containerConfig: *defaultDocker
+          osConfig: *defaultCoreOs
+          nodeConfig: *defaultAWSBastionNode
+          keyPair: *defaultKeyPair
       fabricConfig: *kubeVersionedFabric
       kubeAuth: *rbacKubeAuth
       helmConfig: *defaultHelm
       dnsConfig: *defaultDns
-      # customApiDns: 
       helmOverride:
   readiness:
     type: exact

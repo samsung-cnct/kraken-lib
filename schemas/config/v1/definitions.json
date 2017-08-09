@@ -51,6 +51,15 @@
       "minItems": 1,
       "type": "array"
     },
+    "bastionConfigs": {
+      "title": "Bastion configurations",
+      "description": "A list of bastion configurations within the configuration file.",
+      "items": {
+        "$ref": "bastionConfig.json"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
     "kubeConfigs": {
       "title": "Kubernetes configurations",
       "description": "A list of Kubernetes configurations referenced within the configuration file.",

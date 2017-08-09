@@ -17,7 +17,7 @@
     loop_var: a_cluster
   when: a_cluster.providerConfig.provider == 'gke' and not ( dryrun | bool )
 
-- name: Error Provider
+- name: Supported cloud provider check
   include_role:
     name: '{{ playbook_dir }}/roles/kraken.error'
     kraken_component_type: ssh

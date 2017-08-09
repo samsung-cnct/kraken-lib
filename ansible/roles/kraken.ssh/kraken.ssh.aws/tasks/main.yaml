@@ -16,9 +16,26 @@
     filters:
       "tag:k2-nodepool": "{{ item.name }}"
       "tag:Name": "{{ cluster.name }}_{{ item.name }}*"
+      instance-state-name: running
   with_items: "{{ cluster.nodePools }}"
   register: ec2_results
 
 - name: Generate ssh inventory
-  template: src=ssh_config.jinja2
+  template:
+    src=ssh_config.jinja2
     dest="{{ config_base | expanduser }}/{{ cluster.name }}/ssh_config"
+
+- name: Find any bastion nodes
+  ec2_remote_facts:
+    region: "{{ cluster.providerConfig.region }}"
+    aws_access_key: "{{ cluster.providerConfig.authentication.accessKey or omit }}"
+    aws_secret_key: "{{ cluster.providerConfig.authentication.accessSecret or omit }}"
+    profile: "{{ cluster.providerConfig.authentication.credentialsProfile or omit }}"
+    filters:
+      "tag:k2-nodepool": bastion
+      "tag:KubernetesCluster": "{{ cluster.name }}"
+      instance-state-name: running
+  register: bastion_results
+
+- include: aws_bastion_ssh_config.yaml
+  when:  bastion_results.instances | length > 0

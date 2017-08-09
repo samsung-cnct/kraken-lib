@@ -2,3 +2,6 @@
   template: src=docker-wait-for-mounts.part.jinja2
             dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ item.name }}.units.docker-wait-for-mounts.part"
   with_items: "{{ cluster.nodePools }}"
+  when:
+    - item.nodeConfig.mounts is defined
+    - item.containerConfig is defined

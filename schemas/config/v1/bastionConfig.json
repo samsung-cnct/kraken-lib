@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1/bastionConfig.json",
+  "$$target": "bastionConfig.json",
+  "title": "A Bastion configuration",
+  "description": "Properties pertaining to a Bastion.",
+
+  "properties": {
+    "name": {
+      "description": "Name of the Bastion configuration.",
+      "type": "string"
+    },
+    "kind": {
+      "description": "Type of bastionconfig",
+      "enum": ["bastion", "bastion-elb"],
+      "type": "string"
+    }
+  },
+
+  "required": [
+    "name",
+    "kind"
+  ],
+
+  "type": "object"
+}

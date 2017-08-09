@@ -1,0 +1,21 @@
+---
+- name: Get Bastion OS type
+  set_fact:
+    os_type: "{{ item.osConfig.type }}"
+  register: os_type
+  with_items: "{{ cluster.nodePools }}"
+  when:
+     - item.bastionConfig is defined
+
+- name: Generate bastion ssh inventory
+  template:
+    src=bastion_ssh_config.jinja2
+    dest="{{ config_base | expanduser }}/{{ cluster.name }}/bastion_ssh_config"
+
+- name: Create a list of bastion host names
+  set_fact:
+    bastion_hosts_list: "{{ bastion_results.instances | map(attribute='public_dns_name') | list }}"
+  register: bastion_hosts_list
+
+- include: aws_bastion_coreos.yaml
+  when: os_type == "coreOs"

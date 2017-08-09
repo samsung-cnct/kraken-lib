@@ -17,7 +17,7 @@
     name: '{{ playbook_dir }}/roles/kraken.fabric/kraken.fabric.weave'
   when: cluster.fabricConfig.type == 'weave'
 
-- name: Error Fabric Type
+- name: Check for a supported fabric type.
   include_role:
     name: '{{ playbook_dir }}/roles/kraken.error'
     kraken_component_type: type

@@ -2,7 +2,7 @@
   - set_fact:
       cluster: "{{ a_cluster }}"
 
-  - name: Check that the cluster.status.lock  file exists
+  - name: Check that the cluster.status.lock file exists
     stat:
      path: "{{ config_base | expanduser }}/{{ cluster.name }}/cluster.status.lock"
     register: cluster_status_lock_file

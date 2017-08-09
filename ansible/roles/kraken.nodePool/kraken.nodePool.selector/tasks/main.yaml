@@ -14,7 +14,7 @@
   include_role:
     name: '{{ playbook_dir }}/roles/kraken.nodePool/kraken.nodePool.node'
 
-- name: Error Provider
+- name: Check for Supported docker runtime.
   include_role:
     name: '{{ playbook_dir }}/roles/kraken.error'
     kraken_component_type: nodePool
