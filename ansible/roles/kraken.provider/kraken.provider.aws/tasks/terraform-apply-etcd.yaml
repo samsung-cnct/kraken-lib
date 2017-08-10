@@ -20,8 +20,8 @@
     chdir: "{{ config_base | expanduser }}/{{ cluster.name }}"
 
 - name: Plan terraform configuration for current state of etcd
-  command: > 
-    terraform plan {{ terraform_etcd_targets }} -input=false -no-color
+  command: >
+    terraform plan {{ terraform_etcd_targets }} -input=false -no-color -out={{ config_base | expanduser }}/{{ cluster.name }}/tf_plan
   args:
     chdir: "{{ config_base | expanduser }}/{{ cluster.name }}"
   register: tf_etcd_plan_result
@@ -32,7 +32,7 @@
 
 - name: Apply terraform configuration to current state of etcd
   command: >
-    terraform apply {{ terraform_etcd_targets }} -input=false -no-color
+    terraform apply {{ terraform_etcd_targets }} -input=false -no-color {{ config_base | expanduser }}/{{ cluster.name }}/tf_plan
   args:
     chdir: "{{ config_base | expanduser }}/{{ cluster.name }}"
   register: tf_etcd_apply_result
