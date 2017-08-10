@@ -44,8 +44,9 @@ podTemplate(label: 'k2', containers: [
                 kubesh "build-scripts/update-generated-config.sh cluster/gke/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
         }
             // Dry Run Test
+
             stage('Test: Dry Run') {
-                kubesh 'PWD=`pwd` && ./bin/up.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/ -t dryrun'
+                kubesh "env helm_override_`echo ${JOB_BASE_NAME}-${BUILD_ID} " + '| tr \'[:upper:]\' \'[:lower:]\' | tr \'-\' \'_\'`=false PWD=`pwd` ./bin/up.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/ -t dryrun'
             }
 
             // Unit tests
@@ -61,12 +62,12 @@ podTemplate(label: 'k2', containers: [
                         parallel (
                             "aws": {
                                 timeout(aws_cloud_test_timeout) {
-                                    kubesh 'PWD=`pwd` && ./bin/up.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/'
+                                    kubesh "env helm_override_`echo ${JOB_BASE_NAME}-${BUILD_ID} " + '| tr \'[:upper:]\' \'[:lower:]\' | tr \'-\' \'_\'`=false PWD=`pwd` ./bin/up.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/'
                                 }
                             },
                             "gke": {
                                 timeout(gke_cloud_test_timeout) {
-                                    kubesh 'PWD=`pwd` && ./bin/up.sh --config $PWD/cluster/gke/config.yaml --output $PWD/cluster/gke/'
+                                    kubesh "env helm_override_`echo ${JOB_BASE_NAME}-${BUILD_ID} " + '| tr \'[:upper:]\' \'[:lower:]\' | tr \'-\' \'_\'`=false PWD=`pwd` ./bin/up.sh --config $PWD/cluster/gke/config.yaml --output $PWD/cluster/gke/'
                                 }
                             }
                         )
@@ -87,7 +88,7 @@ podTemplate(label: 'k2', containers: [
                     stage('Test: E2E') {
                         customContainer('e2e-tester') {
                             try {
-                                kubesh "PWD=`pwd` && build-scripts/conformance-tests.sh ${e2e_kubernetes_version} ${env.JOB_BASE_NAME}-${env.BUILD_ID} /mnt/scratch"
+                                kubesh "PWD=`pwd` build-scripts/conformance-tests.sh ${e2e_kubernetes_version} ${env.JOB_BASE_NAME}-${env.BUILD_ID} /mnt/scratch"
                             } catch (caughtError) {
                                 err = caughtError
                                 currentBuild.result = "FAILURE"
@@ -105,10 +106,10 @@ podTemplate(label: 'k2', containers: [
                     stage('Clean up') {
                         parallel (
                             "aws": {
-                                kubesh 'PWD=`pwd` && ./bin/down.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/ || true'
+                                kubesh "env helm_override_`echo ${JOB_BASE_NAME}-${BUILD_ID} " + '| tr \'[:upper:]\' \'[:lower:]\' | tr \'-\' \'_\'`=false PWD=`pwd` ./bin/down.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/ || true'
                             },
                             "gke": {
-                                kubesh 'PWD=`pwd` && ./bin/down.sh --config $PWD/cluster/gke/config.yaml --output $PWD/cluster/gke/'
+                                kubesh "env helm_override_`echo ${JOB_BASE_NAME}-${BUILD_ID} " + '| tr \'[:upper:]\' \'[:lower:]\' | tr \'-\' \'_\'`=false PWD=`pwd` ./bin/down.sh --config $PWD/cluster/gke/config.yaml --output $PWD/cluster/gke/'
                             }
                         )
                     }
