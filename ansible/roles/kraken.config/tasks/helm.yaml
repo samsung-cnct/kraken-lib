@@ -1,8 +1,12 @@
+- name: Convert all dashes to underscores in cluster.name for Helm use
+  set_fact:
+    helm_cluster_name: "{{ cluster.name | replace('-','_') }}"
+
 - name: Set overall helm_override to env var if it has been set, config var if not
   set_fact:
     helm_override: "{{ (lookup('env', helm_override_key) != '') | ternary(lookup('env', helm_override_key), cluster.helmOverride | default('')) }}"
   vars:
-    helm_override_key: "helm_override_{{cluster.name}}"
+    helm_override_key: "helm_override_{{helm_cluster_name}}"
 
 - name: Stop and print out message if helm is not available and helm_override has not been set in either env or config
   fail:
@@ -11,11 +15,11 @@
     If you would like to use the latest version of helm instead, execute:
     export {{ helm_override_key }}=true and then run your cluster up again."
   vars:
-    helm_override_key: "helm_override_{{cluster.name}}"
+    helm_override_key: "helm_override_{{helm_cluster_name}}"
     path: "/opt/cnct/kubernetes/{{ kubernetes_minor_version }}/bin/helm"
-  when: 
-    - not (path | is_file) 
-    - helm_override == "" 
+  when:
+    - not (path | is_file)
+    - helm_override == ""
     - kraken_action != "down"
 
 - name: Set helm facts for cluster {{ cluster.name }}
