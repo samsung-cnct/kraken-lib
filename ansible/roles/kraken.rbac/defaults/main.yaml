@@ -1,2 +1,5 @@
 ---
 readiness_wait_default: 600
+readiness_retry_delay: 20
+rbac_bootstrap_retries: 2
+rbac_retry_delay: 20

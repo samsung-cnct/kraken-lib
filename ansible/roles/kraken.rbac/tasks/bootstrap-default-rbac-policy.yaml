@@ -23,4 +23,7 @@
   command: >
     {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} apply -f {{ config_base | expanduser }}/{{ cluster.name }}/auth/rbac-default-policy.yaml
   register: job_rbac_bootstrap_result
+  until: job_rbac_bootstrap_result | success
+  retries: "{{ rbac_bootstrap_retries | int }}"
+  delay: "{{ rbac_retry_delay | int }}"
   when: "(not (dryrun | bool))"

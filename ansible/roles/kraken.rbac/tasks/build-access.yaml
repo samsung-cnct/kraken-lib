@@ -22,7 +22,7 @@
 
 - name: Set Interval
   set_fact: 
-    rep_interval: 20
+    rep_interval: "{{ readiness_retry_delay }}"
 
 - name: Setup repetitions
   set_fact:
