@@ -1,5 +1,5 @@
 # KV Store Options
-K2 only support etcd clusters now, but any KV store that implements the etcd API can be used.
+Kraken only support etcd clusters now, but any KV store that implements the etcd API can be used.
 
 ## Options
 
