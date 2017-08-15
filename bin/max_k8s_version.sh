@@ -12,8 +12,9 @@ my_dir=$(dirname "${BASH_SOURCE}")
 
 OUTFILE=$1
 if [ -z ${OUTFILE} ]; then 
-  echo "must specify a file to save the max version too"
+  echo "must specify a file to save the max version to"
   exit 1
+fi
 if [ ! -f $OUTFILE ]; then
   echo "first arg must be a pre-created file.  should be created with mktemp"
   exit 2
