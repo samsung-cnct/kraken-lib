@@ -35,7 +35,7 @@ function run_hack_e2e_go() {
 
   common_test_args=()
   common_test_args+=("--ginkgo.v=true")
-  common_test_args+=("--ginkgo.noColor=true")
+  #common_test_args+=("--ginkgo.noColor=y")  # this didnt work
   #common_test_args+=("--provider=${KUBERNETES_PROVIDER}")
 
   test_args=()
@@ -46,7 +46,7 @@ function run_hack_e2e_go() {
   
   # run everything that we can in 
   cd ${KUBE_ROOT}
-  GINKGO_PARALLEL=y go run hack/e2e.go -- --v --test --test_args="${common_test_args[*]} ${test_args[*]}" --check-version-skew=false
+  GINKGO_NO_COLOR=y GINKGO_PARALLEL=y go run hack/e2e.go -- -v --test --test_args="${common_test_args[*]} ${test_args[*]}" --check-version-skew=false
 }
 
 echo
