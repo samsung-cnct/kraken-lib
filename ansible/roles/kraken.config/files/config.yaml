@@ -135,7 +135,7 @@ definitions:
       clusterToken: espouse-monger-rarely
       peerPorts: [2380]
       ssl: true
-      version: v3.1.0
+      version: v3.2.5
     - &defaultEtcdEvents
       name: etcdEvents
       kind: kvStore
@@ -144,7 +144,7 @@ definitions:
       clusterToken: animism-training-chastity
       peerPorts: [2382]
       ssl: true
-      version: v3.1.0
+      version: v3.2.5
 
   apiServerConfigs:
     - &defaultApiServer
@@ -456,6 +456,8 @@ deployment:
       nodePools:
         - name: etcd
           count: 5
+          # m4.large
+          # purposed: m4.16xlarge
           etcdConfig: *defaultEtcd
           containerConfig: *defaultDocker
           osConfig: *defaultCoreOs
@@ -463,6 +465,8 @@ deployment:
           keyPair: *defaultKeyPair
         - name: etcdEvents
           count: 5
+          # m4.large
+          # purposed: m4.16xlarge
           etcdConfig: *defaultEtcdEvents
           containerConfig: *defaultDocker
           osConfig: *defaultCoreOs
@@ -470,6 +474,8 @@ deployment:
           keyPair: *defaultKeyPair
         - name: master
           count: 3
+          # m4.large
+          # purposed: m4.16xlarge
           apiServerConfig: *defaultApiServer
           kubeConfig: *defaultKube
           containerConfig: *defaultDocker
@@ -478,6 +484,7 @@ deployment:
           keyPair: *defaultKeyPair
         - name: clusterNodes
           count: 10
+          # c4.large
           kubeConfig: *defaultKube
           containerConfig: *defaultDocker
           osConfig: *defaultCoreOs
@@ -485,6 +492,7 @@ deployment:
           keyPair: *defaultKeyPair
         - name: specialNodes
           count: 2
+          # m4.large
           kubeConfig: *defaultKube
           containerConfig: *defaultDocker
           osConfig: *defaultCoreOs
