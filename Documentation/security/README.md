@@ -1,6 +1,5 @@
-# Security in K2
-This document describe what of AuthN/Z is used in K2.
-And How to test that.
+# Security in Kraken
+This document describes how AuthN/Z is used in Kraken, and how to test it.
 
 Currently it uses OIDC Authentication using CoreOS Dex.
 It support following authentication backends.
@@ -8,20 +7,21 @@ It support following authentication backends.
 - Google OIDC
 - LDAP
 
-And RBAC is used for Authorization.
+RBAC is used for Authorization.
 
 ## Architecture
-Following images is for understanding AuthN/Z process in K2.
+The following images are for understanding the AuthN/Z process in Kraken.
 ![architecture](image/architecture_1.png)
+
 From above, dex & dex app should be accessible from browser.
-And the kube admin should manage user/group records in LDAP.
+The kube admin should manage user/group records in LDAP.
 Also configures proper RBAC policies for each of the records.
 
-Below is sequence of getting/validating auth.
+Below is the sequence of getting/validating auth.
 ![sequence](image/architecture_2.png)
 
 ## Configuration
-By default, Auth is disabled in k2.
+By default, Auth is disabled in Kraken.
 To enable this see below example in for config.yaml
 ```yaml
 definitions:
@@ -35,20 +35,32 @@ definitions:
       basic:
       - user: admin
         password: secret
+        group: system:masters
     authz:
       rbac:
         super_user: admin
+   - &rbacKubeAuth
+      authz:
+        rbac:
+         # super_user is required until kubernetes 1.5 is no longer supported by k2.
+         # It is not used by kubernetes 1.6 or later.
+          super_user: "placeholder"
+      authn:
+        cert:
+          -
+            user: "admin"
+            group: "system:masters"
+        default_basic_user: "admin"
+
 ```
 
-From above,
-for authentication, it uses 'dex' for oidc provider.
-for Authorization, it uses RBAC.
+From above, for authentication, it uses `dex` for oidc provider. For Authorization, it uses RBAC.
 
-The user 'admin' is basic authentication user has password 'secret'.
+The user `admin` is basic authentication user has password `secret`.
 It is default user so will be set to kubeConfig file.
 It is also RBAC super user, so has permission to manage RBAC policies.
 
-Below is example service configuration.
+Below is an example service configuration.
 
 ```yaml
 helmConfigs:
@@ -77,18 +89,18 @@ helmConfigs:
       namespace: kube-auth
       values:
         DexApp:
-          RedirectUri: http://auth.keyolk.cluster.io:30080/callback
+          RedirectUri: <Your DexApp Redirect URI, browser should be accessible on it.>
         Dex:
-          Issuer: https://auth.keyolk.cluster.io:30443
+          Issuer: <Your Dex Issuer URI, browser should accessible on it, DexApp either.>
           Connector:
             GitHub:
               Name: "GitHub"
-              ClientId: ODAyOWM3MWNiYjRmNmFkOGZmZGE=
-              ClientSecret: NTE5YzRlODg0NDI3MTBhZDJmMGM0YWE1NDBjNjgyZTNlNDY4YWEzZg==
+              ClientId: <Your Client ID>
+              ClientSecret: <Your Client Secret>
             Oidc:
               Issuer: https://accounts.google.com
-              ClientId: ODc2MDc2NjM5NDQ0LW8zdTIzZjY5ZGlsdXMxYTBkNzd0ZHQxb3FzMWZpaDViLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29t
-              ClientSecret: T0pMc0FLeUpsY2ZjaUtnbkhzaHVwZjQ4
+              ClientId: <Your Client ID>
+              ClientSecret: <Your Client Secret>
             Ldap:
               Name: "LDAP"
               Host: "openldap:389"
@@ -114,24 +126,25 @@ helmConfigs:
     value: 0
     wait: 600
         DexApp:
-          RedirectUri: http://auth.keyolk.cluster.io:30080/callback
+          RedirectUri: <Your DexApp Redirect URI, browser should be accessible on it.>
 ```
 
-The chart 'dex' is oidc provider for kube-apiserver.
-It has two endpoint which user should access, 'Dex' and 'DexApp'.
-It should be accessible from user side but also cluster inside.
+The chart `dex` is oidc provider for kube-apiserver.
+It has two endpoints which the user should access, 'Dex' and 'DexApp'.
+It should be accessible from the user side but also cluster side.
 
-The chart 'openldap' is used for authentication backend of 'dex'.
+The chart `openldap` is used for authentication backend of `dex`.
 
 ## Endpoints
-By default, it exposes ports 30443, 30080 for 'dex'.
+By default, it exposes ports 30443, 30080 for `dex`.
 User should use same URI which defined in config.yaml.
-And a port 31080 also exposed for phpLDAPadmin which included in 'openldap'.
+And a port 31080 also exposed for phpLDAPadmin which included in `openldap`.
 
 To access there, following ingress configuration is required.
 ```yaml
-deployment:
-  providerConfig:
+definitions:
+  ...
+  providerConfigs:
     ingressSecurity:
       -
         from_port: 30080
@@ -190,7 +203,7 @@ ou: groups
 dn: cn=cnct,ou=groups,dc=local,dc=io
 cn: cnct
 gidnumber: 500
-memberuid: keyolk
+memberuid: <memberuid>
 objectclass: posixGroup
 objectclass: top
 
@@ -200,27 +213,26 @@ objectclass: organizationalUnit
 objectclass: top
 ou: users
 
-# Entry 6: uid=keyolk,ou=users,dc=local,dc=io
-dn: uid=keyolk,ou=users,dc=local,dc=io
-cn: keyolk
+# Entry 6: uid=<uid>,ou=users,dc=local,dc=io
+dn: uid=<uid>,ou=users,dc=local,dc=io
+cn: <cn>
 gidnumber: 500
-givenname: chanhun
-homedirectory: /home/keyolk
-mail: keyolk@gmail.com
-mobile: 010-6350-5811
+givenname: <name>
+homedirectory: /home/<Username>
+mail: <your_email>
+mobile: <your_phone>
 objectclass: inetOrgPerson
 objectclass: top
 objectclass: posixAccount
 pager: cn=admin,dc=local,dc=io
-sn: keyolk
-uid: keyolk
+sn: <sn>
+uid: <uid>
 uidnumber: 1000
 userpassword: secret
 ```
 It has one group with one user.
-The user 'keyolk' has password 'secret'
 
-Let's see LDAP connector configuration again.
+Let's see the LDAP connector configuration again.
 ```yaml
 Ldap:
   Name: "LDAP"
@@ -244,10 +256,10 @@ Ldap:
     NameAttr: "cn"
 ```
 
-about parameters,
+Parameters:
 - Ldap
-  - BindDn : The DN and password for an application service account. The connector uses
-  - BindPW: these credentials to search for users and groups. Not required if the LDAP server provides access for anonymous auth.
+  - BindDn : The DN and password for an application service account.
+  - BindPW: The connector uses these credentials to search for users and groups. Not required if the LDAP server provides access for anonymous auth.
   - UserSearch:
     - BaseDN: BaseDN to start the search from. It will translate to the query
     - Filter: Optional filter to apply when searching the directory.
@@ -265,17 +277,17 @@ You can confirm whether search function work or not
 using below info with phpLDAPadmin.
 ```bash
 BaseDN: ou=users,dc=local,dc=io
-Filter: (&(objectClass=posixAccount)(uid=keyolk))
+Filter: (&(objectClass=posixAccount)(uid=<user>))
 ShowAttribute: uid, mail
 
 DN: ou=groups,dc=local,dc=io
-Filter: (&(objectClass=posixGroup)(memberUid=keyolk))
+Filter: (&(objectClass=posixGroup)(memberUid=<user>))
 ShowAttribute: cn, gidNumber, memberUid
 ```
 
 From here the informations above is used by kube-apiserver with below flags.
 ```bash
---oidc-issuer-url=https://auth.keyolk.cluster.io:30443
+--oidc-issuer-url=https://auth.<cluster_name>.cluster.io:30443
 --oidc-client-id=example-app
 --oidc-ca-file=/etc/kubernetes/ssl/ca.pem
 --oidc-username-claim=email
@@ -287,21 +299,25 @@ From here the informations above is used by kube-apiserver with below flags.
 
 ## Login
 To login, access to 'DexApp' first from browser.
-Here assume its URL http://auth.keyolk.cluster.io:30080
+Here assume its URL http://auth.<cluster_name>.cluster.io:30080
 ![login_1](image/login_1.png)
-Make sure here, extra scopes filed has 'groups' it be used for gropu authentication.
+
+Make sure here, extra scopes filed has `groups` it be used for group authentication.
 
 ![login_2](image/login_2.png)
+
 Choose LDAP
 
 ![login_3](image/login_3.png)
-keyolk / secret
+
+  < user >/secret
 
 ![login_4](image/login_4.png)
-The token here is used.
+
+The token is used here.
 
 ```bash
-$ token="eyJhbGciOiJSUzI1NiIsImtpZCI6IjNkYzU2YmE0ZWQ2OWNkNGRmZjE2MjdlYWU5NGY2ZThhZmU2NDA5OWIifQ.eyJpc3MiOiJodHRwczovL2RleC5rZXlvbGsua3ViZS5jbHVzdGVyLmlvOjMwNDQzIiwic3ViIjoia2V5b2xrIiwiYXVkIjoiZXhhbXBsZS1hcHAiLCJleHAiOjE0ODM4MzA2NjMsImlhdCI6MTQ4Mzc0NDI2MywiZW1haWwiOiJrZXlvbGtAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJncm91cHMiOlsiY25jdCJdLCJuYW1lIjoia2V5b2xrIn0.qA36iIEIEv3dt22-XldBef0fiM-PqTtuc4BwWUK6E8tK9y3zk8OraoGgqKhLYn2v4hspocYhSC1OXUsj9ShwAKM_Gb-2-5LA8URiTVwtX1MTlF5CkS3f6kX8erX_mGWSURZCoMPf1eiPX814DfIG4U4ApqlJNowCyaXelc3hUQSaATN3hYHYBNlgy0qdiP_QLuZGDbemcgLXUGWeZJad8Yzl6Vg1ub1AfdP50R-YEeMw77pzdyMPu3nOS8jxavCtL1l07GVOqMWg4s4-Z4COCCn8SQbdi9rMmN8Lski6t0jdbcM2l6ag4Dr_tlIpA_pMPoSKmH1Y7BPNfBUcdC7oOA"
+$ token="<token>"
 
 $ kubectl config set-credentials dex --token=$token
 $ kubectl config set-context dex --namespace=kube-auth --user=dex
@@ -309,13 +325,13 @@ $ kubectl config use-context dex
 
 $ kubectl get node
 NAME                                         STATUS                     AGE
-ip-10-0-101-31.us-west-2.compute.internal    Ready,SchedulingDisabled   2h
+ip-10-0-101-31.us-west-2.compute.internal    Ready                      2h
 ip-10-0-126-57.us-west-2.compute.internal    Ready                      2h
 ip-10-0-127-34.us-west-2.compute.internal    Ready                      2h
-ip-10-0-150-133.us-west-2.compute.internal   Ready,SchedulingDisabled   2h
+ip-10-0-150-133.us-west-2.compute.internal   Ready                      2h
 ip-10-0-17-58.us-west-2.compute.internal     Ready                      2h
 ip-10-0-177-165.us-west-2.compute.internal   Ready                      2h
-ip-10-0-36-152.us-west-2.compute.internal    Ready,SchedulingDisabled   2h
+ip-10-0-36-152.us-west-2.compute.internal    Ready                      2h
 ip-10-0-55-64.us-west-2.compute.internal     Ready                      2h
 
 ```
@@ -324,14 +340,14 @@ To make it simple without browser you can use below script instead.
 ```bash
 #!/bin/bash
 
-DEX_URI=https://auth.keyolk.cluster.io:30443
-DEX_CLIENT_REDIRECT_URI=http://auth.keyolk.cluster.io:30080/callback
+DEX_URI=https://auth.<cluster_name>.cluster.io:30443
+DEX_CLIENT_REDIRECT_URI=http://auth.<cluster_name>.cluster.io:30080/callback
 DEX_CLIENT_ID=example-app
 DEX_AUTH_CONNECTOR=ldap
-KUBE_CONFIG=~/.kraken/keyolk/admin.kubeconfig
-KUBE_CLUSTER=keyolk
-KUBE_NAMESPACE=cnct
-KUBE_USER=keyolk
+KUBE_CONFIG=~/.kraken/<User>/admin.kubeconfig
+KUBE_CLUSTER=<cluster_name>
+KUBE_NAMESPACE=<namespace>
+KUBE_USER=<user>
 
 request=/auth
 params="client_id=$DEX_CLIENT_ID"
@@ -368,20 +384,19 @@ kubectl --kubeconfig $KUBE_CONFIG config set-context $KUBE_USER --cluster=$KUBE_
 kubectl --kubeconfig $KUBE_CONFIG config use-context $KUBE_USER
 ```
 
-Then use it like below
+Then use it like below:
 ```bash
 $ ./login.sh
 
 Your token request is :
-https://auth.keyolk.cluster.io:30443/auth?client_id=example-app&redirect_uri=http://auth.keyolk.cluster.io:30080/callback&response_type=code&scope=groups+openid+profile+email+offline_access&
+https://auth.<cluster_name>.cluster.io:30443/auth?client_id=example-app&redirect_uri=http://auth.<cluster_name>.cluster.io:30080/callback&response_type=code&scope=groups+openid+profile+email+offline_access&
 
 Input your login info.
-Username: keyolk
+Username:<username>
 Password:
-Your token is :
-eyJhbGciOiJSUzI1NiIsImtpZCI6ImI5MGUxMTBjYTY2MzZmM2QyYzA4OTVmZjk0NjUwNmIyM2YxZGQwMjQifQ.eyJpc3MiOiJodHRwczovL2F1dGgua2V5b2xrLmNsdXN0ZXIuaW86MzA0NDMiLCJzdWIiOiJrZXlvbGsiLCJhdWQiOiJleGFtcGxlLWFwcCIsImV4cCI6MTQ4NDMzNjU1NSwiaWF0IjoxNDg0MjUwMTU1LCJlbWFpbCI6ImtleW9sa0BnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImdyb3VwcyI6WyJjbmN0Il0sIm5hbWUiOiJrZXlvbGsifQ.HAGhU8U0Wao2qnzhSaYqzxvrrWhR3INWEjMRNvUY9ufTy-Ie42TjWL2NT2ahQbSyrFnD3ZK0PKYv8Mf86MZf0g15I7UKzJUNdodqkVxSw_BJHswnlKcrbgxs89AdiLouZ2MpanNFXaQX25SMP1BOgpyV8kvYXS2XtB13LWCMi-uVrd6azZj0_6kBYaGoGhp8Vg9GKDjLVazUFhaCk2G14sIewWpwTB4HG7gitisvjdXZioolg41KBsQw_yooe7eihM3WQlyoL1KByYmv3exS1VNkT7j73kyAjiLJPQvEbM4wNSa_wTro0SHJLT6wuzfgbNgu_Tfvqj9qr1bcEp6G_Q
+Your token is : <token>
 
-Set the token to given kubeConfig file : /home/keyolk/.kraken/keyolk/admin.kubeconfig
+Set the token to given kubeConfig file : /home/<user>/.kraken/<cluster_name>/admin.kubeconfig
 user "dex" set.
 context "dex" set.
 switched to context "dex".
@@ -404,12 +419,12 @@ openldap-admin   10.36.175.105   <nodes>       80/TCP            2h
 ```
 
 It can get service info, but not pod info.
-Cause k2 assign below policy default.
+Cause Kraken assign below policy default.
 
 ```yaml
 ---
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1alpha1
+apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: default
 rules:
@@ -428,7 +443,7 @@ rules:
     verbs: ["get", "watch", "list"]
 ```
 
-To provide its access right for its namespace, create belows
+To provide access rights for its namespace, create below:
 ```
 ---
 kind: Namespace
@@ -437,7 +452,7 @@ metadata:
   name: cnct
 ---
 kind: Role
-apiVersion: rbac.authorization.k8s.io/v1alpha1
+apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   namespace: cnct
   name: cnct
@@ -447,7 +462,7 @@ rules:
     verbs: ["*"]
 ---
 kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1alpha1
+apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: cnct
   namespace: cnct
@@ -459,7 +474,7 @@ roleRef:
   kind: Role
   namespace: cnct
   name: cnct
-  apiVersion: rbac.authorization.k8s.io/v1alpha1
+  apiVersion: rbac.authorization.k8s.io/v1beta1
 ```
 
 Now it can create deploy to its namespace.
@@ -481,7 +496,7 @@ Now it just use same CA what kube apiserver uses.
 Need another channel for passing it from given services to each VM instances.
 
 And to find/set dex'services configuration like issuer URL.
-From now K2 just assume that it is located under 'values.Dex.Issuer'
+From now Kraken just assumes that it is located under 'values.Dex.Issuer'
 The path is hard coded under kraken.config. Should be changed.
 
 2. Ingress
@@ -490,11 +505,11 @@ Currently It uses NodePort but seems it better to change to use IngressControlle
 Also proper configuration also required for config.yaml.
 
 #### Login from CLI
-Currently kubectl doens has feature like 'login'.
-This implementation on k2 is not convenient yet.
+Currently kubectl has a feature like 'login'.
+This implementation on Kraken is not convenient yet.
 Need to setting JWT token to kubectl manually.
 There is workaround script but not good so.
 Better reimplement DexApp and create a feature to kubecli to get auth token and set it given kubeconfig.
 
 #### Auto sync RBAC and LDAP
-When new LDAP objects is registerd, related user or group's RBAC resources should be created.
+When new LDAP objects is registered, related user or group's RBAC resources should be created.

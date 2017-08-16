@@ -35,7 +35,7 @@ ou: groups
 dn: cn=cnct,ou=groups,dc=local,dc=io
 cn: cnct
 gidnumber: 500
-memberuid: keyolk
+memberuid: <memberuid>
 objectclass: posixGroup
 objectclass: top
 
@@ -45,19 +45,19 @@ objectclass: organizationalUnit
 objectclass: top
 ou: users
 
-# Entry 6: uid=keyolk,ou=users,dc=local,dc=io
-dn: uid=keyolk,ou=users,dc=local,dc=io
-cn: keyolk
+# Entry 6: uid=<uid>,ou=users,dc=local,dc=io
+dn: uid=<uid>,ou=users,dc=local,dc=io
+cn: <cn>
 gidnumber: 500
-givenname: chanhun
-homedirectory: /home/keyolk
-mail: keyolk@gmail.com
-mobile: 010-6350-5811
+givenname: <name>
+homedirectory: /home/<username>
+mail:<your_email@_.com>
+mobile: <your_phone>
 objectclass: inetOrgPerson
 objectclass: top
 objectclass: posixAccount
 pager: cn=admin,dc=local,dc=io
-sn: keyolk
-uid: keyolk
+sn: <sn>
+uid: <uid>
 uidnumber: 1000
-userpassword: 9dnjf3dlf
+userpassword: <password>

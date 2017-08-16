@@ -1,13 +1,13 @@
 #!/bin/bash
 
-DEX_URI=https://auth.keyolk.cluster.io:30443
-DEX_CLIENT_REDIRECT_URI=http://auth.keyolk.cluster.io:30080/callback
+DEX_URI=https://auth.<cluster_name>.cluster.io:30443
+DEX_CLIENT_REDIRECT_URI=http://auth.<cluster_name>.cluster.io:30080/callback
 DEX_CLIENT_ID=example-app
 DEX_AUTH_CONNECTOR=ldap
-KUBE_CONFIG=~/.kraken/keyolk/admin.kubeconfig
-KUBE_CLUSTER=keyolk
-KUBE_NAMESPACE=cnct
-KUBE_USER=keyolk
+KUBE_CONFIG=~/.kraken/<username>/admin.kubeconfig
+KUBE_CLUSTER=<cluster_name>
+KUBE_NAMESPACE=<namespace>
+KUBE_USER=<username>
 
 request=/auth
 params="client_id=$DEX_CLIENT_ID"
