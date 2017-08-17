@@ -1,6 +1,9 @@
 // Configuration variables
 github_org             = "samsung-cnct"
 quay_org               = "samsung_cnct"
+publish_branch         = "master"
+image_tag              = "${env.RELEASE_VERSION}" ?: "latest"
+k2_tools_image_tag     = "${env.K2_TOOLS_VERSION}" ?: "latest"
 
 aws_cloud_test_timeout = 32  // Should be about 16 min (or longer due to etcd cluster health checks)
 gke_cloud_test_timeout = 60  // Should be about 4 min but can be as long as 50 for non-default versions
@@ -12,7 +15,7 @@ e2etester_version      = "0.2"
 custom_jnlp_version    = "0.1"
 
 jnlp_image             = "quay.io/${quay_org}/custom-jnlp:${custom_jnlp_version}"
-k2_tools_image         = "quay.io/${quay_org}/k2-tools:latest"
+k2_tools_image         = "quay.io/${quay_org}/k2-tools:${k2_tools_image_tag}"
 e2e_tester_image       = "quay.io/${quay_org}/e2etester:${e2etester_version}"
 docker_image           = "docker"
 
@@ -34,6 +37,7 @@ podTemplate(label: 'k2', containers: [
                 // retrieve the URI used for checking out the source
                 // this assumes one branch with one uri
                 git_uri = scm.getRepositories()[0].getURIs()[0].toString()
+                git_branch = scm.getBranches()[0].toString()
             }
 
             stage('Configure') {
@@ -43,6 +47,7 @@ podTemplate(label: 'k2', containers: [
                 kubesh 'mkdir -p cluster/gke'
                 kubesh 'cp ansible/roles/kraken.config/files/gke-config.yaml cluster/gke/config.yaml'
                 kubesh "build-scripts/update-generated-config.sh cluster/gke/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
+                kubesh "build-scripts/docker-update.sh ${k2_tools_image_tag} docker/Dockerfile"
             }
             // Dry Run Test
 
@@ -134,11 +139,11 @@ podTemplate(label: 'k2', containers: [
 
             //only push from master if we are on samsung-cnct fork
             stage('Publish') {
-                if (env.BRANCH_NAME == "master" && git_uri.contains(github_org)) {
-                    kubesh "docker tag quay.io/${quay_org}/k2:k2-${env.JOB_BASE_NAME}-${env.BUILD_ID} quay.io/${quay_org}/k2:latest"
-                    kubesh "docker push quay.io/${quay_org}/k2:latest"
+                if (git_branch.contains(publish_branch) && git_uri.contains(github_org)) {
+                    kubesh "docker tag quay.io/${quay_org}/k2:k2-${env.JOB_BASE_NAME}-${env.BUILD_ID} quay.io/${quay_org}/k2:${image_tag}"
+                    kubesh "docker push quay.io/${quay_org}/k2:${image_tag}"
                 } else {
-                    echo "Not pushing to docker repo:\n    BRANCH_NAME='${env.BRANCH_NAME}'\n    git_uri='${git_uri}'"
+                    echo "Not pushing to docker repo:\n    BRANCH_NAME='${env.BRANCH_NAME}'\n    GIT_BRANCH='${git_branch}'\n    git_uri='${git_uri}'"
                 }
                 
                 //  custom overall health notification
