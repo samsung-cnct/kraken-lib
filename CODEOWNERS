@@ -2,20 +2,16 @@
 # Each line is a file pattern followed by one or more owners.
 
 # These owners will be the default owners for everything in the repo.
-*       @coffeepac, @davidewatson, @mikeln, @dstorck, @leahnp, @yenicapotediaz,@guineveresaenger
+*       @coffeepac @davidewatson @mikeln @dstorck @leahnp @yenicapotediaz @guineveresaenger
 
 # Order is important. The last matching pattern has the most precedence.
-*/docs/              @davidewatson
-*/docker/            @coffeepac,@guineveresaenger
-*/schema/            @davidewatson,@coffeepac 
-*/build-scripts/     @coffeepac
-*/hack               @coffeepac,@joejulian
-*/lib                @joejulian
-*/sphinx/            @davidewatson
-*/hack/dockerdev     @joejulian
+/docs/              @davidewatson
+/docker/            @coffeepac @guineveresaenger
+/schema/            @davidewatson @coffeepac
+/build-scripts/     @coffeepac
+/hack/              @coffeepac @joejulian
+/lib/               @joejulian
+/sphinx/            @davidewatson
+/hack/dockerdev/    @joejulian
 
 #ansible directory should be broken up by role
-
-
-# You can also use email addresses if you prefer.
-#docs/*  docs@example.com
