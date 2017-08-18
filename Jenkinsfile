@@ -85,7 +85,9 @@ podTemplate(label: 'k2', containers: [
                     // This keeps the stage view from deleting prior history when the E2E test isn't run
                     if (err) {
                         stage('Test: E2E') {
-                            githubNotify context: "continuous-integration/jenkins/e2e", description: "This commit did not run e2e tests", status: "FAILURE"
+                            if (! git_branch.contains(publish_branch)) {
+                                githubNotify context: "continuous-integration/jenkins/e2e", description: "This commit did not run e2e tests", status: "FAILURE"
+                            }
                             echo 'E2E test not run due to stage failure.'
                         }
                         throw err
@@ -96,19 +98,15 @@ podTemplate(label: 'k2', containers: [
                         customContainer('e2e-tester') {
                             try {
                                 kubesh "PWD=`pwd` build-scripts/conformance-tests.sh ${e2e_kubernetes_version} ${env.JOB_BASE_NAME}-${env.BUILD_ID} /mnt/scratch"
-                                githubNotify context: "continuous-integration/jenkins/e2e", description: "This commit passed e2e tests", status: "SUCCESS"
+                                if (! git_branch.contains(publish_branch)) {
+                                    githubNotify context: "continuous-integration/jenkins/e2e", description: "This commit passed e2e tests", status: "SUCCESS"
+                                }
                             } catch (caughtError) {
-                                githubNotify context: "continuous-integration/jenkins/e2e", description: "This commit failed e2e tests", status: "FAILURE"
-                                //if (env.BRANCH_NAME == "master" && git_uri.contains(github_org)) {
-                                //    err = caughtError
-                                //} 
+                                if (! git_branch.contains(publish_branch)) {
+                                    githubNotify context: "continuous-integration/jenkins/e2e", description: "This commit failed e2e tests", status: "FAILURE"
+                                }
                             } finally {
-
-                                junit testResults: "output/artifacts/*.xml", healthScaleFactor: 0.0
-                                
-                                //if (err) {
-                                //    throw err
-                                //}
+                                junit testResults: "output/artifacts/*.xml", healthScaleFactor: 0.0                                
                             }
                         }
                     }
@@ -149,10 +147,12 @@ podTemplate(label: 'k2', containers: [
                 //  custom overall health notification
                 //  junit plugin will always set build to UNSTABLE if any tests (e2e) fail.  This will cause notificaiton to github
                 //  to be a big red X.  Send another one that 'if status is unstable, passed all but e2e'
-                if (currentBuild.result == "UNSTABLE" || currentBuild.result == null) {
-                    githubNotify context: "continuous-integration/jenkins/all-but-e2e", description: "This comit passed all phases of CI excluding e2e", status: "SUCCESS"
-                } else {
-                    githubNotify context: "continuous-integration/jenkins/all-but-e2e", description: "This comit failed some phase of CI except e2e", status: "FAILURE"
+                if (! git_branch.contains(publish_branch)) {
+                    if (currentBuild.result == "UNSTABLE" || currentBuild.result == null) {
+                        githubNotify context: "continuous-integration/jenkins/all-but-e2e", description: "This comit passed all phases of CI excluding e2e", status: "SUCCESS"
+                    } else {
+                        githubNotify context: "continuous-integration/jenkins/all-but-e2e", description: "This comit failed some phase of CI except e2e", status: "FAILURE"
+                    }
                 }
             }
         }
