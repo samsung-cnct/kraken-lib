@@ -42,18 +42,20 @@ class FilterModule(object):
 
     def current_node_count(self, config_path, nodepool_label):
         config.load_kube_config(config_file=config_path)
-        api_instance = kubernetes.client.CoreV1Api()
-        label_selector = 'nodepool=%s' % nodepool_label
+        count           = -1
+        api_instance    = kubernetes.client.CoreV1Api()
+        label_selector  = 'nodepool={}'.format(nodepool_label)
         timeout_seconds = 30
 
         try:
             time.sleep(10)
             api_response = api_instance.list_node(label_selector=label_selector, timeout_seconds=timeout_seconds)
             count = len(api_response.items)
-            return count
 
         except ApiException as e:
             print("Exception when calling CoreV1Api->list_node: %s\n" % e)
+
+        return count
 
     # delete and terminate node, then wait until node recreates itself by running a check on current node count versus expected node count
     # update this so that it tries to do each part, and breaks if any part fails with a good error message
@@ -71,6 +73,7 @@ class FilterModule(object):
             print "Terminating instance: " + instance_id
         except Exception:
             return False
+
         try:
             self.delete_node(node_name, kubeconfig)
             print "Deleting node: " + node_name
@@ -79,6 +82,7 @@ class FilterModule(object):
 
         current_count = int(self.current_node_count(kubeconfig, nodepool_label))
         print "Available Nodes: %s/%s" % (current_count, expected_count)
+
         while current_count != int(expected_count):
             print "Pausing for node creation"
             time.sleep(60)
