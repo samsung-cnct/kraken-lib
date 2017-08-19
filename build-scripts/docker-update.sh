@@ -9,7 +9,7 @@ set -x
 source_tag=$1
 dockerfile=$2
 
-if [ -n ${source_tag} && -n ${dockerfile}]; then
+if [ -n ${source_tag} && -n ${dockerfile} ] ; then
   sed -i -e "s/latest/${1}/" ${2}
 else 
   echo "missing parameters, make no changes"

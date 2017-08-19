@@ -2,7 +2,7 @@
 github_org             = "samsung-cnct"
 quay_org               = "samsung_cnct"
 publish_branch         = "master"
-image_tag              = "${env.RELEASE_VERSION}" ?: "latest"
+image_tag              = "${env.RELEASE_VERSION}" != "null" ? "${env.RELEASE_VERSION}" : "latest"
 k2_tools_image_tag     = "${env.K2_TOOLS_VERSION}" != "null" ? "${env.K2_TOOLS_VERSION}" : "latest"
 
 aws_cloud_test_timeout = 32  // Should be about 16 min (or longer due to etcd cluster health checks)
