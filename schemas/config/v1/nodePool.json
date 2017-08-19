@@ -12,6 +12,7 @@
     },
     "count": {
       "description": "Number of nodes in the nodePool.",
+      "minimum": 1,
       "type": "number"
     },
     "kvStoreConfig": { "$ref": "kvStoreConfig.json" },
