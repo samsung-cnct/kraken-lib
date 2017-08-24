@@ -6,6 +6,9 @@
 {% if cluster_node_tuple.1.etcdConfig.ssl == true %}
     After=kraken-ssl.service kraken-etcd-prediscovery.service
     Requires=kraken-ssl.service kraken-etcd-prediscovery.service
+{% else %}
+    After=kraken-etcd-prediscovery.service
+    Requires=kraken-etcd-prediscovery.service
 {% endif %}
 {% for mount in cluster_node_tuple.1.nodeConfig.mounts %}
     After={{mount.path | replace('/', '-') | replace('-', '', 1)}}.mount
