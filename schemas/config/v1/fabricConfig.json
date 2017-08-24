@@ -5,12 +5,9 @@
   "title": "Fabric Configuration",
   "description": "Describes the configuration of a network fabric for use with kubernetes.",
 
-  "properties": {
-    "oneOf": [
-      { "$ref": "canalFabricConfig.json" },
-      { "$ref": "weaveFabricConfig.json" },
-      { "$ref": "kubeVersionedFabric.json" }
-    ]
-  },
-  "type": "object"
+  "oneOf": [
+    { "$ref": "canalFabricConfig.json" },
+    { "$ref": "weaveFabricConfig.json" },
+    { "$ref": "kubeVersionedFabric.json" }
+  ]
 }

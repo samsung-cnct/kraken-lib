@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/weaveFabricConfig.json",
   "$$target": "weaveFabricConfig.json",
-  "title": "Weave Fabric",
+  "title": "Weave Fabric Configuration",
   "description": "Describes configuration of Weave network fabric.",
 
   "properties": {
@@ -12,7 +12,9 @@
     },
     "type": {
       "description": "The type of the fabric being used.",
-      "enum": [ "weave" ]
+      "enum": [ "weave" ],
+      "type": "string",
+      "default": "weave"
     },
     "options": { "$ref": "weaveFabricOptions.json" }
   },
