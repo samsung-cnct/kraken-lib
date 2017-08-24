@@ -8,10 +8,16 @@
   "properties": {
     "key": {
       "description": "Taint key which must match toleration",
+      "pattern": "^([A-Za-z0-9][A-Za-z0-9-._]*)?$",
+      "minLength": 0,
+      "maxLength": 253,
       "type": "string"
     },
     "value": {
       "description": "Taint value",
+      "pattern": "^([A-Za-z0-9]*[A-Za-z0-9-._]*)?$",
+      "minLength": 0,
+      "maxLength": 63,
       "type": "string"
     },
     "effect": {
