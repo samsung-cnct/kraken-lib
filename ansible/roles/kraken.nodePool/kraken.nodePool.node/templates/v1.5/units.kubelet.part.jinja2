@@ -42,7 +42,7 @@
       --exec=/hyperkube -- kubelet \
       --api_servers=https://apiserver.{{ cluster.name }}.internal \
       --register-node=true \
-      --node-labels=nodepool={{ node.name }}{% if node.nodeConfig.providerConfig.label is defined %},{% set comma = joiner(",") %}{% for label in node.nodeConfig.providerConfig.label  %}{{ comma() }}{{label.name}}={{label.value}}{% endfor %}{% endif %} \
+      --node-labels=nodepool={{ node.name }}{% if node.nodeConfig.providerConfig.label is defined %},{% set comma = joiner(",") %}{% for label in node.nodeConfig.providerConfig.label  %}{{ comma() }}{{ label.name }}={{ label.value }}{% endfor %}{% endif %} \
       --allow-privileged=true \
       --pod-manifest-path=/etc/kubernetes/manifests \
       --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
