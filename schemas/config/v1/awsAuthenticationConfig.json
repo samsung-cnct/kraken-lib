@@ -21,6 +21,10 @@
     "credentialsProfile": {
       "description": "The profile to use within the credentials file",
       "type": ["string", "null"]
+    },
+    "securityToken": {
+      "description": "The Session Token to use when access credentials are from temporary STS grants",
+      "type": ["string", "null"]
     }
   },
 

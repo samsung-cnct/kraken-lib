@@ -24,6 +24,7 @@
     region: "{{ cluster.providerConfig.region }}"
     aws_access_key: "{{ cluster.providerConfig.authentication.accessKey or omit }}"
     aws_secret_key: "{{ cluster.providerConfig.authentication.accessSecret or omit }}"
+    security_token: "{{ cluster.providerConfig.authentication.securityToken | default(omit) }}"
     profile: "{{ cluster.providerConfig.authentication.credentialsProfile or omit }}"
   register: instance_info
 
