@@ -1,0 +1,7 @@
+- name: sshd.socket
+  drop-ins:
+    - name: 10-sshd-port.conf
+      content: |
+        [Socket]
+        ListenStream=
+        ListenStream={{ node.bastionConfig.listenPort }}

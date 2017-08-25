@@ -7,6 +7,7 @@
     loop_var: cluster_node_tuple
   when: cluster_node_tuple.1.kubeConfig is defined
         and cluster_node_tuple.1.apiServerConfig is not defined
+        and cluster_node_tuple.1.bastionConfig is not defined
         and cluster_node_tuple.0.providerConfig.type == 'cloudinit'
 
 - include: render-kubeconfig.yaml
@@ -17,6 +18,7 @@
     loop_var: cluster_node_tuple
   when: cluster_node_tuple.1.kubeConfig is defined
         and cluster_node_tuple.1.apiServerConfig is not defined
+        and cluster_node_tuple.1.bastionConfig is not defined
         and cluster_node_tuple.0.providerConfig.type == 'cloudinit'
       
 - include: render-write-files.yaml
@@ -26,6 +28,7 @@
   loop_control:
     loop_var: cluster_node_tuple
   when: cluster_node_tuple.1.kubeConfig is defined
+        and cluster_node_tuple.1.bastionConfig is not defined
         and cluster_node_tuple.1.apiServerConfig is not defined
         and cluster_node_tuple.0.providerConfig.type == 'cloudinit'
 
@@ -36,5 +39,6 @@
   loop_control:
     loop_var: cluster_node_tuple
   when: cluster_node_tuple.1.kubeConfig is defined
+        and cluster_node_tuple.1.bastionConfig is not defined
         and cluster_node_tuple.1.apiServerConfig is not defined
         and cluster_node_tuple.0.providerConfig.type == 'cloudinit'

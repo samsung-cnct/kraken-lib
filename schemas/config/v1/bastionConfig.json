@@ -6,21 +6,10 @@
   "description": "Properties pertaining to a Bastion.",
 
   "properties": {
-    "name": {
-      "description": "Name of the Bastion configuration.",
-      "type": "string"
-    },
-    "kind": {
-      "description": "Type of bastionconfig",
-      "enum": ["bastion", "bastion-elb"],
-      "type": "string"
-    }
+    "oneOf": [
+      { "$ref": "bastionConfigSimple.json" },
+      { "$ref": "bastionConfigLoadBalanced.json" }
+    ]
   },
-
-  "required": [
-    "name",
-    "kind"
-  ],
-
   "type": "object"
 }

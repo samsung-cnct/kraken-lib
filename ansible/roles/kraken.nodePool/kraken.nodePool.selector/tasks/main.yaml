@@ -14,6 +14,10 @@
   include_role:
     name: '{{ playbook_dir }}/roles/kraken.nodePool/kraken.nodePool.node'
 
+- name: bastion nodePools
+  include_role:
+    name: '{{ playbook_dir }}/roles/kraken.nodePool/kraken.nodePool.bastion'
+
 - name: Check for Supported docker runtime.
   include_role:
     name: '{{ playbook_dir }}/roles/kraken.error'

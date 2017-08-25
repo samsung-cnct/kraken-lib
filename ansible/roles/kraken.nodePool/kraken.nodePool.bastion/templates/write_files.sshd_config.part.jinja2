@@ -1,0 +1,6 @@
+- path: /etc/ssh/sshd_config
+  owner: root
+  permissions: 0600
+  encoding: "gz+b64"
+  content: |
+    {{ lookup('file', '{{config_base}}/{{ cluster.name }}/bastion.sshd_config' | expanduser) | gz | b64encode }}

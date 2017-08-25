@@ -1,0 +1,224 @@
+# everything Bastion related
+
+variable "vpc_id" {}
+variable "cluster_name" {}
+
+{% for node in cluster.nodePools %}
+{% if node.bastionConfig is defined %}
+
+{% set bastion=node %}
+
+variable "bastion_key_name" {}
+
+{% for subnet in bastion.nodeConfig.providerConfig.subnet %}
+variable "{{subnet}}_subnet_id" {}
+{% endfor %}
+
+{% if bastion.bastionConfig.loadBalancerConfigs is defined %}
+{% for subnet in bastion.bastionConfig.loadBalancerConfigs.subnet %}
+variable "elb_{{subnet}}_subnet_id" {}
+{% endfor %}
+{% endif %}
+
+# information on CoreOS AMIs for node nodepools
+resource "coreosbox_ami" "{{node.name}}_ami" {
+  channel        = "{{bastion.osConfig.channel}}"
+  virtualization = "hvm"
+  region         = "{{cluster.providerConfig.region}}"
+  version        = "{{bastion.osConfig.version}}"
+}
+
+resource "aws_security_group" "vpc_{{bastion.name}}_secgroup" {
+  name        = "${var.cluster_name}_{{node.name}}_secgroup"
+  description = "Security group for ${var.cluster_name} {{bastion.name}}(s)"
+  vpc_id      = "${var.vpc_id}"
+
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Allow SSH
+  ingress {
+    from_port = "{{bastion.bastionConfig.listenPort}}"
+    to_port = "{{bastion.bastionConfig.listenPort}}"
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    self = true
+  }
+}
+
+resource "aws_launch_configuration" "bastion_launch_config" {
+  name_prefix                 = "${var.cluster_name}_bastion"
+  image_id                    = "${coreosbox_ami.{{node.name}}_ami.box_string}"
+  key_name                    = "${var.bastion_key_name}"
+  instance_type               = "{{bastion.nodeConfig.providerConfig.type}}"
+  security_groups             = ["${aws_security_group.vpc_{{bastion.name}}_secgroup.id}"]
+
+  # Will override subnets configuration.
+  {% if bastion.nodeConfig.providerConfig.enablePublicIPs is defined %}
+  associate_public_ip_address = "{{bastion.nodeConfig.providerConfig.enablePublicIPs}}"
+  {% else %}
+  associate_public_ip_address = true
+  {% endif %}
+
+  user_data                   = "${file("{{ config_base | expanduser }}/{{cluster.name}}/cloud-config/{{bastion.name}}.cloud-config.yaml")}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  # No storage
+}
+
+resource "aws_autoscaling_group" "bastion_nodes" {
+  name                      = "${var.cluster_name}_bastion_asg"
+  vpc_zone_identifier       = [{% set comma = joiner(",") %}{% for subnet in bastion.nodeConfig.providerConfig.subnet %}{{ comma() }}"${var.{{subnet}}_subnet_id}"{% endfor %}]
+  launch_configuration      = "${aws_launch_configuration.{{node.name}}_launch_config.name}"
+  wait_for_capacity_timeout = "0"
+  force_delete              = true
+  health_check_grace_period = "30"
+  max_size                  = "{{bastion.count}}"
+  min_size                  = "{{bastion.count}}"
+  desired_capacity          = "{{bastion.count}}"
+  {% if (bastion.bastionConfig.kind == 'bastion-elb') and (bastion.bastionConfig.loadBalancer == 'cloud') %}
+    wait_for_elb_capacity     =  "{{bastion.count}}"
+    load_balancers            = ["${aws_elb.bastion_elb.name}"]
+  {% endif %}
+  {% if (bastion.bastionConfig.kind == 'bastion-elb') and (bastion.bastionConfig.loadBalancer == 'cloud') %}
+    health_check_type         = "ELB"
+  {% else %}
+    health_check_type         = "EC2"
+  {% endif %}
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  tag {
+    key                 = "Name"
+    value               = "${var.cluster_name}_{{bastion.name}}_node-autoscaled"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "k2-nodepool"
+    value               = "{{bastion.name}}"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "KubernetesCluster"
+    value               = "${var.cluster_name}"
+    propagate_at_launch = true
+  }
+
+{% for tag in bastion.nodeConfig.providerConfig.tags %}
+  tag {
+    key                 = "{{tag.key}}"
+    value               = "{{tag.value}}"
+    propagate_at_launch = true
+  }
+{% endfor %}
+}
+
+## ** Load Balancer Definitions Start **
+# if bastions are load-balanced with a cloud loadbalancer, we need to define an ELB and a IAM cert to use for SSL
+{% if (bastion.bastionConfig.kind == 'bastion-elb') and (bastion.bastionConfig.loadBalancer == 'cloud') %}
+
+resource "aws_elb" "bastion_elb" {
+  name = "${var.cluster_name}-bastion-elb"
+  cross_zone_load_balancing = true
+  {% if node.bastionConfig.loadBalancerConfigs is defined %}
+  subnets = [{% set comma = joiner(",") %}{% for subnet in bastion.bastionConfig.loadBalancerConfigs.subnet %}{{ comma() }}"${var.elb_{{subnet}}_subnet_id}"{% endfor %}]
+  {% else %}
+  subnets = [{% set comma = joiner(",") %}{% for subnet in bastion.nodeConfig.providerConfig.subnet %}{{ comma() }}"${var.{{subnet}}_subnet_id}"{% endfor %}]
+  {% endif %}
+
+  security_groups = ["${aws_security_group.vpc_{{bastion.name}}_secgroup.id}"]
+
+  listener {
+    instance_port = "{{bastion.bastionConfig.listenPort}}"
+    instance_protocol = "tcp"
+    lb_port = "{{bastion.bastionConfig.listenPort}}"
+    lb_protocol = "tcp"
+  }
+
+  health_check {
+    healthy_threshold = 2
+    unhealthy_threshold = 10
+    timeout = 2
+    target = "TCP:{{bastion.bastionConfig.listenPort}}"
+    interval = 5
+  }
+
+  tags {
+    Name = "${var.cluster_name}_bastion_elb",
+    KubernetesCluster = "${var.cluster_name}"
+  }
+}
+
+{% endif %}
+
+
+{% if (bastion.bastionConfig.kind == 'bastion-elb') and (bastion.bastionConfig.loadBalancer == 'flipbit') %}
+
+# Launch configuration for bastion loadbalancer
+resource "aws_launch_configuration" "bastion_loadbalancer_launch_config" {
+  name_prefix                 = "${var.cluster_name}_loadbalancer"
+  image_id                    = "${coreosbox_ami.bastion_ami.box_string}"
+  key_name                    = "${var.bastion_key_name}"
+  instance_type               = "{{bastion.nodeConfig.providerConfig.type}}"
+  security_groups             = ["${aws_security_group.vpc_{{bastion.name}}_secgroup.id}"]
+
+  # Will override subnets configuration.
+  {% if bastion.nodeConfig.providerConfig.enablePublicIPs is defined %}
+  associate_public_ip_address = "{{bastion.nodeConfig.providerConfig.enablePublicIPs}}"
+  {% else %}
+  associate_public_ip_address = true
+  {% endif %}
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  user_data                   = ""
+}
+
+# Autoscaling group for bastion loadbalancer.
+resource "aws_autoscaling_group" "bastion_loadbalancer_nodes" {
+  name                      = "${var.cluster_name}_bastion_loadbalancer_asg"
+  vpc_zone_identifier       = [{% set comma = joiner(",") %}{% for subnet in bastion.nodeConfig.providerConfig.subnet %}{{ comma() }}"${var.{{subnet}}_subnet_id}"{% endfor %}]
+  launch_configuration      = "${aws_launch_configuration.bastion_loadbalancer_launch_config.name}"
+  wait_for_capacity_timeout = "0"
+  force_delete              = true
+  health_check_grace_period = "30"
+  max_size                  = "1"
+  min_size                  = "1"
+  desired_capacity          = "1"
+  health_check_type         = "EC2"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  tag {
+    key                 = "Name"
+    value               = "${var.cluster_name}_bastion_loadbalancer"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "KubernetesCluster"
+    value               = "${var.cluster_name}"
+    propagate_at_launch = true
+  }
+}
+{% endif %}
+
+
+{% endif %}
+{% endfor %}
+

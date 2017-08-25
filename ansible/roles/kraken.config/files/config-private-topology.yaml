@@ -150,6 +150,8 @@ definitions:
       name: defaultApiServer
       kind: apiServer
       loadBalancer: cloud
+      loadBalancerConfigs:
+        subnet: ["zone-1-public", "zone-2-public", "zone-3-public"]
       state:
         etcd: *defaultEtcd
       events:
@@ -159,6 +161,15 @@ definitions:
     - &defaultBastion
       name: defaultBastion
       kind: bastion
+      listenPort: 22
+
+    - &defaultLoadBalancedBastion
+      name: defaultLoadBalancedBastion
+      kind: bastion-elb
+      listenPort: 22
+      loadBalancer: cloud
+      loadBalancerConfigs:
+        subnet: ["zone-1-public", "zone-2-public", "zone-3-public"]
 
   kubeConfigs:
     - &defaultKube
@@ -224,6 +235,7 @@ definitions:
               delete_on_termination: true
               snapshot_id:
               encrypted: false
+
     - &defaultAwsEtcdEventsNode
       name: defaultAwsEtcdEventsNode
       kind: node
@@ -264,6 +276,7 @@ definitions:
               delete_on_termination: true
               snapshot_id:
               encrypted: false
+
     - &defaultAwsMasterNode
       name: defaultAwsMasterNode
       kind: node
@@ -291,6 +304,7 @@ definitions:
               delete_on_termination: true
               snapshot_id:
               encrypted: false
+
     - &defaultAwsClusterNode
       name: defaultAwsClusterNode
       kind: node
@@ -318,6 +332,7 @@ definitions:
               delete_on_termination: true
               snapshot_id:
               encrypted: false
+
     - &defaultAwsSpecialNode
       name: defaultAwsSpecialNode
       kind: node
@@ -346,6 +361,7 @@ definitions:
               delete_on_termination: true
               snapshot_id:
               encrypted: false
+
     - &defaultAWSBastionNode
       name: defaultAWSBastionNode
       kind: node
@@ -365,6 +381,7 @@ definitions:
       kind: provider
       provider: aws
       type: cloudinit
+      networkTopology: private
       resourcePrefix:
       vpc: 10.0.0.0/16
       region: us-east-1

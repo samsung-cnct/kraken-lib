@@ -1,0 +1,9 @@
+ClientAliveInterval 180
+UseDNS no
+UsePAM yes
+PrintLastLog no # handled by PAM
+PrintMotd no # handled by PAM
+PermitRootLogin no
+AllowUsers core
+AuthenticationMethods publickey
+Port {{ node.bastionConfig.listenPort }}

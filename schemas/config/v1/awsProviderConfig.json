@@ -25,6 +25,12 @@
       "enum": [ "cloudinit" ],
       "type": "string"
     },
+    "networkTopology": {
+      "description": "Type of network topology to create, care must be taken as you need pairs of subnets in a private topology.",
+      "enum": [ "public", "private" ],
+      "type": "string",
+      "default": "public"
+    },
     "resourcePrefix": {
       "description": "Any prefix that should be prepended to resources in AWS to make them easier to identify.",
       "type": [ "string", "null" ]

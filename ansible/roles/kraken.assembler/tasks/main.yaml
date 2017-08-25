@@ -2,7 +2,7 @@
 #   top level task to loop over all clusters in the cluster list
 #   its a bit weird but its the cleanest way to do it, I think
 - name: Loop over all clusters to generate all cloud-configs for each
-  include: node.yaml
+  include: nodes.yaml
   with_items:
     - "{{ kraken_config.clusters }}"
   loop_control:

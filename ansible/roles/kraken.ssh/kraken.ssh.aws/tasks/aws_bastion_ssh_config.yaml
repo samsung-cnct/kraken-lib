@@ -5,12 +5,12 @@
   register: os_type
   with_items: "{{ cluster.nodePools }}"
   when:
-     - item.bastionConfig is defined
+    - item.bastionConfig is defined
 
 - name: Generate bastion ssh inventory
   template:
-    src=bastion_ssh_config.jinja2
-    dest="{{ config_base | expanduser }}/{{ cluster.name }}/bastion_ssh_config"
+    src: bastion_ssh_config.jinja2
+    dest: "{{ config_base | expanduser }}/{{ cluster.name }}/bastion_ssh_config"
 
 - name: Create a list of bastion host names
   set_fact:

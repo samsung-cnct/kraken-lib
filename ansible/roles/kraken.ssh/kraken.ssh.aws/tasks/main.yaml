@@ -3,6 +3,28 @@
   set_fact:
     cluster: "{{ a_cluster }}"
 
+- name: Check bastion kind if bastion config found
+  set_fact:
+    bastionKind: "{{ item.bastionConfig.kind }}"
+  with_items: "{{ cluster.nodePools }}"
+  when: item.bastionConfig is defined
+  register: bastionKind
+
+- name: Check bastion ssh port
+  set_fact:
+    bastionListenPort: "{{ item.bastionConfig.listenPort }}"
+  with_items: "{{ cluster.nodePools }}"
+  when: item.bastionConfig is defined
+  register: bastionListenPort
+
+- name: Get bastion loadbalancer if bastion config found
+  ec2_elb_facts:
+    names: "{{ cluster.name }}-bastion-elb"
+  register: elb_facts
+  when:
+    - bastionKind is defined
+    - bastionKind == 'bastion-elb'
+
 # because BOTO2 doesn't support AWS_SHARED_CREDENTIALS_FILE environment variable, do some mangling
 - include: aws_config.yaml
   when: cluster.providerConfig.provider == 'aws'
@@ -39,4 +61,4 @@
   register: bastion_results
 
 - include: aws_bastion_ssh_config.yaml
-  when:  bastion_results.instances | length > 0
+  when: bastion_results.instances | length > 0

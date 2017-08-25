@@ -22,3 +22,4 @@
   template: src=write_files.cert-authority.part.jinja2
             dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ item.name }}.write_files.cert-authority.part"
   with_items: "{{ cluster.nodePools }}"
+  when: item.bastionConfig is not defined

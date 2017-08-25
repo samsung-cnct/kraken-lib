@@ -9,3 +9,4 @@
   template: src=locksmith.part.jinja2
             dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ item.name }}.locksmith.part"
   with_items: "{{ cluster.nodePools }}"
+  when: item.bastionConfig is not defined

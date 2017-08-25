@@ -17,6 +17,7 @@
     - etcd
     - master
     - node
+    - bastion
 
 - name: Generate kraken.provider.aws.tf file
   template: src=kraken.provider.aws.tf.jinja2
@@ -34,3 +35,4 @@
     - { source: kraken.provider.aws.module.etcd.tf.jinja2, dest: etcd }
     - { source: kraken.provider.aws.module.master.tf.jinja2, dest: master }
     - { source: kraken.provider.aws.module.node.tf.jinja2, dest: node }
+    - { source: kraken.provider.aws.module.bastion.tf.jinja2, dest: bastion }

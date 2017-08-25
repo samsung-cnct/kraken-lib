@@ -100,19 +100,44 @@ module "node" {
   vpc_id = "${module.vpc.id}"
   nodes_name = "{{cluster.name}}"
 {% for node in cluster.nodePools %}
-{% if node.etcdConfig is not defined and node.apiServerConfig is not defined %}
+{% if node.etcdConfig is not defined and node.apiServerConfig is not defined and node.bastionConfig is not defined %}
   {{node.keyPair.name}}_{{node.name}}_key = "${module.keypair.{{node.keyPair.name}}_keyname}"
 {% endif %}
 {% endfor %}
 
   kubernetes_sec_group = "${module.cluster_secgroup.id}"
 {% for node in cluster.nodePools %}
-{% if node.etcdConfig is not defined and node.apiServerConfig is not defined %}
+{% if node.etcdConfig is not defined and node.apiServerConfig is not defined and node.bastionConfig is not defined %}
 {% for subnet in node.nodeConfig.providerConfig.subnet %}
   {{subnet}}_{{node.name}}_subnet_id = "${module.subnet.{{subnet}}_subnet_id}"
 {% endfor %}
 {% endif %}
 {% endfor %}
+}
+
+module "bastion" {
+  source = "./bastion"
+  vpc_id = "${module.vpc.id}"
+  cluster_name = "{{cluster.name}}"
+
+{% for node in cluster.nodePools %}
+{% if node.bastionConfig is defined %}
+
+  bastion_key_name = "${module.keypair.{{node.keyPair.name}}_keyname}"
+
+{% for subnet in node.nodeConfig.providerConfig.subnet %}
+  {{subnet}}_subnet_id = "${module.subnet.{{subnet}}_subnet_id}"
+{% endfor %}
+
+{% if node.bastionConfig.loadBalancerConfigs is defined %}
+  {% for subnet in node.bastionConfig.loadBalancerConfigs.subnet %}
+  elb_{{subnet}}_subnet_id = "${module.subnet.{{subnet}}_subnet_id}"
+  {% endfor %}
+{% endif %}
+
+{% endif %}
+{% endfor %}
+
 }
 
 output "kraken_endpoint" {
@@ -122,3 +147,4 @@ output "kraken_endpoint" {
 output "kraken_private_zone_id" {
   value = "${module.route53.route53_zone_id}"
 }
+
