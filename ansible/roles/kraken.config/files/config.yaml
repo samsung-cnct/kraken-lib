@@ -131,8 +131,8 @@ definitions:
       name: etcd
       kind: kvStore
       type: etcd
+      uuidToken: true
       clientPorts: [2379, 4001]
-      clusterToken: espouse-monger-rarely
       peerPorts: [2380]
       ssl: true
       version: v3.2.5
@@ -140,8 +140,8 @@ definitions:
       name: etcdEvents
       kind: kvStore
       type: etcd
+      uuidToken: true
       clientPorts: [2381]
-      clusterToken: animism-training-chastity
       peerPorts: [2382]
       ssl: true
       version: v3.2.5

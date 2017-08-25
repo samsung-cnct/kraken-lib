@@ -1,29 +1,6 @@
 ---
-- name: Generate etcd .units.etcd-prediscovery.part files
-  template: src=etcd.units.etcd-prediscovery.part.jinja2
-            dest="{{ config_base | expanduser }}/{{ cluster_node_tuple.0.name }}/{{ cluster_node_tuple.1.name }}.units.etcd-prediscovery.part"
-  with_subelements:
-    - "{{ kraken_config.clusters }}"
-    - nodePools
-  loop_control:
-    loop_var: cluster_node_tuple
-  when: cluster_node_tuple.1.etcdConfig is defined
-        and cluster_node_tuple.0.providerConfig.type == 'cloudinit'
-
-- name: Generate etcd .units.etcd.part files
-  template: src=etcd.units.etcd.part.jinja2
-            dest="{{ config_base | expanduser }}/{{ cluster_node_tuple.0.name }}/{{ cluster_node_tuple.1.name }}.units.etcd.part"
-  with_subelements:
-    - "{{ kraken_config.clusters }}"
-    - nodePools
-  loop_control:
-    loop_var: cluster_node_tuple
-  when: cluster_node_tuple.1.etcdConfig is defined
-        and cluster_node_tuple.0.providerConfig.type == 'cloudinit'
-
-- name: Generate kraken-ssl .units.etcd.part files
-  template: src=etcd.units.kraken-etcd-ssl.part.jinja2
-            dest="{{ config_base | expanduser }}/{{ cluster_node_tuple.0.name }}/{{ cluster_node_tuple.1.name }}.units.kraken-etcd-ssl.part"
+- name: Generate etcd unit files from templates
+  include: template-etcd.yaml
   with_subelements:
     - "{{ kraken_config.clusters }}"
     - nodePools
