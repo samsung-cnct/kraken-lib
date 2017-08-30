@@ -1,6 +1,6 @@
 # KubeAuth
 
-Authorization stanza. This is under active development both in Kraken and in kubernetes as a whole.  As of Kubernetes 1.6 rbac will be required. 
+Authorization stanza. This is under active development both in kraken-lib and in kubernetes as a whole.  As of Kubernetes 1.6 rbac will be required. 
 
 ## Options
 ### Root Options

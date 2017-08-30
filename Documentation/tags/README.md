@@ -2,9 +2,9 @@
 
 ## Usage
 
-User can use certain part of ansible roles under /k2/roles directory through tags. To use tags with commands, user should set environment variable ( $KRAKEN_TAGS ) for the session bash executes those commands .
+User can use certain part of ansible roles under /Kraken/roles directory through tags. To use tags with commands, user should set environment variable ( $KRAKEN_TAGS ) for the session bash executes those commands .
 
-### Run with tag through K2 image
+### Run with tag through kraken-lib image
 
 User should set an env variable for tag inside of the container that executes a command.
 For exmple. if you can set  $KRAKEN_TAGS as 'dryrun' to run shell script without spinning up actual cluster
@@ -27,7 +27,7 @@ User are also able to use **multiple tags** using delimeter : ','
 $ docker run $K2OPTS -e KRAKEN_TAGS="fabric_only,services_only" quay.io/samsung_cnct/k2:latest ./bin/up.sh --config $HOME/.kraken/${CLUSTER}.yaml
 ```
 
-### Run with tags through K2-tools image for using local k2 repository
+### Run with tags through Kraken-tools image for using local Kraken repository
 Like example above, you can set  $KRAKEN_TAGS as 'dryrun' to run shell script without spinning up
 clusters
 

@@ -1,6 +1,6 @@
 # Developer documentation
 
-This document summarizes information relevant to K2 committers and contributors.  It includes information about
+This document summarizes information relevant to kraken-lib committers and contributors.  It includes information about
 the development processes and policies as well as the tools we use to facilitate those.
 
 ---
@@ -26,7 +26,7 @@ Table of Contents
 
 # Welcome!
 
-If you are reading this document then you are interested in contributing to the K2 project -- many thanks for that!
+If you are reading this document then you are interested in contributing to the kraken-lib project -- many thanks for that!
 All contributions are welcome: ideas, documentation, code, patches, bug reports, feature requests, etc.  And you do not
 need to be a programmer to speak up.
 
@@ -46,7 +46,7 @@ then click on the "New Issue" button.
 
 In order to help us understand and fix the bug it would be great if you could provide us with:
 
-1. The steps to reproduce the bug.  This includes information about e.g. the K2 version you were using.
+1. The steps to reproduce the bug.  This includes information about e.g. the kraken-lib version you were using.
 2. The expected behavior.
 3. The actual, incorrect behavior.
 
@@ -71,9 +71,9 @@ log in, and then click on the "New Issue" button.
 
 ## Contribute code
 
-Before you set out to contribute code we recommend that you familiarize yourself with the K2 codebase.
+Before you set out to contribute code we recommend that you familiarize yourself with the kraken-lib codebase.
 
-_If you are interested in contributing code to K2 but do not know where to begin:_
+_If you are interested in contributing code to kraken-lib but do not know where to begin:_
 In this case you should
 [browse our issue tracker for open issues and tasks](https://github.com/samsung-cnct/k2/issues).
 You may want to start with beginner-friendly, easier issues
@@ -82,7 +82,7 @@ because they require learning about only an isolated portion of the codebase and
 
 Please install [pre-commit](http://pre-commit.com/) to check your code against the ansible linter.
 
-Contributions to the K2 codebase should be sent as GitHub pull requests.  See section _Create a pull request_ below
+Contributions to the kraken-lib codebase should be sent as GitHub pull requests.  See section _Create a pull request_ below
 for details.  If there is any problem with the pull request we can iterate on it using the commenting features of
 GitHub.
 
@@ -95,27 +95,27 @@ GitHub.
        issue.
     2. Comment on the issue with your plan for implementing the issue.  Explain what pieces of the codebase you are
        going to touch and how everything is going to fit together.
-    3. K2 committers will iterate with you on the design to make sure you are on the right track.
+    3. kraken-lib committers will iterate with you on the design to make sure you are on the right track.
     4. Implement your issue, create a pull request (see below), and iterate from there.
 
 
 ### Recommended Dev Tooling 
-The recommended K2 Developer Tool can be accessed in the `/hack` directory and is called `dockerdev`, a tool that pulls down a  [k2-tools](https://github.com/samsung-cnct/k2-tools) image. 
-The container will provide you with a console that contains the correct environment for developing and running k2. The intent is to mitigate version issues and 
+The recommended kraken-lib Developer Tool can be accessed in the `/hack` directory and is called `dockerdev`, a tool that pulls down a  [Kraken-tools](https://github.com/samsung-cnct/k2-tools) image. 
+The container will provide you with a console that contains the correct environment for developing and running kraken-lib. The intent is to mitigate version issues and 
 requirements, allowing you the Developer to focus on coding and not worry on dependencies.
 
-#### Developer Workflow with K2-Tools
-Here we document how a developer would use k2-tools to work with a cluster.
+#### Developer Workflow with Kraken-Tools
+Here we document how a developer would use Kraken-tools to work with a cluster.
 
 ##### Assumptions
-* You have used either K2 or k2cli to generate a config file.
-* You have pulled the latest k2 master branch on your machine, and are working on a fork. 
+* You have used either kraken-lib or Kraken to generate a config file.
+* You have pulled the latest kraken-lib master branch on your machine, and are working on a fork. 
 
 ```
 docker pull quay.io/samsung_cnct/k2-tools
 ```
 
-* You are currently on the your local k2 github fork directory
+* You are currently on the your local kraken-lib github fork directory
 
 ##### Steps
 * Generate latest configuration file, for example:
@@ -124,20 +124,20 @@ docker pull quay.io/samsung_cnct/k2-tools
 k2cli generate
 ```
 
-* Next we should create a docker container that points to you (and mount your k2 workspace) cluster config (generated earlier)
+* Next we should create a docker container that points to you (and mount your kraken-lib workspace) cluster config (generated earlier)
 
 ```
 hack/dockerdev -c <PATH_TO_CONFIGS>/<YOUR_CONFIG>.yaml
 ```
 
 * After some time, you will be in the bash terminal of the container, bring up your cluster
-as you would normally when developing k2 (including any flags you require).:
+as you would normally when developing kraken-lib (including any flags you require).:
 
 ```
 /bin/up.sh -c <PATH_TO_CONFIGS>/<YOUR_CONFIG>.yaml
 ```
 
-At this point since you have mounted your workspace, you should be able to make changes to k2 here and even access git commands.
+At this point since you have mounted your workspace, you should be able to make changes to kraken-lib here and even access git commands.
 
 ### Testing
 
@@ -170,16 +170,16 @@ pull request, add a comment explaining that.
 Take a look at [Creating a pull request](https://help.github.com/articles/creating-a-pull-request).  In a nutshell you
 need to:
 
-1. [Fork](https://help.github.com/articles/fork-a-repo) the K2 GitHub repository at
+1. [Fork](https://help.github.com/articles/fork-a-repo) the kraken-lib GitHub repository at
    [https://github.com/samsung-cnct/k2/](https://github.com/samsung-cnct/k2/) to your personal GitHub
    account.  See [Fork a repo](https://help.github.com/articles/fork-a-repo) for detailed instructions.
 2. Commit any changes to your fork.
-3. Send a [pull request](https://help.github.com/articles/creating-a-pull-request) to the K2 GitHub repository
-   that you forked in step 1.  If your pull request is related to an existing K2 issue -- for instance, because
+3. Send a [pull request](https://help.github.com/articles/creating-a-pull-request) to the kraken-lib GitHub repository
+   that you forked in step 1.  If your pull request is related to an existing kraken-lib issue -- for instance, because
    you reported a bug report earlier -- then mention that your pull request `fixes #123` in the description.
 
 You may want to read [Syncing a fork](https://help.github.com/articles/syncing-a-fork) for instructions on how to keep
-your fork up to date with the latest changes of the upstream (official) `K2` repository.
+your fork up to date with the latest changes of the upstream (official) `kraken-lib` repository.
 
 
 <a name="approve-pull-request"></a>

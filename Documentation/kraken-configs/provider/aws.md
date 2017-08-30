@@ -27,9 +27,9 @@
 | route_table_id | __Required__ | String | id of a route table in the linked VPC |
 | default_security_group_id | __Required__ | String | id of the default security group for the linked VPC |
 
-It is important to note that K2 will not auto-detect any existing networking infrastructure in the VPC.  K2 assumes
+It is important to note that kraken-lib will not auto-detect any existing networking infrastructure in the VPC.  kraken-lib assumes
 that you have configured things correctly and will throw an error on a resource conflict.  The listed route_table_id
-must have a valid route to an internet gateway.  K2 has each node pull images from public repositories.  
+must have a valid route to an internet gateway.  kraken-lib has each node pull images from public repositories.  
 
 ## subnets options
 | Key Name | Required     | Type   | Description|

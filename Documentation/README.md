@@ -2,7 +2,7 @@
 
 ## Kraken Configuration File Format
 
-Kraken configuration is done through a yaml file, and is broken up into two sections.  The top of the file will contain the definitions of the component stanzas and the bottom of the file will contain a list of clusters which are composed of the component stanzas.
+kraken-lib configuration is done through a yaml file, and is broken up into two sections.  The top of the file will contain the definitions of the component stanzas and the bottom of the file will contain a list of clusters which are composed of the component stanzas.
 
 ### Definitions
 

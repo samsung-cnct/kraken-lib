@@ -10,8 +10,8 @@ Example version notation: when Kubernetes releases 1.7, `N` means `v1.7`, while 
 
 For each new release `N` of Kubernetes, we should:
 
-1. Ensure that [k2-tools][1] is upgraded accordingly, to include `N`, `N-1`, and `N-2` binaries. Support for `N-3` will be removed.
-2. Copy the K2 default configuration to a directory `N-1`, representing functional configuration of the previous release-version.
+1. Ensure that [Kraken-tools][1] is upgraded accordingly, to include `N`, `N-1`, and `N-2` binaries. Support for `N-3` will be removed.
+2. Copy the kraken-lib default configuration to a directory `N-1`, representing functional configuration of the previous release-version.
 3. [Update the cluster configuration templates](#updating-cluster-configuration) as below.
 4. Test creation of clusters of `N` and `N-1` to confirm functional configurations.
 5. Remove references to the `N-3` version, as it's no longer within our support policy pending adoption of the newly released version.

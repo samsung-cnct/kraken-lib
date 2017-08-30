@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# k2 documentation build configuration file, created by
+# Kraken documentation build configuration file, created by
 # sphinx-quickstart on Wed Jun 14 10:39:41 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -50,7 +50,7 @@ source_suffix = ['.rst', '.md']
 master_doc = 'index'
 
 # General information about the project.
-project = u'k2'
+project = u'Kraken'
 copyright = u'2017, Samsung CNCT'
 author = u'Samsung CNCT'
 
@@ -100,12 +100,12 @@ html_theme = 'alabaster'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
-html_logo = './k2.png'
+html_logo = './Kraken.png'
 
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'k2doc'
+htmlhelp_basename = 'Krakendoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -132,7 +132,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'k2.tex', u'k2 Documentation',
+    (master_doc, 'Kraken.tex', u'Kraken Documentation',
      u'Samsung CNCT', 'manual'),
 ]
 
@@ -142,7 +142,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'k2', u'k2 Documentation',
+    (master_doc, 'Kraken', u'Kraken Documentation',
      [author], 1)
 ]
 
@@ -153,8 +153,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'k2', u'k2 Documentation',
-     author, 'k2', 'One line description of project.',
+    (master_doc, 'Kraken', u'Kraken Documentation',
+     author, 'Kraken', 'One line description of project.',
      'Miscellaneous'),
 ]
 

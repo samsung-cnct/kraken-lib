@@ -15,7 +15,7 @@ The basis of this doc was shamelessly swiped from the puppet repo.
 
 ### Looking for an easy way to get started? ###
 We label easy to complete issues as 'Help Wanted'.  These issues require minimal
-context for Kraken2 and shouldn't require too much time.  If you do start working
+context for kraken-lib and shouldn't require too much time.  If you do start working
 on one of these let us know by assigning this issue to yourself or commenting on
 the issue so we can prevent multiple people working on it and help you out.
 
@@ -61,7 +61,7 @@ a ticket number.
     [doc] Add documentation commit example to CONTRIBUTING
 
     There is no example for contributing a documentation commit
-    to the Kraken2 repository. This is a problem because the contributor
+    to the kraken-lib repository. This is a problem because the contributor
     is left to assume how a commit of this nature may appear.
 
     The first line is a real life imperative statement with '(doc)' in

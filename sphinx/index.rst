@@ -1,9 +1,9 @@
-.. k2 documentation master file, created by
+.. Kraken documentation master file, created by
    sphinx-quickstart on Wed Jun 14 10:39:41 2017.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to k2's config file  documentation!
+Welcome to Kraken's config file  documentation!
 ==============================
 
 .. jsonschema:: ../schemas/config/v1/apiServerConfig.json
