@@ -1,4 +1,26 @@
 ---
+# Module dependencies are recurive as of terraform 0.10.x.
+# See: https://github.com/hashicorp/terraform/pull/9236
+- set_fact:
+    tf_modules:
+      - vpc
+      - route53
+      - keypair
+      - subnet
+      - cluster_secgroup
+      - bastion
+      - etcd
+      - master
+      - node
+
+- set_fact:
+    tf_etcd_modules: "{{ tf_modules | difference(['master', 'node']) }}"
+    tf_k8s_modules: "{{ tf_modules | difference(['etcd']) }}"
+
+- set_fact:
+    tf_etcd_targets: "{% for module in tf_etcd_modules %} -target module.{{ module }}{{ ' ' if not loop.last else '' }}{% endfor %}"
+    tf_k8s_targets: "{% for module in tf_k8s_modules %} -target module.{{ module }}{{ ' ' if not loop.last else '' }}{% endfor %}"
+
 - name:
   set_fact:
     cluster: "{{ a_cluster }}"

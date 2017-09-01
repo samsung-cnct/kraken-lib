@@ -1,18 +1,4 @@
 ---
-# Module dependencies are recurive as of terraform 0.10.x.
-# See: https://github.com/hashicorp/terraform/pull/9236
-- set_fact:
-    terraform_etcd_modules:
-      - vpc
-      - route53
-      - keypair
-      - subnet
-      - cluster_secgroup
-      - etcd
-
-- set_fact:
-    terraform_etcd_targets: "{% for module in terraform_etcd_modules %} -target module.{{ module }}{{ ' ' if not loop.last else '' }}{% endfor %}"
-
 - name: Get terraform modules
   command: >
     terraform get -no-color -update=true
@@ -21,7 +7,7 @@
 
 - name: Plan terraform configuration for current state of etcd
   command: >
-    terraform plan {{ terraform_etcd_targets }} -input=false -no-color -out={{ config_base | expanduser }}/{{ cluster.name }}/tf_plan
+    terraform plan {{ tf_etcd_targets }} -input=false -no-color -out={{ config_base | expanduser }}/{{ cluster.name }}/tf_plan
   args:
     chdir: "{{ config_base | expanduser }}/{{ cluster.name }}"
   register: tf_etcd_plan_result
@@ -32,7 +18,7 @@
 
 - name: Apply terraform configuration to current state of etcd
   command: >
-    terraform apply {{ terraform_etcd_targets }} -input=false -no-color {{ config_base | expanduser }}/{{ cluster.name }}/tf_plan
+    terraform apply {{ tf_etcd_targets }} -input=false -no-color {{ config_base | expanduser }}/{{ cluster.name }}/tf_plan
   args:
     chdir: "{{ config_base | expanduser }}/{{ cluster.name }}"
   register: tf_etcd_apply_result
