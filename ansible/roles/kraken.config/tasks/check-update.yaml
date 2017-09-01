@@ -77,7 +77,7 @@
 
 - name: Fail if nodepools were added to config but not specified
   fail:
-    msg: "It looks like you were trying to add the nodepool {{ item }}, but you need to specify this change in your update command, for example: --addnodepool {{ item }}"
+    msg: "It looks like you were trying to add the nodepool {{ item }}, but you need to specify this change in your update command, for example: --addnodepools {{ item }}"
   with_items:
     - "{{ extra_nodepools_in_config }}"
 
