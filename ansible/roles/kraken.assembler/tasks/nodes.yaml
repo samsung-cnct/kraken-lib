@@ -15,14 +15,16 @@
   register: node_list
   with_items: "{{ cluster.nodePools }}"
 
-- name: Generate node cloud init
-  template:
-    src: node.yaml.jinja2
-    dest: "{{ dest_path }}"
-  vars:
+- name: Generate node cloud init                   
+  template:                                                                                                        
+    src: node.yaml.jinja2                          
+    dest: "{{ dest_path }}"                                                                                        
+  vars:                                            
     dest_path: "{{ config_base | expanduser }}/{{ cluster.name }}/cloud-config/{{ item.0.name }}.cloud-config.yaml"
-  when:
-    - ( dest_path | is_file ) == false or not (item.1.etcdConfig is defined)
-  with_together:
-    - "{{ cluster.nodePools }}"
-    - "{{ node_list.results }}"
+    file_needed: "{{ not (dest_path | is_file) }}"                                                                 
+    not_etcd_node: "{{ item.0.etcdConfig is not defined }}"                                                        
+  when:                                                    
+    - file_needed or not_etcd_node                                                                                 
+  with_together:                                   
+    - "{{ cluster.nodePools }}"                                                                                    
+    - "{{ node_list.results }}"    
