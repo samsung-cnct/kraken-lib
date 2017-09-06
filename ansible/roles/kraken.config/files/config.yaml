@@ -200,6 +200,7 @@ definitions:
       providerConfig:
         enablePublicIPs: true
         provider: aws
+        # m4.16xlarge recommended for 5K scalability clusters. See goo.gl/dxQuYD
         type: m4.large
         subnet: ["zone-1", "zone-2", "zone-3"]
         tags:
@@ -240,6 +241,7 @@ definitions:
       providerConfig:
         enablePublicIPs: true
         provider: aws
+        # m4.16xlarge recommended for 5K scalability clusters. See goo.gl/dxQuYD
         type: m4.large
         subnet: ["zone-1", "zone-2", "zone-3"]
         tags:
@@ -455,18 +457,20 @@ deployment:
       providerConfig: *defaultAws
       nodePools:
         - name: etcd
-          count: 5
-          # m4.large
-          # purposed: m4.16xlarge
+          # 5 nodes recommended for production/high availability clusters. This
+          # configuration is required to tolerate a single node failure during
+          # node upgrades.
+          count: 1
           etcdConfig: *defaultEtcd
           containerConfig: *defaultDocker
           osConfig: *defaultCoreOs
           nodeConfig: *defaultAwsEtcdNode
           keyPair: *defaultKeyPair
         - name: etcdEvents
-          count: 5
-          # m4.large
-          # purposed: m4.16xlarge
+          # 5 nodes recommended for production/high availability clusters. This
+          # configuration is required to tolerate a single node failure during
+          # node upgrades.
+          count: 1
           etcdConfig: *defaultEtcdEvents
           containerConfig: *defaultDocker
           osConfig: *defaultCoreOs
@@ -474,8 +478,6 @@ deployment:
           keyPair: *defaultKeyPair
         - name: master
           count: 3
-          # m4.large
-          # purposed: m4.16xlarge
           apiServerConfig: *defaultApiServer
           kubeConfig: *defaultKube
           containerConfig: *defaultDocker
@@ -484,7 +486,6 @@ deployment:
           keyPair: *defaultKeyPair
         - name: clusterNodes
           count: 10
-          # c4.large
           kubeConfig: *defaultKube
           containerConfig: *defaultDocker
           osConfig: *defaultCoreOs
