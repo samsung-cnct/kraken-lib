@@ -460,7 +460,7 @@ deployment:
           # 5 nodes recommended for production/high availability clusters. This
           # configuration is required to tolerate a single node failure during
           # node upgrades.
-          count: 1
+          count: 5
           etcdConfig: *defaultEtcd
           containerConfig: *defaultDocker
           osConfig: *defaultCoreOs
@@ -470,7 +470,7 @@ deployment:
           # 5 nodes recommended for production/high availability clusters. This
           # configuration is required to tolerate a single node failure during
           # node upgrades.
-          count: 1
+          count: 5
           etcdConfig: *defaultEtcdEvents
           containerConfig: *defaultDocker
           osConfig: *defaultCoreOs

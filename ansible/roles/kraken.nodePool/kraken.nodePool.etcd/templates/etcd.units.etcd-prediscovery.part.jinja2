@@ -5,12 +5,10 @@
     Description=Wait for and log etcd SRV records before starting kraken-etcd
     Requires=kraken-networking.service
     After=kraken-networking.service
+    Before=kraken-etcd.service
     [Service]
     Type=simple
     Environment=ETCD_PREDISCOVERY_LOG=/tmp/kraken-{{cluster_node_tuple.1.name}}-prediscovery.log
-    ExecStartPre=/usr/bin/bash -xc "/usr/bin/dig +short {{cluster_node_tuple.1.name}}.{{cluster_node_tuple.0.name}}.internal > ${ETCD_PREDISCOVERY_LOG}"
-    ExecStartPre=/bin/cat ${ETCD_PREDISCOVERY_LOG}
-    ExecStart=/bin/bash -xc 'if [[ $(/bin/cat ${ETCD_PREDISCOVERY_LOG} | /usr/bin/wc -l) -eq  {{ cluster_node_tuple.1.count }} ]] ; then true ; else false ; fi'
-    ExectStartPost=/bin/rm -f ${ETCD_PREDISCOVERY_LOG}
+    ExecStart=/bin/bash -xc 'while [[ $(/usr/bin/dig SRV +noall +short +answer _etcd-server{% if cluster_node_tuple.1.etcdConfig.ssl %}-ssl{% endif %}._tcp.{{ cluster_node_tuple.1.name }}.{{ cluster_node_tuple.0.name }}.internal | /usr/bin/wc -l) -ne  {{ cluster_node_tuple.1.count }} ]] ; do sleep 1 ; done'
     Restart=on-failure
     RestartSec=5s
