@@ -21,7 +21,7 @@
       "type": "string"
     },
     "type": {
-      "description": "Type of machine image deployment.",
+      "description": "Type of machine image deployment. For AWS, only cloudinit is supported.",
       "enum": [ "cloudinit" ],
       "type": "string"
     },

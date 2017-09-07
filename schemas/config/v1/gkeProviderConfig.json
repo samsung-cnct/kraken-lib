@@ -12,23 +12,17 @@
     },
     "kind": {
       "description": "The type of configuration this object it",
-      "enum": [
-        "provider"
-      ],
+      "enum": [ "provider" ],
       "type": "string"
     },
     "provider": {
       "description": "The name of the provider for this provider setting",
-      "enum": [
-        "gke"
-      ],
+      "enum": [ "gke" ],
       "type": "string"
     },
     "type": {
-      "description": "How are nodes configured - SHOULD BE MOVED TO NODE PROVIDER CONFIG?",
-      "enum": [
-        "autonomous"
-      ],
+      "description": "Type of machine image deployment. For GKE, only autonomous is supported.",
+      "enum": [ "autonomous" ],
       "type": "string"
     },
     "project": {
