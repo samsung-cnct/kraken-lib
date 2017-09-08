@@ -1,4 +1,1 @@
-endpoint: {% if etcd.etcdConfig.ssl == true %}https{% else %}http{% endif %}://{{etcd.name}}.{{cluster.name}}.internal:{{etcd.etcdConfig.clientPorts[0]}}
-etcd_cafile: /etc/etcd/ssl/client-ca.pem
-etcd_certfile: /etc/etcd/ssl/client.pem
-etcd_keyfile: /etc/etcd/ssl/client-key.pem
+reboot_strategy: off
