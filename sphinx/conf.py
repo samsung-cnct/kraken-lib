@@ -50,7 +50,7 @@ source_suffix = ['.rst', '.md']
 master_doc = 'index'
 
 # General information about the project.
-project = u'Kraken'
+project = u'kraken'
 copyright = u'2017, Samsung CNCT'
 author = u'Samsung CNCT'
 
@@ -100,7 +100,7 @@ html_theme = 'alabaster'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
-html_logo = './Kraken.png'
+html_logo = './kraken.png'
 
 # -- Options for HTMLHelp output ------------------------------------------
 

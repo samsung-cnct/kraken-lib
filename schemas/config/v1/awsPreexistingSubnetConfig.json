@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://judkins.house/apis/k2/v1/awsPreexistingSubnetConfig.json",
-  "$$target": "awsPreexistingSubnetConfig",
+  "$$target": "awsPreexistingSubnetConfig.json",
   "title": "AWS Subnet Identification",
   "description": "Identifies an [AWS subnet](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Subnets.html) that is not managed by K2.",
 
