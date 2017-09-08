@@ -19,5 +19,4 @@
       --zone {{ cluster.providerConfig.zone.primaryZone }}
       --no-async
       --quiet
-  when: cluster_check.stdout == "{{ cluster.name }}"
-
+  when: cluster_check.stdout == cluster.name

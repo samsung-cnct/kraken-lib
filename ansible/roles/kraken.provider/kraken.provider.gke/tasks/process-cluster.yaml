@@ -5,4 +5,4 @@
   ignore_errors: yes
 
 - include: create-cluster.yaml
-  when: deployment_check.stdout != "{{ cluster.name }}-k2-deployment"
+  when: deployment_check.stdout !=  cluster.name + "-k2-deployment"

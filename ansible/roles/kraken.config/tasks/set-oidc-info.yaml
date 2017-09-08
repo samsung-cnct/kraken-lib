@@ -5,7 +5,7 @@
   set_fact:
     oidc_provider_values: "{{ item.get('values') }}"
   with_items: "{{ cluster.helmConfig.charts | default([]) }}"
-  when: item.name == "{{ cluster.kubeAuth.authn.oidc.service_name }}"
+  when: item.name == cluster.kubeAuth.authn.oidc.service_name
 
 ## TO DO :
 # Here duplicated oidc issuer configuration.
