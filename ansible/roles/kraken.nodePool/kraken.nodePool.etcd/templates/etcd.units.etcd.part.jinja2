@@ -3,8 +3,6 @@
   content: |
     [Unit]
     Description=etcd
-    After=kraken-etcd-prediscovery.service
-    Requires=kraken-etcd-prediscovery.service
 {% if cluster_node_tuple.1.etcdConfig.ssl == true %}
     After=kraken-ssl.service
     Requires=kraken-ssl.service
@@ -21,6 +19,7 @@
     RestartSec=15
     Restart=always
     KillMode=none
+    ExecStartPre=/bin/bash -xc 'while [[ $(/usr/bin/dig SRV +noall +short +answer _etcd-server{% if cluster_node_tuple.1.etcdConfig.ssl %}-ssl{% endif %}._tcp.{{ cluster_node_tuple.1.name }}.{{ cluster_node_tuple.0.name }}.internal | /usr/bin/wc -l) -ne  {{ cluster_node_tuple.1.count }} ]] ; do sleep 1 ; done'
     ExecStartPre=/usr/bin/mkdir -p /ephemeral/etcd
     ExecStart=/usr/bin/rkt run --net=host \
      --stage1-path=/usr/lib/rkt/stage1-images/stage1-fly.aci \

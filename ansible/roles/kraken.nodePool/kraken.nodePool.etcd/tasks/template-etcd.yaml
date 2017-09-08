@@ -44,10 +44,6 @@
     - cluster_node_tuple.1.etcdConfig.uuidToken is defined
     - cluster_node_tuple.1.etcdConfig.uuidToken
 
-- name: Generate etcd .units.etcd-prediscovery.part files
-  template: src=etcd.units.etcd-prediscovery.part.jinja2
-            dest="{{ config_base | expanduser }}/{{ cluster_node_tuple.0.name }}/{{ cluster_node_tuple.1.name }}.units.etcd-prediscovery.part"
-
 - name: Generate etcd .units.etcd.part files
   template: src=etcd.units.etcd.part.jinja2
             dest="{{ config_base | expanduser }}/{{ cluster_node_tuple.0.name }}/{{ cluster_node_tuple.1.name }}.units.etcd.part"
