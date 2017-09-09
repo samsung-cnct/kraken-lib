@@ -180,7 +180,7 @@ definitions:
       name: defaultCoreOs
       kind: os
       type: coreOs
-      version: 1409.5.0
+      version: 1465.7.0
       channel: stable
       rebootStrategy: "off"
 
