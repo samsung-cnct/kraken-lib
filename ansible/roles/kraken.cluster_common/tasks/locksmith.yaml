@@ -1,5 +1,12 @@
 ---
+- name: find nodePool named etcd - assume this is the primary etcd cluster
+  set_fact:
+    etcd: "{{ item }}"
+  with_items: "{{ cluster.nodePools }}"
+  when: item.name == "etcd"
+
 - name: Generate nodePool .locksmith.part files
   template: src=locksmith.part.jinja2
             dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ item.name }}.locksmith.part"
   with_items: "{{ cluster.nodePools }}"
+  when: item.bastionConfig is not defined
