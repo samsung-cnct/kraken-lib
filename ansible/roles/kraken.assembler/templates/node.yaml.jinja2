@@ -25,7 +25,7 @@ coreos:
     {{ lookup('file', filedata.path) | indent(4) }}
 {% endif %}
 {% endfor %}
-{% if item.0.bastionConfig is not defined %}
+{% if item.1.locksmith is defined %}
   locksmith:
 {% for filedata in item.1.files %}
 {% if item.0.name + '.locksmith.' in filedata.path %}

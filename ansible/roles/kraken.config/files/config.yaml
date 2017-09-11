@@ -182,7 +182,14 @@ definitions:
       type: coreOs
       version: 1465.7.0
       channel: stable
+      # If rebootStrategy is anything other than "off" then the version of
+      # CoreOS specified above will not be pinned.
       rebootStrategy: "off"
+      locksmith:
+        etcdConfig: *defaultEtcd
+        setMax: 1
+        windowStart: 04:00
+        windowLength: 2h
 
   nodeConfigs:
     - &defaultAwsEtcdNode

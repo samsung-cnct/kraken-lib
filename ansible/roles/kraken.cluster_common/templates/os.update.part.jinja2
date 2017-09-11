@@ -1,4 +1,2 @@
-group: {{item.osConfig.channel}}
-{% if item.bastionConfig is not defined %}
-reboot-strategy: etcd-lock
-{% endif %}
+group: {{ item.osConfig.channel }}
+reboot-strategy: {{ item.osConfig.rebootStrategy }}

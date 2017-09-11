@@ -6,24 +6,47 @@
   "description": "Describes the configuration of CoreOS Locksmith (used to manage [updates](https://coreos.com/os/docs/latest/update-strategies.html).",
 
   "properties": {
+    "etcdConfig": {
+      "description": "If rebootStrategy is 'etcd-lock', then etcdConfig is the configuration of the kraken etcd cluster which will be used by locksmithd to coordinate upgrade for nodes within the same nodePool. Usually this is one of the kubernetes etcd clusters.",
+      "etcdConfig": { "$ref": "etcdConfig.json" }
+    },
     "endpoint": {
-      "description": "The etcd endpoint.",
+      "description": "Comma separated list of etcd endpoints.",
       "type": "string"
     },
-    "etcd_cafile": {
-      "description": "The filename and path to the certificate authority.",
+    "etcdCafile": {
+      "description": "Path to CA file used for TLS communication with etcd.",
       "type": "string",
       "default": "/etc/etcd/ssl/client-ca.pem"
     },
-    "etcd_certfile": {
-      "description": "The filename and path to the certificate (public key).",
+    "etcdCertfile": {
+      "description": "Path to certificate file used for TLS communication with etcd.",
       "type": "string",
       "default": "/etc/etcd/ssl/client.pem"
     },
-    "etcd_keyfile": {
-      "description": "The filename and path to the private key.",
+    "etcdKeyfile": {
+      "description": "Path to private key file used for TLS communication with etcd.",
       "type": "string",
       "default": "/etc/etcd/ssl/client-key.pem"
+    },
+    "group": {
+      "description": "Name of the reboot group in which this instance belongs. If not specified then it is the name of the nodePool, which is the default.",
+      "type": "string"
+    },
+    "setMax": {
+      "description": "Maximum number of nodes allowed to reboot at the same time. Should be one less than the number of failures the cluster can tolerate.",
+      "type": "number",
+      "default": 1
+    },
+    "windowStart": {
+      "description": "Optional day of the week (e.g. Sun, Mon, ...) and the time of day (specified in 24-hours). For example, 'Sat 04:00', or '18:00'.",
+      "type": "string",
+      "default": "04:00"
+    },
+    "windowLength": {
+      "description": "Length of time after window-start during which reboots are allowed. For example, '2h', or '13h'. Duration will be parsed by https://godoc.org/time#ParseDuration",
+      "type": "string",
+      "default": "2h"
     }
   },
 
