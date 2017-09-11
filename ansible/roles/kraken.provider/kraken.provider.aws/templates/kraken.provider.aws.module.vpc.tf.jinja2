@@ -69,6 +69,12 @@ resource "aws_route_table" "vpc_rt" {
     Name = "${var.vpc_name}_routetable",
     KubernetesCluster = "${var.vpc_name}"
   }
+  
+{% if kraken_action == 'update' %}
+  lifecycle {
+    ignore_changes = ["route"]
+  }
+{% endif %}
 }
 
 # VPC ACL

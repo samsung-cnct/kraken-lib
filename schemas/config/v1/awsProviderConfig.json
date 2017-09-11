@@ -66,13 +66,13 @@
       "type": "array"
     },
     "ingressSecurity": {
-      "description": "List of ingress security rules to create for the VPC.",
+      "description": "List of ingress security rules to create for the VPC.  This section is ignored when modifying an existing cluster.",
       "items": { "$ref": "awsSecurityConfig.json" },
       "minItems": 1,
       "type": "array"
     },
     "egressSecurity": {
-      "description": "List of egress security rules to create for the VPC.",
+      "description": "List of egress security rules to create for the VPC.  This section is ignored when modifying an existing cluster.",
       "items": { "$ref": "awsSecurityConfig.json" },
       "minItems": 1,
       "type": "array"

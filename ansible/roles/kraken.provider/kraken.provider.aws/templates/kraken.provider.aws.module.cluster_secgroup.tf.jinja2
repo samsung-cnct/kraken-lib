@@ -57,7 +57,13 @@ resource "aws_security_group" "vpc_kubernetes_secgroup" {
     Name = "${var.secgroup_name}_vpc_secgroup",
     KubernetesCluster = "${var.secgroup_name}"
   }
-}
+
+{% if kraken_action == 'update' %}
+  lifecycle {
+    ignore_changes = ["ingress", "egress"]
+  }
+{% endif %}
+} 
 
 output "id" {
   value = "${aws_security_group.vpc_kubernetes_secgroup.id}"
