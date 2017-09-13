@@ -4,10 +4,10 @@
 #   a_user
 #   cluster
 #   kubeconfig
-#   
+#
 #   kubernetes_minor_versions
 #   kraken_endpoint
-#   
+#
 - name: Generate end-user {{ a_user.user }} key
   command: >
     openssl genrsa -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.key 2048
@@ -23,7 +23,7 @@
     endsubj: "/CN={{ a_user.user }}/O={{ a_user.group }}"
   when: (cluster.kubeAuth.authz.rbac is defined)
 
-- name: Generate end-user {{ a_user.user }} csr 
+- name: Generate end-user {{ a_user.user }} csr
   command: >
     openssl req -new -key {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.key
       -subj {{ endsubj }} -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.csr
@@ -42,10 +42,10 @@
 #   a_user
 #   cluster
 #   kubeconfig
-#   
+#
 #   kubernetes_minor_versions
 #   kraken_endpoint
-#   
+#
 - name: Look up and set k8s minor version for this cluster
   set_fact:
     kubernetes_minor_version: "{{ kubernetes_minor_versions[cluster.name] }}"

@@ -12,7 +12,7 @@
 - include: generate-user-cert-config.yaml
   with_items:
     - "{{ a_cluster.kubeAuth.authn.cert }}"
-  loop_control: 
+  loop_control:
     loop_var: a_user
   when: (kraken_endpoint is defined) and (a_cluster.kubeAuth.authn.cert is defined)
 #

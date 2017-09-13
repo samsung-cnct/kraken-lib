@@ -21,7 +21,7 @@
     readiness_wait: "{{ kraken_config.readiness.wait | default(readiness_wait_default) }}"
 
 - name: Set Interval
-  set_fact: 
+  set_fact:
     rep_interval: "{{ readiness_retry_delay }}"
 
 - name: Setup repetitions

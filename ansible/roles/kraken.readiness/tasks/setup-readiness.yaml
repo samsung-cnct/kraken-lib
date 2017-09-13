@@ -2,7 +2,7 @@
 #
 # Expects:
 #    cluster
-#    
+#
 #    kraken_config
 #    kubernetes_minor_versions
 #

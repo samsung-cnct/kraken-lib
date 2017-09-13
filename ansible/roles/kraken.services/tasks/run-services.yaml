@@ -12,7 +12,7 @@
     helm_home: "{{ config_base | expanduser }}/{{ cluster.name }}/.helm"
     kubeconfig: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
     kubectl: "{{ kubectl_commands[cluster.name] }}"
- 
+
 - name: create debug helm command string
   set_fact:
     helm_command: "{{ helm_command }} --debug"
