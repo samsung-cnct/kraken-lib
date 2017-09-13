@@ -11,7 +11,8 @@
 - name: Generate end-user {{ a_user.user }} key
   command: >
     openssl genrsa -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.key 2048
-      creates={{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.key
+  args:
+    creates: "{{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.key"
 
 - name: Create non-rbac subj value
   set_fact:
@@ -27,7 +28,8 @@
   command: >
     openssl req -new -key {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.key
       -subj {{ endsubj }} -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.csr
-        creates={{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.csr
+  args:
+    creates: "{{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.csr"
 
 - name: Generate end-user {{ a_user.user }} crt
   command: >
@@ -37,6 +39,8 @@
       -CAcreateserial
       -CAserial {{ config_base | expanduser }}/{{ cluster.name }}/certs/ca.srl
       -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.crt -days 10000
+  args:
+    creates: "{{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.crt"
 #
 # expects:
 #   a_user
@@ -65,6 +69,13 @@
       --certificate-authority={{ config_base | expanduser }}/{{ cluster.name }}/certs/ca.pem
       --embed-certs=true
       --kubeconfig={{ kubeconfig }}
+  vars:
+    kconfig: "{{ lookup('file',kubeconfig) | from_yaml }}"
+    query: "clusters[?name=='{{ cluster.name }}'].cluster"
+    ca_exists: "{{ (kconfig | json_query(query) | first)['certificate-authority-data'] is defined }}"
+  when:
+    - not ca_exists
+
 
 - name: create user entry
   command: >
@@ -74,6 +85,12 @@
       --client-key={{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.key
       --embed-certs=true
       --kubeconfig={{ kubeconfig }}
+  vars:
+    kconfig: "{{ lookup('file',kubeconfig) | from_yaml }}"
+    query: "users[?name=='{{ a_user.user }}'].user"
+    user_exists: "{{ (kconfig | json_query(query) | first)['username'] is defined }}"
+  when:
+    - not user_exists
 
 - name: create context entry
   command: >
@@ -81,8 +98,17 @@
       --cluster={{ cluster.name }}
       --user={{ cluster.name }}_{{ a_user.user }}
       --kubeconfig={{ kubeconfig }}
+  vars:
+    kconfig: "{{ lookup('file',kubeconfig) | from_yaml }}"
+    query: "contexts[?name=='{{ cluster.name }}_{{ a_user.user }}'].context"
+    context_exists: "{{ (kconfig | json_query(query) | first)['cluster'] is defined }}"
+  when:
+    - not context_exists
 
 - name: set current context
   command: >
     {{ kubectl }} config use-context {{ cluster.name }}_context
       --kubeconfig={{ kubeconfig }}
+  vars:
+    kconfig: "{{ lookup('file',kubeconfig) | from_yaml }}"
+  when: kconfig.current-context is not defined or kconfig.current-context != "{{ cluster.name }}_context"

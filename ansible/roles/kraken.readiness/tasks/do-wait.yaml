@@ -27,6 +27,7 @@
   retries: "{{ (( readiness_wait | int ) / retry_interval | int ) | int }}"
   delay: "{{ retry_interval }}"
   when: not wait_for_all_hosts
+  changed_when: false
 
 
 - name: Wait for all nodes to join cluster (status Ready)
@@ -37,6 +38,7 @@
   retries: "{{ (( readiness_wait | int ) / retry_interval | int ) | int }}"
   delay: "{{ retry_interval }}"
   when: wait_for_all_hosts
+  changed_when: false
 
 - debug:
     var: job_get_nodes_result

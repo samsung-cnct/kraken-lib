@@ -50,7 +50,17 @@
   register: job_rbac_dns_results
   when: "cluster.kubeAuth.authz.rbac is defined"
 
+- name: DNS installed?
+  command: >
+    {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} get deployment {{ dns_config.k8sapp }} --namespace={{ dns_config.namespace }}
+  register: deployment_dns_installed
+  changed_when: false
+
 - name: Install DNS
   command: >
       {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} apply -f {{ config_base | expanduser }}/{{ cluster.name }}/services/dns-deployment.yaml --namespace={{ dns_config.namespace }}
   register: deployment_dns_result
+  vars:
+    installed_version: deployment_dns_installed.stdout | from_json | json_query(metadata.labels.version)
+  when:
+    - installed_version != dns_config.version

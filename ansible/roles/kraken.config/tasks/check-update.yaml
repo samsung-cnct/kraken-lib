@@ -16,6 +16,7 @@
   vars:
     kubectl: "{{ kubectl_commands[cluster.name] }}"
   register: current_nodepools
+  changed_when: false
 
 - name: Create list of current nodepool names
   set_fact:
