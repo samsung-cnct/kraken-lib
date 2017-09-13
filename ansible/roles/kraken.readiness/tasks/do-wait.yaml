@@ -20,7 +20,7 @@
     verbosity: 0
 
 - name: Wait for all nodes to join cluster (any status)
-  shell: >
+  command: >
     {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} get nodes --no-headers=true --v 7
   register: job_get_nodes_result
   until: job_get_nodes_result.stdout_lines | length >= needed_nodes | int

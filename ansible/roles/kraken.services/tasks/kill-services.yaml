@@ -17,7 +17,7 @@
     cluster_namespaces: "{{ cluster_namespaces | unique | reject('search', 'kube-system') | list }}"
 
 - name: See if tiller rc if present
-  shell: >
+  command: >
       {{ kubectl }} --kubeconfig={{ kubeconfig }} get deployment {{ tiller }} --namespace=kube-system
   register: tiller_present
   when: kubeconfig | is_file
