@@ -1,5 +1,6 @@
 ---
-- set_fact:
+- name: Set cluster fact
+  set_fact:
     cluster: "{{ a_cluster }}"
 
 - name: Look up and set k8s minor version for this cluster
@@ -10,7 +11,8 @@
   set_fact:
     kubectl: "/opt/cnct/kubernetes/{{ kubernetes_minor_version }}/bin/kubectl"
 
-- set_fact:
+- name: Set kubeconfig fact
+  set_fact:
     kubeconfig: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
 
 - name: Merge User DNS Config with Default DNS Config

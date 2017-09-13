@@ -3,7 +3,8 @@
 # kubernetes_minor_versions
 # kraken_endpoint
 #
-- set_fact:
+- name: Set cluster fact
+  set_fact:
     cluster: "{{ a_cluster }}"
 
 - name: Set kubeconfig path

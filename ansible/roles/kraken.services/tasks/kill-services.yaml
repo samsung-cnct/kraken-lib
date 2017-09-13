@@ -1,19 +1,23 @@
 ---
-- set_fact:
+- name: Set cluster fact
+  set_fact:
     cluster: "{{ a_cluster }}"
 
-- set_fact:
+- name: Set facts needed for service management
+  set_fact:
     cluster_services: "{{ cluster.helmConfig.charts | default([]) }}"
     cluster_repos: "{{ cluster.helmConfig.repos | default([]) }}"
     kubeconfig: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
     kubectl: "{{ kubectl_commands[cluster.name] }}"
     cluster_namespaces: []
 
-- set_fact:
+- name: Build a list of namespaces used for services
+  set_fact:
     cluster_namespaces: "{{ cluster_namespaces + [item.namespace | default('kube-system')] }}"
   with_items: "{{ cluster_services }}"
 
-- set_fact:
+- name: Filter the list of namespaces
+  set_fact:
     cluster_namespaces: "{{ cluster_namespaces | unique | reject('search', 'kube-system') | list }}"
 
 - name: See if tiller rc if present

@@ -29,7 +29,8 @@
   set_fact:
     readiness_wait: "{{ kraken_config.readiness.wait | default(600) }}"
 
-- set_fact:
+- name: Set cluster fact
+  set_fact:
     cluster: "{{ a_cluster }}"
 
 - name: Set kubeconfig path

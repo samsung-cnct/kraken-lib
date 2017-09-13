@@ -1,4 +1,5 @@
-- set_fact:
+- name: Set cluster fact
+  set_fact:
     cluster: "{{ a_cluster }}"
 
 - name: Get oidc provider values from cluster services

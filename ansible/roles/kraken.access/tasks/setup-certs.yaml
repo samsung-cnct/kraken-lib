@@ -4,7 +4,8 @@
 #    kubernetes_minor_versions
 #    kraken_endpoint
 #
-- set_fact:
+- name: Set cluster fact
+  set_fact:
     cluster: "{{ a_cluster }}"
 #
 # certificate auth
@@ -25,6 +26,3 @@
 
 - include: generate-admin-kubeconfig.yaml
   when: kraken_endpoint is defined
-
-
-
