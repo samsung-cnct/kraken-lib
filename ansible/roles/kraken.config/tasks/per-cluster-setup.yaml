@@ -2,10 +2,6 @@
 - set_fact:
     cluster: "{{ a_cluster }}"
 
-- name: Prevent up if cluster is already up
-  include: check-clusters-lock.yaml
-  when: kraken_action =='up'
-
 - name: Verify all clusters in the clusters list have names
   fail:
     msg: "Make sure that all 'clusters.name' are defined in {{ config_file }}"

@@ -39,7 +39,6 @@
     filters:
       "tag:k2-nodepool": "{{ item.name }}"
       "tag:Name": "{{ cluster.name }}_{{ item.name }}*"
-      instance-state-name: running
   with_items: "{{ cluster.nodePools }}"
   register: ec2_results
 

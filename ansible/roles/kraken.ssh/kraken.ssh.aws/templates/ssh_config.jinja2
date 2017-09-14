@@ -20,14 +20,24 @@ Host {{instance.tags['k2-nodepool']}}-{{validHostCounter}}
 {% else %}
 
 {% for result in ec2_results.results %}
-{% set validHostCounter = 1 %}
+{% set validHostCounter = 0 %}
 {% for instance in result.instances %}
 {% if instance.state == 'running' or instance.state == 'pending' %}
 {% set privateKeyPath = cluster.nodePools | selectattr("name", "equalto", instance.tags['k2-nodepool']) | list %}
 {% if privateKeyPath[0].keyPair.privatekeyFile is defined %}
-{% if instance.public_dns_name is defined and instance.public_dns_name != "" %}
-Host {{instance.tags['k2-nodepool']}}-{{validHostCounter}}
-  HostName {{instance.public_dns_name}}
+{% set publicAddress = instance.public_dns_name or instance.public_ip_address %}
+{% if publicAddress %}
+{% set validHostCounter = validHostCounter + 1 %}
+{% set hostAlias = "%s-%d"|format(instance.tags['k2-nodepool'], validHostCounter) %}
+{% if not instance.tags['Name'].endswith("autoscaled") %}
+{% set hostAlias =  instance.tags['Name']|replace("_", "-")|replace(instance.tags['KubernetesCluster'] + '-', '')  %}
+{% endif %}
+
+# Name: {{instance.tags['Name']}} ({{ instance.tags['k2-nodepool'] }})
+# Private: {{instance.private_dns_name}} {{instance.private_ip_address}}
+# Public: {{instance.public_dns_name}} {{instance.public_ip_address}}
+Host {{hostAlias}} 
+  HostName {{publicAddress}}
   User core
 {% if instance.tags['k2-nodepool'] == 'bastion' %}
   Port {{bastionListenPort}}
@@ -38,7 +48,6 @@ Host {{instance.tags['k2-nodepool']}}-{{validHostCounter}}
   StrictHostKeyChecking no
   UserKnownHostsFile=/dev/null
 {% endif %}
-{% set validHostCounter = validHostCounter + 1 %}
 {% endif %}
 {% endif %}
 {% endfor %}

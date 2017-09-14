@@ -16,8 +16,8 @@ To ssh:
 
 {% for cluster in kraken_config.clusters %}
 {%   for node in cluster.nodePools       %}
-{%     for number in range(1,node.count) %}
-    ssh -F {{ config_base }}/{{ cluster.name }}/ssh_config {{ node.name }}-{{ number }}
+{%     for number in range(0,node.count) %}
+    ssh -F {{ config_base }}/{{ cluster.name }}/ssh_config {{ node.name }}-{{ number +1}}
 {%     endfor                            %}
 {%   endfor                              %}
 {% endfor                                %}

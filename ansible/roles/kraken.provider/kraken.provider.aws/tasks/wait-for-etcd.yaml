@@ -5,7 +5,7 @@
 
 # We purposely use ssh to query etcd over the loopback interface.
 # This allows us to support stricter firewall rules.
-- name: Wait for etcd cluster to form
+- name: Wait for etcd cluster to form ({{ nodePool.name }})
   command: >
     ssh -o StrictHostKeyChecking=no
         -o UserKnownHostsFile=/dev/null

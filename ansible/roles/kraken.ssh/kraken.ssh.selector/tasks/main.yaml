@@ -17,6 +17,11 @@
     loop_var: a_cluster
   when: a_cluster.providerConfig.provider == 'gke' and not ( dryrun | bool )
 
+- name: Generate shell command help text
+  template:
+    src: help.txt.jinja2
+    dest: "{{ config_base | expanduser }}/help.txt"
+
 - name: Supported cloud provider check
   include_role:
     name: '{{ playbook_dir }}/roles/kraken.error'
@@ -28,3 +33,5 @@
   loop_control:
     loop_var: a_cluster
   when: a_cluster.providerConfig.provider not in ['aws', 'gke']
+
+

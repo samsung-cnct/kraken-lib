@@ -22,10 +22,6 @@
         tags: [ 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun']
       }
     - {
-        role: 'roles/kraken.ssh/kraken.ssh.selector',
-        tags: [ 'ssh', 'all', 'dryrun' ,'ssh_only' ]
-      }
-    - {
         role: 'roles/kraken.access',
         tags: [ 'readiness', 'services', 'all', 'dryrun', 'access_only' ]
       }
@@ -35,11 +31,21 @@
       }
     - {
         role: 'roles/kraken.readiness',
+        wait_for_all_hosts: false,
         tags: [ 'readiness', 'services', 'all' ]
       }
     - {
         role: 'roles/kraken.fabric/kraken.fabric.selector',
         tags: [ 'assembler', 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun', 'fabric_only' ]
+      }
+    - {
+        role: 'roles/kraken.readiness',
+        wait_for_all_hosts: true,
+        tags: [ 'readiness', 'services', 'all', 'ssh_only' ]
+      }
+    - { # Run the SSH config generation when all nodes/ASGs are ready.
+        role: 'roles/kraken.ssh/kraken.ssh.selector',
+        tags: [ 'ssh', 'all', 'dryrun' ,'ssh_only' ]
       }
     - {
         role: 'roles/kraken.services',
