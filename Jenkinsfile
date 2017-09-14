@@ -16,12 +16,14 @@ custom_jnlp_version    = "0.1"
 
 jnlp_image             = "quay.io/${quay_org}/custom-jnlp:${custom_jnlp_version}"
 k2_tools_image         = "quay.io/${quay_org}/k2-tools:${k2_tools_image_tag}"
+ansible_lint           = "quay.io/${quay_org}/ansible-lint:latest"
 e2e_tester_image       = "quay.io/${quay_org}/e2etester:${e2etester_version}"
 docker_image           = "docker"
 
 podTemplate(label: 'k2', containers: [
     containerTemplate(name: 'jnlp', image: jnlp_image, args: '${computer.jnlpmac} ${computer.name}'),
     containerTemplate(name: 'k2-tools', image: k2_tools_image, ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi'),
+    containerTemplate(name: 'ansible-lint', image: ansible_lint, ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi'),
     containerTemplate(name: 'e2e-tester', image: e2e_tester_image, ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi'),
     containerTemplate(name: 'docker', image: docker_image, command: 'cat', ttyEnabled: true)
   ], volumes: [
@@ -57,7 +59,9 @@ podTemplate(label: 'k2', containers: [
 
             // Unit tests
             stage('Test: Unit') {
-                kubesh 'true' // Add unit test call here
+                customContainer('ansible-lint') {
+                    kubesh 'ansible-lint ansible/*.yaml'
+                }
             }
 
             // Live tests
