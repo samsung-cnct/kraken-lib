@@ -87,7 +87,7 @@ for d in $(sed -e 's/[^:]\+://' -e "s/^[ ]*\([\"']\)\(.*\)\1\$/\2/g" $CONFIGFILE
     p=$(envsubst <<< "$d")  # expand variables
     p=$(sed -e "s/^[\"']//" -e "s/[\"']$//" <<< "$p")
     # only add the map if the path is absolute, if it's not already in the string, and if it's a file or directory
-    if [[ $p == /* ]] && ! [[ ${MAPPINGS} == *${p}* ]] && ([[ -f $p ]] || [[ -d $p ]]); then
+    if [[ $p == /* ]] && ! [[ ${MAPPINGS} == *${p}:${p}* ]] && ([[ -f $p ]] || [[ -d $p ]]); then
         MAPPINGS="${MAPPINGS} -v ${p}:${p}"
     fi
 done
