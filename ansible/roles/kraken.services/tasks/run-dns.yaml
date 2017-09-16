@@ -52,7 +52,7 @@
 
 - name: DNS installed?
   command: >
-    {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} get deployment {{ dns_config.k8sapp }} --namespace={{ dns_config.namespace }}
+    {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} get deployments --namespace={{ dns_config.namespace }} -o yaml
   register: deployment_dns_installed
   changed_when: false
 
@@ -61,6 +61,7 @@
       {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} apply -f {{ config_base | expanduser }}/{{ cluster.name }}/services/dns-deployment.yaml --namespace={{ dns_config.namespace }}
   register: deployment_dns_result
   vars:
-    installed_version: deployment_dns_installed.stdout | from_json | json_query(metadata.labels.version)
+    query: "[?spec.metadata.name=='{{ dns_config.k8sapp }}'] | [0].metadata.labels.version"
+    installed_version: "{{ deployment_dns_installed.stdout | from_yaml | json_query(query) }}"
   when:
     - installed_version != dns_config.version

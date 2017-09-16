@@ -62,6 +62,13 @@
   set_fact:
      kubeconfig: "{{ config_base | expanduser }}/{{ cluster.name }}/user-{{ a_user.user }}.kubeconfig"
 
+- name: Ensure kubeconfig file exists
+  file:
+    path: "{{ kubeconfig }}"
+    state: touch
+  when:
+  - not (kubeconfig | is_file)
+
 - name: create kubeconfig entry
   command: >
     {{ kubectl }} config set-cluster {{ cluster.name }}
@@ -70,12 +77,12 @@
       --embed-certs=true
       --kubeconfig={{ kubeconfig }}
   vars:
-    kconfig: "{{ kubeconfig | is_file | ternary(lookup('file',kubeconfig),'---') | from_yaml }}"
-    query: "clusters[?name=='{{ cluster.name }}'].cluster"
-    ca_exists: "{{ (kconfig | json_query(query) | first)['certificate-authority-data'] is defined }}"
+    kconfig: "{{ lookup('file',kubeconfig) | from_yaml }}"
+    # The escaped double quotes are necessary because of the bad json keys with dashes
+    query: "clusters[?name=='{{ cluster.name }}'].cluster | [0].\"certificate-authority-data\""
+    ca: "{{ kconfig | json_query(query) }}"
   when:
-    - not ca_exists
-
+    - not (ca | is_empty)
 
 - name: create user entry
   command: >
@@ -87,10 +94,10 @@
       --kubeconfig={{ kubeconfig }}
   vars:
     kconfig: "{{ lookup('file',kubeconfig) | from_yaml }}"
-    query: "users[?name=='{{ a_user.user }}'].user"
-    user_exists: "{{ (kconfig | json_query(query) | first)['username'] is defined }}"
+    query: "users[?name=='{{ cluster.name }}_{{ a_user.user }}'].user | [0].username"
+    username: "{{ kconfig | json_query(query) }}"
   when:
-    - not user_exists
+    - username != a_user.user
 
 - name: create context entry
   command: >
@@ -100,10 +107,10 @@
       --kubeconfig={{ kubeconfig }}
   vars:
     kconfig: "{{ lookup('file',kubeconfig) | from_yaml }}"
-    query: "contexts[?name=='{{ cluster.name }}_{{ a_user.user }}'].context"
-    context_exists: "{{ (kconfig | json_query(query) | first)['cluster'] is defined }}"
+    query: "contexts[?name=='{{ cluster.name }}_context'].context | [0].user"
+    user_context: "{{ kconfig | json_query(query) }}"
   when:
-    - not context_exists
+    - user_context != cluster.name + "_" + a_user.user
 
 - name: set current context
   command: >
@@ -111,4 +118,5 @@
       --kubeconfig={{ kubeconfig }}
   vars:
     kconfig: "{{ lookup('file',kubeconfig) | from_yaml }}"
-  when: kconfig.current-context is not defined or kconfig.current-context != "{{ cluster.name }}_context"
+    context_is_set: "{{ kconfig['current-context'] is defined and kconfig['current-context'] == (cluster.name + '_context') }}"
+  when: not context_is_set
