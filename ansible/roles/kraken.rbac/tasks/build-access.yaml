@@ -9,7 +9,7 @@
 
 - name: Set kubeconfig path
   set_fact:
-    kubeconfig: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
+    kubeconfig: "{{ config_base }}/{{ cluster.name }}/admin.kubeconfig"
 
 - name: Execute appropriate kubectl per minor version
   set_fact:
@@ -31,7 +31,7 @@
 
 - name: Wait for api server response before continuing
   command: >
-    {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} get nodes --no-headers=true
+    {{ kubectl }} --kubeconfig={{ kubeconfig }} get nodes --no-headers=true
   register: rbac_get_nodes_result
   until: rbac_get_nodes_result.stdout_lines | length >= 1 | int
   retries: "{{ repetitions | int }}"

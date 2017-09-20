@@ -3,13 +3,13 @@
   command: >
     terraform get -no-color -update=true
   args:
-    chdir: "{{ config_base | expanduser }}/{{ cluster.name }}"
+    chdir: "{{ config_base }}/{{ cluster.name }}"
 
 - name: Plan terraform configuration for current state of etcd
   command: >
-    terraform plan {{ tf_etcd_targets }} -input=false -no-color -out={{ config_base | expanduser }}/{{ cluster.name }}/tf_plan
+    terraform plan {{ tf_etcd_targets }} -input=false -no-color -out={{ config_base }}/{{ cluster.name }}/tf_plan
   args:
-    chdir: "{{ config_base | expanduser }}/{{ cluster.name }}"
+    chdir: "{{ config_base }}/{{ cluster.name }}"
   register: tf_etcd_plan_result
 
 - debug:
@@ -18,9 +18,9 @@
 
 - name: Apply terraform configuration to current state of etcd
   command: >
-    terraform apply {{ tf_etcd_targets }} -input=false -no-color {{ config_base | expanduser }}/{{ cluster.name }}/tf_plan
+    terraform apply {{ tf_etcd_targets }} -input=false -no-color {{ config_base }}/{{ cluster.name }}/tf_plan
   args:
-    chdir: "{{ config_base | expanduser }}/{{ cluster.name }}"
+    chdir: "{{ config_base }}/{{ cluster.name }}"
   register: tf_etcd_apply_result
   until: tf_etcd_apply_result | succeeded
   retries: "{{ tf_retries }}"

@@ -1,4 +1,9 @@
 ---
+- name: "Expand ~ paths"
+  set_fact:
+    config_base: "{{ config_base | expanduser }}"
+    config_file: "{{ config_file | expanduser }}"
+
 - name: Load default configuration file
   include_vars:
     file: "{{ role_path }}/files/config.yaml"

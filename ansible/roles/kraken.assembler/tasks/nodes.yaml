@@ -5,12 +5,12 @@
 
 - name: Make sure generated folder for full cloud configs is there
   file:
-    path: "{{ config_base | expanduser }}/{{ cluster.name }}/cloud-config"
+    path: "{{ config_base }}/{{ cluster.name }}/cloud-config"
     state: directory
 
 - name: Create a list of files for all nodePools
   find:
-    paths: "{{ config_base | expanduser }}/{{ cluster.name }}"
+    paths: "{{ config_base }}/{{ cluster.name }}"
     patterns: "{{ item.name }}.*.part"
   register: node_list
   with_items: "{{ cluster.nodePools }}"
@@ -20,7 +20,7 @@
     src: node.yaml.jinja2
     dest: "{{ dest_path }}"
   vars:
-    dest_path: "{{ config_base | expanduser }}/{{ cluster.name }}/cloud-config/{{ item.0.name }}.cloud-config.yaml"
+    dest_path: "{{ config_base }}/{{ cluster.name }}/cloud-config/{{ item.0.name }}.cloud-config.yaml"
     file_needed: "{{ not (dest_path | is_file) }}"
     not_etcd_node: "{{ item.0.etcdConfig is not defined }}"
   when:

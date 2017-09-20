@@ -6,14 +6,14 @@
     cluster.providerConfig.authentication.credentialsProfile | is_empty
 
 - name: set accessKey if unset and credentialsFile set
-  set_fact: 
+  set_fact:
     cluster: "{{ cluster |combine({'providerConfig':{'authentication':{'accessKey': lookup('ini', 'aws_access_key_id section=' + cluster.providerConfig.authentication.credentialsProfile + ' file=' + cluster.providerConfig.authentication.credentialsFile)}}}, recursive=True)}}"
   when:
     - cluster.providerConfig.authentication.accessKey | is_empty
     - not (cluster.providerConfig.authentication.credentialsFile | is_empty)
 
 - name: set accessSecret if unset and credentialsFile set
-  set_fact: 
+  set_fact:
     cluster: "{{ cluster | combine({'providerConfig':{'authentication':{'accessSecret': lookup('ini', 'aws_secret_access_key section=' + cluster.providerConfig.authentication.credentialsProfile + ' file=' + cluster.providerConfig.authentication.credentialsFile)}}}, recursive=True)}}"
   when:
     - cluster.providerConfig.authentication.accessSecret | is_empty

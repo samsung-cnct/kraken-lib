@@ -9,8 +9,8 @@
     cluster_repos: "{{ cluster.helmConfig.repos | default([]) }}"
     helm_command: "{{ helm_commands[cluster.name] }}"
     kubectl: "{{ kubectl_commands[cluster.name] }}"
-    kubeconfig: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
-    helm_home: "{{ config_base | expanduser }}/{{ cluster.name }}/.helm"
+    kubeconfig: "{{ config_base }}/{{ cluster.name }}/admin.kubeconfig"
+    helm_home: "{{ config_base }}/{{ cluster.name }}/.helm"
 
 - name: Get helm and tiller versions
   command: >
@@ -34,7 +34,7 @@
     regex: "^.*: "
 
 - name: Wait for tiller to be ready
-  command: "{{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} --namespace=kube-system get deploy tiller-deploy -o json"
+  command: "{{ kubectl }} --kubeconfig={{ kubeconfig }} --namespace=kube-system get deploy tiller-deploy -o json"
   register: output
   until: (output | succeeded) and ((output.stdout | from_json).status.availableReplicas | default(0)) > 0
   retries: 600
@@ -67,7 +67,7 @@
 
 - name: Save config values to files for repo charts
   template: src=service-values.yaml.jinja2
-    dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ item.repo }}-{{ item.name }}.helmvalues"
+    dest="{{ config_base }}/{{ cluster.name }}/{{ item.repo }}-{{ item.name }}.helmvalues"
   with_items: "{{ cluster_services }}"
   when:
     - cluster_services is defined
@@ -75,7 +75,7 @@
 
 - name: Save config values to files for registry charts
   template: src=service-values.yaml.jinja2
-    dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ item.registry }}-{{ item.name }}.helmvalues"
+    dest="{{ config_base }}/{{ cluster.name }}/{{ item.registry }}-{{ item.name }}.helmvalues"
   with_items: "{{ cluster_services }}"
   when:
     - cluster_services is defined
@@ -86,7 +86,7 @@
     {{ helm_command }} upgrade {{ item.name }} {{ item.repo }}/{{ item.chart }}
       --version {{ item.version }}
       --namespace {{ item.namespace | default('default') }}
-      --values {{ config_base | expanduser }}/{{ cluster.name }}/{{ item.repo }}-{{ item.name }}.helmvalues
+      --values {{ config_base }}/{{ cluster.name }}/{{ item.repo }}-{{ item.name }}.helmvalues
       --install
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
@@ -101,7 +101,7 @@
   command: >
     {{ helm_command }} registry upgrade {{ item.registry }}/{{ item.chart }}@{{ item.version }} {{ item.name }} --
       --namespace {{ item.namespace | default('default') }}
-      --values {{ config_base | expanduser }}/{{ cluster.name }}/{{ item.registry }}-{{ item.name | replace('/','_') }}.helmvalues
+      --values {{ config_base }}/{{ cluster.name }}/{{ item.registry }}-{{ item.name | replace('/','_') }}.helmvalues
       --install
   environment:
     KUBECONFIG: "{{ kubeconfig }}"

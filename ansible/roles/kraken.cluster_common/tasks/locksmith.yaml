@@ -7,6 +7,6 @@
 
 - name: Generate nodePool .locksmith.part files
   template: src=locksmith.part.jinja2
-            dest="{{ config_base | expanduser }}/{{ cluster.name }}/{{ item.name }}.locksmith.part"
+            dest="{{ config_base }}/{{ cluster.name }}/{{ item.name }}.locksmith.part"
   with_items: "{{ cluster.nodePools }}"
   when: item.osConfig.locksmith is defined

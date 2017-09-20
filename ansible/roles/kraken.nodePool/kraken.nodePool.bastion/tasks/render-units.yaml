@@ -6,4 +6,4 @@
 - name: Generate bastion units.sshd.part
   template:
     src: units.sshd.part.jinja2
-    dest: "{{ config_base | expanduser }}/{{ cluster.name }}/{{ node.name }}.units.sshd.part"
+    dest: "{{ config_base }}/{{ cluster.name }}/{{ node.name }}.units.sshd.part"

@@ -7,7 +7,7 @@
   set_fact:
     cluster_services: "{{ cluster.helmConfig.charts | default([]) }}"
     cluster_repos: "{{ cluster.helmConfig.repos | default([]) }}"
-    kubeconfig: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
+    kubeconfig: "{{ config_base }}/{{ cluster.name }}/admin.kubeconfig"
     kubectl: "{{ kubectl_commands[cluster.name] }}"
     cluster_namespaces: []
 
@@ -88,7 +88,7 @@
   ignore_errors: yes
 
 - name: Get vpc id
-  shell: "terraform state show -state={{ config_base | expanduser }}/{{ cluster.name }}/terraform.tfstate module.vpc.aws_vpc.vpc  | awk '/^id/{print $3}'"
+  shell: "terraform state show -state={{ config_base }}/{{ cluster.name }}/terraform.tfstate module.vpc.aws_vpc.vpc  | awk '/^id/{print $3}'"
   register: terraform_state_show
   when: kraken_action == 'down'
   changed_when: false

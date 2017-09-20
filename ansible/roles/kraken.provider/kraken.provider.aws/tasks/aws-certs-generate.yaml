@@ -1,41 +1,41 @@
 ---
 - name: Make sure generated folder for certs is there
   file:
-    path: "{{ config_base | expanduser }}/{{ cluster.name }}/certs"
+    path: "{{ config_base }}/{{ cluster.name }}/certs"
     state: directory
 
 - name: Generate api server SSL options
   template: src=apiserver-loadbalancer-ssl-certificate-options.conf.jinja2
-    dest="{{ config_base | expanduser }}/{{ cluster.name }}/certs/apiserver-loadbalancer-ssl-certificate-options.conf"
+    dest="{{ config_base }}/{{ cluster.name }}/certs/apiserver-loadbalancer-ssl-certificate-options.conf"
 
 
 - name: Generate APIServer Loadbalancer key
   command: >
     openssl genrsa
-      -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/apiserver-loadbalancer-key.pem 2048
+      -out {{ config_base }}/{{ cluster.name }}/certs/apiserver-loadbalancer-key.pem 2048
 
 - name: Generate APIServer Loadbalancer CSR
   command: >
     openssl req -new
-      -key {{ config_base | expanduser }}/{{ cluster.name }}/certs/apiserver-loadbalancer-key.pem
-      -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/apiserver-loadbalancer.csr
+      -key {{ config_base }}/{{ cluster.name }}/certs/apiserver-loadbalancer-key.pem
+      -out {{ config_base }}/{{ cluster.name }}/certs/apiserver-loadbalancer.csr
       -subj "/CN=kube-apiserver"
-      -config {{ config_base | expanduser }}/{{ cluster.name }}/certs/apiserver-loadbalancer-ssl-certificate-options.conf
+      -config {{ config_base }}/{{ cluster.name }}/certs/apiserver-loadbalancer-ssl-certificate-options.conf
 
 - name: Sign APIServer Loadbalancer CSR
   command: >
     openssl x509 -req
-      -in {{ config_base | expanduser }}/{{ cluster.name }}/certs/apiserver-loadbalancer.csr
-      -CA {{ config_base | expanduser }}/{{ cluster.name }}/certs/ca.pem
-      -CAkey {{ config_base | expanduser }}/{{ cluster.name }}/certs/ca-key.pem
+      -in {{ config_base }}/{{ cluster.name }}/certs/apiserver-loadbalancer.csr
+      -CA {{ config_base }}/{{ cluster.name }}/certs/ca.pem
+      -CAkey {{ config_base }}/{{ cluster.name }}/certs/ca-key.pem
       -CAcreateserial
-      -CAserial {{ config_base | expanduser }}/{{ cluster.name }}/certs/ca.srl
-      -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/apiserver-loadbalancer.pem
+      -CAserial {{ config_base }}/{{ cluster.name }}/certs/ca.srl
+      -out {{ config_base }}/{{ cluster.name }}/certs/apiserver-loadbalancer.pem
       -days 3650 -extensions v3_req
-      -extfile {{ config_base | expanduser }}/{{ cluster.name }}/certs/apiserver-loadbalancer-ssl-certificate-options.conf
+      -extfile {{ config_base }}/{{ cluster.name }}/certs/apiserver-loadbalancer-ssl-certificate-options.conf
 
 
 - name: Generate Generic Cluster key
   command: >
-    openssl genrsa -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/cluster.key 2048
-    creates={{ config_base | expanduser }}/{{ cluster.name }}/certs/cluster.key
+    openssl genrsa -out {{ config_base }}/{{ cluster.name }}/certs/cluster.key 2048
+    creates={{ config_base }}/{{ cluster.name }}/certs/cluster.key

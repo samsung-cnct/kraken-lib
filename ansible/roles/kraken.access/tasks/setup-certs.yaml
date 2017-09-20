@@ -20,7 +20,7 @@
 # reset kubeconfig path for the admin config generation
 - name: Set kubeconfig path
   set_fact:
-    kubeconfig: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
+    kubeconfig: "{{ config_base }}/{{ cluster.name }}/admin.kubeconfig"
 
 - include: generate-admin-cert.yaml
 

@@ -1,6 +1,6 @@
 ---
 kraken_action: up
 config_base: "~/.kraken"
-config_file_default: "{{ config_base | expanduser }}/config.yaml"
-config_file: "{{ config_path | expanduser | default(config_file_default) }}"
+config_file_default: "{{ config_base }}/config.yaml"
+config_file: "{{ config_path | default(config_file_default) }}"
 dryrun: false

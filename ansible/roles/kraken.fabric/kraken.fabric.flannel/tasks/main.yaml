@@ -5,7 +5,7 @@
 
 - name: Set kubeconfig fact
   set_fact:
-    kubefn: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
+    kubefn: "{{ config_base }}/{{ cluster.name }}/admin.kubeconfig"
 
 - name: Execute appropriate kubectl per minor version
   set_fact:
@@ -15,7 +15,7 @@
 
 - name: Ensuring fabric directory exists
   file:
-    path: "{{ config_base | expanduser }}/{{ cluster.name }}/fabric"
+    path: "{{ config_base }}/{{ cluster.name }}/fabric"
     state: directory
 
 - name: Leagacy non-versioned fabric check
@@ -33,7 +33,7 @@
 - name: Generate canal RBAC policy file
   template:
     src: "{{ item }}"
-    dest: "{{ config_base | expanduser }}/{{ cluster.name }}/auth/rbac-canal-policy.yaml"
+    dest: "{{ config_base }}/{{ cluster.name }}/auth/rbac-canal-policy.yaml"
   with_first_found:
     - files:
       - "{{ kubernetes_minor_versions[ cluster.name ] }}/rbac-canal-policy.yaml.jinja2"
@@ -43,7 +43,7 @@
 - name: Generate Network Namespace Fie
   template:
     src: "{{ item }}"
-    dest: "{{ config_base | expanduser }}/{{ cluster.name }}/fabric/namespace.yaml"
+    dest: "{{ config_base }}/{{ cluster.name }}/fabric/namespace.yaml"
   with_first_found:
     - files:
       - "{{ kubernetes_minor_versions[ cluster.name ] }}/namespace.yaml.part.jinja2"
@@ -52,7 +52,7 @@
 - name: Generate canal deployment file
   template:
     src: "{{ item }}"
-    dest: "{{ config_base | expanduser }}/{{ cluster.name }}/fabric/canal.yaml"
+    dest: "{{ config_base }}/{{ cluster.name }}/fabric/canal.yaml"
   with_first_found:
     - files:
       - "{{ kubernetes_minor_versions[ cluster.name ] }}/canal.yaml.part.jinja2"
@@ -61,7 +61,7 @@
 - name: Generate canal configuration file
   template:
     src: "{{ item }}"
-    dest: "{{ config_base | expanduser }}/{{ cluster.name }}/fabric/config.yaml"
+    dest: "{{ config_base }}/{{ cluster.name }}/fabric/config.yaml"
   with_first_found:
     - files:
       - "{{ kubernetes_minor_versions[ cluster.name ] }}/config.yaml.part.jinja2"
@@ -69,12 +69,12 @@
 
 - name: Deploy Networking Namespace
   command: >
-    {{ kubectl }} --kubeconfig={{ kubefn | expanduser }} apply -f {{ config_base | expanduser }}/{{ cluster.name }}/fabric/namespace.yaml
+    {{ kubectl }} --kubeconfig={{ kubefn }} apply -f {{ config_base }}/{{ cluster.name }}/fabric/namespace.yaml
   when: not ( dryrun | bool )
 
 - name: Deploy canal RBAC policy
   command: >
-    {{ kubectl }} --kubeconfig={{ kubefn | expanduser }} apply -f {{ config_base | expanduser }}/{{ cluster.name }}/auth/rbac-canal-policy.yaml
+    {{ kubectl }} --kubeconfig={{ kubefn }} apply -f {{ config_base }}/{{ cluster.name }}/auth/rbac-canal-policy.yaml
   register: job_rbac_canal_results
   when:
     - "cluster.kubeAuth.authz.rbac is defined"
@@ -82,10 +82,10 @@
 
 - name: Deploy canal configuration
   command: >
-    {{ kubectl }} --kubeconfig={{ kubefn | expanduser }} apply -f {{ config_base | expanduser }}/{{ cluster.name }}/fabric/config.yaml --namespace=kube-networking
+    {{ kubectl }} --kubeconfig={{ kubefn }} apply -f {{ config_base }}/{{ cluster.name }}/fabric/config.yaml --namespace=kube-networking
   when: not ( dryrun | bool )
 
 - name: Deploy canal daemonset
   command: >
-    {{ kubectl }} --kubeconfig={{ kubefn | expanduser }} apply -f {{ config_base | expanduser }}/{{ cluster.name }}/fabric/canal.yaml --namespace=kube-networking
+    {{ kubectl }} --kubeconfig={{ kubefn }} apply -f {{ config_base }}/{{ cluster.name }}/fabric/canal.yaml --namespace=kube-networking
   when: not ( dryrun | bool )

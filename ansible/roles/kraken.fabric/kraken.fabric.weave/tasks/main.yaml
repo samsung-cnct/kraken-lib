@@ -5,7 +5,7 @@
 
 - name: Set kubeconfig fact
   set_fact:
-    kubefn: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
+    kubefn: "{{ config_base }}/{{ cluster.name }}/admin.kubeconfig"
 
 - name: Execute appropriate kubectl per minor version
   set_fact:
@@ -15,7 +15,7 @@
 
 - name: Ensuring fabric directory exists
   file:
-    path: "{{ config_base | expanduser }}/{{ cluster.name }}/fabric"
+    path: "{{ config_base }}/{{ cluster.name }}/fabric"
     state: directory
 
 - name: Leagacy non-versioned fabric check
@@ -33,7 +33,7 @@
 - name: Generate weave deployment file
   template:
     src: "{{ item }}"
-    dest: "{{ config_base | expanduser }}/{{ cluster.name }}/fabric/weave.yaml"
+    dest: "{{ config_base }}/{{ cluster.name }}/fabric/weave.yaml"
   with_first_found:
     - files:
       - "{{ kubernetes_minor_versions[ cluster.name ] }}/weave.yaml.part.jinja2"
@@ -42,7 +42,7 @@
 - name: Generate Network Namespace Fie
   template:
     src: "{{ item }}"
-    dest: "{{ config_base | expanduser }}/{{ cluster.name }}/fabric/namespace.yaml"
+    dest: "{{ config_base }}/{{ cluster.name }}/fabric/namespace.yaml"
   with_first_found:
     - files:
       - "{{ kubernetes_minor_versions[ cluster.name ] }}/namespace.yaml.part.jinja2"
@@ -50,10 +50,10 @@
 
 - name: Deploy Networking Namespace
   command: >
-    {{ kubectl }} --kubeconfig={{ kubefn | expanduser }} apply -f {{ config_base | expanduser }}/{{ cluster.name }}/fabric/namespace.yaml
+    {{ kubectl }} --kubeconfig={{ kubefn }} apply -f {{ config_base }}/{{ cluster.name }}/fabric/namespace.yaml
   when: not ( dryrun | bool )
 
 - name: Deploy weave daemonset
   command: >
-    {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} apply -f {{ config_base | expanduser }}/{{ cluster.name }}/fabric/weave.yaml --namespace=kube-networking
+    {{ kubectl }} --kubeconfig={{ kubeconfig }} apply -f {{ config_base }}/{{ cluster.name }}/fabric/weave.yaml --namespace=kube-networking
   when: not (dryrun | bool)

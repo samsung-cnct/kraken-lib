@@ -1,15 +1,15 @@
 ---
 - name: Get terraform modules
   command: >
-    terraform get -no-color -update=true {{ config_base | expanduser }}/{{ cluster.name }}
+    terraform get -no-color -update=true {{ config_base }}/{{ cluster.name }}
   args:
-    chdir: "{{ config_base | expanduser }}/{{ cluster.name }}"
+    chdir: "{{ config_base }}/{{ cluster.name }}"
 
 - name: Run cluster {{ kraken_action }}
   command: >
-    terraform apply {{ tf_k8s_targets }} -input=false -no-color {{ config_base | expanduser }}/{{ cluster.name }}
+    terraform apply {{ tf_k8s_targets }} -input=false -no-color {{ config_base }}/{{ cluster.name }}
   args:
-    chdir: "{{ config_base | expanduser }}/{{ cluster.name }}"
+    chdir: "{{ config_base }}/{{ cluster.name }}"
   when: (kraken_action == 'up') or (kraken_action == 'update')
   register: up_result
   until: up_result.rc == 0
@@ -24,9 +24,9 @@
 
 - name: Get kraken endpoint
   shell: >
-    terraform output -no-color kraken_endpoint chdir={{ config_base | expanduser }}/{{ cluster.name }}
+    terraform output -no-color kraken_endpoint chdir={{ config_base }}/{{ cluster.name }}
   args:
-    chdir: "{{ config_base | expanduser }}/{{ cluster.name }}"
+    chdir: "{{ config_base }}/{{ cluster.name }}"
   register: endpoint_result
   when: kraken_action == 'up'
 
@@ -37,15 +37,15 @@
 
 - name: Check for terraform state file
   stat:
-    path: "{{ config_base | expanduser }}/{{ cluster.name }}/terraform.tfstate"
+    path: "{{ config_base }}/{{ cluster.name }}/terraform.tfstate"
   register: tfstate
   when: (kraken_action == 'down')
 
 - name: Run terraform destroy
   command: >
-    terraform destroy -input=false -no-color -force {{ config_base | expanduser }}/{{ cluster.name }}
+    terraform destroy -input=false -no-color -force {{ config_base }}/{{ cluster.name }}
   args:
-    chdir: "{{ config_base | expanduser }}/{{ cluster.name }}"
+    chdir: "{{ config_base }}/{{ cluster.name }}"
   when: (kraken_action == 'down') and (tfstate.stat.exists)
   register: down_result
   until: down_result.rc == 0
@@ -54,7 +54,7 @@
 
 - name: clean the terraform state generated prefix and other misc files.
   file:
-    path: "{{ config_base | expanduser }}/{{ cluster.name }}/{{ item }}"
+    path: "{{ config_base }}/{{ cluster.name }}/{{ item }}"
     state: absent
   when: kraken_action == 'down'
   with_items:

@@ -10,7 +10,7 @@
 - name: Execute appropriate kubectl per minor version
   set_fact:
     kubectl: "/opt/cnct/kubernetes/{{ kubernetes_minor_version }}/bin/kubectl"
-    kubeconfig: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
+    kubeconfig: "{{ config_base }}/{{ cluster.name }}/admin.kubeconfig"
 
 - name: Collect node names in nodepool
   command: >

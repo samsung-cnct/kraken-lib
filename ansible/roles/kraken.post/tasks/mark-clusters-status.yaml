@@ -5,11 +5,11 @@
 
   - name: Make sure generated folder for cluster is there
     file:
-      path: "{{ config_base | expanduser }}/{{ cluster.name }}"
+      path: "{{ config_base }}/{{ cluster.name }}"
       state: directory
 
   - name: Log when the cluster is created on cluster.status.lock file
     copy:
       content: "{{ cluster.name }} cluster is successfully created at: {{ ansible_date_time.iso8601 }}"
-      dest: "{{ config_base | expanduser }}/{{ cluster.name }}/cluster.status.lock"
+      dest: "{{ config_base }}/{{ cluster.name }}/cluster.status.lock"
       mode: "u=rw,g=r,o=r"

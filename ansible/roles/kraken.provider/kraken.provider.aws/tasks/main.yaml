@@ -24,12 +24,12 @@
 - name:
   set_fact:
     cluster: "{{ a_cluster }}"
-    etcd_status_lock_filename: "{{ config_base | expanduser }}/{{ cluster.name }}/etcd.status.lock"
+    etcd_status_lock_filename: "{{ config_base }}/{{ cluster.name }}/etcd.status.lock"
     ssl_cert_common_name: "*.{{ cluster.providerConfig.region }}.elb.amazonaws.com"
 
 - name: Ensure cluster directories exist
   file:
-    path: "{{ config_base | expanduser }}/{{ cluster.name }}/"
+    path: "{{ config_base }}/{{ cluster.name }}/"
     state: directory
     recurse: yes
 
@@ -72,7 +72,7 @@
 - name: Ensure etcd_status_lock file exists
   copy:
     content: ""
-    dest: "{{ config_base | expanduser }}/{{ cluster.name }}/etcd.status.lock"
+    dest: "{{ config_base }}/{{ cluster.name }}/etcd.status.lock"
 
 - include: aws-action-dryrun.yaml
 

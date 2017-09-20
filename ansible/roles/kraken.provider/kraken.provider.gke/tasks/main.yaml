@@ -5,7 +5,7 @@
 
 - name: Make sure generated folder for full cloud configs is there
   file:
-    path: "{{ config_base | expanduser }}/{{ cluster.name }}"
+    path: "{{ config_base }}/{{ cluster.name }}"
     state: directory
 
 - name: Get the Default Admin User from BasicAuth
@@ -20,7 +20,7 @@
 
 - name: Render a deployment manager template for created-cluster.yaml in advance
   template: src=deploymentmanager-create.yaml.jinja2
-   dest="{{ config_base | expanduser }}/{{ cluster.name }}/deploymentmanager-create.yaml"
+   dest="{{ config_base }}/{{ cluster.name }}/deploymentmanager-create.yaml"
 
 - include: authenticate.yaml
   when: not ( dryrun | bool )

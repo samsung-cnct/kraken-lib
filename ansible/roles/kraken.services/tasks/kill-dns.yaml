@@ -13,7 +13,7 @@
 
 - name: Set kubeconfig fact
   set_fact:
-    kubeconfig: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
+    kubeconfig: "{{ config_base }}/{{ cluster.name }}/admin.kubeconfig"
 
 - name: Merge User DNS Config with Default DNS Config
   set_fact:
@@ -21,6 +21,6 @@
 
 - name: Clean up DNS
   command: >
-    {{ kubectl }} --kubeconfig={{ kubeconfig }} delete -f {{ config_base | expanduser }}/{{ cluster.name }}/services/dns-deployment.yaml --namespace={{ dns_config.namespace }}
+    {{ kubectl }} --kubeconfig={{ kubeconfig }} delete -f {{ config_base }}/{{ cluster.name }}/services/dns-deployment.yaml --namespace={{ dns_config.namespace }}
   when: kraken_action == 'down'
   ignore_errors: yes

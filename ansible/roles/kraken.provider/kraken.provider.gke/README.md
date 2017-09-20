@@ -14,9 +14,9 @@ deployment:
   keypair:
     -
       name: k2key
-      providerConfig: 
+      providerConfig:
         serviceAccount: "your-service-account@developer.gserviceaccount.com"
-        serviceAccountKeyFile: "{{ '~/.ssh/your-service-account-key.json' | expanduser }}"
+        serviceAccountKeyFile: "{{ '~/.ssh/your-service-account-key.json' }}"
   provider: gke
   providerConfig:
     type: autonomous
@@ -25,7 +25,7 @@ deployment:
     keypair: k2key
     zone:
       primaryZone: us-central1-a
-      additionalZones: 
+      additionalZones:
         - us-central1-b
         - us-central1-c
   nodepool:

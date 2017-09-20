@@ -1,5 +1,5 @@
 ---
-  
+
 - name: Update nodepools, if needed
   command: >
     gcloud container clusters upgrade {{ cluster.name }}

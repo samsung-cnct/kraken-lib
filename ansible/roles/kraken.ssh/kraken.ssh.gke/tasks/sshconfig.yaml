@@ -10,4 +10,4 @@
 
 - name: Generate ssh inventory
   template: src=ssh_config.jinja2
-    dest="{{ config_base | expanduser }}/{{ cluster.name }}/ssh_config"
+    dest="{{ config_base }}/{{ cluster.name }}/ssh_config"

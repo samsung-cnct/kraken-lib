@@ -96,7 +96,7 @@ resource "aws_launch_configuration" "master_launch_config" {
   {% endif %}
 
   iam_instance_profile        = "${aws_iam_instance_profile.kubernetes_master_profile.name}"
-  user_data                   = "${file("{{ config_base | expanduser }}/{{cluster.name}}/cloud-config/{{master.name}}.cloud-config.yaml")}"
+  user_data                   = "${file("{{ config_base }}/{{cluster.name}}/cloud-config/{{master.name}}.cloud-config.yaml")}"
 
   lifecycle {
     create_before_destroy = true
@@ -117,9 +117,9 @@ resource "aws_launch_configuration" "master_launch_config" {
 
 # Client Auth doesn't work right in amazon ELB
 #resource "aws_iam_server_certificate" "master_cert" {
-#  certificate_chain = "${file("{{ config_base | expanduser }}/{{cluster.name}}/certs/ca.pem")}"
-#  certificate_body = "${file("{{ config_base | expanduser }}/{{cluster.name}}/certs/apiserver-loadbalancer.pem")}"
-#  private_key = "${file("{{ config_base | expanduser }}/{{cluster.name}}/certs/apiserver-loadbalancer-key.pem")}"
+#  certificate_chain = "${file("{{ config_base }}/{{cluster.name}}/certs/ca.pem")}"
+#  certificate_body = "${file("{{ config_base }}/{{cluster.name}}/certs/apiserver-loadbalancer.pem")}"
+#  private_key = "${file("{{ config_base }}/{{cluster.name}}/certs/apiserver-loadbalancer-key.pem")}"
 #}
 
 resource "aws_elb" "master_elb" {

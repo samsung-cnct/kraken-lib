@@ -86,7 +86,7 @@ resource "aws_instance" "{{node.name}}_{{node_idx}}" {
   instance_type               = "{{node.nodeConfig.providerConfig.type}}"
   key_name                    = "${var.{{node.keyPair.name}}_{{node.name}}_key}"
   vpc_security_group_ids      = ["${aws_security_group.vpc_etcd_{{node.name}}_secgroup.id}"]
-  user_data                   = "${file("{{ config_base | expanduser }}/{{cluster.name}}/cloud-config/{{node.name}}.cloud-config.yaml")}"
+  user_data                   = "${file("{{ config_base }}/{{cluster.name}}/cloud-config/{{node.name}}.cloud-config.yaml")}"
 
   {% if node.nodeConfig.providerConfig.enablePublicIPs is defined %}
   associate_public_ip_address = "{{node.nodeConfig.providerConfig.enablePublicIPs}}"

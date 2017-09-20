@@ -3,4 +3,4 @@
   permissions: 0644
   encoding: "gz+b64"
   content: |
-    {{ lookup('file', '{{ config_base }}/{{ cluster.name }}/{{ node.name }}.kube-proxy.yaml.manifest' | expanduser) | gz | b64encode }}
+    {{ lookup('file', '{{ config_base }}/{{ cluster.name }}/{{ node.name }}.kube-proxy.yaml.manifest') | gz | b64encode }}

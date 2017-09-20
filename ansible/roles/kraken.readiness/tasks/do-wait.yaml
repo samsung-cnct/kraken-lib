@@ -21,7 +21,7 @@
 
 - name: Wait for all nodes to join cluster (any status)
   command: >
-    {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} get nodes --no-headers=true --v 7
+    {{ kubectl }} --kubeconfig={{ kubeconfig }} get nodes --no-headers=true --v 7
   register: job_get_nodes_result
   until: job_get_nodes_result.stdout_lines | length >= needed_nodes | int
   retries: "{{ (( readiness_wait | int ) / retry_interval | int ) | int }}"
@@ -32,7 +32,7 @@
 
 - name: Wait for all nodes to join cluster (status Ready)
   shell: >
-    {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} get nodes --no-headers=true --v 7 | grep -v NotReady
+    {{ kubectl }} --kubeconfig={{ kubeconfig }} get nodes --no-headers=true --v 7 | grep -v NotReady
   register: job_get_nodes_result
   until: job_get_nodes_result.stdout_lines | length >= needed_nodes | int
   retries: "{{ (( readiness_wait | int ) / retry_interval | int ) | int }}"

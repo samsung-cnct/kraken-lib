@@ -10,7 +10,7 @@
 - name: Generate bastion ssh inventory
   template:
     src: bastion_ssh_config.jinja2
-    dest: "{{ config_base | expanduser }}/{{ cluster.name }}/bastion_ssh_config"
+    dest: "{{ config_base }}/{{ cluster.name }}/bastion_ssh_config"
 
 - name: Create a list of bastion host names
   set_fact:

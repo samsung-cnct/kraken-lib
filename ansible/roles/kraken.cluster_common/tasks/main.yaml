@@ -8,4 +8,3 @@
   loop_control:
     loop_var: a_cluster
   when: a_cluster.providerConfig.type == 'cloudinit'
-

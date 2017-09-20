@@ -30,7 +30,7 @@
     path: "/opt/cnct/kubernetes/{{ kubernetes_minor_version }}/bin/helm"
     latest: "/opt/cnct/kubernetes/latest/bin/helm"
     helm_command: "{{ ( path | is_file ) | ternary( path, latest ) }}"
-    helm_home: "{{ config_base | expanduser }}/{{ cluster.name }}/.helm"
+    helm_home: "{{ config_base }}/{{ cluster.name }}/.helm"
 
 - name: Create Helm home
   file:

@@ -20,7 +20,7 @@
 - name: Generate shell command help text
   template:
     src: help.txt.jinja2
-    dest: "{{ config_base | expanduser }}/help.txt"
+    dest: "{{ config_base }}/help.txt"
 
 - name: Supported cloud provider check
   include_role:

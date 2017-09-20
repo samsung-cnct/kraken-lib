@@ -10,9 +10,9 @@
 #
 - name: Generate end-user {{ a_user.user }} key
   command: >
-    openssl genrsa -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.key 2048
+    openssl genrsa -out {{ config_base }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.key 2048
   args:
-    creates: "{{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.key"
+    creates: "{{ config_base }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.key"
 
 - name: Create non-rbac subj value
   set_fact:
@@ -26,21 +26,21 @@
 
 - name: Generate end-user {{ a_user.user }} csr
   command: >
-    openssl req -new -key {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.key
-      -subj {{ endsubj }} -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.csr
+    openssl req -new -key {{ config_base }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.key
+      -subj {{ endsubj }} -out {{ config_base }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.csr
   args:
-    creates: "{{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.csr"
+    creates: "{{ config_base }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.csr"
 
 - name: Generate end-user {{ a_user.user }} crt
   command: >
-    openssl x509 -req -in {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.csr
-      -CA {{ config_base | expanduser }}/{{ cluster.name }}/certs/ca.pem
-      -CAkey {{ config_base | expanduser }}/{{ cluster.name }}/certs/ca-key.pem
+    openssl x509 -req -in {{ config_base }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.csr
+      -CA {{ config_base }}/{{ cluster.name }}/certs/ca.pem
+      -CAkey {{ config_base }}/{{ cluster.name }}/certs/ca-key.pem
       -CAcreateserial
-      -CAserial {{ config_base | expanduser }}/{{ cluster.name }}/certs/ca.srl
-      -out {{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.crt -days 10000
+      -CAserial {{ config_base }}/{{ cluster.name }}/certs/ca.srl
+      -out {{ config_base }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.crt -days 10000
   args:
-    creates: "{{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.crt"
+    creates: "{{ config_base }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.crt"
 #
 # expects:
 #   a_user
@@ -60,7 +60,7 @@
 
 - name: Set kubeconfig file name
   set_fact:
-     kubeconfig: "{{ config_base | expanduser }}/{{ cluster.name }}/user-{{ a_user.user }}.kubeconfig"
+     kubeconfig: "{{ config_base }}/{{ cluster.name }}/user-{{ a_user.user }}.kubeconfig"
 
 - name: Ensure kubeconfig file exists
   file:
@@ -73,7 +73,7 @@
   command: >
     {{ kubectl }} config set-cluster {{ cluster.name }}
       --server=https://{{ kraken_endpoint }}
-      --certificate-authority={{ config_base | expanduser }}/{{ cluster.name }}/certs/ca.pem
+      --certificate-authority={{ config_base }}/{{ cluster.name }}/certs/ca.pem
       --embed-certs=true
       --kubeconfig={{ kubeconfig }}
   vars:
@@ -88,8 +88,8 @@
   command: >
     {{ kubectl }} config set-credentials {{ cluster.name }}_{{ a_user.user }}
       --username={{ a_user.user }}
-      --client-certificate={{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.crt
-      --client-key={{ config_base | expanduser }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.key
+      --client-certificate={{ config_base }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.crt
+      --client-key={{ config_base }}/{{ cluster.name }}/certs/end-user-{{ a_user.user }}.key
       --embed-certs=true
       --kubeconfig={{ kubeconfig }}
   vars:

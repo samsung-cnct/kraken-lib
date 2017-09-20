@@ -2,7 +2,7 @@
 - name: Deploy cluster
   command: >
     gcloud deployment-manager deployments create {{ cluster.name }}-k2-deployment
-      --config {{ config_base | expanduser }}/{{ cluster.name }}/deploymentmanager-create.yaml
+      --config {{ config_base }}/{{ cluster.name }}/deploymentmanager-create.yaml
       --project {{ cluster.providerConfig.project }}
       --no-async
       --quiet
@@ -37,7 +37,7 @@
        --zone {{ cluster.providerConfig.zone.primaryZone }}
        --quiet
   environment:
-    KUBECONFIG: "{{ config_base | expanduser }}/{{ cluster.name }}/admin.kubeconfig"
+    KUBECONFIG: "{{ config_base }}/{{ cluster.name }}/admin.kubeconfig"
     CLOUDSDK_CONTAINER_USE_CLIENT_CERTIFICATE: True
 
 - include: update-cluster.yaml

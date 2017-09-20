@@ -7,13 +7,13 @@
 #
 - name: Make sure generated folder for RBAC policy is there
   file:
-    path: "{{ config_base | expanduser }}/{{ cluster.name }}/auth"
+    path: "{{ config_base }}/{{ cluster.name }}/auth"
     state: directory
 
 - name: Generate default RBAC policy file
   template:
     src: "{{ item }}"
-    dest: "{{ config_base | expanduser }}/{{ cluster.name }}/auth/rbac-default-policy.yaml"
+    dest: "{{ config_base }}/{{ cluster.name }}/auth/rbac-default-policy.yaml"
   with_first_found:
     - files:
       - "{{ kubernetes_minor_versions[ cluster.name ] }}/rbac-default-policy.yaml.jinja2"
@@ -21,7 +21,7 @@
 
 - name: Bootstrap RBAC policy
   command: >
-    {{ kubectl }} --kubeconfig={{ kubeconfig | expanduser }} apply -f {{ config_base | expanduser }}/{{ cluster.name }}/auth/rbac-default-policy.yaml
+    {{ kubectl }} --kubeconfig={{ kubeconfig }} apply -f {{ config_base }}/{{ cluster.name }}/auth/rbac-default-policy.yaml
   register: job_rbac_bootstrap_result
   until: job_rbac_bootstrap_result | success
   retries: "{{ rbac_bootstrap_retries | int }}"
