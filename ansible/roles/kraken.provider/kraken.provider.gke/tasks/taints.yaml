@@ -22,11 +22,20 @@
   set_fact:
     nodes_in_nodepool: "{{ node_names.stdout_lines }}"
 
-- name: Taint nodes by nodepool
+- name: Taint nodes by nodeConfig
   command: >
     {{ kubectl }} --kubeconfig={{ kubeconfig }} taint nodes {{ item.0 }} {{ item.1.key }}={{ item.1.value }}:{{ item.1.effect }}
   with_nested:
     - "{{ nodes_in_nodepool }}"
     - "{{ node.nodeConfig.taints }}"
   when: node.nodeConfig.taints is defined
+  ignore_errors: yes
+
+- name: Taint nodes by nodePool
+  command: >
+    {{ kubectl }} --kubeconfig={{ kubeconfig }} taint nodes {{ item.0 }} {{ item.1.key }}={{ item.1.value }}:{{ item.1.effect }}
+  with_nested:
+    - "{{ nodes_in_nodepool }}"
+    - "{{ node.schedulingConfig.taints }}"
+  when: node.schedulingConfig.taints is defined
   ignore_errors: yes

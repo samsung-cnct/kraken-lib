@@ -30,11 +30,12 @@
   when: kraken_action == 'down' and not ( dryrun | bool )
 - include: deauthenticate.yaml
   when: not ( dryrun | bool )
-  
+
 - include: taints.yaml
   with_subelements:
     - "{{ kraken_config.clusters }}"
     - nodePools
   loop_control:
     loop_var: cluster_node_tuple
-  when: kraken_action == 'up' and cluster_node_tuple.1.nodeConfig.taints is defined
+  when: kraken_action == 'up' and (cluster_node_tuple.1.nodeConfig.taints is defined or cluster_node_tuple.1.schedulingConfig.taints is defined)
+  ignore_errors: yes

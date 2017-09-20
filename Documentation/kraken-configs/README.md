@@ -12,3 +12,4 @@
 * `provider` -[provider configuration](provider/README.md)
 * `keypairs` -[keyPair configuration](keypair/README.md)
 * `kubeAuth` -[kubeAuth configuration](kubeauth.md)
+* `scheduling` -[scheduling configuration](schedulingConfig.md)

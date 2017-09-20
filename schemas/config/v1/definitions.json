@@ -113,6 +113,14 @@
       },
       "minItems": 1,
       "type": "array"
+    },
+    "schedulingConfigs": {
+      "title": "Pod Scheduling configuration.",
+      "description": "Taint information for pod scheduling.",
+      "items": {
+        "$ref": "schedulingConfig.json"
+      },
+      "type": "array"
     }
   },
 

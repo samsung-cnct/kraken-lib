@@ -2,6 +2,26 @@
 - set_fact:
     cluster: "{{ cluster_node_tuple.0 }}"
     node: "{{ cluster_node_tuple.1 }}"
+    nodePoolTaints: []
+    nodeTypeTaints: []
+    taints_exist: false 
+
+- set_fact:
+    nodePoolTaints: "{{ node.schedulingConfig.taints }}"
+  when: node.schedulingConfig.taints is defined
+  ignore_errors: true
+
+- set_fact:
+    nodeTypeTaints: "{{ node.nodeConfig.taints }}"
+  when: node.nodeConfig.taints is defined
+  ignore_errors: true
+
+- set_fact:
+    taints: "{{ nodePoolTaints }} + {{ nodeTypeTaints }}"
+
+- set_fact:
+    taints_exist: true
+  when: taints | length > 0
 
 - name: Generate node units.kraken-worker-ssl.part
   template: src=units.kraken-worker-ssl.part.jinja2

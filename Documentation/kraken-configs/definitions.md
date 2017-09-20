@@ -53,4 +53,7 @@ definitions:
   kubeAuth:
    - &defaultKubeAuth
       #kubeAuth configuration
+  schedulingConfigs:
+   - &defaultScheduling
+     # taint and label configurations
 ```

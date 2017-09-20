@@ -25,6 +25,7 @@ We do not expect the same machine types to be used for each purpose, therefore e
 | nodeConfig      | __Required__ | String  | Name of the [node config](node/README.md) for this nodepool
 | keypair         | Optional     | String  | Key name from list of keypairs in [deployment](deployment.md). Lack of setting this indicates nobody should be able to log in. |
 | kubeConfig      | Optional     | String  | Name of one of the [Kubernetes configurations](kubeconfig.md)|
+| schedulingConfig| Optional     | String  | [Taints](schedulingConfig.md) to apply to nodePool |
 
 ## Example
 ```yaml
@@ -65,4 +66,5 @@ nodePools:
     osConfig: *defaultCoreOs
     nodeConfig: *defaultAwsSpecialNode
     keyPair: *defaultKeyPair
+    schedulingConfig: *defaultScheduling
 ```
