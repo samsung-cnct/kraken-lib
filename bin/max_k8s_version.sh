@@ -23,7 +23,18 @@ source "${my_dir}/../lib/common.sh"
 trap control_c SIGINT
 LOCAL_KEV="kraken_action=max_k8s_version version_outfile=${OUTFILE}"
 
-ansible-playbook ${K2_VERBOSE} -i ansible/inventory/localhost \
-	ansible/max_k8s_version.yaml --extra-vars \
-	"${KRAKEN_EXTRA_VARS}${LOCAL_KEV}" \
-    || echo "max_version failed"
+function runcmd(){
+    ansible-playbook ${K2_VERBOSE} \
+        -i ansible/inventory/localhost \
+        ansible/max_k8s_version.yaml \
+        --extra-vars "${KRAKEN_EXTRA_VARS}${LOCAL_KEV}" \
+        || echo "max_version failed" > out
+}
+
+if [[ ! -z $K2_VERBOSE ]]; then
+    runcmd
+else
+    out=`runcmd`
+fi
+
+
