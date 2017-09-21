@@ -1,9 +1,9 @@
 {% if item.osConfig.locksmith is defined %}
 {% set locksmith = item.osConfig.locksmith %}
 {% if locksmith.group is defined %}
-group = {{ locksmith.group }}
+group: {{ locksmith.group }}
 {% else %}
-group = item.name
+group: {{ item.name }}
 {% endif %}
 {% if locksmith.setMax is defined %}
 set_max: {{ locksmith.setMax }}
