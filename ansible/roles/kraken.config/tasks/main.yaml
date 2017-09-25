@@ -1,4 +1,10 @@
 ---
+- name: Fail if user specified config file does not exist
+  fail:
+    msg: >-
+         The configuration file ({{ config_file }}) cannot be found. Please make sure a file exists and you specified the correct file path.
+  when: not config_file | is_file
+
 - name: "Expand ~ paths"
   set_fact:
     config_base: "{{ config_base | expanduser }}"
@@ -13,17 +19,10 @@
   include_vars:
     file: "{{ config_file }}"
     name: kraken_config_user
-  when: config_file | is_file
-
-- name: Expand default configuration
-  set_fact:
-    kraken_config: "{{ kraken_config_defaults.deployment | expand_config }}"
-  when: not config_file | is_file
 
 - name: Non-recursively combine and expand the defaults and user configuration
   set_fact:
     kraken_config: "{{ kraken_config_defaults.deployment | combine(kraken_config_user.deployment) | expand_config }}"
-  when: config_file | is_file
 
 - name: Validate the config against the schema
   include: validate-config.yaml
