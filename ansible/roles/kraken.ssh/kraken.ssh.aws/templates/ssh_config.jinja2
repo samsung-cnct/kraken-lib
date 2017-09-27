@@ -10,7 +10,8 @@ Host {{instance.tags['k2-nodepool']}}-{{validHostCounter}}
   User core
   StrictHostKeyChecking no
   UserKnownHostsFile=/dev/null
-  ProxyCommand ssh core@{{elb_facts.elbs[0].dns_name}} -p {{bastionListenPort}} -W {{instance.private_ip_address}}:22
+  IdentityFile {{privateKeyPath[0].keyPair.privatekeyFile}}
+  ProxyCommand ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null core@{{elb_facts.elbs[0].dns_name}} -p {{bastionListenPort}} -W {{instance.private_ip_address}}:22
 {% set validHostCounter = validHostCounter + 1 %}
 {% endif %}
 {% endif %}
