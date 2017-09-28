@@ -73,7 +73,7 @@ For the specific version of Python modules (including Ansible) that are expected
 
 The easiest way to get started with kraken-lib directly is to use a kraken-lib container image:
 
-`docker pull quay.io/samsung_cnct/K2:latest`
+`docker pull quay.io/samsung_cnct/k2:latest`
 
 ## Preparing the Environment  
 
