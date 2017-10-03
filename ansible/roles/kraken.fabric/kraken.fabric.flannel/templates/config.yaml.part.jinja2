@@ -1,20 +1,17 @@
+---
+#--------------------------
+# SOURCE OF THIS FILE: https://github.com/projectcalico/canal/blob/master/k8s-install/1.6/canal.yaml
+# 5/19/2017 mikeln - for samsung-cnct
+#---------------------------
 # This ConfigMap can be used to configure a self-hosted Canal installation.
-# See `canal.yaml` for an example of a Canal deployment which uses
-# the config in this ConfigMap.
 kind: ConfigMap
 apiVersion: v1
 metadata:
   name: canal-config
   namespace: kube-networking
 data:
-  # Configure this with the location of your etcd cluster.
-  etcd_endpoints: "{% if etcd.etcdConfig.ssl == true %}https{% else %}http{% endif %}://{{etcd.etcdConfig.name}}.{{cluster.name}}.internal:{{etcd.etcdConfig.clientPorts[0]}}"
-  etcd_ca_cert_file: "/etc/etcd/ssl/client-ca.pem"
-  etcd_cert_file: "/etc/etcd/ssl/client.pem"
-  etcd_key_file: "/etc/etcd/ssl/client-key.pem"
-
   # The interface used by canal for host <-> host communication.
-  # If left blank, then the interface is chosing using the node's
+  # If left blank, then the interface is chosen using the node's
   # default route.
   canal_iface: ""
 
@@ -22,26 +19,38 @@ data:
   # the pod network.
   masquerade: "true"
 
-  # The CNI network configuration to install on each node.  The special
-  # values in this config will be automatically populated.
+  # The CNI network configuration to install on each node.
   cni_network_config: |-
     {
-        "name": "canal",
-        "type": "flannel",
-        "delegate": {
-          "type": "calico",
-          "etcd_endpoints": "__ETCD_ENDPOINTS__",
-          "etcd_ca_cert_file": "/etc/etcd/ssl/client-ca.pem",
-          "etcd_cert_file": "/etc/etcd/ssl/client.pem",
-          "etcd_key_file": "/etc/etcd/ssl/client-key.pem",
-          "log_level": "info",
-          "policy": {
-              "type": "k8s",
-              "k8s_api_root": "https://__KUBERNETES_SERVICE_HOST__:__KUBERNETES_SERVICE_PORT__",
-              "k8s_api_token": "__SERVICEACCOUNT_TOKEN__"
-          },
-          "kubernetes": {
-              "kubeconfig": "/etc/kubernetes/kubeconfig.yaml"
-          }
+        "name": "k8s-pod-network",
+        "type": "calico",
+        "log_level": "info",
+        "datastore_type": "kubernetes",
+        "hostname": "__KUBERNETES_NODE_NAME__",
+        "ipam": {
+            "type": "host-local",
+            "subnet": "usePodCidr"
+        },
+        "policy": {
+            "type": "k8s",
+            "k8s_auth_token": "__SERVICEACCOUNT_TOKEN__"
+        },
+        "kubernetes": {
+            "k8s_api_root": "https://__KUBERNETES_SERVICE_HOST__:__KUBERNETES_SERVICE_PORT__",
+            "kubeconfig": "__KUBECONFIG_FILEPATH__"
         }
     }
+
+  # Flannel network configuration. Mounted into the flannel container.
+  # "Network": "10.244.0.0/16",
+  net-conf.json: |
+    {
+      "Network": "{{ fabricConfigVal.options.network.network }}",
+      "SubnetLen": {{ fabricConfigVal.options.network.subnetLen}}, 
+      "SubnetMin": "{{ fabricConfigVal.options.network.subnetMin}}", 
+      "SubnetMax": "{{ fabricConfigVal.options.network.subnetMax}}", 
+      "Backend": {
+        "Type": "{{ fabricConfigVal.options.network.backend.type}}"
+      }
+    }
+

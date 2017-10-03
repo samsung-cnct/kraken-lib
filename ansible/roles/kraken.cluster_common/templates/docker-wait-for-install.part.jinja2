@@ -1,7 +1,0 @@
-- name: docker.service
-  drop-ins:
-    - name: wait-docker-install.conf
-      content: |
-        [Unit]
-        After=docker-install.service
-        Requires=docker-install.service

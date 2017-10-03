@@ -2,11 +2,10 @@
 #--------------------------
 # SOURCE OF THIS FILE: https://github.com/projectcalico/canal/blob/master/k8s-install/1.6/rbac.yaml
 # 5/19/2017 mikeln - for samsung-cnct
-# v1beta1 has to be v1alpha1
 #---------------------------
 # Calico Roles
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1alpha1
+apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: canal
   namespace: kube-networking
@@ -55,7 +54,14 @@ rules:
       - watch
   - apiGroups: ["projectcalico.org"]
     resources:
+      - globalbgppeers
+    verbs:
+      - get
+      - list
+  - apiGroups: ["projectcalico.org"]
+    resources:
       - globalconfigs
+      - globalbgpconfigs
     verbs:
       - create
       - get
@@ -67,10 +73,16 @@ rules:
       - ippools
     verbs:
       - create
-      - delete
       - get
       - list
       - update
+      - watch
+  - apiGroups: ["alpha.projectcalico.org"]
+    resources:
+      - systemnetworkpolicies
+    verbs:
+      - get
+      - list
       - watch
 
 ---
@@ -78,7 +90,7 @@ rules:
 # Flannel roles
 # Pulled from https://github.com/coreos/flannel/blob/master/Documentation/kube-flannel-rbac.yml
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1alpha1
+apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: flannel
 rules:
@@ -104,7 +116,7 @@ rules:
 ---
 
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1alpha1
+apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: flannel
 roleRef:
@@ -118,7 +130,7 @@ subjects:
 
 ---
 
-apiVersion: rbac.authorization.k8s.io/v1alpha1
+apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
   name: canal

@@ -5,30 +5,64 @@
 #--------------------------
 #
 # This manifest installs weave-net cni on kubernetes clusters v1.5 and earlier.
-
 #
 # Further details about configuring and environment variables found here:
 # https://www.weave.works/docs/net/latest/kube-addon/
 #
+
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: weave-net
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - namespaces
+  - nodes
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - networkpolicies
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: weave-net
+  namespace:  kube-networking
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: weave-net
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: weave-net
+subjects:
+- kind: ServiceAccount
+  name: weave-net
+  namespace:  kube-networking
+---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
   name: weave-net
+  namespace: kube-networking
 spec:
   template:
     metadata:
       labels:
         name: weave-net
-      annotations:
-        scheduler.alpha.kubernetes.io/tolerations: |
-          [
-            {
-              "key": "dedicated",
-              "operator": "Equal",
-              "value": "master",
-              "effect": "NoSchedule"
-            }
-          ]
     spec:
       hostNetwork: true
       hostPID: true
@@ -38,10 +72,10 @@ spec:
           command:
             - /home/weave/launch.sh
           env:
-          - name: IPALLOC_RANGE
-            value: {{fabricConfigVal.options.network.network}}
-          - name: CONN_LIMIT
-            value: '{{fabricConfigVal.options.network.nodeConnectionLimit}}'
+            - name: IPALLOC_RANGE
+              value: {{fabricConfigVal.options.network.network}}
+            - name: CONN_LIMIT
+              value: '{{fabricConfigVal.options.network.nodeConnectionLimit}}'
           livenessProbe:
             initialDelaySeconds: 30
             httpGet:
@@ -80,6 +114,14 @@ spec:
                 apiVersion: v1
                 fieldPath: spec.nodeName
       restartPolicy: Always
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Equal
+        effect: NoSchedule
+      - operator: Exists
+      serviceAccountName: weave-net
+      securityContext:
+        seLinuxOptions: {}
       volumes:
         - name: weavedb
           emptyDir: {}

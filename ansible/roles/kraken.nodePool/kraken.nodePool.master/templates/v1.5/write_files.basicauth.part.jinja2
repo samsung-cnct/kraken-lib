@@ -1,4 +1,0 @@
-- path: /etc/kubernetes/basicauth.csv
-  encoding: "gz+b64"
-  content: |
-    {{ lookup('file', '{{config_base}}/{{ cluster.name }}/basicauth.csv') | gz | b64encode }}

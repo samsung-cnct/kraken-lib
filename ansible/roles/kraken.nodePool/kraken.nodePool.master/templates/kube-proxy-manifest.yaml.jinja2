@@ -25,3 +25,7 @@ spec:
   - hostPath:
       path: /usr/share/ca-certificates
     name: ssl-certs-host
+  tolerations:
+  - key: node-role.kubernetes.io/master
+    operator: Equal
+    effect: NoSchedule

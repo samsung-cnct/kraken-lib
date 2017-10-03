@@ -1,8 +1,0 @@
-- name: install-docker.service
-  command: start
-  content: |
-    [Unit]
-    Description=Install custom docker
-    [Service]
-    Type=oneshot
-    ExecStart=/bin/bash -c "/bin/bash <(/usr/bin/curl https://s3-us-west-2.amazonaws.com/samsung-cnct/artifacts/install-artifact.sh) -u {{item.containerConfig.url}} -l /var/run/cnct-docker-installed.lock"

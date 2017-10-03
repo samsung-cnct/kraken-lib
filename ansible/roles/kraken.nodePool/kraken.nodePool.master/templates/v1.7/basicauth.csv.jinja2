@@ -1,9 +1,0 @@
-{% set uid=1 %}
-{% for list in cluster.kubeAuth.authn.basic %}
-  {% if cluster.kubeAuth.authz.rbac is defined %}
-    {{ list.password }},{{ list.user }},{{ uid }},"{{list.group}}"
-  {% else %}
-    {{ list.password }},{{ list.user }},{{ uid }}
-  {% endif %}
-{% set uid = uid + 1 %}
-{% endfor %}
