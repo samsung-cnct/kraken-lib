@@ -33,6 +33,7 @@ spec:
     - --service-account-key-file=/etc/kubernetes/ssl/service-account-key.pem
     - --cloud-provider={{cluster.providerConfig.provider}}
     - --logtostderr=true
+    - --runtime-config=batch/v2alpha1=true 
 {% if cluster.kubeAuth.authn.oidc is defined %}
     - --oidc-issuer-url={{cluster.kubeAuth.authn.oidc.issuer}}
     - --oidc-client-id=example-app
