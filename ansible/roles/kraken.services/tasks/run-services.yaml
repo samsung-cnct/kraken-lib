@@ -13,6 +13,10 @@
     kubeconfig: "{{ config_base }}/{{ cluster.name }}/admin.kubeconfig"
     kubectl: "{{ kubectl_commands[cluster.name] }}"
 
+- name: Set dependent facts
+  set_fact:
+    helm_path: "{{ helm_command | dirname }}"
+
 - name: create debug helm command string
   set_fact:
     helm_command: "{{ helm_command }} --debug"
@@ -43,6 +47,7 @@
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
+    PATH: "{{ helm_path }}:{{ ansible_env.PATH }}"
   register: init_dry_out
   when:
     - cluster.helmConfig.debug is defined
@@ -55,6 +60,7 @@
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
+    PATH: "{{ helm_path }}:{{ ansible_env.PATH }}"
   retries: 60
   delay: 1
   when: helm_command is defined
@@ -74,6 +80,7 @@
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
+    PATH: "{{ helm_path }}:{{ ansible_env.PATH }}"
   with_items: "{{ cluster_repos }}"
   when:
     - cluster_repos is defined
@@ -87,6 +94,7 @@
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
+    PATH: "{{ helm_path }}:{{ ansible_env.PATH }}"
   with_items: "{{ cluster_repos }}"
   when:
     - cluster_repos is defined
@@ -98,6 +106,7 @@
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
+    PATH: "{{ helm_path }}:{{ ansible_env.PATH }}"
   with_items: "{{ cluster_registries }}"
   when: cluster_registries is defined and (helm_command is defined)
 
@@ -128,6 +137,7 @@
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
+    PATH: "{{ helm_path }}:{{ ansible_env.PATH }}"
   with_items: "{{ cluster_services }}"
   register: install_dry_out
   when:
@@ -146,6 +156,7 @@
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
+    PATH: "{{ helm_path }}:{{ ansible_env.PATH }}"
   with_items: "{{ cluster_services }}"
   when:
     - cluster_services is defined
@@ -161,6 +172,7 @@
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
+    PATH: "{{ helm_path }}:{{ ansible_env.PATH }}"
   with_items: "{{ cluster_services }}"
   when:
     - cluster_services is defined

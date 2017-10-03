@@ -12,6 +12,10 @@
     kubeconfig: "{{ config_base }}/{{ cluster.name }}/admin.kubeconfig"
     helm_home: "{{ config_base }}/{{ cluster.name }}/.helm"
 
+- name: Set dependent facts
+  set_fact:
+    helm_path: "{{ helm_command | dirname }}"
+
 - name: Get helm and tiller versions
   command: >
     {{ helm_command }} version --short
@@ -19,6 +23,7 @@
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
+    PATH: "{{ helm_path }}:{{ ansible_env.PATH }}"
   changed_when: false
 
 - name: Upgrade tiller
@@ -27,6 +32,7 @@
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
+    PATH: "{{ helm_path }}:{{ ansible_env.PATH }}"
   when:
     - (helm_versions.stdout_lines | length) == 2
     - (helm_versions.stdout_lines[0] | regex_replace(regex)) != (helm_versions.stdout_lines[1] | regex_replace(regex))
@@ -47,6 +53,7 @@
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
+    PATH: "{{ helm_path }}:{{ ansible_env.PATH }}"
   with_items: "{{ cluster_repos }}"
   when:
     - cluster_repos is defined
@@ -60,6 +67,7 @@
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
+    PATH: "{{ helm_path }}:{{ ansible_env.PATH }}"
   with_items: "{{ cluster_repos }}"
   when:
     - cluster_repos is defined
@@ -91,6 +99,7 @@
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
+    PATH: "{{ helm_path }}:{{ ansible_env.PATH }}"
   with_items: "{{ cluster_services }}"
   when:
     - cluster_services is defined
@@ -106,6 +115,7 @@
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
+    PATH: "{{ helm_path }}:{{ ansible_env.PATH }}"
   with_items: "{{ cluster_services }}"
   when:
     - cluster_services is defined

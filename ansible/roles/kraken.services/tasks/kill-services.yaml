@@ -7,9 +7,16 @@
   set_fact:
     cluster_services: "{{ cluster.helmConfig.charts | default([]) }}"
     cluster_repos: "{{ cluster.helmConfig.repos | default([]) }}"
+    helm_command: "{{ helm_commands[cluster.name] }}"
+    helm_home: "{{ config_base }}/{{ cluster.name }}/.helm"
     kubeconfig: "{{ config_base }}/{{ cluster.name }}/admin.kubeconfig"
     kubectl: "{{ kubectl_commands[cluster.name] }}"
     cluster_namespaces: []
+
+- name: Set dependent facts
+  set_fact:
+    helm_path: "{{ helm_command | dirname }}"
+
 
 - name: Build a list of namespaces used for services
   set_fact:
@@ -30,10 +37,11 @@
 
 - name: Clean up releases
   command: >
-    {{ helm_commands[cluster.name] }} delete --purge {{ item.name }}
+    {{ helm_command }} delete --purge {{ item.name }}
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
-    HELM_HOME: "{{ helm_homes[cluster.name] }}"
+    HELM_HOME: "{{ helm_home }}"
+    PATH: "{{ helm_path }}:{{ ansible_env.PATH }}"
   with_items: "{{ cluster_services }}"
   ignore_errors: yes
   when:
