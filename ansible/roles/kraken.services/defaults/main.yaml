@@ -17,7 +17,6 @@ kubedns:
   kubedns_image: "gcr.io/google_containers/kubedns-amd64:1.8"
   kubedns_image_v16: "gcr.io/google_containers/k8s-dns-kube-dns-amd64:1.14.5"
   kubedns_image_v15: "gcr.io/google_containers/kubedns-amd64:1.9"
-  kubedns_image_v14: "gcr.io/google_containers/kubedns-amd64:1.8"
   kubedns_log_level: 0
   kubedns_max_surge: 10%
   kubedns_max_unavail: 0
@@ -27,7 +26,6 @@ kubedns:
   kubedns_mem_req: 70Mi
   healthz_image: "gcr.io/google_containers/exechealthz-amd64:1.2"
   healthz_image_v15: "gcr.io/google_containers/exechealthz-amd64:1.2"
-  healthz_image_v14: "gcr.io/google_containers/exechealthz-amd64:1.2"
   healthz_cpu_lim: 10m
   healthz_mem_lim: 50Mi
   healthz_cpu_req: 10m
@@ -41,7 +39,6 @@ kubedns:
   dnsmasq_image: "gcr.io/google_containers/kube-dnsmasq-amd64:1.4.1"
   dnsmasq_image_v16: "gcr.io/google_containers/k8s-dns-dnsmasq-nanny-amd64:1.14.5"
   dnsmasq_image_v15: "gcr.io/google_containers/kube-dnsmasq-amd64:1.14.5"
-  dnsmasq_image_v14: "gcr.io/google_containers/kube-dnsmasq-amd64:1.4.1"
   dnsmasq_delay: 60
   dnsmasq_timeout: 5
   dnsmasq_succ_thresh: 1
