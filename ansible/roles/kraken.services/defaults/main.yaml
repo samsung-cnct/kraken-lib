@@ -38,7 +38,7 @@ kubedns:
   readiness_timeout: 5
   dnsmasq_image: "gcr.io/google_containers/kube-dnsmasq-amd64:1.4.1"
   dnsmasq_image_v16: "gcr.io/google_containers/k8s-dns-dnsmasq-nanny-amd64:1.14.5"
-  dnsmasq_image_v15: "gcr.io/google_containers/kube-dnsmasq-amd64:1.14.5"
+  dnsmasq_image_v15: "gcr.io/google_containers/k8s-dns-dnsmasq-amd64:1.14.5"
   dnsmasq_delay: 60
   dnsmasq_timeout: 5
   dnsmasq_succ_thresh: 1
