@@ -21,7 +21,7 @@
 
 - name: Bootstrap RBAC policy
   command: >
-    {{ kubectl }} --kubeconfig={{ kubeconfig }} apply -f {{ config_base }}/{{ cluster.name }}/auth/rbac-default-policy.yaml
+    {{ kubectl }} --kubeconfig={{ kubeconfig }} apply -f {{ config_base }}/{{ cluster.name }}/auth/rbac-default-policy.yaml --record
   register: job_rbac_bootstrap_result
   until: job_rbac_bootstrap_result | success
   retries: "{{ rbac_bootstrap_retries | int }}"

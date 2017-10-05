@@ -3,14 +3,6 @@
 - set_fact:
     cluster: "{{ a_cluster }}"
 
-- name: Look up and set k8s minor version for this cluster
-  set_fact:
-    kubernetes_minor_version: "{{ kubernetes_minor_versions[cluster.name] }}"
-
-- name: Execute appropriate kubectl per minor version
-  set_fact:
-    kubectl: "/opt/cnct/kubernetes/{{ kubernetes_minor_version }}/bin/kubectl"
-
 - set_fact:
     aws_region: "{{ cluster.providerConfig.region }}"
     kubeconfig: "{{ config_base }}/{{ cluster.name }}/admin.kubeconfig"

@@ -50,10 +50,10 @@
 
 - name: Deploy Networking Namespace
   command: >
-    {{ kubectl }} --kubeconfig={{ kubefn }} apply -f {{ config_base }}/{{ cluster.name }}/fabric/namespace.yaml
+    {{ kubectl }} --kubeconfig={{ kubefn }} apply -f {{ config_base }}/{{ cluster.name }}/fabric/namespace.yaml --record
   when: not ( dryrun | bool )
 
 - name: Deploy weave daemonset
   command: >
-    {{ kubectl }} --kubeconfig={{ kubeconfig }} apply -f {{ config_base }}/{{ cluster.name }}/fabric/weave.yaml --namespace=kube-networking
+    {{ kubectl }} --kubeconfig={{ kubeconfig }} apply -f {{ config_base }}/{{ cluster.name }}/fabric/weave.yaml --namespace=kube-networking --record
   when: not (dryrun | bool)

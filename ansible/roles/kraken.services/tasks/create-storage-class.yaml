@@ -23,7 +23,7 @@
 
 - name: Create provider-specific storage class, if it does not exist
   command: >
-    {{ kubectl }} --kubeconfig={{ kubeconfig }} apply -f "{{ item }}"
+    {{ kubectl }} --kubeconfig={{ kubeconfig }} apply -f "{{ item }}" --record
   with_first_found:
     - files:
       - /kraken/ansible/roles/kraken.services/files/{{ cluster.providerConfig.provider }}/storage-class-config.yaml

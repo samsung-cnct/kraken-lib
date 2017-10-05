@@ -38,7 +38,7 @@
 
 - name: Bootstrap kubedns RBAC policy
   command: >
-    {{ kubectl }} --kubeconfig={{ kubeconfig }} apply -f {{ config_base }}/{{ cluster.name }}/auth/rbac-dns-policy.yaml
+    {{ kubectl }} --kubeconfig={{ kubeconfig }} apply -f {{ config_base }}/{{ cluster.name }}/auth/rbac-dns-policy.yaml --record
   register: job_rbac_dns_results
   when: "cluster.kubeAuth.authz.rbac is defined"
 
@@ -50,7 +50,7 @@
 
 - name: Install DNS
   command: >
-      {{ kubectl }} --kubeconfig={{ kubeconfig }} apply -f {{ config_base }}/{{ cluster.name }}/services/dns-deployment.yaml --namespace={{ dns_config.namespace }}
+      {{ kubectl }} --kubeconfig={{ kubeconfig }} apply -f {{ config_base }}/{{ cluster.name }}/services/dns-deployment.yaml --namespace={{ dns_config.namespace }} --record
   register: deployment_dns_result
   vars:
     query: "[?spec.metadata.name=='{{ dns_config.k8sapp }}'] | [0].metadata.labels.version"

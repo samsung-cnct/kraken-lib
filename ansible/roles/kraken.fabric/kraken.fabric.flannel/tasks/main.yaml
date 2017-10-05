@@ -69,12 +69,12 @@
 
 - name: Deploy Networking Namespace
   command: >
-    {{ kubectl }} --kubeconfig={{ kubefn }} apply -f {{ config_base }}/{{ cluster.name }}/fabric/namespace.yaml
+    {{ kubectl }} --kubeconfig={{ kubefn }} apply -f {{ config_base }}/{{ cluster.name }}/fabric/namespace.yaml --record
   when: not ( dryrun | bool )
 
 - name: Deploy canal RBAC policy
   command: >
-    {{ kubectl }} --kubeconfig={{ kubefn }} apply -f {{ config_base }}/{{ cluster.name }}/auth/rbac-canal-policy.yaml
+    {{ kubectl }} --kubeconfig={{ kubefn }} apply -f {{ config_base }}/{{ cluster.name }}/auth/rbac-canal-policy.yaml --record
   register: job_rbac_canal_results
   when:
     - "cluster.kubeAuth.authz.rbac is defined"
@@ -82,10 +82,10 @@
 
 - name: Deploy canal configuration
   command: >
-    {{ kubectl }} --kubeconfig={{ kubefn }} apply -f {{ config_base }}/{{ cluster.name }}/fabric/config.yaml --namespace=kube-networking
+    {{ kubectl }} --kubeconfig={{ kubefn }} apply -f {{ config_base }}/{{ cluster.name }}/fabric/config.yaml --namespace=kube-networking --record
   when: not ( dryrun | bool )
 
 - name: Deploy canal daemonset
   command: >
-    {{ kubectl }} --kubeconfig={{ kubefn }} apply -f {{ config_base }}/{{ cluster.name }}/fabric/canal.yaml --namespace=kube-networking
+    {{ kubectl }} --kubeconfig={{ kubefn }} apply -f {{ config_base }}/{{ cluster.name }}/fabric/canal.yaml --namespace=kube-networking --record
   when: not ( dryrun | bool )
