@@ -57,3 +57,11 @@
   when:
     - a_cluster.helmConfig is defined
     - kraken_action == 'down'
+
+- include: create-storage-class.yaml
+  with_items:
+    - "{{ kraken_config.clusters }}"
+  loop_control:
+    loop_var: a_cluster
+  when:
+    - kraken_action == 'up'

@@ -403,6 +403,9 @@ Events:
 
 After a few minutes, you can view the Kubernetes dashboard. In this example, it is located at [here](http://ae7a0bae03c1511e78f8f06148e55c0f-1296896684.us-west-2.elb.amazonaws.com).
 
+#### Storage Class
+For AWS clusters, kraken-lib creates a storage class that is assigned the `default` Namespace. GKE clusters come with a GKE-provided storageclass. We are working to add support for storage classes with other providers.
+
 ### Debugging
 
 If kraken-lib hangs during deployment, hit CTRL-C to break out of the application and try again. Note that some steps are slow and may give a false indication that the deployment is hung up. In particular, the `TASK [/kraken/ansible/roles/kraken.provider/kraken.provider.aws : Run cluster up] ***` step and the wait for a cluster to come up can take some time.

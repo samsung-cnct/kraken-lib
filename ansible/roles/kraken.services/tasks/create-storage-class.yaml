@@ -1,0 +1,31 @@
+---
+- name: Set cluster fact
+  set_fact:
+    cluster: "{{ a_cluster }}"
+
+- name: Set kubectl and kubeconfig specific to this cluster
+  set_fact:
+    kubectl: "/opt/cnct/kubernetes/{{ kubernetes_minor_versions[cluster.name] }}/bin/kubectl"
+    kubeconfig: "{{ config_base }}/{{ cluster.name }}/admin.kubeconfig"
+
+- name: Get storage class state
+  command: >
+    {{ kubectl }} --kubeconfig={{ kubeconfig }} get storageclass -o json
+  register: storageclass_state
+  changed_when: False
+
+- name: Check if default storageclass exists
+  set_fact:
+    storageclass_exists: "{{ query_results != '' }}"
+  vars:
+    query: 'items[0].metadata.annotations."storageclass.kubernetes.io/is-default-class"'
+    query_results: "{{ storageclass_state.stdout | from_json | json_query(query) }}"
+
+- name: Create provider-specific storage class, if it does not exist
+  command: >
+    {{ kubectl }} --kubeconfig={{ kubeconfig }} apply -f "{{ item }}"
+  with_first_found:
+    - files:
+      - /kraken/ansible/roles/kraken.services/files/{{ cluster.providerConfig.provider }}/storage-class-config.yaml
+      skip: true
+  when: storageclass_exists
