@@ -1,5 +1,25 @@
 ---
-- name: Generate nodePool .coreos.update.part files
-  template: src=os.update.part.jinja2
-            dest="{{ config_base }}/{{ cluster.name }}/{{ item.name }}.update.part"
-  with_items: "{{ cluster.nodePools }}"
+- name: Generate CoreOS update cloud_config keys
+  set_fact:
+    cloud_config: "{{ cloud_config | combine(new_data, recursive=True) }}"
+  vars:
+    data:
+      coreos:
+        update:
+          "reboot-strategy": "{{ node.osConfig.rebootStrategy }}"
+    new_data: '{{ { cluster.name: { node.name: data } } }}'
+  when: node.osConfig.rebootStrategy is defined
+
+- name: "Generate locksmith cloud_config settings"
+  set_fact:
+    cloud_config: "{{ cloud_config | combine(new_data, recursive=True) }}"
+  vars:
+    data:
+      coreos:
+        locksmith:
+          "{{ lookup('template', item) | from_yaml }}"
+    new_data: '{{ { cluster.name: { node.name: data } } }}'
+  with_first_found:
+    - "templates/{{ kubernetes_minor_versions[ cluster.name ] }}/locksmith.part.jinja2"
+    - "templates/locksmith.part.jinja2"
+  when: node.osConfig.locksmith is defined

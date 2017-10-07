@@ -1,0 +1,12 @@
+---
+- name: Legacy non-versioned fabric check
+  set_fact:
+    fabricConfigVal: "{{ cluster.fabricConfig }}"
+  when: cluster.fabricConfig.kind == 'fabric'
+
+- name: Load the correct fabric config for the kuberenetes version
+  set_fact:
+    fabricConfigVal: "{{ cluster.fabricConfig.kubeVersion.versions[ kubernetes_minor_version ] if cluster.fabricConfig.kubeVersion.versions[ kubernetes_minor_version ] is defined else cluster.fabricConfig.kubeVersion.default }}"
+  vars:
+    kubernetes_minor_version: "{{ kubernetes_minor_versions[cluster.name] }}"
+  when: cluster.fabricConfig.kind == 'versionedFabric'

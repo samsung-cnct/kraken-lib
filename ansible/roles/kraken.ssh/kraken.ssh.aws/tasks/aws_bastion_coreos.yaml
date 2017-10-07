@@ -1,8 +1,0 @@
-# Do not want failure to push up ssh config file to be a source of cluster up/down failure
-# could not use 'copy' module since it requires python installed in host.
-- name: Send bastion_ssh_config to bastion coreos hosts
-  with_items: "{{ bastion_hosts_list }}"
-  shell: "scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {{ config_base }}/{{ cluster.name }}/bastion_ssh_config core@{{ item }}:/home/core/.ssh/config"
-  retries: 60
-  delay: 5
-  ignore_errors: yes

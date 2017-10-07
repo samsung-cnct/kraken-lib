@@ -1,0 +1,18 @@
+---
+- name: Set template_name
+  set_fact:
+    template_name: "{{ item }}"
+
+- name: "Rendering template {{ template_name }} to service unit"
+  set_fact:
+    cloud_config: "{{ cloud_config | combine(new_data, recursive=True) }}"
+  vars:
+    unit: "{{ lookup('template', template_file) | from_yaml }}"
+    coreos: "{{ cloud_config[cluster.name][node.name].coreos | default({}) }}"
+    units: "{{ coreos.units | default([]) + unit }}"
+    new_data: '{{ { cluster.name: { node.name: { "coreos": { "units": units } } } } }}'
+  with_first_found:
+    - "templates/{{ kubernetes_minor_versions[ cluster.name ] }}/{{ template_name }}"
+    - "templates/{{ template_name }}"
+  loop_control:
+    loop_var: template_file

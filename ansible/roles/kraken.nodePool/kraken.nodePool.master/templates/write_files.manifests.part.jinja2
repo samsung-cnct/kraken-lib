@@ -1,6 +1,0 @@
-- path: /etc/kubernetes/manifests/{{item.name}}.yaml
-  owner: root
-  permissions: 0644
-  encoding: "gz+b64"
-  content: |
-    {{ lookup('file', item.file) | gz | b64encode }}

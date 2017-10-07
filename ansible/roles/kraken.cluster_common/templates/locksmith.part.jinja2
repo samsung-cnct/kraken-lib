@@ -1,31 +1,28 @@
-{% if item.osConfig.locksmith is defined %}
-{% set locksmith = item.osConfig.locksmith %}
-{% if locksmith.group is defined %}
+{% if node.osConfig.locksmith is defined %}
+{%   set locksmith = node.osConfig.locksmith %}
+{%   if locksmith.group is defined %}
 group: {{ locksmith.group }}
-{% else %}
-group: {{ item.name }}
-{% endif %}
-{% if locksmith.setMax is defined %}
-set_max: {{ locksmith.setMax }}
-{% endif %}
+{%   else %}
+group: {{ node.name }}
+{%   endif %}
 
-{% if locksmith.windowStart is defined %}
+{%   if locksmith.windowStart is defined %}
 window_start: {{ locksmith.windowStart }}
-{% endif %}
-{% if locksmith.windowLength is defined %}
+{%   endif %}
+{%   if locksmith.windowLength is defined %}
 window_length: {{ locksmith.windowLength }}
-{% endif %}
+{%   endif %}
 
-{% if locksmith.etcdConfig is defined %}
-{% set etcdConfig = locksmith.etcdConfig %}
+{%   if locksmith.etcdConfig is defined %}
+{%     set etcdConfig = locksmith.etcdConfig %}
 endpoint: {% if etcdConfig.ssl == true %}https{% else %}http{% endif %}://{{ etcdConfig.name }}.{{ cluster.name }}.internal:{{ etcdConfig.clientPorts[0] }}
 etcd_cafile: /etc/{{ etcdConfig.name }}/ssl/client-ca.pem
 etcd_certfile: /etc/{{ etcdConfig.name }}/ssl/client-certfile.pem
 etcd_keyfile: /etc/etcd/{{ etcdConfig.name }}/client-keyfile.pem
-{% else %}
+{%   else %}
 endpoint: {{ locksmith.endpoint }}
 etcd_cafile: {{ locksmith.etcdCafile }}
 etcd_certfile: {{ locksmith.etcdCertfile }}
 etcd_keyfile: {{ locksmith.etcdKeyfile }}
-{% endif %}{# locksmith.etcdConfig is defined #}
-{% endif %}{# if item.osConfig.locksmith is defined #}
+{%   endif %}{# locksmith.etcdConfig is defined #}
+{% endif %}{# if node.osConfig.locksmith is defined #}

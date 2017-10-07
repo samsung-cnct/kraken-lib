@@ -1,0 +1,18 @@
+---
+- set_fact:
+    cluster: "{{ cluster_node_tuple.0 }}"
+    node: "{{ cluster_node_tuple.1 }}"
+
+- include: set-taints.yaml
+
+- name: Create cloud_config write_files for worker nodes
+  include: cloud_config/write_files.yaml
+  with_items:
+    - kube-proxy-manifest.yaml.jinja2
+    - kubeconfig.jinja2
+
+- name: Create cloud_config units for worker nodes
+  include: cloud_config/units.yaml
+  with_items:
+    - units.kubelet.part.jinja2
+    - units.kraken-worker-ssl.part.jinja2

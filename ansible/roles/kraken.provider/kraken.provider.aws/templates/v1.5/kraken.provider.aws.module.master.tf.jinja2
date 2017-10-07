@@ -96,7 +96,7 @@ resource "aws_launch_configuration" "master_launch_config" {
   {% endif %}
 
   iam_instance_profile        = "${aws_iam_instance_profile.kubernetes_master_profile.name}"
-  user_data                   = "${file("{{ config_base }}/{{cluster.name}}/cloud-config/{{master.name}}.cloud-config.yaml")}"
+  user_data                   = "${file("{{ config_base }}/{{cluster.name}}/cloud-config/{{master.name}}.cloud-config.yaml.gz")}"
 
   lifecycle {
     create_before_destroy = true

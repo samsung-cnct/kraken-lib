@@ -1,0 +1,24 @@
+---
+- name: "Generate common docker service units"
+  include: cloud_config/units.yaml
+  with_items:
+    - containerd-exec.part.jinja2
+    - docker-exec.part.jinja2
+    - docker-install.part.jinja2
+    - docker-wait-for-mounts.part.jinja2
+  when:
+    - node.containerConfig.runtime == "docker"
+    - node.containerConfig.type == "tgz"
+
+- name: "Generate common mount service units"
+  include: cloud_config/units.yaml
+  with_items:
+    - format-storage.part.jinja2
+    - mount.part.jinja2
+  when: node.nodeConfig.mounts is defined
+
+- name: "Generate network-environment service units"
+  include: cloud_config/units.yaml
+  with_items:
+    - setup-network-environment.part.jinja2
+  when: node.bastionConfig is not defined

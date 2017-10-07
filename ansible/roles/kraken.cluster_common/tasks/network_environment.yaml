@@ -1,6 +1,0 @@
----
-- name: Generate per nodePool setup-network-environment.part files
-  template: src=setup-network-environment.part.jinja2
-            dest="{{ config_base }}/{{ cluster.name }}/{{ item.name }}.units.setup-network-environment.part"
-  with_items: "{{ cluster.nodePools }}"
-  when: item.bastionConfig is not defined

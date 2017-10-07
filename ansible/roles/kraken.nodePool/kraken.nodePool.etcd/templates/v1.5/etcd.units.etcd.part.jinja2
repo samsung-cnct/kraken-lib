@@ -47,7 +47,11 @@
 {% endif %}
      --discovery-srv {{cluster_node_tuple.1.name}}.{{cluster_node_tuple.0.name}}.internal \
      --initial-advertise-peer-urls {% if cluster_node_tuple.1.etcdConfig.ssl == true %}https{% else %}http{% endif %}://${DEFAULT_IPV4}:{{cluster_node_tuple.1.etcdConfig.peerPorts[0]}} \
-     --initial-cluster-token {{cluster_node_tuple.1.etcdConfig.clusterToken}} \
+{% if cluster_node_tuple.1.etcdConfig.uuidToken is defined and cluster_node_tuple.1.etcdConfig.uuidToken %}
+     --initial-cluster-token {{ clusterUuidToken }} \
+{% elif cluster_node_tuple.1.etcdConfig.clusterToken is defined %}
+     --initial-cluster-token {{ cluster_node_tuple.1.etcdConfig.clusterToken }} \
+{% endif %}
      --initial-cluster-state new \
      --advertise-client-urls {% for port in cluster_node_tuple.1.etcdConfig.clientPorts %}{% if loop.index > 1 %},{% endif %}{% if cluster_node_tuple.1.etcdConfig.ssl == true %}https{% else %}http{% endif %}://${DEFAULT_IPV4}:{{port}}{% endfor %} \
      --listen-client-urls {% for port in cluster_node_tuple.1.etcdConfig.clientPorts %}{% if loop.index > 1 %},{% endif %}{% if cluster_node_tuple.1.etcdConfig.ssl == true %}https{% else %}http{% endif %}://127.0.0.1:{{port}},{% if cluster_node_tuple.1.etcdConfig.ssl == true %}https{% else %}http{% endif %}://${DEFAULT_IPV4}:{{port}}{% endfor %} \

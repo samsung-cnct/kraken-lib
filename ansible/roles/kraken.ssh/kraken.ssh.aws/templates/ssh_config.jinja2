@@ -37,7 +37,7 @@ Host {{instance.tags['k2-nodepool']}}-{{validHostCounter}}
 # Name: {{instance.tags['Name']}} ({{ instance.tags['k2-nodepool'] }})
 # Private: {{instance.private_dns_name}} {{instance.private_ip_address}}
 # Public: {{instance.public_dns_name}} {{instance.public_ip_address}}
-Host {{hostAlias}} 
+Host {{hostAlias}}
   HostName {{publicAddress}}
   User core
 {% if instance.tags['k2-nodepool'] == 'bastion' %}

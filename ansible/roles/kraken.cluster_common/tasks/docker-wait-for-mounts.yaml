@@ -1,7 +1,0 @@
-- name: Generate nodePool .units.docker-wait-for-mounts.part files
-  template: src=docker-wait-for-mounts.part.jinja2
-            dest="{{ config_base }}/{{ cluster.name }}/{{ item.name }}.units.docker-wait-for-mounts.part"
-  with_items: "{{ cluster.nodePools }}"
-  when:
-    - item.nodeConfig.mounts is defined
-    - item.containerConfig is defined

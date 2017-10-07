@@ -1,0 +1,11 @@
+---
+- set_fact:
+    cluster: "{{ cluster_node_tuple.0 }}"
+    node: "{{ cluster_node_tuple.1 }}"
+
+- name: Generate bastion sshd service unit
+  include: cloud_config/units.yaml
+  with_items:
+    - units.sshd.part.jinja2
+  when:
+    - node.bastionConfig.listenPort is defined

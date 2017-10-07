@@ -1,0 +1,10 @@
+---
+- set_fact:
+    taints: "{{ new_taints }}"
+    taints_exist: "{{ new_taints | length > 0 | bool }}"
+  vars:
+    nodePoolTaintQuery: "{{ node | json_query('schedulingConfig.taints[*]') }}"
+    nodePoolTaints: "{{ (nodePoolTaintQuery == '') | ternary([],nodePoolTaintQuery) }}"
+    nodeTypeTaintQuery: "{{ node | json_query('nodeConfig.taints[*]') }}"
+    nodeTypeTaints: "{{ (nodeTypeTaintQuery == '') | ternary([],nodeTypeTaintQuery) }}"
+    new_taints: "{{ nodePoolTaints + nodeTypeTaints }}"

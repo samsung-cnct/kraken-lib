@@ -1,0 +1,17 @@
+---
+- name: Set template_name
+  set_fact:
+    template_name: "{{ item }}"
+
+- name: "Rendering template {{ template_name }} to write_files"
+  set_fact:
+    cloud_config: "{{ cloud_config | combine(new_data, recursive=True) }}"
+  vars:
+    write_file: "{{ lookup('template', template_file) | from_yaml }}"
+    write_files: "{{ cloud_config[cluster.name][node.name].write_files| default([]) + write_file }}"
+    new_data: '{{ { cluster.name: { node.name: { "write_files": write_files } } } }}'
+  with_first_found:
+    - "templates/{{ kubernetes_minor_versions[ cluster.name ] }}/{{ template_name }}"
+    - "templates/{{ template_name }}"
+  loop_control:
+    loop_var: template_file

@@ -7,8 +7,14 @@ metadata:
   name: canal-config
   namespace: kube-networking
 data:
+  # find the etcd server, set etcd to that value
+  #  doing this here because later versions of canal speak to the apiserver, not directly to etcd
+{% for node in cluster.nodePools %}
+{% if node.apiServerConfig is defined %}
+{% set etcd = node.apiServerConfig.state.etcd %}
+
   # Configure this with the location of your etcd cluster.
-  etcd_endpoints: "{% if etcd.etcdConfig.ssl == true %}https{% else %}http{% endif %}://{{etcd.etcdConfig.name}}.{{cluster.name}}.internal:{{etcd.etcdConfig.clientPorts[0]}}"
+  etcd_endpoints: "{% if etcd.ssl == true %}https{% else %}http{% endif %}://{{etcd.name}}.{{cluster.name}}.internal:{{etcd.clientPorts[0]}}"
   etcd_ca_cert_file: "/etc/etcd/ssl/client-ca.pem"
   etcd_cert_file: "/etc/etcd/ssl/client.pem"
   etcd_key_file: "/etc/etcd/ssl/client-key.pem"
@@ -45,3 +51,5 @@ data:
           }
         }
     }
+{% endif %}
+{% endfor %}

@@ -3,7 +3,7 @@
     - name: 10-wait-docker.conf
       content: |
         [Unit]
-{% for mount in item.nodeConfig.mounts %}
+{% for mount in node.nodeConfig.mounts %}
         After={{mount.path | replace('/', '-') | replace('-', '', 1)}}.mount
         Requires={{mount.path | replace('/', '-') | replace('-', '', 1)}}.mount
 {% endfor %}

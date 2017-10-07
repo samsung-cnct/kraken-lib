@@ -1,0 +1,28 @@
+---
+- set_fact:
+    cluster: "{{ cluster_node_tuple.0 }}"
+    node: "{{ cluster_node_tuple.1 }}"
+
+- include: service-account-key.yaml
+- include: set_fabric.yaml
+
+- name: Create cloud_config write_files for master nodes
+  include: cloud_config/write_files.yaml
+  with_items:
+    - kubeconfig.jinja2
+    - api-server-manifest.yaml.jinja2
+    - controller-manager-manifest.yaml.jinja2
+    - kube-proxy-manifest.yaml.jinja2
+    - scheduler-manifest.yaml.jinja2
+
+- name: Create cloud_config basic auth write_files for master nodes
+  include: cloud_config/write_files.yaml
+  with_items:
+    - basicauth.csv.jinja2
+  when: cluster.kubeAuth.authn.basic is defined
+
+- name: Create cloud_config units for master nodes
+  include: cloud_config/units.yaml
+  with_items:
+    - units.kubelet.part.jinja2
+    - units.kraken-apiserver-ssl.part.jinja2

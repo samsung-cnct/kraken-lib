@@ -1,10 +1,13 @@
 ---
-#   top level task to loop over all clusters in the cluster list
-#   its a bit weird but its the cleanest way to do it, I think
-- name: Loop over all elements of cluster_common for each cluster
+- name: Create user-data base dict
+  set_fact:
+    cloud_config: {}
+
+- name: Loop over all nodepools for each cluster
   include: cluster-start.yaml
-  with_items:
+  with_subelements:
     - "{{ kraken_config.clusters }}"
+    - nodePools
   loop_control:
-    loop_var: a_cluster
-  when: a_cluster.providerConfig.type == 'cloudinit'
+    loop_var: cluster_node_tuple
+  when: cluster_node_tuple.0.providerConfig.type == 'cloudinit'
