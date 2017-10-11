@@ -328,7 +328,12 @@ kube-system   tiller-deploy                1         1         1            1   
 
 _Optional step_
 
-You can try having Helm install a new service, such as the Kubernetes dashboard
+Kraken-lib comes with a lot of built-in services but you can also deploy additional services.
+
+In the past, we used github repositories for our Helm charts. These are deprecated in favor of Quay's app registry. The app registry allows for tagging the latest versions of charts and flexibly pulling up-to-date chart images for dependencies elsewhere. Additionally the registry can grant login-based access for private Helm charts.
+[Information on Quay app registry](https://coreos.com/blog/quay-application-registry-for-kubernetes.html)
+
+As an example for using Helm to install a new service, try installing the Kubernetes dashboard:
 
 ##### Finding Kubernetes dashboard version
 
