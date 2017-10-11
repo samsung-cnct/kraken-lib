@@ -20,7 +20,7 @@ ansible_lint           = "quay.io/${quay_org}/ansible-lint:latest"
 e2e_tester_image       = "quay.io/${quay_org}/e2etester:${e2etester_version}"
 docker_image           = "docker"
 
-podTemplate(label: 'kraken_lib', containers: [
+podTemplate(label: 'kraken-lib', containers: [
     containerTemplate(name: 'jnlp', image: jnlp_image, args: '${computer.jnlpmac} ${computer.name}'),
     containerTemplate(name: 'kraken-tools',
                       image: kraken_tools_image,
@@ -158,6 +158,11 @@ podTemplate(label: 'kraken_lib', containers: [
                 kubesh "docker rmi quay.io/${quay_org}/kraken-lib:kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID} || true"
                 kubesh "docker rmi quay.io/${quay_org}/kraken-lib:latest || true"
                 kubesh "docker build --no-cache --force-rm -t quay.io/${quay_org}/kraken-lib:kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID} docker/"
+
+                // The k2 image is built for compatibility with older versions of Kraken.
+                kubesh "docker rmi quay.io/${quay_org}/k2:kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID} || true"
+                kubesh "docker rmi quay.io/${quay_org}/k2:latest || true"
+                kubesh "docker build --no-cache --force-rm -t quay.io/${quay_org}/k2:kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID} docker/"
             }
 
             //only push from master if we are on samsung-cnct fork
@@ -165,6 +170,10 @@ podTemplate(label: 'kraken_lib', containers: [
                 if (git_branch.contains(publish_branch) && git_uri.contains(github_org)) {
                     kubesh "docker tag quay.io/${quay_org}/kraken-lib:kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID} quay.io/${quay_org}/kraken-lib:${image_tag}"
                     kubesh "docker push quay.io/${quay_org}/kraken-lib:${image_tag}"
+
+                    // The k2 image is built for compatibility with older versions of Kraken.
+                    kubesh "docker tag quay.io/${quay_org}/k2:kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID} quay.io/${quay_org}/kraken-lib:${image_tag}"
+                    kubesh "docker push quay.io/${quay_org}/k2:${image_tag}"
                 } else {
                     echo "Not pushing to docker repo:\n    BRANCH_NAME='${env.BRANCH_NAME}'\n    GIT_BRANCH='${git_branch}'\n    git_uri='${git_uri}'"
                 }
