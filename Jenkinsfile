@@ -15,7 +15,7 @@ e2etester_version      = "0.2"
 custom_jnlp_version    = "0.1"
 
 jnlp_image             = "quay.io/${quay_org}/custom-jnlp:${custom_jnlp_version}"
-kraken_tools_image     = "quay.io/${quay_org}/kraken-tools:${kraken_tools_image}"
+kraken_tools_image     = "quay.io/${quay_org}/kraken-tools:${kraken_tools_image_tag}"
 ansible_lint           = "quay.io/${quay_org}/ansible-lint:latest"
 e2e_tester_image       = "quay.io/${quay_org}/e2etester:${e2etester_version}"
 docker_image           = "docker"
