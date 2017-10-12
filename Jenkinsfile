@@ -3,7 +3,7 @@ github_org             = "samsung-cnct"
 quay_org               = "samsung_cnct"
 publish_branch         = "master"
 image_tag              = "${env.RELEASE_VERSION}" != "null" ? "${env.RELEASE_VERSION}" : "latest"
-k2_tools_image_tag     = "${env.K2_TOOLS_VERSION}" != "null" ? "${env.K2_TOOLS_VERSION}" : "latest"
+kraken_tools_image_tag = "${env.K2_TOOLS_VERSION}" != "null" ? "${env.K2_TOOLS_VERSION}" : "latest"
 
 aws_cloud_test_timeout = 32  // Should be about 16 min (or longer due to etcd cluster health checks)
 gke_cloud_test_timeout = 60  // Should be about 4 min but can be as long as 50 for non-default versions
@@ -15,24 +15,45 @@ e2etester_version      = "0.2"
 custom_jnlp_version    = "0.1"
 
 jnlp_image             = "quay.io/${quay_org}/custom-jnlp:${custom_jnlp_version}"
-k2_tools_image         = "quay.io/${quay_org}/k2-tools:${k2_tools_image_tag}"
+kraken_tools_image     = "quay.io/${quay_org}/kraken-tools:${kraken_tools_image_tag}"
 ansible_lint           = "quay.io/${quay_org}/ansible-lint:latest"
 e2e_tester_image       = "quay.io/${quay_org}/e2etester:${e2etester_version}"
 docker_image           = "docker"
 
-podTemplate(label: 'k2', containers: [
+podTemplate(label: 'kraken-lib', containers: [
     containerTemplate(name: 'jnlp', image: jnlp_image, args: '${computer.jnlpmac} ${computer.name}'),
-    containerTemplate(name: 'k2-tools', image: k2_tools_image, ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi'),
-    containerTemplate(name: 'ansible-lint', image: ansible_lint, ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi'),
-    containerTemplate(name: 'e2e-tester', image: e2e_tester_image, ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '1Gi', resourceLimitMemory: '1Gi'),
-    containerTemplate(name: 'docker', image: docker_image, command: 'cat', ttyEnabled: true)
+    containerTemplate(name: 'kraken-tools',
+                      image: kraken_tools_image,
+                      ttyEnabled: true,
+                      command: 'cat',
+                      alwaysPullImage: true,
+                      resourceRequestMemory: '1Gi',
+                      resourceLimitMemory: '1Gi'),
+    containerTemplate(name: 'ansible-lint',
+                      image: ansible_lint,
+                      ttyEnabled: true,
+                      command: 'cat',
+                      alwaysPullImage: true,
+                      resourceRequestMemory: '1Gi',
+                      resourceLimitMemory: '1Gi'),
+    containerTemplate(name: 'e2e-tester',
+                      image: e2e_tester_image,
+                      ttyEnabled: true,
+                      command: 'cat',
+                      alwaysPullImage: true,
+                      resourceRequestMemory: '1Gi',
+                      resourceLimitMemory: '1Gi'),
+    containerTemplate(name: 'docker',
+                      image: docker_image,
+                      command: 'cat',
+                      ttyEnabled: true)
   ], volumes: [
     hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
     hostPathVolume(hostPath: '/var/lib/docker/scratch', mountPath: '/mnt/scratch'),
     secretVolume(mountPath: '/home/jenkins/.docker/', secretName: 'samsung-cnct-quay-robot-dockercfg')
   ]) {
-    node('k2') {
-        customContainer('k2-tools'){
+    node('kraken-lib') {
+        customContainer('kraken-tools'){
 
             stage('Checkout') {
                 checkout scm
@@ -49,7 +70,7 @@ podTemplate(label: 'k2', containers: [
                 kubesh 'mkdir -p cluster/gke'
                 kubesh 'cp ansible/roles/kraken.config/files/gke-config.yaml cluster/gke/config.yaml'
                 kubesh "build-scripts/update-generated-config.sh cluster/gke/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
-                kubesh "build-scripts/docker-update.sh ${k2_tools_image_tag} docker/Dockerfile"
+                kubesh "build-scripts/docker-update.sh ${kraken_tools_image} docker/Dockerfile"
             }
             // Dry Run Test
 
@@ -134,6 +155,11 @@ podTemplate(label: 'k2', containers: [
         customContainer('docker') {
             // add a docker rmi/docker purge/etc.
             stage('Build') {
+                kubesh "docker rmi quay.io/${quay_org}/kraken-lib:kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID} || true"
+                kubesh "docker rmi quay.io/${quay_org}/kraken-lib:latest || true"
+                kubesh "docker build --no-cache --force-rm -t quay.io/${quay_org}/kraken-lib:kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID} docker/"
+
+                // The k2 image is built for compatibility with older versions of Kraken.
                 kubesh "docker rmi quay.io/${quay_org}/k2:k2-${env.JOB_BASE_NAME}-${env.BUILD_ID} || true"
                 kubesh "docker rmi quay.io/${quay_org}/k2:latest || true"
                 kubesh "docker build --no-cache --force-rm -t quay.io/${quay_org}/k2:k2-${env.JOB_BASE_NAME}-${env.BUILD_ID} docker/"
@@ -142,6 +168,10 @@ podTemplate(label: 'k2', containers: [
             //only push from master if we are on samsung-cnct fork
             stage('Publish') {
                 if (git_branch.contains(publish_branch) && git_uri.contains(github_org)) {
+                    kubesh "docker tag quay.io/${quay_org}/kraken-lib:kraken-${env.JOB_BASE_NAME}-${env.BUILD_ID} quay.io/${quay_org}/kraken-lib:${image_tag}"
+                    kubesh "docker push quay.io/${quay_org}/kraken-lib:${image_tag}"
+
+                    // The k2 image is built for compatibility with older versions of Kraken.
                     kubesh "docker tag quay.io/${quay_org}/k2:k2-${env.JOB_BASE_NAME}-${env.BUILD_ID} quay.io/${quay_org}/k2:${image_tag}"
                     kubesh "docker push quay.io/${quay_org}/k2:${image_tag}"
                 } else {
