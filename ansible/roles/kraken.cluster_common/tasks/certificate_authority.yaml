@@ -16,7 +16,7 @@
       -key {{ config_base }}/{{ cluster.name }}/certs/ca-key.pem
       -days 7300
       -out {{ config_base }}/{{ cluster.name }}/certs/ca.pem
-      -subj {{ (cluster.kubeAuth.authz.rbac is defined) | ternary("/O=system:masters/CN=kraken-ca","/CN=kraken-ca") }}
+      -subj "/O=kraken,/CN=kraken-ca"
   args:
     creates: "{{ config_base }}/{{ cluster.name }}/certs/ca.pem"
 
