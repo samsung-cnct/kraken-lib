@@ -10,7 +10,7 @@
       "description": "Name of this cluster.",
       "type": "string",
       "pattern": "^[A-Za-z0-9-]+$",
-      "maxLength": 32,
+      "maxLength": 21,
       "minLength": 1
     },
     "network": {
