@@ -10,6 +10,7 @@
   include: cloud_config/write_files.yaml
   with_items:
     - kubeconfig.jinja2
+    - proxy-kubeconfig.jinja2
     - api-server-manifest.yaml.jinja2
     - controller-manager-manifest.yaml.jinja2
     - kube-proxy-manifest.yaml.jinja2

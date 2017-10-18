@@ -16,14 +16,14 @@
         - /hyperkube
         - proxy
         - --master=https://apiserver.{{ cluster.name }}.internal
-        - --kubeconfig=/etc/kubernetes/kubeconfig.yaml
+        - --kubeconfig=/etc/kubernetes/proxy-kubeconfig.yaml
         - --proxy-mode=iptables
         securityContext:
           privileged: true
         volumeMounts:
           - mountPath: /etc/ssl/certs
             name: "ssl-certs"
-          - mountPath: /etc/kubernetes/kubeconfig.yaml
+          - mountPath: /etc/kubernetes/proxy-kubeconfig.yaml
             name: "kubeconfig"
             readOnly: true
           - mountPath: /etc/kubernetes/ssl
@@ -35,7 +35,7 @@
             path: "/usr/share/ca-certificates"
         - name: "kubeconfig"
           hostPath:
-            path: "/etc/kubernetes/kubeconfig.yaml"
+            path: "/etc/kubernetes/proxy-kubeconfig.yaml"
         - name: "etc-kube-ssl"
           hostPath:
             path: "/etc/kubernetes/ssl"

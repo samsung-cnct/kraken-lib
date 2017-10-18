@@ -23,6 +23,6 @@
      {% if cluster.customApiDns is defined %}
         --set-env=CUSTOM_API_DNS={{ cluster.customApiDns }} \
      {% endif %}
-     quay.io/samsung_cnct/drunkensmee:v0.6 \
+     {{ drunkensmee }} \
      --exec /assets/generate_apiserver.sh
     ExecStopPost=/usr/bin/rkt gc --mark-only

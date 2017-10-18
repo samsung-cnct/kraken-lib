@@ -10,6 +10,7 @@
   with_items:
     - kube-proxy-manifest.yaml.jinja2
     - kubeconfig.jinja2
+    - proxy-kubeconfig.jinja2
 
 - name: Create cloud_config units for worker nodes
   include: cloud_config/units.yaml
