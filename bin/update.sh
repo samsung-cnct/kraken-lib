@@ -11,7 +11,7 @@ set -o pipefail
 
 # pull in utils
 my_dir=$(dirname "${BASH_SOURCE}")
-source "${my_dir}/../lib/common.sh"
+source "${my_dir}/../lib/kraken_arguments.sh"
 
 # if [ -z $UPDATE_NODEPOOLS ]; then
 #   error "--nodepools flag must be used"
