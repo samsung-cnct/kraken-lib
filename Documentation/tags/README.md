@@ -169,6 +169,11 @@ fabric_only,services_only
 - roles/kraken.config
 - roles/kraken.rbac
 
+### dns_only
+**: To update DNS components for a running cluster, you can modify images and versions in k2/ansible/roles/kraken.services/defaults/main.yaml**
+- roles/kraken.services
+
+
 ### readiness
 **: To test readinees which waits for when api server is ready, spins up actual cluster except for  ssh setup and services setup**
 - roles/kraken.config

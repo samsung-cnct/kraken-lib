@@ -94,11 +94,18 @@ else
     KRAKEN_DRYRUN=false
 fi
 
+if [[ ${KRAKEN_TAGS} == *dns_only* ]]; then
+    DNS_ONLY=true
+else
+    DNS_ONLY=false
+fi
+
 KRAKEN_EXTRA_VARS="config_path=${KRAKEN_CONFIG} config_base=${KRAKEN_BASE} \
                    config_forced=${KRAKEN_FORCE} dryrun=${KRAKEN_DRYRUN} \
                    update_nodepools=${UPDATE_NODEPOOLS} \
                    add_nodepools=${ADD_NODEPOOLS} \
                    remove_nodepools=${REMOVE_NODEPOOLS} \
+                   dns_only=${DNS_ONLY} \
                   "
 
 if [ ! -z ${BUILD_TAG+x} ]; then

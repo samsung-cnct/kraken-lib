@@ -6,7 +6,7 @@
     loop_var: a_cluster
   when:
     - a_cluster.kubeAuth.authn.oidc is defined
-    - kraken_action == 'up'
+    - (kraken_action == 'up') and not ( dns_only | bool )
     - a_cluster.clusterServices is defined
 
 - include: kill-dns.yaml
@@ -35,7 +35,7 @@
   loop_control:
     loop_var: a_cluster
   when:
-    - kraken_action == 'up'
+    - (kraken_action == 'up') and not ( dns_only | bool )
     - a_cluster.helmConfig is defined
   static: no
 
@@ -64,4 +64,4 @@
   loop_control:
     loop_var: a_cluster
   when:
-    - kraken_action == 'up'
+    - (kraken_action == 'up') and not ( dns_only | bool )
