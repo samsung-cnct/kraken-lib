@@ -52,13 +52,13 @@ module "etcd" {
   cidr_block = "{{cluster.providerConfig.vpc}}"
   route53_zone_id = "${module.route53.route53_zone_id}"
 {% for node in cluster.nodePools %}
-{% if node.etcdConfig is defined %}
+{% if node.etcdConfigs is defined %}
   {{node.keyPair.name}}_{{node.name}}_key = "${module.keypair.{{node.keyPair.name}}_keyname}"
 {% endif %}
 {% endfor %}
 
 {% for node in cluster.nodePools %}
-{% if node.etcdConfig is defined %}
+{% if node.etcdConfigs is defined %}
 {% for subnet in node.nodeConfig.providerConfig.subnet %}
   {{subnet}}_{{node.name}}_subnet_id = "${module.subnet.{{subnet}}_subnet_id}"
 {% endfor %}
@@ -100,14 +100,14 @@ module "node" {
   vpc_id = "${module.vpc.id}"
   nodes_name = "{{cluster.name}}"
 {% for node in cluster.nodePools %}
-{% if node.etcdConfig is not defined and node.apiServerConfig is not defined and node.bastionConfig is not defined %}
+{% if node.etcdConfigs is not defined and node.apiServerConfig is not defined and node.bastionConfig is not defined %}
   {{node.keyPair.name}}_{{node.name}}_key = "${module.keypair.{{node.keyPair.name}}_keyname}"
 {% endif %}
 {% endfor %}
 
   kubernetes_sec_group = "${module.cluster_secgroup.id}"
 {% for node in cluster.nodePools %}
-{% if node.etcdConfig is not defined and node.apiServerConfig is not defined and node.bastionConfig is not defined %}
+{% if node.etcdConfigs is not defined and node.apiServerConfig is not defined and node.bastionConfig is not defined %}
 {% for subnet in node.nodeConfig.providerConfig.subnet %}
   {{subnet}}_{{node.name}}_subnet_id = "${module.subnet.{{subnet}}_subnet_id}"
 {% endfor %}

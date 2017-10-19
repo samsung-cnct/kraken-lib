@@ -1,8 +1,4 @@
 ---
-- set_fact:
-    cluster: "{{ cluster_node_tuple.0 }}"
-    node: "{{ cluster_node_tuple.1 }}"
-
 # The cluster UUID can not be used twice, even if cluster formation fails midway.
 # Since templates are unconditionally generated, we know terraform will be forced
 # to regenerate the instance, or fail on up, since prevent_destroy will be set
@@ -10,36 +6,40 @@
 #
 # Cf. https://coreos.com/etcd/docs/latest/v2/discovery_protocol.html and
 # https://github.com/coreos/etcd/blob/master/Documentation/op-guide/configuration.md
+- set_fact:
+    cluster: "{{ cluster_node_tuple.0 }}"
+    node: "{{ cluster_node_tuple.1 }}"
+     
 - name: Generate cluster UUID
   command: >
     uuidgen
   register: uuidgen_result
   when:
-    - node.etcdConfig.uuidToken is defined
-    - node.etcdConfig.uuidToken
+    - etcd.uuidToken is defined
+    - etcd.uuidToken
 
 - name: Fail if uuidgen failed
   fail:
     msg: "uuidgen failed with {{ uuidgen_result.stderr }}"
   when:
-    - node.etcdConfig.uuidToken is defined
-    - node.etcdConfig.uuidToken
+    - etcd.uuidToken is defined
+    - etcd.uuidToken
     - uuidgen_result | failed
 
 - set_fact:
     clusterUuidToken: "{{ uuidgen_result.stdout | lower }}"
   when:
-    - node.etcdConfig.uuidToken is defined
-    - node.etcdConfig.uuidToken
+    - etcd.uuidToken is defined
+    - etcd.uuidToken
 
 - debug:
     msg: >
       The UUID for (cluster, nodePool) ({{ cluster_node_tuple.0.name }},
-      {{ node.etcdConfig.name }}) is {{ clusterUuidToken }}
+      {{ etcd.name }}) is {{ clusterUuidToken }}
     verbosity: 0
   when:
-    - node.etcdConfig.uuidToken is defined
-    - node.etcdConfig.uuidToken
+    - etcd.uuidToken is defined
+    - etcd.uuidToken
 
 - name: "Generate etcd service units"
   include: cloud_config/units.yaml

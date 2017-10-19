@@ -1,9 +1,9 @@
-- name: kraken-ssl.service
+- name: kraken-etcd-ssl-{{ etcd.name }}.service 
   runtime: true
   command: start
   content: |
     [Unit]
-    Description=Setup Network Environment
+    Description=Kraken etcd ssl configuration for etcd instance named {{ etcd.name }}
     Requires=kraken-networking.service
     After=kraken-networking.service
     [Service]
@@ -18,8 +18,10 @@
      --mount volume=input,target=/input \
      --mount volume=output,target=/output \
      --set-env=HOST_IP=${DEFAULT_IPV4} \
-     --set-env=SERVICE_DNS_NAME={{ cluster_node_tuple.1.name }}.{{ cluster_node_tuple.0.name }}.internal \
+     --set-env=SERVICE_DNS_NAME=etcd.{{ cluster_node_tuple.1.name }}.{{ cluster_node_tuple.0.name }}.internal \
      --set-env=HOST_DNS_NAME=*.{{ cluster_node_tuple.1.name }}.{{ cluster_node_tuple.0.name }}.internal \
+     --set-env=EVENTS_SERVICE_DNS_NAME=etcdevents.{{ cluster_node_tuple.1.name }}.{{ cluster_node_tuple.0.name }}.internal \
+     --set-env=EVENTS_HOST_DNS_NAME=*.etcdevents.{{ cluster_node_tuple.1.name }}.{{ cluster_node_tuple.0.name }}.internal \
      {{ drunkensmee }} \
-     --exec /assets/generate_etcd.sh
+     --exec /assets/generate_etcd.sh -- {{ etcd.name }}
     ExecStopPost=/usr/bin/rkt gc --mark-only

@@ -1,7 +1,7 @@
 ---
 - set_fact:
     ssh_config: "{{ config_base }}/{{ cluster.name }}/ssh_config"
-    etcd_loopback_endpoints: "{% for port in nodePool.etcdConfig.clientPorts %}{% if nodePool.etcdConfig.ssl == true %}https{% else %}http{% endif %}://127.0.0.1:{{ port }}{{ ',' if not loop.last else '' }}{% endfor %}"
+    etcd_loopback_endpoints: "{% for etcd in nodePool.etcdConfigs %}{% for port in etcd.clientPorts %}{% if etcd.ssl == true %}https{% else %}http{% endif %}://127.0.0.1:{{ port }}{{ ',' if not loop.last else '' }}{% endfor %}{% endfor %}"
 
 # We purposely use ssh to query etcd over the loopback interface.
 # This allows us to support stricter firewall rules.

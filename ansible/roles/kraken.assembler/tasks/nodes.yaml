@@ -8,7 +8,6 @@
     path: "{{ config_base }}/{{ cluster.name }}/cloud-config"
     state: directory
 
-
 - name: Generate node cloud init
   copy:
     dest: "{{ dest_path }}"
@@ -18,7 +17,7 @@
   vars:
     dest_path: "{{ config_base }}/{{ cluster.name }}/cloud-config/{{ item.name }}.cloud-config.yaml"
     file_needed: "{{ not (dest_path | is_file) }}"
-    not_etcd_node: "{{ item.etcdConfig is not defined }}"
+    not_etcd_node: "{{ item.etcdConfigs is not defined }}"
   when:
     - file_needed or not_etcd_node
   with_items:

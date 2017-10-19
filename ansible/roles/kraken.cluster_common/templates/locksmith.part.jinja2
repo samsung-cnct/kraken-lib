@@ -16,10 +16,10 @@ window_length: {{ locksmith.windowLength }}
 {%   if locksmith.etcdConfig is defined %}
 {%     set etcdConfig = locksmith.etcdConfig %}
 endpoint: {% if etcdConfig.ssl == true %}https{% else %}http{% endif %}://{{ etcdConfig.name }}.{{ cluster.name }}.internal:{{ etcdConfig.clientPorts[0] }}
-etcd_cafile: /etc/{{ etcdConfig.name }}/ssl/client-ca.pem
-etcd_certfile: /etc/{{ etcdConfig.name }}/ssl/client-certfile.pem
-etcd_keyfile: /etc/etcd/{{ etcdConfig.name }}/client-keyfile.pem
-{%   else %}
+etcd_cafile: /etc/etcd/ssl/client-ca.pem
+etcd_certfile: /etc/etcd/ssl/client-certfile.pem
+etcd_keyfile: /etc/etcd/client-keyfile.pem
+{% else %}
 endpoint: {{ locksmith.endpoint }}
 etcd_cafile: {{ locksmith.etcdCafile }}
 etcd_certfile: {{ locksmith.etcdCertfile }}

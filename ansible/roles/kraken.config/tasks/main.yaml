@@ -24,6 +24,10 @@
   set_fact:
     kraken_config: "{{ kraken_config_defaults.deployment | combine(kraken_config_user.deployment) | expand_config }}"
 
+- name: Check if config is using etcdConfig, if so change to etcdConfigs
+  set_fact:
+    kraken_config: "{{ kraken_config_defaults.deployment | combine(kraken_config_user.deployment) | translate_config }}"
+
 - name: Validate the config against the schema
   include: validate-config.yaml
 

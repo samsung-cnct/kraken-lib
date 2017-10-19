@@ -4,7 +4,7 @@ variable "vpc_id" {}
 variable "nodes_name" {}
 variable "kubernetes_sec_group" {}
 {% for node in cluster.nodePools %}
-{% if node.etcdConfig is not defined and node.apiServerConfig is not defined and node.bastionConfig is not defined %}
+{% if node.etcdConfigs is not defined and node.apiServerConfig is not defined and node.bastionConfig is not defined %}
 variable "{{node.keyPair.name}}_{{node.name}}_key" {}
 {% for subnet in node.nodeConfig.providerConfig.subnet %}
 variable "{{subnet}}_{{node.name}}_subnet_id" {}
@@ -81,7 +81,7 @@ resource "aws_iam_instance_profile" "kubernetes_node_profile" {
 
 # information on CoreOS AMIs for node nodepools
 {% for node in cluster.nodePools %}
-{% if node.etcdConfig is not defined and node.apiServerConfig is not defined and node.bastionConfig is not defined %}
+{% if node.etcdConfigs is not defined and node.apiServerConfig is not defined and node.bastionConfig is not defined %}
 resource "coreosbox_ami" "{{node.name}}_ami" {
   channel        = "{{node.osConfig.channel}}"
   virtualization = "hvm"
@@ -94,7 +94,7 @@ resource "coreosbox_ami" "{{node.name}}_ami" {
 
 # Launch configurations for all node pools
 {% for node in cluster.nodePools %}
-{% if node.etcdConfig is not defined and node.apiServerConfig is not defined and node.bastionConfig is not defined %}
+{% if node.etcdConfigs is not defined and node.apiServerConfig is not defined and node.bastionConfig is not defined %}
 resource "aws_launch_configuration" "{{node.name}}_launch_config" {
   name_prefix                 = "${var.nodes_name}_{{node.name}}"
   image_id                    = "${coreosbox_ami.{{node.name}}_ami.box_string}"
@@ -132,7 +132,7 @@ resource "aws_launch_configuration" "{{node.name}}_launch_config" {
 
 # Autoscaling groups for all node pools
 {% for node in cluster.nodePools %}
-{% if node.etcdConfig is not defined and node.apiServerConfig is not defined and node.bastionConfig is not defined %}
+{% if node.etcdConfigs is not defined and node.apiServerConfig is not defined and node.bastionConfig is not defined %}
 resource "aws_autoscaling_group" "{{node.name}}_nodes" {
   name                      = "${var.nodes_name}_{{node.name}}_asg"
   vpc_zone_identifier       = [{% set comma = joiner(",") %}{% for subnet in node.nodeConfig.providerConfig.subnet %}{{ comma() }}"${var.{{subnet}}_{{node.name}}_subnet_id}"{% endfor %}]

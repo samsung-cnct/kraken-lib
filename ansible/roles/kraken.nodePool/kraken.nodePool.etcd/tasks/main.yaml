@@ -1,6 +1,6 @@
 ---
 - name: Generate etcd unit files from templates
-  include: each-cluster-nodepool.yaml
+  include: etcd-configs.yaml
   with_subelements:
     - "{{ kraken_config.clusters }}"
     - nodePools
@@ -8,4 +8,4 @@
     loop_var: cluster_node_tuple
   when:
     - cluster_node_tuple.0.providerConfig.type == 'cloudinit'
-    - cluster_node_tuple.1.etcdConfig is defined
+    - cluster_node_tuple.1.etcdConfigs is defined

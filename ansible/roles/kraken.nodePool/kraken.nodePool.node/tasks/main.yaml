@@ -7,6 +7,6 @@
     loop_var: cluster_node_tuple
   when:
     - cluster_node_tuple.1.apiServerConfig is not defined
-    - cluster_node_tuple.1.etcdConfig is not defined
+    - cluster_node_tuple.1.etcdConfigs is not defined
     - cluster_node_tuple.1.bastionConfig is not defined
     - cluster_node_tuple.0.providerConfig.type == 'cloudinit'

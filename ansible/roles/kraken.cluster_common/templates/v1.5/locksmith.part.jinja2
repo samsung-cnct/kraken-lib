@@ -1,4 +1,4 @@
-endpoint: {% if etcd.etcdConfig.ssl == true %}https{% else %}http{% endif %}://{{etcd.name}}.{{cluster.name}}.internal:{{etcd.etcdConfig.clientPorts[0]}}
+endpoint: {% if etcd.etcdConfigs.0.ssl == true %}https{% else %}http{% endif %}://{{etcd.name}}.{{cluster.name}}.internal:{{etcd.etcdConfigs.0.clientPorts[0]}}
 etcd_cafile: /etc/etcd/ssl/client-ca.pem
 etcd_certfile: /etc/etcd/ssl/client.pem
 etcd_keyfile: /etc/etcd/ssl/client-key.pem

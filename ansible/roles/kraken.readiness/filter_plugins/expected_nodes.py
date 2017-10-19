@@ -4,7 +4,7 @@ from ansible import errors
 def expected_nodes(config_data, readiness_type, readiness_value):
   total_nodes = 0
   for node in config_data['nodePools']:
-    if 'etcdConfig' not in node and 'bastionConfig' not in node:
+    if 'etcdConfigs' not in node and 'bastionConfig' not in node:
       total_nodes += node['count']
 
   if readiness_type == 'exact':

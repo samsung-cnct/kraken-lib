@@ -18,7 +18,7 @@
   loop_control:
     loop_var: i
   when:
-    - i.1.etcdConfig is undefined
+    - i.1.etcdConfigs is undefined
     - (i.1.apiServerConfig is undefined or (i.1.apiServerConfig is defined and i.1.kubeConfig is undefined))
     - i.1.kubeConfig is undefined
     - i.1.bastionConfig is undefined
@@ -32,7 +32,7 @@
   loop_control:
     loop_var: i
   when:
-    (i.1.etcdConfig is defined and (i.1.kubeConfig is defined or i.1.bastionConfig is defined)) or
+    (i.1.etcdConfigs is defined and (i.1.kubeConfig is defined or i.1.bastionConfig is defined)) or
     (i.1.apiServerConfig is defined and i.1.bastionConfig is defined) or
     (i.1.kubeConfig is defined and i.1.bastionConfig is defined)
 

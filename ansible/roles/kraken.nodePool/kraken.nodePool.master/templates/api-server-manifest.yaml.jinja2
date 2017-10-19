@@ -16,9 +16,9 @@
         command:
         - /hyperkube
         - apiserver
-        - --etcd-servers={% if node.apiServerConfig.state.etcd.ssl == true %}https{% else %}http{% endif %}://{{ node.apiServerConfig.state.etcd.name }}.{{ cluster.name }}.internal:{{ node.apiServerConfig.state.etcd.clientPorts[0] }}
+        - --etcd-servers={% if node.apiServerConfig.state.etcd.ssl == true %}https{% else %}http{% endif %}://{{ node.apiServerConfig.state.etcd.name }}.etcd.{{ cluster.name }}.internal:{{ node.apiServerConfig.state.etcd.clientPorts[0] }}
 {% if node.apiServerConfig.events is defined %}
-        - --etcd-servers-overrides=/events#{% if node.apiServerConfig.events.etcd.ssl == true %}https{% else %}http{% endif %}://{{ node.apiServerConfig.events.etcd.name }}.{{ cluster.name }}.internal:{{ node.apiServerConfig.events.etcd.clientPorts[0]}}
+        - --etcd-servers-overrides=/events#{% if node.apiServerConfig.events.etcd.ssl == true %}https{% else %}http{% endif %}://{{ node.apiServerConfig.events.etcd.name }}.etcd.{{ cluster.name }}.internal:{{ node.apiServerConfig.events.etcd.clientPorts[0]}}
 {% endif %}
         - --bind-address=0.0.0.0
         - --etcd-cafile=/etc/etcd/ssl/client-ca.pem

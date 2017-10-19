@@ -14,7 +14,7 @@ data:
 {% set etcd = node.apiServerConfig.state.etcd %}
 
   # Configure this with the location of your etcd cluster.
-  etcd_endpoints: "{% if etcd.ssl == true %}https{% else %}http{% endif %}://{{etcd.name}}.{{cluster.name}}.internal:{{etcd.clientPorts[0]}}"
+  etcd_endpoints: "{% if etcd.etcdConfigs.0.ssl == true %}https{% else %}http{% endif %}://{{etcd.etcdConfigs.0.name}}.{{cluster.name}}.internal:{{etcd.etcdConfigs.0.clientPorts[0]}}"
   etcd_ca_cert_file: "/etc/etcd/ssl/client-ca.pem"
   etcd_cert_file: "/etc/etcd/ssl/client.pem"
   etcd_key_file: "/etc/etcd/ssl/client-key.pem"

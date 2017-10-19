@@ -64,7 +64,7 @@
   loop_control:
     loop_var: nodePool
   when:
-    - nodePool.etcdConfig is defined
+    - nodePool.etcdConfigs is defined
     - not etcd_status_lock_file.stat.exists
     - kraken_action == 'up'
     - not (dryrun | bool)

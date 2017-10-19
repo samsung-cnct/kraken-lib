@@ -1,11 +1,11 @@
-- name: kraken-etcd.service
+- name: kraken-etcd-{{ etcd.name }}.service
   command: start
   content: |
     [Unit]
     Description=etcd
-{% if cluster_node_tuple.1.etcdConfig.ssl == true %}
-    After=kraken-ssl.service
-    Requires=kraken-ssl.service
+{% if etcd.ssl == true %}
+    After=kraken-etcd-ssl-{{ etcd.name }}.service
+    Requires=kraken-etcd-ssl-{{ etcd.name }}.service
 {% endif %}
 {% for mount in cluster_node_tuple.1.nodeConfig.mounts %}
     After={{mount.path | replace('/', '-') | replace('-', '', 1)}}.mount
@@ -19,23 +19,23 @@
     RestartSec=15
     Restart=always
     KillMode=none
-    ExecStartPre=/usr/bin/mkdir -p /ephemeral/etcd
+    ExecStartPre=/usr/bin/mkdir -p /ephemeral/{{etcd.name}}
     ExecStart=/usr/bin/rkt run --net=host \
      --stage1-path=/usr/lib/rkt/stage1-images/stage1-fly.aci \
      --insecure-options=image \
      --inherit-env=true \
-{% if cluster_node_tuple.1.etcdConfig.ssl == true %}
+{% if etcd.ssl == true %}
      --volume ssl,kind=host,source=/etc/etcd/ssl,readOnly=true \
 {% endif %}
-     --volume data,kind=host,source=/ephemeral/etcd,readOnly=false \
+     --volume data,kind=host,source=/ephemeral/{{etcd.name}},readOnly=false \
      --volume resolv-conf,kind=host,source=/etc/resolv.conf \
      --mount volume=ssl,target=/etc/etcd/ssl \
      --mount volume=data,target=/ephemeral \
      --mount volume=resolv-conf,target=/etc/resolv.conf \
-     quay.io/coreos/etcd:{{cluster_node_tuple.1.etcdConfig.version}} \
-     -- --data-dir /ephemeral/etcd \
-     --name etcd{{cluster_node_tuple.1.name}} \
-{% if cluster_node_tuple.1.etcdConfig.ssl == true %}
+     quay.io/coreos/etcd:{{etcd.version}} \
+     -- --data-dir /ephemeral/{{etcd.name}} \
+     --name {{etcd.name}}{{cluster_node_tuple.1.name}}${DEFAULT_IPV4} \
+{% if etcd.ssl == true %}
      --peer-client-cert-auth \
      --peer-trusted-ca-file=/etc/etcd/ssl/peer-ca.pem \
      --peer-cert-file=/etc/etcd/ssl/peer.pem \
@@ -53,8 +53,8 @@
      --initial-cluster-token {{ cluster_node_tuple.1.etcdConfig.clusterToken }} \
 {% endif %}
      --initial-cluster-state new \
-     --advertise-client-urls {% for port in cluster_node_tuple.1.etcdConfig.clientPorts %}{% if loop.index > 1 %},{% endif %}{% if cluster_node_tuple.1.etcdConfig.ssl == true %}https{% else %}http{% endif %}://${DEFAULT_IPV4}:{{port}}{% endfor %} \
-     --listen-client-urls {% for port in cluster_node_tuple.1.etcdConfig.clientPorts %}{% if loop.index > 1 %},{% endif %}{% if cluster_node_tuple.1.etcdConfig.ssl == true %}https{% else %}http{% endif %}://127.0.0.1:{{port}},{% if cluster_node_tuple.1.etcdConfig.ssl == true %}https{% else %}http{% endif %}://${DEFAULT_IPV4}:{{port}}{% endfor %} \
-     --listen-peer-urls {% for port in cluster_node_tuple.1.etcdConfig.peerPorts %}{% if loop.index > 1 %},{% endif %}{% if cluster_node_tuple.1.etcdConfig.ssl == true %}https{% else %}http{% endif %}://${DEFAULT_IPV4}:{{port}}{% endfor %} \
+     --advertise-client-urls {% for port in etcd.clientPorts %}{% if loop.index > 1 %},{% endif %}{% if etcd.ssl == true %}https{% else %}http{% endif %}://${DEFAULT_IPV4}:{{port}}{% endfor %} \
+     --listen-client-urls {% for port in etcd.clientPorts %}{% if loop.index > 1 %},{% endif %}{% if etcd.ssl == true %}https{% else %}http{% endif %}://127.0.0.1:{{port}},{% if etcd.ssl == true %}https{% else %}http{% endif %}://${DEFAULT_IPV4}:{{port}}{% endfor %} \
+     --listen-peer-urls {% for port in etcd.peerPorts %}{% if loop.index > 1 %},{% endif %}{% if etcd.ssl == true %}https{% else %}http{% endif %}://${DEFAULT_IPV4}:{{port}}{% endfor %} \
      ---
     ExecStopPost=/usr/bin/rkt gc --mark-only
