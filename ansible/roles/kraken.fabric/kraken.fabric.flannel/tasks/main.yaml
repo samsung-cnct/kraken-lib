@@ -33,11 +33,21 @@
 - name: Generate canal RBAC policy file
   template:
     src: "{{ item }}"
-    dest: "{{ config_base }}/{{ cluster.name }}/auth/rbac-canal-policy.yaml"
+    dest: "{{ config_base }}/{{ cluster.name }}/fabric/rbac-canal-policy.yaml"
   with_first_found:
     - files:
       - "{{ kubernetes_minor_versions[ cluster.name ] }}/rbac-canal-policy.yaml.jinja2"
       - rbac-canal-policy.yaml.jinja2
+  when: "cluster.kubeAuth.authz.rbac is defined"
+
+- name: Generate calico configuration
+  template:
+    src: "{{ item }}"
+    dest: "{{ config_base }}/{{ cluster.name }}/fabric/calico.yaml"
+  with_first_found:
+    - files:
+      - "{{ kubernetes_minor_versions[ cluster.name ] }}/calico.yaml.part.jinja2"
+      - calico.yaml.part.jinja2
   when: "cluster.kubeAuth.authz.rbac is defined"
 
 - name: Generate Network Namespace Fie
@@ -67,25 +77,12 @@
       - "{{ kubernetes_minor_versions[ cluster.name ] }}/config.yaml.part.jinja2"
       - config.yaml.part.jinja2
 
-- name: Deploy Networking Namespace
+- name: Create Namespace
   command: >
     {{ kubectl }} --kubeconfig={{ kubefn }} apply -f {{ config_base }}/{{ cluster.name }}/fabric/namespace.yaml --record
   when: not ( dryrun | bool )
 
-- name: Deploy canal RBAC policy
+- name: Deploy Networking
   command: >
-    {{ kubectl }} --kubeconfig={{ kubefn }} apply -f {{ config_base }}/{{ cluster.name }}/auth/rbac-canal-policy.yaml --record
-  register: job_rbac_canal_results
-  when:
-    - "cluster.kubeAuth.authz.rbac is defined"
-    - not ( dryrun | bool )
-
-- name: Deploy canal configuration
-  command: >
-    {{ kubectl }} --kubeconfig={{ kubefn }} apply -f {{ config_base }}/{{ cluster.name }}/fabric/config.yaml --namespace=kube-networking --record
-  when: not ( dryrun | bool )
-
-- name: Deploy canal daemonset
-  command: >
-    {{ kubectl }} --kubeconfig={{ kubefn }} apply -f {{ config_base }}/{{ cluster.name }}/fabric/canal.yaml --namespace=kube-networking --record
+    {{ kubectl }} --kubeconfig={{ kubefn }} apply -f {{ config_base }}/{{ cluster.name }}/fabric/ --record
   when: not ( dryrun | bool )

@@ -36,13 +36,12 @@
       --stage1-from-dir=stage1-fly.aci \
       docker://{{ node.kubeConfig.hyperkubeLocation }}:{{ node.kubeConfig.version }} \
       --exec=/hyperkube -- kubelet \
-      --api_servers=http://127.0.0.1:8080 \
       --register-with-taints=node-role.kubernetes.io/master=:NoSchedule \
       --allow-privileged=true \
       --pod-manifest-path=/etc/kubernetes/manifests \
       --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
       --node-labels=nodepool={{ node.name }}{% if node.nodeConfig.providerConfig.label is defined %},{% set comma = joiner(",") %}{% for label in node.nodeConfig.providerConfig.label  %}{{ comma() }}{{ label.name }}={{ label.value }}{% endfor %}{% endif %} \
-      --hostname-override=${DEFAULT_IPV4} \
+      --hostname-override=%H \
       --cluster-dns={{ cluster.dns }} \
       --cluster-domain={{ cluster.domain }} \
       --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem \

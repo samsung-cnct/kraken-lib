@@ -16,9 +16,9 @@
         command:
         - /hyperkube
         - apiserver
-    - --etcd-servers={% if node.apiServerConfig.state.etcd.ssl == true %}https{% else %}http{% endif %}://{{ node.apiServerConfig.state.etcd.name }}.etcd.{{ cluster.name }}.internal:{{ node.apiServerConfig.state.etcd.clientPorts[0] }}
+        - --etcd-servers={% if node.apiServerConfig.state.etcd.ssl == true %}https{% else %}http{% endif %}://{{ node.apiServerConfig.state.etcd.name }}.etcd.{{ cluster.name }}.internal:{{ node.apiServerConfig.state.etcd.clientPorts[0] }}
 {% if node.apiServerConfig.events is defined %}
-    - --etcd-servers-overrides=/events#{% if node.apiServerConfig.events.etcd.ssl == true %}https{% else %}http{% endif %}://{{ node.apiServerConfig.events.etcd.name }}.etcd.{{ cluster.name }}.internal:{{ node.apiServerConfig.events.etcd.clientPorts[0]}}
+        - --etcd-servers-overrides=/events#{% if node.apiServerConfig.events.etcd.ssl == true %}https{% else %}http{% endif %}://{{ node.apiServerConfig.events.etcd.name }}.etcd.{{ cluster.name }}.internal:{{ node.apiServerConfig.events.etcd.clientPorts[0]}}
 {% endif %}
         - --bind-address=0.0.0.0
         - --etcd-cafile=/etc/etcd/ssl/client-ca.pem
@@ -27,7 +27,7 @@
         - --allow-privileged=true
         - --service-cluster-ip-range={{ cluster.network }}
         - --secure-port=443
-        - --admission-control=DefaultStorageClass,NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota
+        - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,ResourceQuota,DefaultTolerationSeconds
         - --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem
         - --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
         - --client-ca-file=/etc/kubernetes/ssl/ca.pem
@@ -37,7 +37,7 @@
         - --service-account-key-file=/etc/kubernetes/ssl/service-account-key.pem
         - --cloud-provider={{cluster.providerConfig.provider}}
         - --logtostderr=true
-        - --runtime-config=batch/v2alpha1=true 
+        - --runtime-config=batch/v2alpha1=true
 {% if cluster.kubeAuth.authn.oidc is defined %}
         - --oidc-issuer-url={{cluster.kubeAuth.authn.oidc.issuer}}
         - --oidc-client-id=example-app
@@ -46,9 +46,9 @@
         - --oidc-groups-claim=groups
 {% endif %}
 {% if cluster.kubeAuth.authz.rbac is defined %}
+        - --runtime-config=rbac.authorization.k8s.io/v1beta1=true
         - --authorization-mode=RBAC
-        - --authorization-rbac-super-user={{ cluster.kubeAuth.authz.rbac.super_user }}
-        - --runtime-config=rbac.authorization.k8s.io/v1alpha1
+        - --v=2
 {% endif %}
         ports:
         - containerPort: 443
@@ -87,3 +87,7 @@
       - hostPath:
           path: /usr/share/ca-certificates
         name: ssl-certs-host
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Equal
+        effect: NoSchedule

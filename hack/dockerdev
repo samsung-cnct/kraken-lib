@@ -24,7 +24,7 @@ show_help() {
     echo "     -f,--fresh                freshen the docker image from the repo"
     echo "     -h,--help                 this text"
     echo "     -i,--image   <imagename>  k2-tools docker image to use"
-    echo "                               default: quay.io/samsung_cnct/k2-tools"
+    echo "                               default: quay.io/samsung_cnct/kraken-tools"
     echo "     -m,--home <path>          specify the path to be used for \$HOME"
 }
 
@@ -65,7 +65,7 @@ done
 
 MYHOME=${MYHOME:-${HOME}}
 CONFIGFILE="${CONFIGFILE:-${MYHOME}/.kraken/config.yaml}"
-IMAGE="${IMAGE:-quay.io/samsung_cnct/k2-tools:latest}"
+IMAGE="${IMAGE:-quay.io/samsung_cnct/kraken-tools:latest}"
 GITROOT="$(git rev-parse --show-toplevel)"
 
 # error if this isn't a k2 checkout

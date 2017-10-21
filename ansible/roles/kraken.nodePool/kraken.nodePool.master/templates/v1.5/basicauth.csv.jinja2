@@ -1,5 +1,0 @@
-{% set uid=1 %}
-{% for list in cluster.kubeAuth.authn.basic %}
-{{ list.password }},{{ list.user }},{{ uid }}
-{% set uid = uid + 1 %}
-{% endfor %}

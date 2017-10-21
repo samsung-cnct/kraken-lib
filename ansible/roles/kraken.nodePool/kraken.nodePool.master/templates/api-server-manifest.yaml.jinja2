@@ -27,7 +27,7 @@
         - --allow-privileged=true
         - --service-cluster-ip-range={{ cluster.network }}
         - --secure-port=443
-        - --admission-control=DefaultStorageClass,NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota
+        - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,NodeRestriction,PersistentVolumeLabel,DefaultStorageClass,ResourceQuota,DefaultTolerationSeconds
         - --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem
         - --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
         - --client-ca-file=/etc/kubernetes/ssl/ca.pem
@@ -46,8 +46,7 @@
         - --oidc-groups-claim=groups
 {% endif %}
 {% if cluster.kubeAuth.authz.rbac is defined %}
-        - --authorization-mode=RBAC
-        - --runtime-config=rbac.authorization.k8s.io/v1beta1=true
+        - --authorization-mode=Node,RBAC
         - --v=2
 {% endif %}
         ports:

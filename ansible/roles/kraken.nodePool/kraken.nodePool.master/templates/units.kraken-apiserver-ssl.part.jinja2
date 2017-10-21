@@ -20,6 +20,7 @@
      --set-env=HOST_IP=${DEFAULT_IPV4} \
      --set-env=KUBE_SERVICE_IP={{ cluster.network | ipaddr('1') | ipaddr('address') }} \
      --set-env=SERVICE_DNS_NAME=apiserver.{{ cluster.name }}.internal \
+     --set-env=HOST_NAME=%H \
      {% if cluster.customApiDns is defined %}
         --set-env=CUSTOM_API_DNS={{ cluster.customApiDns }} \
      {% endif %}
