@@ -63,9 +63,8 @@
 - name: Fail if configuration file is incompatible
   fail:
     msg: >-
-         One or more incompatibilities were found in {{ config_filename }}.
-         They were {{ compatibility.result.explainations }}. If you would
-         like to proceed anyway, pass the --force flag to kraken.
+         One or more incompatibilities were found in {{ config_file }}.
+         If you would like to proceed anyway, pass the --force flag to kraken.
   when:
     - config_forced == 'false'
     - compatibility.result.incompatible

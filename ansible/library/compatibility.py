@@ -18,8 +18,9 @@
 DOCUMENTATION = '''  
 ---
 module: compatibility
-short_description: Verifies whether a given kraken config file contains
-any known incompatibilities
+short_description: Verifies whether a given kraken config file contains any
+known incompatibilities. This module assumes the config has already passed
+jsonschema validation.
 '''
 
 EXAMPLES = '''
@@ -48,7 +49,7 @@ from ansible import errors
 
 try:
     import yaml
-    from semver import VersionInfo, parse_version_info
+    from semver import parse_version_info
 except ImportError as e:
     raise errors.AnsibleModuleError(e)
 
@@ -60,8 +61,8 @@ def register_check(check):
     return check
 
 def get_version(version):
-    '''Return the VersionInfo for the version, but strip the leading character
-    if it is a v. That's not strictly semver.
+    '''Return the VersionInfo for the version string, but strip the leading
+    character if it is a v, since that's not strictly semver.
     '''
     if version[0] == 'v':
         version = version[1:]
@@ -69,8 +70,8 @@ def get_version(version):
     return version_info
 
 def get_versioned_fabric(fabric_config, version):
-    '''If the fabric is a `versionedFabric`, return the config specified by
-    the version.
+    '''If the kind of fabricConfig is `versionedFabric`, return the config
+    specified by the version. Otherwise return the fabric_config.
     '''
     if fabric_config['kind'] == 'versionedFabric':
         version_key = 'v{}.{}'.format(version.major,
@@ -88,7 +89,7 @@ def check_k8s_calico_mismatch(config):
     nodepools running kubernetes 1.7 must use calico version v2.6.1. See
     https://goo.gl/uJR4c9 for more information.
     '''
-    incompatible, explaination = False, 'Compatible'
+    incompatible, explainations = False, []
 
     required_k8s_version = get_version('v1.7.0')
     required_calico_node_version = get_version('v2.6.1')
@@ -125,8 +126,9 @@ def check_k8s_calico_mismatch(config):
                 incompatible = True
                 explaination = template.format(cluster=cluster['name'],
                                                nodepool=nodepool['name'])
+                explainations.append(explaination)
 
-    return incompatible, explaination
+    return incompatible, explainations
 
 def check_compatibility(config):
     '''Calls each check function with a config and collects any
@@ -136,10 +138,10 @@ def check_compatibility(config):
                'explainations': [] }
 
     for check in REGISTERED_CHECKS:
-        incompatible, explaination = check(config)
+        incompatible, explainations = check(config)
         if incompatible:
             result['incompatible'] = True
-            result['explainations'].append(explaination)
+            result['explainations'] = result['explainations'] + explainations
 
     return result
 
@@ -172,8 +174,11 @@ def main():
     result = check_compatibility(config)
 
     if result['incompatible']:
-        module.fail_json(changed=False, msg="Incompatible", result=result)
-    module.exit_json(changed=False, msg="Compatible", result=result)
+        msg = 'There are incompatibles in the kraken config.'
+        module.exit_json(changed=False, msg=msg, result=result)
+    else:
+        msg = "The kraken config appears to be compatible."
+        module.exit_json(changed=False, msg=msg, result=result)
 
 if __name__ == '__main__':  
     main()
