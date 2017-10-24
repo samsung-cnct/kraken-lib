@@ -19,5 +19,6 @@
     "version",
     "location"
   ],
+  "additionalProperties": false,
   "type": "object"
 }

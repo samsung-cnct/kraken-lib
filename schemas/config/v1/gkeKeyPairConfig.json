@@ -20,6 +20,6 @@
     "serviceAccount",
     "serviceAccountKeyFile"
   ],
-
+  "additionalProperties": false,
   "type": "object"
 }

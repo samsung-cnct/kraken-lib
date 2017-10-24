@@ -47,6 +47,6 @@
     "keypair",
     "zone"
   ],
-
+  "additionalProperties": false,
   "type": "object"
 }

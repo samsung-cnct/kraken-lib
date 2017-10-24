@@ -31,6 +31,6 @@
     "subnet",
     "default_security_group_id"
   ],
-
+  "additionalProperties": false,
   "type": "object"
 }

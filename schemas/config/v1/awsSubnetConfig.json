@@ -32,5 +32,6 @@
     "az",
     "cidr"
   ],
+  "additionalProperties": false,
   "type": "object"
 }

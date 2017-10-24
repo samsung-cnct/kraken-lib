@@ -39,6 +39,7 @@
     "snapshot_id",
     "encrypted"
   ],
+  "additionalProperties": false,
   "type": "object"
 
 }

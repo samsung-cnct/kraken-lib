@@ -52,6 +52,6 @@
 
   "required": [
   ],
-
+  "additionalProperties": false,
   "type": "object"
 }

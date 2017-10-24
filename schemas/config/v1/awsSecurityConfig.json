@@ -33,6 +33,6 @@
     "from_port",
     "to_port"
   ],
-
+  "additionalProperties": false,
   "type": "object"
 }

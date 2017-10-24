@@ -4,11 +4,10 @@
   "$$target": "nodeConfig.json",
   "title": "Node Configuration",
   "description": "Describes the configuration of a node within a nodePool.",
-
-  "items": {
-    "anyOf": [
-      { "$ref": "awsNodeConfig.json" },
-      { "$ref": "gkeNodeConfig.json" }
-    ]
-  }
+  
+  "oneOf": [
+    { "$ref": "awsNodeConfig.json" },
+    { "$ref": "gkeNodeConfig.json" }
+  ]
+ 
 }

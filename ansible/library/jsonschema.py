@@ -62,7 +62,7 @@ _semver_regex = (r'^v?(0|[1-9]\d*)\.'
                  r'(-(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*)?'
                  r'(\+[0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*)?$')
 
-@jsonschema.FormatChecker.cls_checks('symver')
+@jsonschema.FormatChecker.cls_checks('semver')
 def validate_semver_format(entry):
     m = re.match(_semver_regex, entry)
     return m is not None    

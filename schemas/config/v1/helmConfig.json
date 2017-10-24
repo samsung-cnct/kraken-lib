@@ -42,6 +42,6 @@
     "repos",
     "charts"
   ],
-
+  "additionalProperties": false,
   "type": "object"
 }

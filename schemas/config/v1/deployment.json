@@ -20,5 +20,6 @@
   "required": [
     "clusters"
   ],
+  "additionalProperties": false,
   "type": "object"
 }

@@ -25,5 +25,6 @@
     "machineType",
     "scopes"
   ],
+  "additionalProperties": false,
   "type": "object"
 }

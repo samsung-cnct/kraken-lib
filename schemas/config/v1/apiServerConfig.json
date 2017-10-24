@@ -10,6 +10,11 @@
       "description": "Name of the API server configuration",
       "type": "string"
     },
+    "kind": {
+      "description": "Type of apiServer",
+      "enum": ["apiServer"],
+      "type": "string"
+    },
     "loadBalancer": {
       "description": "What sort of load balancer system should be used",
       "enum": ["cloud", "flipbit"],
@@ -32,5 +37,6 @@
     "state",
     "events"
   ],
+  "additionalProperties": false,
   "type": "object"
 }
