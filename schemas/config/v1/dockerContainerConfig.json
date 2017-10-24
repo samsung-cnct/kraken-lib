@@ -39,6 +39,6 @@
     "runtime",
     "type"
   ],
-  "additionalProperties": false,
+
   "type": "object"
 }

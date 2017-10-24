@@ -20,6 +20,6 @@
     "name",
     "value"
   ],
-  "additionalProperties": false,
+
   "type": "object"
 }

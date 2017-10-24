@@ -94,6 +94,6 @@
     "ingressSecurity",
     "authentication"
   ],
-  "additionalProperties": false,
+
   "type": "object"
 }

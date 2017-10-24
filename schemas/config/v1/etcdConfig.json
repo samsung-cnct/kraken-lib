@@ -15,11 +15,6 @@
       "enum": [ "etcd" ],
       "type": "string"
     },
-    "kind": {
-      "description": "Type of etcdConfig",
-      "enum": ["kvStore"],
-      "type": "string"
-    },
     "clientPorts": {
       "description": "Ports used to listen for client requests.",
       "items": {
@@ -65,6 +60,6 @@
     "ssl",
     "version"
   ],
-  "additionalProperties": false,
+
   "type": "object"
 }

@@ -19,6 +19,5 @@
     "name",
     "id"
   ],
-  "additionalProperties": false,
   "type": "object"
 }

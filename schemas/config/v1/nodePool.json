@@ -15,7 +15,7 @@
       "minimum": 1,
       "type": "number"
     },
-    "etcdConfig": { "$ref": "kvStoreConfig.json" },
+    "kvStoreConfig": { "$ref": "kvStoreConfig.json" },
     "apiServerConfig": { "$ref": "apiServerConfig.json" },
     "kubeConfig": { "$ref": "kubeConfig.json" },
     "bastionConfig": { "$ref": "bastionConfig.json" },
@@ -30,6 +30,5 @@
     "count",
     "nodeConfig"
   ],
-  "additionalProperties": false,
   "type": "object"
 }

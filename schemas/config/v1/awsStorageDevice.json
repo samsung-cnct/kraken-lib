@@ -22,6 +22,6 @@
     "type",
     "opts"
   ],
-  "additionalProperties": false,
+
   "type": "object"
 }

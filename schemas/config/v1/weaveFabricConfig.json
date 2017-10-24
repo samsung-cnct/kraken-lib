@@ -10,11 +10,6 @@
       "description": "Name for the weave fabric configuration - used for referencing.",
       "type": "string"
     },
-    "kind": {
-      "description": "Type of weave fabric configuration",
-      "enum": ["fabric"],
-      "type": "string"
-    },
     "type": {
       "description": "The type of the fabric being used.",
       "enum": [ "weave" ],
@@ -29,6 +24,6 @@
     "type",
     "options"
   ],
-  "additionalProperties": false,
+
   "type": "object"
 }

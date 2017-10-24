@@ -47,6 +47,6 @@
     "type",
     "subnet"
   ],
-  "additionalProperties": false,
+
   "type": "object"
 }

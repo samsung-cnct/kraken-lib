@@ -24,6 +24,6 @@
     "network",
     "nodeConnectionLimit"
   ],
-  "additionalProperties": false,
+
   "type": "object"
 }

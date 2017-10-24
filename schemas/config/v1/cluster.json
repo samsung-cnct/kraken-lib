@@ -32,10 +32,6 @@
       "description": "Provider (e.g. AWS, GKE, etc.) configuration.",
       "$ref": "providerConfig.json"
     },
-    "helmOverride": {
-      "description": "Set to true when using your own helm version.",
-      "type": ["boolean","string","null"]
-    },
     "nodePools": {
       "description": "A list of nodePools.",
       "items": {
@@ -78,6 +74,6 @@
     "helmConfig",
     "dnsConfig"
   ],
-  "additionalProperties": false,
+
   "type": "object"
 }

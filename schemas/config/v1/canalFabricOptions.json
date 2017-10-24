@@ -13,6 +13,5 @@
     "containers",
     "network"
   ],
-  "additionalProperties": false,
   "type": "object"
 }

@@ -45,6 +45,6 @@
     "version",
     "rebootStrategy"
   ],
-  "additionalProperties": false,
+
   "type": "object"
 }

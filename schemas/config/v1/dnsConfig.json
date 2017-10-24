@@ -21,6 +21,5 @@
     "name",
     "kubedns"
   ],
-  "additionalProperties": false,
   "type": "object"
 }

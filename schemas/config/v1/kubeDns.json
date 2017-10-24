@@ -24,6 +24,6 @@
     "cluster_ip",
     "dns_domain"
   ],
-  "additionalProperties": false,
+
   "type": "object"
 }

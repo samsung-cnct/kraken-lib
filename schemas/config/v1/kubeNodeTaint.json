@@ -32,7 +32,6 @@
     "value",
     "effect"
   ],
-  "additionalProperties": false,
 
   "type": "array"
 }

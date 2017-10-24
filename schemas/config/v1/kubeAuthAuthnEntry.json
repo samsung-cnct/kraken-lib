@@ -32,6 +32,6 @@
      { "required": [ "basic" ] },
      { "required": [ "cert"  ] }
    ],
-  "additionalProperties": false,
+
   "type": "object"
 }

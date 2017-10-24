@@ -16,6 +16,5 @@
   "required": [
     "type"
   ],
-  "additionalProperties": false,
   "type": "object"
 }

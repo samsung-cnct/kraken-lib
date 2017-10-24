@@ -13,6 +13,6 @@
   "required": [
     "authn"
   ],
-  "additionalProperties": false,
+
   "type": "object"
 }

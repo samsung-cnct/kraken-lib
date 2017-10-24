@@ -30,6 +30,6 @@
     "type",
     "options"
   ],
-  "additionalProperties": false,
+
   "type": "object"
 }

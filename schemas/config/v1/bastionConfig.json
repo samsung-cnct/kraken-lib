@@ -4,11 +4,12 @@
   "$$target": "bastionConfig.json",
   "title": "A Bastion configuration",
   "description": "Properties pertaining to a Bastion.",
-  
-  "oneOf": [
-    { "$ref": "bastionConfigSimple.json" },
-    { "$ref": "bastionConfigLoadBalanced.json" }
-  ],
-  
+
+  "properties": {
+    "oneOf": [
+      { "$ref": "bastionConfigSimple.json" },
+      { "$ref": "bastionConfigLoadBalanced.json" }
+    ]
+  },
   "type": "object"
 }
