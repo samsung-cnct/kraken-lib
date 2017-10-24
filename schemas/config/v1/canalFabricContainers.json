@@ -17,5 +17,6 @@
     "calicoNode",
     "flannel"
   ],
+  "additionalProperties": false,
   "type": "object"
 }

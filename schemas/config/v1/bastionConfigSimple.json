@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://judkins.house/apis/k2/v1/bastionConfig.json",
-  "$$target": "bastionConfig.json",
+  "id": "http://judkins.house/apis/k2/v1/bastionConfigSimple.json",
+  "$$target": "bastionConfigSimple.json",
   "title": "A Bastion configuration",
   "description": "Properties pertaining to a Bastion.",
 
@@ -26,9 +26,8 @@
 
   "required": [
     "name",
-    "kind",
-    "listenPort"
+    "kind"
   ],
-
+  "additionalProperties": false,
   "type": "object"
 }

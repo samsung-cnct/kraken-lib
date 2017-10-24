@@ -24,5 +24,6 @@
     "value",
     "wait"
   ],
+  "additionalProperties": false,
   "type": "object"
 }

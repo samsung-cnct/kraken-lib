@@ -105,6 +105,24 @@
       "minItems": 1,
       "type": "array"
     },
+    "dnsConfig" : {
+      "title": "DNS configurations",
+      "description": "A list of DNS configurations referenced within the configuration file.",
+      "items": {
+        "$ref": "dnsConfig.json"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "kubeAuth" : {
+      "title": "Kubernetes Authentication configurations",
+      "description": "A list of Kubernetes Authenications entries referenced within the configuration file.",
+      "items": {
+        "$ref": "kubeAuthConfig.json"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
     "keyPairs": {
       "title": "Key pairs",
       "description": "A list of key pairs referenced within the configuration file.",
@@ -125,6 +143,6 @@
   },
 
   "//": "Nothing is required. The administrator can choose not to declare a definitions stanza.",
-
+  "additionalProperties": false,
   "type": "object"
 }

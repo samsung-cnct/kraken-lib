@@ -17,5 +17,6 @@
   "required": [
     "subnet"
   ],
+  "additionalProperties": false,
   "type": "object"
 }

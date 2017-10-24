@@ -26,6 +26,7 @@ Note that the configuration file itself is un-versioned outside of an external v
 
 When changing the configuration file format be sure to update the schema file. By default JSON Schema will ignore
 additional properties it finds in a document (i.e. these documents are still considered valid).
+Setting ``` "additionalProperties": false ``` is recommended for all json schema definition files, to avoid invalid schemas.
 
 k2 configuration files should be backwards compatible but may not be forward compatible. That is a configuration file generated with k2 version x.y should be compatible with version k2 version x+1. On the other hand, a configuration file generated with k2 version x.y may not be compatible with k2 version x-1.
 

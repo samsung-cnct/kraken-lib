@@ -21,6 +21,6 @@
     "primaryZone",
     "additionalZones"
   ],
-
+  "additionalProperties": false,
   "type": "object"
 }

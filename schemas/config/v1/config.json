@@ -18,7 +18,7 @@
     "version",
     "deployment"
   ],
-
+  "additionalProperties": false,
   "type": "object",
   "deprecated": false
 }

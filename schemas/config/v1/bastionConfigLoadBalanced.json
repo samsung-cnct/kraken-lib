@@ -40,6 +40,6 @@
     "loadBalancer",
     "loadBalancerConfigs"
   ],
-
+  "additionalProperties": false,
   "type": "object"
 }

@@ -24,6 +24,6 @@
     "user",
     "password"
   ],
-
+  "additionalProperties": false,
   "type": "object"
 }

@@ -59,6 +59,6 @@
     "type",
     "kubeVersion"
   ],
-
+  "additionalProperties": false,
   "type": "object"
 }
