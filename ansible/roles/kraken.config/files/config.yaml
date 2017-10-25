@@ -189,7 +189,6 @@ definitions:
             opts:
               device_name: sdf
               volume_type: gp2
-              volume_size: 10
               volume_size: 100
               delete_on_termination: true
               snapshot_id:
