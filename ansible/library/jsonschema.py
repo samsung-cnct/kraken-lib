@@ -37,8 +37,9 @@ EXAMPLES = '''
   fail:
     msg: >-
          {{ config_filename }} was invalid. Exception raised was
-         {{ validation.result.exception }}
-    when: validation.result.is_valid
+         {{ validation.exception }}
+    when:
+      - validation.invalid
  
 '''
 
@@ -104,9 +105,9 @@ class ApiValidator(jsonschema.Draft4Validator):
 
 def validate_document(config, schema, subschema_dir=''):
     '''Attempts to validate config against schema. Returns a dictionary
-    containing the config and schema, a boolean is_valid indicating whether the
-    config is valid under the schema, and exception of type ValidationError
-    (SchemaError) if config (schema) is invalid respectively.
+    containing the config and schema, a boolean invalid indicating whether the
+    config is invalid under the schema, and a text message description if
+    there is a ValidationError or SchemaError exception.
     
     The jsonschema module which implements validation unconditionally attempts
     to load subschema with a remote URI over the network. This behavior is not
@@ -118,7 +119,8 @@ def validate_document(config, schema, subschema_dir=''):
     '''
     result={ 'config': config,
              'schema': schema,
-             'is_valid': True,
+             'invalid': False,
+             'exception': None,
     }
 
     if 'id' in schema:
@@ -130,8 +132,8 @@ def validate_document(config, schema, subschema_dir=''):
         validator = ApiValidator(schema, schema_uri, subschema_dir)
         validator.validate(config)
     except (jsonschema.ValidationError, jsonschema.SchemaError) as e:
-        result['is_valid'] = False
-        result['exception'] = e
+        result['invalid'] = True
+        result['exception'] = str(e)
 
     return result
 
@@ -176,9 +178,11 @@ def main():
     else:
         result = validate_document(config, schema)
 
-    if 'exception' in result:
-        module.fail_json(changed=False, msg="Validation failed", result=result)
-    module.exit_json(changed=False, msg="Validation succeeded", result=result)
+    if result['invalid']:
+        msg = 'The kraken config is invalid.'
+    else:
+        msg = "The kraken config appears to be valid."
+    module.exit_json(changed=False, msg=msg, **result)
 
 if __name__ == '__main__':  
     main()

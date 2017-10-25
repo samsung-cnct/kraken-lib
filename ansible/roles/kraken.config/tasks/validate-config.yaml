@@ -33,7 +33,7 @@
 
 - name: Set deprecation fact
   set_fact:
-    deprecated: "{{ validation.result.schema.deprecated | default(false) }}"
+    deprecated: "{{ validation.schema.deprecated | default(false) }}"
 
 - name: Check for deprecated version
   fail:
@@ -46,12 +46,19 @@
     - deprecated == true
     - config_forced == 'false'
 
+- name: Print validation errors
+  debug:
+    msg: "{{ validation.exception.split('\n') }}"
+  when:
+    - validation.invalid
+
 - name: Fail if configuration file is invalid
   fail:
     msg: >-
          Configuration file ({{ config_file }}) is not a valid instance
          of API version {{ kraken_config_user.version }}.
-  when: not validation.result.is_valid
+  when:
+    - validation.invalid
 
 - name: Check if configuration file is incompatible
   compatibility:
@@ -60,6 +67,12 @@
   when:
     - config_forced == 'false'
 
+- name: Print compatibility errors
+  debug:
+    msg: "{{ compatibility.explanations }}"
+  when:
+    - compatibility.incompatible
+
 - name: Fail if configuration file is incompatible
   fail:
     msg: >-
@@ -67,5 +80,5 @@
          If you would like to proceed anyway, pass the --force flag to kraken.
   when:
     - config_forced == 'false'
-    - compatibility.result.incompatible
+    - compatibility.incompatible
 

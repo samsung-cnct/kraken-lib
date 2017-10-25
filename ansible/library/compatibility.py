@@ -38,9 +38,9 @@ EXAMPLES = '''
   fail:
     msg: >-
          One or more incompatibilities were found in {{ config_filename }}.
-         They were {{ compatibility.result.explainations }}
+         They were {{ compatibility.explanations }}
   when:
-    - compatibility.result.incompatible
+    - compatibility.incompatible
 
 '''
 
@@ -89,7 +89,7 @@ def check_k8s_calico_mismatch(config):
     nodepools running kubernetes 1.7 must use calico version v2.6.1. See
     https://goo.gl/uJR4c9 for more information.
     '''
-    incompatible, explainations = False, []
+    incompatible, explanations = False, []
 
     required_k8s_version = get_version('v1.7.0')
     required_calico_node_version = get_version('v2.6.1')
@@ -126,22 +126,22 @@ def check_k8s_calico_mismatch(config):
                 incompatible = True
                 explaination = template.format(cluster=cluster['name'],
                                                nodepool=nodepool['name'])
-                explainations.append(explaination)
+                explanations.append(explaination)
 
-    return incompatible, explainations
+    return incompatible, explanations
 
 def check_compatibility(config):
     '''Calls each check function with a config and collects any
     incompatibilities returned.
     '''
     result = { 'incompatible': False,
-               'explainations': [] }
+               'explanations': [] }
 
     for check in REGISTERED_CHECKS:
-        incompatible, explainations = check(config)
+        incompatible, explanations = check(config)
         if incompatible:
             result['incompatible'] = True
-            result['explainations'] = result['explainations'] + explainations
+            result['explanations'] = result['explanations'] + explanations
 
     return result
 
@@ -175,10 +175,9 @@ def main():
 
     if result['incompatible']:
         msg = 'There are incompatibles in the kraken config.'
-        module.exit_json(changed=False, msg=msg, result=result)
     else:
         msg = "The kraken config appears to be compatible."
-        module.exit_json(changed=False, msg=msg, result=result)
+    module.exit_json(changed=False, msg=msg, **result)
 
 if __name__ == '__main__':  
     main()
