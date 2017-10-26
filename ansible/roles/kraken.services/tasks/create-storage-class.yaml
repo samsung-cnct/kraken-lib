@@ -26,6 +26,7 @@
     {{ kubectl }} --kubeconfig={{ kubeconfig }} apply -f "{{ item }}" --record
   with_first_found:
     - files:
-      - /kraken/ansible/roles/kraken.services/files/{{ cluster.providerConfig.provider }}/storage-class-config.yaml
+      - "{{ cluster.providerConfig.provider }}/{{ kubernetes_minor_versions[cluster.name] }}/storage-class-config.yaml"
+      - "{{ cluster.providerConfig.provider }}/storage-class-config.yaml"
       skip: true
   when: not storageclass_exists
