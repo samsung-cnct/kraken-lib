@@ -79,7 +79,7 @@ def get_versioned_fabric(fabric_config, version):
         if version_key in fabric_config['kubeVersion']['versions']:
             return fabric_config['kubeVersion']['versions'][version_key]
         else:
-            return fabric_config['default']
+            return fabric_config['kubeVersion']['default']
     else:
         return fabric_config
 
