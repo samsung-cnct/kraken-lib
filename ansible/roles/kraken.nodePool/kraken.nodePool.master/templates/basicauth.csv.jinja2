@@ -1,3 +1,5 @@
+- path: /etc/kubernetes/basicauth.csv
+  content: |
 {% set uid=1 %}
 {% for list in cluster.kubeAuth.authn.basic %}
   {% if cluster.kubeAuth.authz.rbac is defined %}
