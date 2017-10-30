@@ -95,7 +95,7 @@ definitions:
         network:
           network: 10.128.0.0/10
           nodeConnectionLimit: 30
-          
+
   kvStoreConfigs:
     - &defaultEtcd
       name: etcd
@@ -135,7 +135,7 @@ definitions:
     - &defaultKube
       name: defaultKube
       kind: kubernetes
-      version: v1.8.1
+      version: v1.8.2
       hyperkubeLocation: gcr.io/google_containers/hyperkube
 
   containerConfigs:

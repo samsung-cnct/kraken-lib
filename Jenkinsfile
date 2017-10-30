@@ -10,7 +10,7 @@ gke_cloud_test_timeout = 60  // Should be about 4 min but can be as long as 50 f
 e2e_test_timeout       = 18  // Should be about 15 min
 cleanup_timeout        = 60  // Should be about 6 min
 
-e2e_kubernetes_version = "v1.8.1"
+e2e_kubernetes_version = "v1.8.2"
 e2etester_version      = "0.2"
 custom_jnlp_version    = "0.1"
 
@@ -105,7 +105,7 @@ podTemplate(label: 'kraken-lib', containers: [
                     }
                 } catch (caughtError) {
                     err = caughtError
-                    currentBuild.result = "FAILURE"                
+                    currentBuild.result = "FAILURE"
                 } finally {
                     // This keeps the stage view from deleting prior history when the E2E test isn't run
                     if (err) {
@@ -131,7 +131,7 @@ podTemplate(label: 'kraken-lib', containers: [
                                     githubNotify context: "continuous-integration/jenkins/e2e", description: "This commit failed e2e tests", status: "FAILURE"
                                 }
                             } finally {
-                                junit testResults: "output/artifacts/*.xml", healthScaleFactor: 0.0                                
+                                junit testResults: "output/artifacts/*.xml", healthScaleFactor: 0.0
                             }
                         }
                     }
@@ -177,7 +177,7 @@ podTemplate(label: 'kraken-lib', containers: [
                 } else {
                     echo "Not pushing to docker repo:\n    BRANCH_NAME='${env.BRANCH_NAME}'\n    GIT_BRANCH='${git_branch}'\n    git_uri='${git_uri}'"
                 }
-                
+
                 //  custom overall health notification
                 //  junit plugin will always set build to UNSTABLE if any tests (e2e) fail.  This will cause notificaiton to github
                 //  to be a big red X.  Send another one that 'if status is unstable, passed all but e2e'
