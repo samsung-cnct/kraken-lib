@@ -8,7 +8,7 @@ following instructions are intended for developers working on kraken-lib.
 ## What is kraken-lib?
 kraken-lib is an orchestration and cluster-level management system for [Kubernetes](https://kubernetes.io) that creates a production-scale Kubernetes cluster on a range of platforms using default settings. When you're ready to optimize your cluster for your own environment and use case, you can deploy with kraken-lib's rich set of configurable options.  
 
-We (Samsung CNCT) built this tool to aid in our own research into high performance and reliability for the Kubernetes control plane. Realizing this would be a useful tool for the public at large, we released it as [kraken](https://github.com/samsung-cnct/kraken) (now kraken-v1) in mid 2016. This first release was great, but we had developed it quickly and just for research. After using it ourselves for almost a year and identifying some pain points, we deemed it best to build anew, bringing the best parts forward. Thus sprouted kraken-lib our second release. 
+We (Samsung CNCT) built this tool to aid in our own research into high performance and reliability for the Kubernetes control plane. Realizing this would be a useful tool for the public at large, we released it as [kraken](https://github.com/samsung-cnct/kraken) (now kraken-v1) in mid 2016. This first release was great, but we had developed it quickly and just for research. After using it ourselves for almost a year and identifying some pain points, we deemed it best to build anew, bringing the best parts forward. Thus sprouted kraken-lib our second release.
 
 It continues to use Ansible and Terraform because of the flexible and powerful abstractions these tools provide at the right layers. kraken-lib provides the same functionality as kraken-v1 but with much cleaner internal abstractions. This more easily facilitates external and internal contributions. It also enables us to quickly improve and evolve with the Kubernetes ecosystem as a whole.
 
@@ -22,15 +22,15 @@ kraken-lib uses a single file to drive cluster configuration, enabling you to ch
 We believe solving these two problems is a baseline for effectively and efficiently nurturing a Kubernetes-based infrastructure.
 
 ## Crash Data Collection
-To support our efforts to make kraken-lib a fault-tolerant, reliable tool, we collect data if kraken-lib crashes on up, down or update. If you are running it with the [kraken-tools](https://github.com/samsung-cnct/k2-tools) Docker container and the program exits with a failure, the following data will be collected by [kraken-lib crash-app](https://github.com/samsung-cnct/k2-crash-application) 
+To support our efforts to make kraken-lib a fault-tolerant, reliable tool, we collect data if kraken-lib crashes on up, down or update. If you are running it with the [kraken-tools](https://github.com/samsung-cnct/k2-tools) Docker container and the program exits with a failure, the following data will be collected by [kraken-lib crash-app](https://github.com/samsung-cnct/k2-crash-application)
 * Logs
 * The failing task
 
-This data remains internal for the Samsung-CNCT team to use for data-driven development. We do not collect personal information from users. 
+This data remains internal for the Samsung-CNCT team to use for data-driven development. We do not collect personal information from users.
 
 ## Supported Add-ons
 kraken-lib also supports a number of Samsung CNCT-supported add-ons in the form of Kubernetes charts. These charts, tested and maintained by Samsung CNCT, can be found in the [kraken-lib Charts repository](https://github.com/samsung-cnct/k2-charts).
-*They should work on any Kubernetes cluster.* 
+*They should work on any Kubernetes cluster.*
 
 # Getting Started with kraken-lib
 
@@ -147,7 +147,7 @@ While all configuration options are available for a reason, some are more import
 
 For a detailed explanation of all configuration variables, please consult [our configuration documentation](Documentation/kraken-configs/README.md)
 
-### Add a Custom Domain for the Kubernetes API Server 
+### Add a Custom Domain for the Kubernetes API Server
 To add a human-readable domain name to your Kubernetes API server, uncomment `customApiDns` and add the desired domain name to your config.yaml:
 
 ```
@@ -508,22 +508,18 @@ To create a small, low resource-consuming cluster, alter your configuration to t
 
 Role | # | Type
 --- | ---  | ---
-Primary etcd cluster | 1 | t2.small
-Events etcd cluster | 1 | t2.small
+etcd nodes| 1 | t2.small
 Master nodes | 1 | m4.large
 Cluster nodes | 1 | c4.large
 ~~Special~~ ~~nodes~~ | ~~2~~ | ~~m4.large~~
 
-yaml:
-```deployment:
+```yaml
+deployment:
   clusters:
-    - name:
+    - name: YOURCLUSTER
 ...
       nodePools:
         - name: etcd
-          count: 1
-...
-    - name: etcdEvents
           count: 1
 ...
         - name: master
@@ -531,9 +527,13 @@ yaml:
 ...
         - name: clusterNodes
           count: 1
+...
+        # - name: specialNodes
+        #   count: 2
+
 ```
 
-Delete 'Special nodes'.
+Delete or comment out 'Special nodes'.
 
 # Docs
 You can find further information here:
