@@ -134,7 +134,7 @@ definitions:
       clusterToken: espouse-monger-rarely
       peerPorts: [2380]
       ssl: true
-      version: v3.1.0
+      version: v3.0.17
     - &defaultEtcdEvents
       name: etcdEvents
       kind: kvStore
@@ -143,7 +143,7 @@ definitions:
       clusterToken: animism-training-chastity
       peerPorts: [2382]
       ssl: true
-      version: v3.1.0
+      version: v3.0.17
 
   apiServerConfigs:
     - &defaultApiServer
