@@ -49,7 +49,7 @@
       }
     - {
         role: 'roles/kraken.services',
-        tags: [ 'services', 'all', 'dns_only' ]
+        tags: [ 'services', 'services_only', 'all', 'dns_only' ]
       }
     - {
         role: 'roles/kraken.post',
