@@ -76,5 +76,4 @@ definitions:
       - user: admin
         password: secret
     authz:
-      rbac:
-        super_user: admin
+      rbac: {}

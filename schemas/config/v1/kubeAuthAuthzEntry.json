@@ -9,14 +9,7 @@
     "rbac": {
       "description": "Kubernetes RBAC configuration.",
       "properties": {
-        "super_user": {
-          "description": "Determines the authorization-rbac-super-user flag used to start the apiserver in versions of kubernetes <= 1.5",
-          "type": "string",
-          "default": "placeholder"
-        }
       },
-      "required": [
-      ],
       "type": "object"
     }
   },
