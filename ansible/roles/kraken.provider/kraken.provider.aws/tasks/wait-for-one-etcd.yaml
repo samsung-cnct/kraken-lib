@@ -1,0 +1,56 @@
+---
+- set_fact:
+    ssh_config: "{{ config_base }}/{{ cluster.name }}/ssh_config"
+    etcd_loopback_endpoints: "
+      {%- for port in etcdConfig.clientPorts -%}
+        {%- if etcdConfig.ssl == true -%}
+          https
+        {%- else -%}
+          http
+        {%- endif -%}
+          ://127.0.0.1:{{ port }}
+        {{- ',' if not loop.last else '' -}}
+      {%- endfor -%}"
+
+# We purposely use ssh to query etcd over the loopback interface.
+# This allows us to support stricter firewall rules.
+- name: Wait for etcd cluster {{ etcdConfig.name }} to form within nodePool {{ nodePool.name }}
+  command: >
+    ssh -o StrictHostKeyChecking=no
+        -o UserKnownHostsFile=/dev/null
+        -F {{ ssh_config }} {{ nodePool.name }}-1
+        etcdctl --ca-file={{ etcd_cafile }}
+                --cert-file={{ etcd_certfile }}
+                --key-file={{ etcd_keyfile }}
+                --endpoints={{ etcd_loopback_endpoints }}
+                member list
+  register: etcdctl_result
+  until: etcdctl_result.stdout_lines | list | length == nodePool.count
+  retries: "{{ etcd_retries }}"
+  delay: "{{ etcd_delay }}"
+  ignore_errors: yes
+  # See k2/674 for notes on the correct fix to eliminating this when statement.
+  when: nodePool.nodeConfig.providerConfig.enablePublicIPs is undefined or
+        nodePool.nodeConfig.providerConfig.enablePublicIPs
+
+- debug:
+    var: etcdctl_result
+    verbosity: 0
+
+- name: Fail if there were fewer members of the etcd cluster {{ etcdConfig.name }} than expected
+  fail:
+    msg: >
+     Expected {{ nodePool.count }} members of the etcd cluster
+     {{ etcdConfig.name }}, but only found {{ etcdctl_result.stdout_lines | list | length }}
+     members. Please run down and reattempt to run up again.
+  when: etcdctl_result.stdout_lines | list | length != nodePool.count
+
+# When we have no other way to determine etcd cluster health, wait the maximum
+# expected time. See k2/674 for notes on the correct fix to eliminating this
+# pause.
+- name: Pause when traditional etcd health checks are unavailable
+  pause:
+    seconds: "{{ (etcd_retries * etcd_delay) | int }}"
+  when:
+    - nodePool.nodeConfig.providerConfig.enablePublicIPs is defined
+    - not nodePool.nodeConfig.providerConfig.enablePublicIPs

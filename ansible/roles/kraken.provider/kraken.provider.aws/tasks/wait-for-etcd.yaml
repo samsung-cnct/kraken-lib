@@ -1,48 +1,7 @@
 ---
-- set_fact:
-    ssh_config: "{{ config_base }}/{{ cluster.name }}/ssh_config"
-    etcd_loopback_endpoints: "{% for etcd in nodePool.etcdConfigs %}{% for port in etcd.clientPorts %}{% if etcd.ssl == true %}https{% else %}http{% endif %}://127.0.0.1:{{ port }}{{ ',' if not loop.last else '' }}{% endfor %}{% endfor %}"
-
-# We purposely use ssh to query etcd over the loopback interface.
-# This allows us to support stricter firewall rules.
-- name: Wait for etcd cluster to form ({{ nodePool.name }})
-  command: >
-    ssh -o StrictHostKeyChecking=no
-        -o UserKnownHostsFile=/dev/null
-        -F {{ ssh_config }} {{ nodePool.name }}-{{ idx }}
-        etcdctl --ca-file={{ etcd_cafile }}
-                --cert-file={{ etcd_certfile }}
-                --key-file={{ etcd_keyfile }}
-                --endpoints={{ etcd_loopback_endpoints }}
-                   cluster-health
-  register: etcd_result
-  until: etcd_result | succeeded
-  retries: "{{ etcd_retries }}"
-  delay: "{{ etcd_delay }}"
-  with_items: "{{ nodePool.count }}"
+- name: Wait for all etcd clusters in the nodePool named {{ nodePool.name }} to form
+  include: wait-for-one-etcd.yaml
+  with_items:
+    - "{{ nodePool.etcdConfigs }}"
   loop_control:
-    loop_var: idx
-  # See k2/674 for notes on the correct fix to eliminating this when statement.
-  when: nodePool.nodeConfig.providerConfig.enablePublicIPs is undefined or
-        nodePool.nodeConfig.providerConfig.enablePublicIPs
-
-- debug:
-    var: etcd_result
-    verbosity: 0
-
-- name: Fail if any etcd node failed to report healthy
-  fail:
-    msg: >
-      An etcd node failed to report a healthy status. Please run down and
-      reattempt to run up again.
-  when: etcd_result | failed
-
-# When we have no other way to determine etcd cluster health, wait the maximum
-# expected time. See k2/674 for notes on the correct fix to eliminating this
-# pause.
-- name: Pause when traditional etcd health checks are unavailable
-  pause:
-    seconds: "{{ (etcd_retries * etcd_delay) | int }}"
-  when:
-    - nodePool.nodeConfig.providerConfig.enablePublicIPs is defined
-    - not nodePool.nodeConfig.providerConfig.enablePublicIPs
+    loop_var: etcdConfig

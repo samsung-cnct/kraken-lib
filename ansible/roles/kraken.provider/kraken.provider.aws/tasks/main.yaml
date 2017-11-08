@@ -58,9 +58,10 @@
   include_role:
     name: kraken.ssh/kraken.ssh.aws
 
-- name: Wait for etcd nodes to form cluster
+- name: Wait for etcd nodes to form clusters
   include: wait-for-etcd.yaml
-  with_items: "{{ cluster.nodePools }}"
+  with_items:
+    - "{{ cluster.nodePools }}"
   loop_control:
     loop_var: nodePool
   when:
