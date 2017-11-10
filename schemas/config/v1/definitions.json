@@ -78,6 +78,15 @@
       "minItems": 1,
       "type": "array"
     },
+    "autoScalingConfigs": {
+      "title": "AutoScaling configurations",
+      "description": "Describes the autoScaling configuration for a nodePool.",
+      "items": {
+        "$ref": "autoScalingConfig.json"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
     "osConfigs": {
       "title": "OS configurations",
       "description": "A list of OS configurations referenced within the configuration file.",

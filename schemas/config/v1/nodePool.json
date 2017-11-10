@@ -30,6 +30,7 @@
     "osConfig": { "$ref": "osConfig.json" },
     "nodeConfig": { "$ref": "nodeConfig.json" },
     "keyPair": { "$ref": "keyPair.json" },
+    "autoScalingConfig": { "$ref": "autoScalingConfig.json" },
     "schedulingConfig": {"$ref": "schedulingConfig.json"}
   },
   "required": [

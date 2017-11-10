@@ -145,6 +145,12 @@ definitions:
       runtime: docker
       type: distro
 
+  autoScalingConfigs:
+    - &defaultAutoScaling
+      minNodes: 1
+      maxNodes: 10
+      enabled: true
+
   osConfigs:
     - &defaultCoreOs
       name: defaultCoreOs
@@ -413,14 +419,15 @@ deployment:
           osConfig: *defaultCoreOs
           nodeConfig: *defaultAwsClusterNode
           keyPair: *defaultKeyPair
+          autoScalingConfig: *defaultAutoScaling
         - name: specialNodes
           count: 2
-          # m4.large
           kubeConfig: *defaultKube
           containerConfig: *defaultDocker
           osConfig: *defaultCoreOs
           nodeConfig: *defaultAwsSpecialNode
           keyPair: *defaultKeyPair
+          autoScalingConfig: *defaultAutoScaling
       fabricConfig: *kubeVersionedFabric
       kubeAuth: *rbacKubeAuth
       helmConfig: *defaultHelm

@@ -198,3 +198,24 @@
     - cluster_services is defined
     - helm_command is defined
     - item.registry is defined
+
+- name: Set cluster-autoscaling version
+  set_fact:
+    caTags: {
+             v1.8: v1.0.1,
+             v1.7: v0.6.0,
+             v1.6: v0.5.0
+            }
+
+- name: Install cluster-autoscaling addon
+  command: >
+    {{ helm_command }} install stable/cluster-autoscaler --name {{ item.name | lower }}-autoscaling --set "autoscalingGroups[0].name={{ cluster.name }}_{{ item.name }}_asg,autoscalingGroups[0].maxSize={{ item.autoScalingConfig.maxNodes }},autoscalingGroups[0].minSize={{ item.autoScalingConfig.minNodes }},autoscalingGroups[0].cloudProvider=aws,image.tag={{ caTags[kubernetes_minor_versions[cluster.name]] }}" --tiller-namespace kraken
+      --namespace kube-system
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+    HELM_HOME: "{{ helm_home }}"
+    PATH: "{{ helm_path }}:{{ ansible_env.PATH }}"
+  with_items:
+    - "{{ cluster.nodePools }}"
+  when:
+    - item.autoScalingConfig is defined

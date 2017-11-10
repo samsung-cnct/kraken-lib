@@ -61,6 +61,19 @@ data "aws_iam_policy_document" "kubernetes_node_policy_doc" {
     ]
     effect = "Allow"
   }
+
+  statement {
+    actions = [
+      "autoscaling:DescribeAutoScalingGroups",
+      "autoscaling:DescribeAutoScalingInstances",
+      "autoscaling:SetDesiredCapacity",
+      "autoscaling:TerminateInstanceInAutoScalingGroup",
+    ]
+    resources = [
+      "*",
+    ]
+    effect = "Allow"
+  }
 }
 
 resource "aws_iam_role_policy" "kubernetes_node_policy" {
@@ -140,8 +153,12 @@ resource "aws_autoscaling_group" "{{node.name}}_nodes" {
   wait_for_capacity_timeout = "0"
   force_delete              = true
   health_check_grace_period = "30"
-  max_size                  = "{{node.count}}"
-  min_size                  = "{{node.count}}"
+  {% if node.autoScalingConfig is defined %}
+  {% if node.autoScalingConfig.enabled == true %}
+  max_size                  = "{{node.autoScalingConfig.maxNodes}}"
+  min_size                  = "{{node.autoScalingConfig.minNodes}}"
+  {% endif %}
+  {% endif %}
   desired_capacity          = "{{node.count}}"
   health_check_type         = "EC2"
 
