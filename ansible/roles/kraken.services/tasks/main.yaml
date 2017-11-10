@@ -29,6 +29,14 @@
     - a_cluster.providerConfig.provider in ['aws']
   static: no
 
+- include: create-storage-class.yaml
+  with_items:
+    - "{{ kraken_config.clusters }}"
+  loop_control:
+    loop_var: a_cluster
+  when:
+    - (kraken_action == 'up') and not ( dns_only | bool )
+
 - include: run-services.yaml
   with_items:
     - "{{ kraken_config.clusters }}"
@@ -57,11 +65,3 @@
   when:
     - a_cluster.helmConfig is defined
     - kraken_action == 'down'
-
-- include: create-storage-class.yaml
-  with_items:
-    - "{{ kraken_config.clusters }}"
-  loop_control:
-    loop_var: a_cluster
-  when:
-    - (kraken_action == 'up') and not ( dns_only | bool )
