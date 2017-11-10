@@ -153,11 +153,12 @@ resource "aws_autoscaling_group" "{{node.name}}_nodes" {
   wait_for_capacity_timeout = "0"
   force_delete              = true
   health_check_grace_period = "30"
-  {% if node.autoScalingConfig is defined %}
-  {% if node.autoScalingConfig.enabled == true %}
+  {% if node.autoScalingConfig is defined and node.autoScalingConfig.enabled == true %}
   max_size                  = "{{node.autoScalingConfig.maxNodes}}"
   min_size                  = "{{node.autoScalingConfig.minNodes}}"
-  {% endif %}
+  {% else %}
+  max_size                  = "{{node.count}}"
+  min_size                  = "{{node.count}}"
   {% endif %}
   desired_capacity          = "{{node.count}}"
   health_check_type         = "EC2"
