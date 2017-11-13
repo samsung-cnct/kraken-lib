@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://judkins.house/apis/k2/v1/apiServerFlags.json",
+  "$$target": "apiServerFlags.json",
+  "title": "Kubernetes API server flags",
+  "description": "modifiable flags for apiserver",
+
+  "properties": {
+    "admissionControl": {
+      "description": "Comma separated list of admission-controls to use in cluster",
+      "type": "string"
+    },
+    "runtimeConfig": {
+      "description": "Comma separated list of runtime configs to use in cluster",
+      "type": "string"
+    },
+    "admissionControlConfigFile": {
+      "description": "Comma separated list of runtime configs to use in cluster",
+      "type": "string"
+    }
+  },
+  "required": [],
+  "additionalProperties": false,
+  "type": "object"
+}

@@ -27,7 +27,12 @@
         - --allow-privileged=true
         - --service-cluster-ip-range={{ cluster.network }}
         - --secure-port=443
+{% if node.apiServerConfig.flags is defined and node.apiServerConfig.flags.admissionControl is defined %}
+        - --admission-control={{ node.apiServerConfig.admissionControl }}
+{% else %}
         - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,ResourceQuota,DefaultTolerationSeconds
+{% endif %}
+
         - --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem
         - --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
         - --client-ca-file=/etc/kubernetes/ssl/ca.pem
@@ -37,7 +42,11 @@
         - --service-account-key-file=/etc/kubernetes/ssl/service-account-key.pem
         - --cloud-provider={{cluster.providerConfig.provider}}
         - --logtostderr=true
+{% if node.apiServerConfig.flags is defined and node.apiServerConfig.flags.runtimeConfig is defined %}
+        - --runtime-config={{ node.apiServerConfig.runtimeConfig }}
+{% else %}
         - --runtime-config=batch/v2alpha1=true
+{% endif %}
 {% if cluster.kubeAuth.authn.oidc is defined %}
         - --oidc-issuer-url={{cluster.kubeAuth.authn.oidc.issuer}}
         - --oidc-client-id=example-app
