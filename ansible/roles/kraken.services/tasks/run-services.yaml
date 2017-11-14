@@ -219,3 +219,4 @@
     - "{{ cluster.nodePools }}"
   when:
     - item.autoScalingConfig is defined
+    - item.autoScalingConfig.enabled
