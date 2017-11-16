@@ -47,6 +47,10 @@ case $key in
   KRAKEN_TAGS="$2"
   shift
   ;;
+  -k|--kubernetesendpoint)
+  K8S_ENDPOINT="$2"
+  shift
+  ;;
   -v|--verbose)
   K2_VERBOSE="$2"
   shift
@@ -106,6 +110,7 @@ KRAKEN_EXTRA_VARS="config_path=${KRAKEN_CONFIG} config_base=${KRAKEN_BASE} \
                    add_nodepools=${ADD_NODEPOOLS} \
                    remove_nodepools=${REMOVE_NODEPOOLS} \
                    dns_only=${DNS_ONLY} \
+                   kubernetes_endpoint=${K8S_ENDPOINT} \
                   "
 
 if [ ! -z ${BUILD_TAG+x} ]; then

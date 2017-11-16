@@ -7,6 +7,12 @@
 - name: Set cluster fact
   set_fact:
     cluster: "{{ a_cluster }}"
+
+- name: Set kraken_endpoint endpoint to kubernetes_endpoint if kubernetes_endpoint is set (CL arg)
+  set_fact:
+    kraken_endpoint: "{{ kubernetes_endpoint }}"
+  when: kubernetes_endpoint != ""
+
 #
 # certificate auth
 #

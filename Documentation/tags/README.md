@@ -103,6 +103,8 @@ fabric_only,services_only
 - roles/kraken.rbac
 - roles/kraken.readiness
 - roles/kraken.fabric/kraken.fabric.selector
+- roles/kraken.readiness
+- roles/kraken.ssh/kraken.ssh.selector
 - roles/kraken.services
 - roles/kraken.post
 
@@ -136,17 +138,30 @@ fabric_only,services_only
 
 
 ### provider
- **: Render and spins up actual kubernetes cluster on cloud such as AWS or GKE.**
+ **: Render and spins up unconfigured kubernetes cluster on cloud such as AWS or GKE.**
 - roles/kraken.config
 - roles/kraken.cluster_common
 - roles/kraken.nodePool/kraken.nodePool.selector
 - roles/kraken.assembler
 - roles/kraken.provider/kraken.provider.selector
+
+### post_provider
+ **: Assumes a set of machines has been created and has nodes in etcd, master and cluster pools**
+ **: Requires manually setting krakenconfig cli variable**
+- roles/kraken.config
+- roles/kraken.cluster_common
+- roles/kraken.access
+- roles/kraken.rbac
+- roles/kraken.readiness
 - roles/kraken.fabric/kraken.fabric.selector
+- roles/kraken.readiness
+- roles/kraken.ssh/kraken.ssh.selector
+- roles/kraken.services
 - roles/kraken.post
 
 ### ssh_only
 **: To regenerate the ssh config without doing other stuff**
+- roles/kraken.readiness
 - roles/kraken.ssh/kraken.ssh.selector
 
 ### ssh

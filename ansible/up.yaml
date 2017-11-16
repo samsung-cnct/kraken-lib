@@ -7,7 +7,7 @@
       }
     - {
         role: 'roles/kraken.cluster_common',
-        tags: [ 'assembler', 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun' ]
+        tags: [ 'assembler', 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun', 'post_provider' ]
       }
     - {
         role: 'roles/kraken.nodePool/kraken.nodePool.selector',
@@ -19,39 +19,39 @@
       }
     - {
         role: 'roles/kraken.provider/kraken.provider.selector',
-        tags: [ 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun']
+        tags: [ 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun', 'provider_access']
       }
     - {
         role: 'roles/kraken.access',
-        tags: [ 'readiness', 'services', 'all', 'dryrun', 'access_only' ]
+        tags: [ 'readiness', 'services', 'all', 'dryrun', 'access_only', 'post_provider' , 'provider_access']
       }
     - {
         role: 'roles/kraken.rbac',
-        tags: [ 'readiness', 'services', 'all', 'dryrun', 'rbac_only' ]
+        tags: [ 'readiness', 'services', 'all', 'dryrun', 'rbac_only', 'post_provider' ]
       }
     - {
         role: 'roles/kraken.readiness',
         wait_for_all_hosts: false,
-        tags: [ 'readiness', 'services', 'all' ]
+        tags: [ 'readiness', 'services', 'all', 'post_provider' ]
       }
     - {
         role: 'roles/kraken.fabric/kraken.fabric.selector',
-        tags: [ 'assembler', 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun', 'fabric_only' ]
+        tags: [ 'assembler', 'ssh', 'readiness', 'services', 'all', 'dryrun', 'fabric_only', 'post_provider' ]
       }
     - {
         role: 'roles/kraken.readiness',
         wait_for_all_hosts: true,
-        tags: [ 'readiness', 'services', 'all', 'ssh_only' ]
+        tags: [ 'readiness', 'services', 'all', 'ssh_only', 'post_provider' ]
       }
     - { # Run the SSH config generation when all nodes/ASGs are ready.
         role: 'roles/kraken.ssh/kraken.ssh.selector',
-        tags: [ 'ssh', 'all', 'dryrun' ,'ssh_only' ]
+        tags: [ 'ssh', 'all', 'dryrun' ,'ssh_only', 'post_provider' ]
       }
     - {
         role: 'roles/kraken.services',
-        tags: [ 'services', 'services_only', 'all', 'dns_only' ]
+        tags: [ 'services', 'services_only', 'all', 'dns_only', 'post_provider' ]
       }
     - {
         role: 'roles/kraken.post',
-        tags: [ 'all','provider','readiness','services','post_only' ]
+        tags: [ 'all','readiness','services','post_only', 'post_provider' ]
       }
