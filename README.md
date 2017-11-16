@@ -29,8 +29,36 @@ To support our efforts to make kraken-lib a fault-tolerant, reliable tool, we co
 This data remains internal for the Samsung-CNCT team to use for data-driven development. We do not collect personal information from users.
 
 ## Supported Add-ons
-kraken-lib also supports a number of Samsung CNCT-supported add-ons in the form of Kubernetes charts. These charts, tested and maintained by Samsung CNCT, can be found in the [kraken-lib Charts repository](https://github.com/samsung-cnct/k2-charts).
-*They should work on any Kubernetes cluster.*
+kraken-lib also supports a number of Samsung CNCT-supported add-ons in the form of Helm charts. These charts, tested and maintained by Samsung CNCT, can be found in the following repositories:
+
+#### Logging:
+To deploy a lightweight, configurable logging stack you can install:
+- [Logging Chart](https://github.com/samsung-cnct/chart-logging)
+
+This chart deploys:
+- Fluent-bit daemonset
+- ElasticSearch cluster
+- ElasticSearch curator
+- Kibana
+
+Additionally, you can deploy some or all of these charts individually with the following charts:
+- [Fluent-bit](https://github.com/samsung-cnct/chart-fluent-bit)
+- [ElasticSearch](https://github.com/samsung-cnct/chart-elasticsearch)
+- [ElasticSearch Curator](https://github.com/samsung-cnct/chart-curator)
+- [Kibana](https://github.com/samsung-cnct/chart-kibana)
+
+*These charts should work on any Kubernetes cluster.*
+
+#### Other Add-ons
+Another Kubernetes add-on that kraken-lib supports is [cluster-autoscaling](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler) this can be 'enabled' in the following `config.yaml` block:
+
+```
+  autoScalingConfigs:
+    - &defaultAutoScaling
+      minNodes: 3
+      maxNodes: 10
+      enabled: true
+```
 
 # Getting Started with kraken-lib
 
