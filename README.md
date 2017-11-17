@@ -126,7 +126,9 @@ K2OPTS="-v ${KRAKEN}:${KRAKEN}
 
 ### Initial kraken-lib directory
 
-If this is your first time using kraken-lib, use the kraken-lib Docker image to generate a 'sensible defaults' configuration (this assumes AWS is the infrastructure provider):
+If this is your first time using kraken-lib, use the kraken-lib Docker image to generate a 'sensible defaults' configuration:
+
+#### Config generation for AWS
 
 With the Docker container:
 
@@ -160,6 +162,14 @@ Then rename the `config.yaml` file to `YOURCLUSTER.yaml`. This is best practice.
 
 It is particularly useful when trying to create and manage multiple clusters, each of which
 **must** have unique names.
+
+#### Config generation for GKE
+
+Follow the instructions above for creating an AWS configuration file but include the following flag:
+
+```
+--provider GKE
+```
 
 ## Configure Your Kubernetes Cluster
 

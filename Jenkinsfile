@@ -65,7 +65,7 @@ podTemplate(label: 'kraken-lib', containers: [
 
             stage('Configure') {
                 kubesh 'build-scripts/fetch-credentials.sh'
-                kubesh './bin/up.sh --generate cluster/aws/config.yaml'
+                kubesh './bin/up.sh --generate --config cluster/aws/config.yaml'
                 kubesh "build-scripts/update-generated-config.sh cluster/aws/config.yaml ${env.JOB_BASE_NAME}-${env.BUILD_ID}"
                 kubesh 'mkdir -p cluster/gke'
                 kubesh 'cp ansible/roles/kraken.config/files/gke-config.yaml cluster/gke/config.yaml'

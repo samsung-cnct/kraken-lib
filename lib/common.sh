@@ -41,9 +41,17 @@ function run_command {
 }
 
 function generate_config {
-  inf "Generating config file at: $1"
+  inf "Generating $2 config file at: $1"
   mkdir -p "${1%/*}"
-  cp "${KRAKEN_ROOT}/ansible/roles/kraken.config/files/config.yaml" "${1}"
+
+  if [ ${2} == "AWS" ]; then
+      cp "${KRAKEN_ROOT}/ansible/roles/kraken.config/files/config.yaml" "${1}"
+  fi
+
+  if [ ${2} == "GKE" ]; then
+      cp "${KRAKEN_ROOT}/ansible/roles/kraken.config/files/gke-config.yaml" "${1}"
+  fi
+
   exit 0
 }
 

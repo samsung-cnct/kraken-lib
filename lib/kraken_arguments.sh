@@ -34,10 +34,7 @@ case $key in
   shift
   ;;
   -g|--generate)
-  KRAKEN_GENERATE_PATH="${2-"${HOME}/.kraken/config.yaml"}"
-  if [ -n "${2+x}" ]; then
-    shift
-  fi
+  KRAKEN_GENERATE_PATH="${HOME}/.kraken/config.yaml"
   ;;
   -o|--output)
   KRAKEN_BASE="$2"
@@ -55,6 +52,10 @@ case $key in
   K2_VERBOSE="$2"
   shift
   ;;
+  -p|--provider)
+  KRAKEN_PROVIDER="$2"
+  shift
+  ;;
   -h|--help)
   KRAKEN_HELP=true
   shift
@@ -65,19 +66,26 @@ esac
 shift # past argument or value
 done
 
-
 if [ "${KRAKEN_HELP}" == true ]; then
   show_help
   exit 0
 fi
 
-if [ -n "${KRAKEN_GENERATE_PATH+x}" ]; then
-  generate_config "${KRAKEN_GENERATE_PATH}"
-fi
-
 if [ -z ${KRAKEN_CONFIG+x} ]; then
   warn "--config not specified. Using ${HOME}/.kraken/config.yaml as location"
   KRAKEN_CONFIG="${HOME}/.kraken/config.yaml"
+fi
+
+if [ -n "${KRAKEN_GENERATE_PATH+x}" ]; then
+  KRAKEN_GENERATE_PATH=${KRAKEN_CONFIG}
+
+  if [[ -n ${KRAKEN_PROVIDER+x} ]]; then
+    if [ $KRAKEN_PROVIDER == "GKE" ]; then
+        generate_config "${KRAKEN_GENERATE_PATH}" GKE
+    fi
+  fi
+
+  generate_config "${KRAKEN_GENERATE_PATH}" AWS
 fi
 
 if [ -z ${KRAKEN_BASE+x} ]; then
