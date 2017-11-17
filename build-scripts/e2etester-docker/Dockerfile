@@ -3,7 +3,9 @@ MAINTAINER Pat Christopher <patrick.c@samsung.com>
 
 ENV GOLANG_DEB_VERSION=2:1.7~5~bpo8+1 \
     GOOGLE_CLOUD_SDK_VERSION=117.0.0 \
-    KUBERNETES_VERSION=v1.3.2
+    KUBERNETES_VERSION=v1.3.2 \
+    GSUTIL_SHA256=1ebc2e01deb5c6511f4a82ca293a5979a9bc625ae52326660dde7b14cfec0dc2 \
+    GC_SDK_SHA256=0068f46fcde543d9955b0c8fad8aa566abe72534c4a590b402f62ef37c0ffde3
 
 RUN echo 'deb http://deb.debian.org/debian jessie-backports main' > /etc/apt/sources.list.d/jessie-backports.list
 
@@ -37,15 +39,17 @@ RUN pip install --upgrade pip \
   && pip install --requirement /opt/kraken-ci/containers/jenkins/requirements.txt
 
 ## Install Google Cloud SDK
-RUN wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GOOGLE_CLOUD_SDK_VERSION}-linux-x86_64.tar.gz \
-  && tar xzf google-cloud-sdk-${GOOGLE_CLOUD_SDK_VERSION}-linux-x86_64.tar.gz \
-  && rm google-cloud-sdk-${GOOGLE_CLOUD_SDK_VERSION}-linux-x86_64.tar.gz \
-  && google-cloud-sdk/install.sh --usage-reporting=false --path-update true --bash-completion true --rc-path ~/.bashrc
+RUN wget -O google-cloud-sdk.tgz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GOOGLE_CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
+   echo "${GC_SDK_SHA256}  google-cloud-sdk.tgz" | sha256sum -c - && \
+   tar xzf google-cloud-sdk.tgz && \
+   rm google-cloud-sdk.tgz && \
+   google-cloud-sdk/install.sh --usage-reporting=false --path-update true --bash-completion true --rc-path ~/.bashrc
 
 ## Install gsutil
 RUN mkdir -p /google-cloud-util/bin/
 
 RUN wget https://storage.googleapis.com/pub/gsutil.tar.gz -O /google-cloud-util/gsutil.tar.gz && \
+        echo "${GSUTIL_SHA256}  /google-cloud-util/gsutil.tar.gz" | sha256sum -c - && \
         tar -xzf /google-cloud-util/gsutil.tar.gz -C /google-cloud-util/bin && \
         rm /google-cloud-util/gsutil.tar.gz
 
