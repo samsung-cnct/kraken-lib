@@ -131,6 +131,11 @@ definitions:
       kind: container
       runtime: docker
       type: distro
+  autoScalingConfigs:
+    - &defaultAutoScaling
+      minNodes: 3
+      maxNodes: 10
+      enabled: false
   nodeConfigs:
     - &defaultGKEClusterNode
       name: defaultGKEClusterNode
@@ -211,10 +216,12 @@ deployment:
           count: 2
           kubeConfig: *defaultKube
           nodeConfig: *defaultGKEClusterNode
+          autoScalingConfig: *defaultAutoScaling
         - name: othernodes
           count: 2
           kubeConfig: *defaultKube
           nodeConfig: *defaultGKEOtherNode
+          autoScalingConfig: *defaultAutoScaling
       fabricConfig: *kubeVersionedFabric
       helmConfig: *defaultHelm
       dnsConfig: *defaultDns

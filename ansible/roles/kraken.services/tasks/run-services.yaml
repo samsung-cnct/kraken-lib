@@ -220,3 +220,4 @@
   when:
     - item.autoScalingConfig is defined
     - item.autoScalingConfig.enabled
+    - cluster.providerConfig.provider == 'aws'

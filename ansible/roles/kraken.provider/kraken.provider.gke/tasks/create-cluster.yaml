@@ -40,4 +40,18 @@
     KUBECONFIG: "{{ config_base }}/{{ cluster.name }}/admin.kubeconfig"
     CLOUDSDK_CONTAINER_USE_CLIENT_CERTIFICATE: True
 
+- name: Enable autoscaling
+  command: >
+    gcloud --quiet beta container clusters update {{ cluster.name }} --enable-autoscaling 
+      --min-nodes={{ item.autoScalingConfig.minNodes }} 
+      --max-nodes={{ item.autoScalingConfig.maxNodes }} 
+      --node-pool={{ item.name }}
+      --zone {{ cluster.providerConfig.zone.primaryZone }}
+      --project {{ cluster.providerConfig.project }}
+  with_items:
+    - "{{ cluster.nodePools }}"
+  when:
+    - item.autoScalingConfig is defined
+    - item.autoScalingConfig.enabled == true
+
 - include: update-cluster.yaml
