@@ -1,8 +1,8 @@
 # everything master related
 
 {% for node in cluster.nodePools %}
-{% if node.apiServerConfig is defined %}
-{% set master=node %}
+{%   if node.apiServerConfig is defined %}
+{%     set master=node %}
 
 variable "vpc_id" {}
 variable "master_name" {}
@@ -12,9 +12,9 @@ variable "{{subnet}}_subnet_id" {}
 {% endfor %}
 
 {% if master.apiServerConfig.loadBalancerConfigs is defined %}
-{% for subnet in master.apiServerConfig.loadBalancerConfigs.subnet %}
+{%   for subnet in master.apiServerConfig.loadBalancerConfigs.subnet %}
 variable "{{subnet}}_subnet_id" {}
-{% endfor %}
+{%   endfor %}
 {% endif %}
 
 variable "route53_zone_id" {}
@@ -110,17 +110,17 @@ resource "aws_launch_configuration" "master_launch_config" {
   }
 
   # storage
-{% for storage in master.nodeConfig.providerConfig.storage %}
+  {% for storage in master.nodeConfig.providerConfig.storage %}
   {{storage.type}} {
-{% for k,v in storage.opts.iteritems() %}
+    {% for k,v in storage.opts.iteritems() %}
     {{k}} = "{{v}}"
-{% endfor %}
+    {% endfor %}
   }
-{% endfor %}
+  {% endfor %}
 }
 
 # if masters are load-balanced with a cloud loadbalancer, we need to define an ELB and a IAM cert to use for SSL
-{% if master.apiServerConfig.loadBalancer == 'cloud' %}
+{%     if master.apiServerConfig.loadBalancer == 'cloud' %}
 
 # Client Auth doesn't work right in amazon ELB
 #resource "aws_iam_server_certificate" "master_cert" {
@@ -132,11 +132,19 @@ resource "aws_launch_configuration" "master_launch_config" {
 resource "aws_elb" "master_elb" {
   name = "${var.master_name}-master-elb"
   cross_zone_load_balancing = true
-  {% if master.apiServerConfig.loadBalancerConfigs is defined %}
-  subnets = [{% set comma = joiner(",") %}{% for subnet in master.apiServerConfig.loadBalancerConfigs.subnet %}{{ comma() }}"${var.{{subnet}}_subnet_id}"{% endfor %}]
-  {% else %}
-  subnets = [{% set comma = joiner(",") %}{% for subnet in master.nodeConfig.providerConfig.subnet %}{{ comma() }}"${var.{{subnet}}_subnet_id}"{% endfor %}]
-  {% endif %}
+  {%- if master.apiServerConfig.loadBalancerConfigs is defined %}
+  subnets = [{%- set comma = joiner(",") -%}
+             {%- for subnet in master.apiServerConfig.loadBalancerConfigs.subnet -%}
+               {{- comma() -}}
+               "${var.{{subnet}}_subnet_id}"
+             {%- endfor -%}]
+  {%- else %}
+  subnets = [{%- set comma = joiner(",") -%}
+             {%- for subnet in master.nodeConfig.providerConfig.subnet -%}
+               {{- comma() -}}
+               "${var.{{subnet}}_subnet_id}"
+             {%- endfor -%}]
+  {%- endif %}
 
   security_groups = ["${var.kubernetes_sec_group}"]
 
@@ -147,7 +155,7 @@ resource "aws_elb" "master_elb" {
     lb_protocol = "tcp"
   }
 
-{% if cluster.kubeAuth.authn.oidc is defined %}
+  {%- if cluster.kubeAuth.authn.oidc is defined %}
   listener {
     instance_port = 30443
     instance_protocol = "tcp"
@@ -168,7 +176,7 @@ resource "aws_elb" "master_elb" {
     lb_port = 31080
     lb_protocol = "tcp"
   }
-{% endif %}
+  {%- endif %}
 
   health_check {
     healthy_threshold = 2
@@ -202,7 +210,7 @@ resource "aws_route53_record" "dex_record" {
 }
 {% endif %}
 
-{% else %}
+{%   else %}{#     if master.apiServerConfig.loadBalancer == 'cloud' #}
 # Launch configuration for master loadbalancer
 resource "aws_launch_configuration" "master_loadbalancer_launch_config" {
   name_prefix                 = "${var.master_name}_loadbalancer"
@@ -229,7 +237,11 @@ resource "aws_launch_configuration" "master_loadbalancer_launch_config" {
 # Autoscaling group for master loadbalancer.
 resource "aws_autoscaling_group" "master_loadbalancer_nodes" {
   name                      = "${var.master_name}_master_loadbalancer_asg"
-  vpc_zone_identifier       = [{% set comma = joiner(",") %}{% for subnet in master.nodeConfig.providerConfig.subnet %}{{ comma() }}"${var.{{subnet}}_subnet_id}"{% endfor %}]
+  vpc_zone_identifier       = [{%- set comma = joiner(",") -%}
+                               {%- for subnet in master.nodeConfig.providerConfig.subnet -%}
+                                 {{- comma() -}}
+                                 "${var.{{subnet}}_subnet_id}"
+                               {%- endfor -%}]
   launch_configuration      = "${aws_launch_configuration.master_loadbalancer_launch_config.name}"
   wait_for_capacity_timeout = "0"
   force_delete              = true
@@ -256,12 +268,16 @@ resource "aws_autoscaling_group" "master_loadbalancer_nodes" {
     propagate_at_launch = true
   }
 }
-{% endif %}
+{%     endif %}{#     if master.apiServerConfig.loadBalancer == 'cloud' #}
 
 # Autoscaling group for master.
 resource "aws_autoscaling_group" "master_nodes" {
   name                      = "${var.master_name}_master_asg"
-  vpc_zone_identifier       = [{% set comma = joiner(",") %}{% for subnet in master.nodeConfig.providerConfig.subnet %}{{ comma() }}"${var.{{subnet}}_subnet_id}"{% endfor %}]
+  vpc_zone_identifier       = [{%- set comma = joiner(",") -%}
+                               {%- for subnet in master.nodeConfig.providerConfig.subnet -%}
+                                 {{- comma() -}}
+                                 "${var.{{subnet}}_subnet_id}"
+                               {%- endfor -%}]
   launch_configuration      = "${aws_launch_configuration.master_launch_config.name}"
   wait_for_capacity_timeout = "0"
   force_delete              = true
@@ -269,15 +285,13 @@ resource "aws_autoscaling_group" "master_nodes" {
   max_size                  = "{{master.count}}"
   min_size                  = "{{master.count}}"
   desired_capacity          = "{{master.count}}"
-{% if master.apiServerConfig.loadBalancer == 'cloud'  %}
+  {%- if master.apiServerConfig.loadBalancer == 'cloud'  %}
   wait_for_elb_capacity     =  "{{master.count}}"
   load_balancers            = ["${aws_elb.master_elb.name}"]
-{% endif %}
-{% if master.apiServerConfig.loadBalancer == 'cloud'  %}
   health_check_type         = "ELB"
-{% else %}
+  {%- else %}
   health_check_type         = "EC2"
-{% endif %}
+  {%- endif %}
 
   lifecycle {
     create_before_destroy = true
@@ -301,13 +315,13 @@ resource "aws_autoscaling_group" "master_nodes" {
     propagate_at_launch = true
   }
 
-{% for tag in master.nodeConfig.providerConfig.tags %}
+  {%- for tag in master.nodeConfig.providerConfig.tags %}
   tag {
     key                 = "{{tag.key}}"
     value               = "{{tag.value}}"
     propagate_at_launch = true
   }
-{% endfor %}
+  {%- endfor %}
 }
 
 output "master_dependency" {
@@ -317,5 +331,5 @@ output "master_dependency" {
 output "kraken_endpoint" {
   value = "${aws_elb.master_elb.dns_name}"
 }
-{% endif %}
-{% endfor %}
+{%   endif %}{#   if node.apiServerConfig is defined #}
+{% endfor %}{# for node in cluster.nodePools #}
