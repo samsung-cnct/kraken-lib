@@ -38,10 +38,10 @@ definitions:
             version: v1.10.0
             location: quay.io/calico/cni
           calicoNode:
-            version: v2.6.1
+            version: v2.6.2
             location: quay.io/calico/node
           flannel:
-            version: v0.8.0
+            version: v0.9.1
             location: quay.io/coreos/flannel
         network:
           network: 10.128.0.0/10
@@ -87,10 +87,10 @@ definitions:
       options:
         containers:
           weave:
-            version: 1.9.8
+            version: 2.1.1
             location: weaveworks/weave-kube
           weave_npc:
-            version: 1.9.8
+            version: 2.1.1
             location: weaveworks/weave-npc
         network:
           network: 10.128.0.0/10
