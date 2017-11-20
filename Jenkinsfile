@@ -75,7 +75,7 @@ podTemplate(label: 'kraken-lib', containers: [
             // Dry Run Test
 
             stage('Test: Dry Run') {
-                kubesh "env helm_override_`echo ${JOB_BASE_NAME}-${BUILD_ID} " + '| tr \'[:upper:]\' \'[:lower:]\' | tr \'-\' \'_\'`=false PWD=`pwd` ./bin/up.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/ -t dryrun'
+                kubesh 'PWD=`pwd` ./bin/up.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/ -t dryrun'
             }
 
             // Unit tests
@@ -93,12 +93,12 @@ podTemplate(label: 'kraken-lib', containers: [
                         parallel (
                             "aws": {
                                 timeout(aws_cloud_test_timeout) {
-                                    kubesh "env helm_override_`echo ${JOB_BASE_NAME}-${BUILD_ID} " + '| tr \'[:upper:]\' \'[:lower:]\' | tr \'-\' \'_\'`=false PWD=`pwd` ./bin/up.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/'
+                                    kubesh 'PWD=`pwd` ./bin/up.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/'
                                 }
                             },
                             "gke": {
                                 timeout(gke_cloud_test_timeout) {
-                                    kubesh "env helm_override_`echo ${JOB_BASE_NAME}-${BUILD_ID} " + '| tr \'[:upper:]\' \'[:lower:]\' | tr \'-\' \'_\'`=false PWD=`pwd` ./bin/up.sh --config $PWD/cluster/gke/config.yaml --output $PWD/cluster/gke/'
+                                    kubesh 'PWD=`pwd` ./bin/up.sh --config $PWD/cluster/gke/config.yaml --output $PWD/cluster/gke/'
                                 }
                             }
                         )
@@ -141,10 +141,10 @@ podTemplate(label: 'kraken-lib', containers: [
                     stage('Clean up') {
                         parallel (
                             "aws": {
-                                kubesh "env helm_override_`echo ${JOB_BASE_NAME}-${BUILD_ID} " + '| tr \'[:upper:]\' \'[:lower:]\' | tr \'-\' \'_\'`=false PWD=`pwd` ./bin/down.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/ || true'
+                                kubesh 'PWD=`pwd` ./bin/down.sh --config $PWD/cluster/aws/config.yaml --output $PWD/cluster/aws/ || true'
                             },
                             "gke": {
-                                kubesh "env helm_override_`echo ${JOB_BASE_NAME}-${BUILD_ID} " + '| tr \'[:upper:]\' \'[:lower:]\' | tr \'-\' \'_\'`=false PWD=`pwd` ./bin/down.sh --config $PWD/cluster/gke/config.yaml --output $PWD/cluster/gke/'
+                                kubesh 'PWD=`pwd` ./bin/down.sh --config $PWD/cluster/gke/config.yaml --output $PWD/cluster/gke/'
                             }
                         )
                     }

@@ -518,20 +518,8 @@ docker run $K2OPTS quay.io/samsung_cnct/k2:latest ./bin/update.sh --config $HOME
 kraken-lib will use the versions of Helm and kubectl appropriate for the Kubernetes version of each cluster. It does so by determining each cluster's currently set Kubernetes minor version. Because node pools can have different versions from each other, the minor version is set according to the version of the control-plane node pool in AWS clusters. For GKE clusters, kraken-lib uses the Kubernetes version of the last node pool in the node pools list.
 
 ### Handling unsupported versions of Helm
-Currently, and for the foreseeable future, new Helm releases will be shipped after new Kubernetes releases, resulting in Helm possibly not being supported for the latest Kubernetes version. You have two options as detailed below.
+New Helm releases may be shipped _after_ new Kubernetes releases resulting in Helm possibly not supporting the latest features of Kubernetes. Kraken-lib will use the latest Helm release.
 
-#### Option 1: Overriding Helm in kraken-lib config file
-In the kraken-lib config file, set the cluster-level key `helmOverride` to `true` if you wish to use the latest version of Helm available. Warning: because this would be using a version of Helm that doesn't support your cluster's Kubernetes version, this may result in unexpected behavior.
-Set `helmOverride` to `false` if you would like to run kraken-lib without Helm.
-
-#### Option 2: Overriding Helm via environment variable
-This will automatically happen if you are trying to run a cluster with a Kubernetes version that does not have Helm support, and you did not set `helmOverride` in the kraken-lib config file.
-kraken-lib will halt and, via a fail message, prompt you to set a cluster-specific Helm override environment variable to true or false.
-
-```bash
-export helm_override_<CLUSTER_NAME>=<TRUE/FALSE>
-```
-Now, run cluster up again, and kraken-lib will use the override condition you specified.
 
 ## Destroying a Kubernetes Cluster
 

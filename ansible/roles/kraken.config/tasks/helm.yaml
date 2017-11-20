@@ -2,34 +2,13 @@
   set_fact:
     helm_cluster_name: "{{ cluster.name | replace('-','_') }}"
 
-- name: Set overall helm_override to env var if it has been set, config var if not
-  set_fact:
-    helm_override: "{{ (lookup('env', helm_override_key) != '') | ternary(lookup('env', helm_override_key), cluster.helmOverride | default('')) }}"
-  vars:
-    helm_override_key: "helm_override_{{helm_cluster_name}}"
-
-- name: Stop and print out message if helm is not available and helm_override has not been set in either env or config
-  fail:
-    msg: "This version of Kubernetes does not currently have helm support. If you would like to continue without using helm, execute following command:
-    export {{ helm_override_key }}=false and then run cluster up again.
-    If you would like to use the latest version of helm instead, execute:
-    export {{ helm_override_key }}=true and then run your cluster up again."
-  vars:
-    helm_override_key: "helm_override_{{helm_cluster_name}}"
-    path: "/opt/cnct/kubernetes/{{ kubernetes_minor_version }}/bin/helm"
-  when:
-    - not (path | is_file)
-    - helm_override == ""
-    - kraken_action != "down"
-
 - name: Set helm facts for cluster {{ cluster.name }}
   set_fact:
     helm_commands: "{{ { cluster.name : helm_command } | combine( helm_commands | default( {} ) ) }}"
     helm_homes: "{{ { cluster.name : helm_home } | combine( helm_homes | default( {} ) )}}"
   vars:
-    path: "/opt/cnct/kubernetes/{{ kubernetes_minor_version }}/bin/helm"
     latest: "/opt/cnct/kubernetes/latest/bin/helm"
-    helm_command: "{{ ( path | is_file ) | ternary( path, latest ) }}"
+    helm_command: "{{ latest }}"
     helm_home: "{{ config_base }}/{{ cluster.name }}/.helm"
 
 - name: Create Helm home

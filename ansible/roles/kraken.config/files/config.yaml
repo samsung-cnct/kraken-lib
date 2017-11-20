@@ -433,7 +433,6 @@ deployment:
       helmConfig: *defaultHelm
       dnsConfig: *defaultDns
       # customApiDns:
-      helmOverride:
   readiness:
     type: exact
     value: 0
