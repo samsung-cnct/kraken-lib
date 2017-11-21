@@ -246,7 +246,7 @@ definitions:
       providerConfig:
         enablePublicIPs: true
         provider: aws
-        type: c4.large
+        type: m4.large
         subnet: ["zone-1", "zone-2", "zone-3"]
         tags:
           -
@@ -274,7 +274,7 @@ definitions:
       providerConfig:
         provider: aws
         enablePublicIPs: true
-        type: m4.large
+        type: c4.large
         subnet: ["zone-1", "zone-2", "zone-3"]
         tags:
           -
