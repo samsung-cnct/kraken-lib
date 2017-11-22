@@ -84,7 +84,7 @@ You will need the following installed on your machine:
   - pip
   - boto
   - netaddr
-- Ansible ([see kraken-tools](https://github.com/samsung-cnct/k2-tools/blob/master/requirements.txt) for the version)
+- Ansible ([see kraken-tools](https://github.com/samsung-cnct/k2-tools/blob/master/build/requirements.txt) for the version)
 - Cloud SDKs
   - AWS cli
   - gcloud SDK
