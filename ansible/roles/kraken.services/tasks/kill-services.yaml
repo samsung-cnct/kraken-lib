@@ -90,9 +90,9 @@
 
 - name: Delete all service namespaces
   command: >
-    {{ kubectl }} --kubeconfig={{ kubeconfig }} delete namespace {{ item }}
+    {{ kubectl }} --kubeconfig={{ kubeconfig }} delete namespace {{ item.namespace }}
   with_items: "{{ cluster_namespaces }}"
-  when: cluster_namespaces is defined
+  when: kraken_action == 'down'
   ignore_errors: yes
 
 - name: Get vpc id
