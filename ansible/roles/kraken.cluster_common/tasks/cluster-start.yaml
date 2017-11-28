@@ -26,6 +26,13 @@
       Spinning up  {{ cluster.name }} cluster has been canceled due to its already completed.
   when: cluster_status_lock_file.stat.exists == True and kraken_action == 'up'
 
+- name: Loop over each node and check that corresponding ssh file exists
+  include: ssh_check.yaml
+  with_items:
+    - "{{ node }}"
+  loop_control:
+    loop_var: a_node
+
 - include: certificate_authority.yaml
 - include: os_update.yaml
 - include: units.yaml

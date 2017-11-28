@@ -1,0 +1,16 @@
+---
+- name: Get public ssh key file path
+  stat:
+    path: "{{ a_node.keyPair.publickeyFile }}"
+  register: pub_key
+
+- name: Get private ssh key file path
+  stat:
+    path: "{{ a_node.keyPair.privatekeyFile }}"
+  register: pri_key
+
+- name: Fail if files for public & private ssh keys do not exist
+  fail:
+    msg: >-
+      This job has failed because the ssh keys specified in the config.yaml do not exist.
+  when: pub_key.stat.exists == False and pri_key.stat.exists == False
