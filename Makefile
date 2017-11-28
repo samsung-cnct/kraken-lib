@@ -14,16 +14,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-SPHINX_SOURCE_DIR = ./sphinx
-SPHINX_BUILD_DIR  = ./docs
+DOCS_SRC_DIR   := ./sphinx
+DOCS_DIR       := ./docs
+DOCS_BK_DIR    := ./docs_bk
+DOCS_BUILD_DIR := ./build
 
-# Put it first so that "make" without argument is like "make help".
-help:
+.PHONY: help
+default: help
+help: ## Show the defined tasks
 	@grep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
 
-.PHONY: help Makefile
+.PHONY: bootstrap
+bootstrap: ## Get build dependencies (assumes python and pip are installed)
+	pip install sphinx sphinx-jsonschema
 
-gh-pages: ## Build gh-pages documentation, manual push required
-	@mv $(SPHINX_BUILD_DIR) ./html
-	$(MAKE) -C $(SPHINX_SOURCE_DIR) html
-	@mv ./html $(SPHINX_BUILD_DIR)
+.PHONY: docs
+docs: ## Build gh-pages documentation, manual push required
+	mkdir -p $(DOCS_BUILD_DIR)
+	cp -r $(DOCS_DIR) $(DOCS_BK_DIR)
+	sphinx-build -a $(DOCS_SRC_DIR) $(DOCS_BUILD_DIR)
+	rm -rf $(DOCS_DIR)
+	@mv $(DOCS_BUILD_DIR) $(DOCS_DIR)
+
+.PHONY: clean
+clean: ## Remove items creted by make docs
+	-rm -rf $(DOCS_BUILD_DIR) $(DOCS_BK_DIR)

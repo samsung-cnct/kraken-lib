@@ -51,7 +51,7 @@
 <tbody valign="top">
 <tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/apiServerConfig.json">http://judkins.house/apis/k2/v1/apiServerConfig.json</a></td>
 </tr>
-<tr class="row-even"><td colspan="3">kvStore (e.g. etcd) for API servers</td>
+<tr class="row-even"><td colspan="3">API Server properties such as the state kvStore (e.g. etcd) or flags</td>
 </tr>
 <tr class="row-odd"><td>type</td>
 <td colspan="2"><em>object</em></td>
@@ -68,32 +68,53 @@
 <td><em>string</em></td>
 </tr>
 <tr class="row-odd"><td rowspan="3"><ul class="first last simple">
-<li><strong>loadBalancer</strong></li>
+<li>kind</li>
 </ul>
 </td>
-<td colspan="2">What sort of load balancer system should be used</td>
+<td colspan="2">Type of apiServer</td>
 </tr>
 <tr class="row-even"><td>type</td>
 <td><em>string</em></td>
 </tr>
 <tr class="row-odd"><td>enum</td>
+<td>apiServer</td>
+</tr>
+<tr class="row-even"><td rowspan="3"><ul class="first last simple">
+<li><strong>loadBalancer</strong></li>
+</ul>
+</td>
+<td colspan="2">What sort of load balancer system should be used</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-even"><td>enum</td>
 <td>cloud, flipbit</td>
 </tr>
-<tr class="row-even"><td><ul class="first last simple">
+<tr class="row-odd"><td><ul class="first last simple">
 <li>loadBalancerConfigs</li>
 </ul>
 </td>
 <td colspan="2"><a class="reference internal" href="#awsloadbalancerconfig.json"><span class="std std-ref">AWS Load balancer configuration</span></a></td>
 </tr>
-<tr class="row-odd"><td colspan="3"><ul class="first last simple">
+<tr class="row-even"><td colspan="3"><ul class="first last simple">
 <li><strong>state</strong></li>
 </ul>
 </td>
 </tr>
-<tr class="row-even"><td colspan="3"><ul class="first last simple">
+<tr class="row-odd"><td colspan="3"><ul class="first last simple">
 <li><strong>events</strong></li>
 </ul>
 </td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li>flags</li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">apiServerFlags.json</span></td>
+</tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
 </tr>
 </tbody>
 </table>
@@ -185,6 +206,9 @@
 <tr class="row-odd"><td>type</td>
 <td><em>number</em></td>
 </tr>
+<tr class="row-even"><td>additionalProperties</td>
+<td colspan="2">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -250,6 +274,9 @@
 </tr>
 <tr class="row-even"><td>type</td>
 <td><em>string</em> / <em>null</em></td>
+</tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
 </tr>
 </tbody>
 </table>
@@ -326,6 +353,9 @@
 <tr class="row-even"><td>type</td>
 <td><em>boolean</em></td>
 </tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -369,6 +399,9 @@
 <tr class="row-odd"><td>minItems</td>
 <td colspan="2">1</td>
 </tr>
+<tr class="row-even"><td>additionalProperties</td>
+<td colspan="3">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -403,7 +436,7 @@
 <li>kind</li>
 </ul>
 </td>
-<td colspan="2">Type of config this is.</td>
+<td colspan="2">Type of node</td>
 </tr>
 <tr class="row-even"><td>type</td>
 <td><em>string</em></td>
@@ -429,27 +462,37 @@
 <td><a class="reference internal" href="#awsnodemountconfig.json"><span class="std std-ref">Node Mount Configuration</span></a></td>
 </tr>
 <tr class="row-even"><td><ul class="first last simple">
+<li>keypair</li>
+</ul>
+</td>
+<td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
 <li><strong>providerConfig</strong></li>
 </ul>
 </td>
 <td colspan="2"><a class="reference internal" href="#awsnodeproviderconfig.json"><span class="std std-ref">AWS Provider Configuration</span></a></td>
 </tr>
-<tr class="row-odd"><td rowspan="4"><ul class="first last simple">
+<tr class="row-even"><td rowspan="4"><ul class="first last simple">
 <li>taints</li>
 </ul>
 </td>
 <td colspan="2">List of AWS taints to associate with the kubernetes node</td>
 </tr>
-<tr class="row-even"><td>type</td>
+<tr class="row-odd"><td>type</td>
 <td><em>array</em></td>
 </tr>
-<tr class="row-odd"><td colspan="2">items</td>
+<tr class="row-even"><td colspan="2">items</td>
 </tr>
-<tr class="row-even"><td><ul class="first last simple">
+<tr class="row-odd"><td><ul class="first last simple">
 <li></li>
 </ul>
 </td>
 <td><a class="reference internal" href="#kubenodetaint.json"><span class="std std-ref">Taint Configuration</span></a></td>
+</tr>
+<tr class="row-even"><td>additionalProperties</td>
+<td colspan="2">False</td>
 </tr>
 </tbody>
 </table>
@@ -498,6 +541,9 @@
 </tr>
 <tr class="row-even"><td>type</td>
 <td><em>boolean</em></td>
+</tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
 </tr>
 </tbody>
 </table>
@@ -623,6 +669,9 @@
 <tr class="row-even"><td>default</td>
 <td colspan="2">true</td>
 </tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="3">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -662,6 +711,9 @@
 <tr class="row-even"><td>type</td>
 <td><em>string</em></td>
 </tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -700,6 +752,9 @@
 </tr>
 <tr class="row-even"><td>type</td>
 <td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
 </tr>
 </tbody>
 </table>
@@ -888,7 +943,7 @@
 <li><strong>ingressSecurity</strong></li>
 </ul>
 </td>
-<td colspan="2">List of ingress security rules to create for the VPC.</td>
+<td colspan="2">List of ingress security rules to create for the VPC.  This section is ignored when modifying an existing cluster.</td>
 </tr>
 <tr class="row-even"><td>type</td>
 <td><em>array</em></td>
@@ -908,7 +963,7 @@
 <li><strong>egressSecurity</strong></li>
 </ul>
 </td>
-<td colspan="2">List of egress security rules to create for the VPC.</td>
+<td colspan="2">List of egress security rules to create for the VPC.  This section is ignored when modifying an existing cluster.</td>
 </tr>
 <tr class="row-odd"><td>type</td>
 <td><em>array</em></td>
@@ -929,6 +984,9 @@
 </ul>
 </td>
 <td colspan="2"><a class="reference internal" href="#awsauthenticationconfig.json"><span class="std std-ref">AWS Security Credentials Configuration</span></a></td>
+</tr>
+<tr class="row-even"><td>additionalProperties</td>
+<td colspan="2">False</td>
 </tr>
 </tbody>
 </table>
@@ -974,7 +1032,7 @@
 <td colspan="2"><em>array</em></td>
 </tr>
 <tr class="row-even"><td>default</td>
-<td colspan="2">[u‘0.0.0.0/0’]</td>
+<td colspan="2">[‘0.0.0.0/0’]</td>
 </tr>
 <tr class="row-odd"><td colspan="3">items</td>
 </tr>
@@ -1002,6 +1060,9 @@
 </tr>
 <tr class="row-even"><td>type</td>
 <td colspan="2"><em>number</em></td>
+</tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="3">False</td>
 </tr>
 </tbody>
 </table>
@@ -1044,6 +1105,9 @@
 </ul>
 </td>
 <td><a class="reference internal" href="#awsebsstorageoptions.json"><span class="std std-ref">AWS EBS Storage Options</span></a></td>
+</tr>
+<tr class="row-even"><td>additionalProperties</td>
+<td colspan="3">False</td>
 </tr>
 </tbody>
 </table>
@@ -1114,6 +1178,9 @@
 <tr class="row-even"><td>default</td>
 <td>true</td>
 </tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1182,6 +1249,9 @@
 <tr class="row-odd"><td>minItems</td>
 <td>1</td>
 </tr>
+<tr class="row-even"><td>additionalProperties</td>
+<td colspan="2">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1189,23 +1259,30 @@
 <span id="bastionconfig.json"></span><h2>A Bastion configuration<a class="headerlink" href="#a-bastion-configuration" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="docutils">
 <colgroup>
-<col width="50%" />
-<col width="50%" />
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td colspan="2"><a class="reference external" href="http://judkins.house/apis/k2/v1/bastionConfig.json">http://judkins.house/apis/k2/v1/bastionConfig.json</a></td>
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/bastionConfig.json">http://judkins.house/apis/k2/v1/bastionConfig.json</a></td>
 </tr>
-<tr class="row-even"><td colspan="2">Properties pertaining to a Bastion.</td>
+<tr class="row-even"><td colspan="3">Properties pertaining to a Bastion.</td>
 </tr>
 <tr class="row-odd"><td>type</td>
-<td><em>object</em></td>
+<td colspan="2"><em>object</em></td>
 </tr>
-<tr class="row-even"><td colspan="2">properties</td>
-</tr>
-<tr class="row-odd"><td colspan="2"><ul class="first last simple">
-<li>oneOf</li>
+<tr class="row-even"><td rowspan="2">oneOf</td>
+<td><ul class="first last simple">
+<li></li>
 </ul>
 </td>
+<td><a class="reference internal" href="#bastionconfigsimple.json"><span class="std std-ref">A Bastion configuration</span></a></td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><a class="reference internal" href="#bastionconfigloadbalanced.json"><span class="std std-ref">A Load Balanced Bastion configuration</span></a></td>
 </tr>
 </tbody>
 </table>
@@ -1285,11 +1362,14 @@
 </td>
 <td colspan="2"><a class="reference internal" href="#awsloadbalancerconfig.json"><span class="std std-ref">AWS Load balancer configuration</span></a></td>
 </tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
+</tr>
 </tbody>
 </table>
 </div>
-<div class="section" id="bastionconfig.json">
-<span id="id2"></span><h2>A Bastion configuration<a class="headerlink" href="#bastionconfig.json" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="bastionconfigsimple.json">
+<span id="id2"></span><h2>A Bastion configuration<a class="headerlink" href="#bastionconfigsimple.json" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="docutils">
 <colgroup>
 <col width="33%" />
@@ -1297,7 +1377,7 @@
 <col width="33%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/bastionConfig.json">http://judkins.house/apis/k2/v1/bastionConfig.json</a></td>
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/bastionConfigSimple.json">http://judkins.house/apis/k2/v1/bastionConfigSimple.json</a></td>
 </tr>
 <tr class="row-even"><td colspan="3">Properties pertaining to a Bastion.</td>
 </tr>
@@ -1328,7 +1408,7 @@
 <td>bastion</td>
 </tr>
 <tr class="row-even"><td rowspan="5"><ul class="first last simple">
-<li><strong>listenPort</strong></li>
+<li>listenPort</li>
 </ul>
 </td>
 <td colspan="2">What port number to open for the ssh tunnel, default is 22</td>
@@ -1344,6 +1424,9 @@
 </tr>
 <tr class="row-even"><td>default</td>
 <td>22</td>
+</tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
 </tr>
 </tbody>
 </table>
@@ -1411,6 +1494,9 @@
 </td>
 <td colspan="2"><a class="reference internal" href="#canalfabricoptions.json"><span class="std std-ref">Canal Fabric Options</span></a></td>
 </tr>
+<tr class="row-even"><td>additionalProperties</td>
+<td colspan="2">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1449,6 +1535,9 @@
 </tr>
 <tr class="row-even"><td>type</td>
 <td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
 </tr>
 </tbody>
 </table>
@@ -1499,6 +1588,9 @@
 </ul>
 </td>
 <td><a class="reference internal" href="#canalfabriccontainerconfig.json"><span class="std std-ref">Canal Fabric Container Options</span></a></td>
+</tr>
+<tr class="row-even"><td>additionalProperties</td>
+<td>False</td>
 </tr>
 </tbody>
 </table>
@@ -1586,6 +1678,9 @@
 </td>
 <td><a class="reference internal" href="#canalfabricnetworkvxlan.json"><span class="std std-ref">Canal Fabric VXLan Network configuration</span></a></td>
 </tr>
+<tr class="row-even"><td>additionalProperties</td>
+<td colspan="3">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1622,6 +1717,9 @@
 <tr class="row-even"><td>default</td>
 <td>vxlan</td>
 </tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1654,6 +1752,9 @@
 </td>
 <td><a class="reference internal" href="#canalfabricnetwork.json"><span class="std std-ref">Canal Fabric Network configuration</span></a></td>
 </tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td>False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1685,7 +1786,7 @@
 <td><em>string</em></td>
 </tr>
 <tr class="row-odd"><td>maxLength</td>
-<td>32</td>
+<td>21</td>
 </tr>
 <tr class="row-even"><td>minLength</td>
 <td>1</td>
@@ -1734,6 +1835,15 @@
 </ul>
 </td>
 <td colspan="2"><a class="reference internal" href="#providerconfig.json"><span class="std std-ref">Provider Configuration</span></a></td>
+</tr>
+<tr class="row-even"><td rowspan="2"><ul class="first last simple">
+<li>helmOverride</li>
+</ul>
+</td>
+<td colspan="2">Set to true when using your own helm version.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>boolean</em> / <em>string</em> / <em>null</em></td>
 </tr>
 <tr class="row-even"><td rowspan="5"><ul class="first last simple">
 <li><strong>nodePools</strong></li>
@@ -1788,6 +1898,9 @@
 <tr class="row-even"><td>type</td>
 <td><em>string</em></td>
 </tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1829,6 +1942,9 @@
 </ul>
 </td>
 <td colspan="2"><a class="reference internal" href="#deployment.json"><span class="std std-ref">A Kubernetes deployment</span></a></td>
+</tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
 </tr>
 </tbody>
 </table>
@@ -1950,6 +2066,9 @@
 </td>
 <td colspan="2"><a class="reference internal" href="#coreoslocksmithconfig.json"><span class="std std-ref">CoreOS Locksmith Configuration</span></a></td>
 </tr>
+<tr class="row-even"><td>additionalProperties</td>
+<td colspan="2">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1971,50 +2090,103 @@
 </tr>
 <tr class="row-even"><td colspan="3">properties</td>
 </tr>
-<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<tr class="row-odd"><td colspan="3"><ul class="first last simple">
+<li>etcdConfig</li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td rowspan="2"><ul class="first last simple">
 <li>endpoint</li>
 </ul>
 </td>
-<td colspan="2">The etcd endpoint.</td>
+<td colspan="2">Comma separated list of etcd endpoints.</td>
 </tr>
-<tr class="row-even"><td>type</td>
+<tr class="row-odd"><td>type</td>
 <td><em>string</em></td>
-</tr>
-<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
-<li>etcd_cafile</li>
-</ul>
-</td>
-<td colspan="2">The filename and path to the certificate authority.</td>
-</tr>
-<tr class="row-even"><td>type</td>
-<td><em>string</em></td>
-</tr>
-<tr class="row-odd"><td>default</td>
-<td>/etc/etcd/ssl/client-ca.pem</td>
 </tr>
 <tr class="row-even"><td rowspan="3"><ul class="first last simple">
-<li>etcd_certfile</li>
+<li>etcdCafile</li>
 </ul>
 </td>
-<td colspan="2">The filename and path to the certificate (public key).</td>
+<td colspan="2">Path to CA file used for TLS communication with etcd.</td>
 </tr>
 <tr class="row-odd"><td>type</td>
 <td><em>string</em></td>
 </tr>
 <tr class="row-even"><td>default</td>
-<td>/etc/etcd/ssl/client.pem</td>
+<td>/etc/etcd/ssl/client-ca.pem</td>
 </tr>
 <tr class="row-odd"><td rowspan="3"><ul class="first last simple">
-<li>etcd_keyfile</li>
+<li>etcdCertfile</li>
 </ul>
 </td>
-<td colspan="2">The filename and path to the private key.</td>
+<td colspan="2">Path to certificate file used for TLS communication with etcd.</td>
 </tr>
 <tr class="row-even"><td>type</td>
 <td><em>string</em></td>
 </tr>
 <tr class="row-odd"><td>default</td>
+<td>/etc/etcd/ssl/client.pem</td>
+</tr>
+<tr class="row-even"><td rowspan="3"><ul class="first last simple">
+<li>etcdKeyfile</li>
+</ul>
+</td>
+<td colspan="2">Path to private key file used for TLS communication with etcd.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-even"><td>default</td>
 <td>/etc/etcd/ssl/client-key.pem</td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li>group</li>
+</ul>
+</td>
+<td colspan="2">Name of the reboot group in which this instance belongs. If not specified then it is the name of the nodePool, which is the default.</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li>setMax</li>
+</ul>
+</td>
+<td colspan="2">Maximum number of nodes allowed to reboot at the same time. Should be one less than the number of failures the cluster can tolerate.</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>number</em></td>
+</tr>
+<tr class="row-odd"><td>default</td>
+<td>1</td>
+</tr>
+<tr class="row-even"><td rowspan="3"><ul class="first last simple">
+<li>windowStart</li>
+</ul>
+</td>
+<td colspan="2">Optional day of the week (e.g. Sun, Mon, …) and the time of day (specified in 24-hours). For example, ‘Sat 04:00’, or ‘18:00’.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-even"><td>default</td>
+<td>04:00</td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li>windowLength</li>
+</ul>
+</td>
+<td colspan="2">Length of time after window-start during which reboots are allowed. For example, ‘2h’, or ‘13h’. Duration will be parsed by <a class="reference external" href="https://godoc.org/time#ParseDuration">https://godoc.org/time#ParseDuration</a></td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>default</td>
+<td>2h</td>
+</tr>
+<tr class="row-even"><td>additionalProperties</td>
+<td colspan="2">False</td>
 </tr>
 </tbody>
 </table>
@@ -2214,6 +2386,28 @@
 <td>1</td>
 </tr>
 <tr class="row-odd"><td rowspan="6"><ul class="first last simple">
+<li>autoScalingConfigs</li>
+</ul>
+</td>
+<td colspan="2"><em>AutoScaling configurations</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">Describes the autoScaling configuration for a nodePool.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>array</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">items</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">autoScalingConfig.json</span></td>
+</tr>
+<tr class="row-even"><td>minItems</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td rowspan="6"><ul class="first last simple">
 <li>osConfigs</li>
 </ul>
 </td>
@@ -2280,6 +2474,50 @@
 <td>1</td>
 </tr>
 <tr class="row-odd"><td rowspan="6"><ul class="first last simple">
+<li>dnsConfig</li>
+</ul>
+</td>
+<td colspan="2"><em>DNS configurations</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">A list of DNS configurations referenced within the configuration file.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>array</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">items</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><a class="reference internal" href="#dnsconfig.json"><span class="std std-ref">Cluster DNS configuration</span></a></td>
+</tr>
+<tr class="row-even"><td>minItems</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td rowspan="6"><ul class="first last simple">
+<li>kubeAuth</li>
+</ul>
+</td>
+<td colspan="2"><em>Kubernetes Authentication configurations</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">A list of Kubernetes Authenications entries referenced within the configuration file.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>array</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">items</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><a class="reference internal" href="#kubeauthconfig.json"><span class="std std-ref">Kubernetes Authentication Entry</span></a></td>
+</tr>
+<tr class="row-even"><td>minItems</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td rowspan="6"><ul class="first last simple">
 <li>keyPairs</li>
 </ul>
 </td>
@@ -2300,6 +2538,28 @@
 </tr>
 <tr class="row-even"><td>minItems</td>
 <td>1</td>
+</tr>
+<tr class="row-odd"><td rowspan="5"><ul class="first last simple">
+<li>schedulingConfigs</li>
+</ul>
+</td>
+<td colspan="2"><em>Pod Scheduling configuration.</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">Taint information for pod scheduling.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>array</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">items</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><span class="xref std std-ref">schedulingConfig.json</span></td>
+</tr>
+<tr class="row-even"><td>additionalProperties</td>
+<td colspan="2">False</td>
 </tr>
 </tbody>
 </table>
@@ -2351,6 +2611,9 @@
 </td>
 <td colspan="2"><a class="reference internal" href="#readiness.json"><span class="std std-ref">Cluster Readiness Configuration</span></a></td>
 </tr>
+<tr class="row-even"><td>additionalProperties</td>
+<td colspan="2">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -2398,6 +2661,9 @@
 </ul>
 </td>
 <td colspan="2"><a class="reference internal" href="#kubedns.json"><span class="std std-ref">Kubernetes DNS Configurations</span></a></td>
+</tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
 </tr>
 </tbody>
 </table>
@@ -2483,6 +2749,9 @@
 <tr class="row-even"><td>type</td>
 <td><em>string</em></td>
 </tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -2526,95 +2795,110 @@
 <tr class="row-odd"><td>enum</td>
 <td colspan="2">etcd</td>
 </tr>
-<tr class="row-even"><td rowspan="6"><ul class="first last simple">
+<tr class="row-even"><td rowspan="3"><ul class="first last simple">
+<li>kind</li>
+</ul>
+</td>
+<td colspan="3">Type of etcdConfig</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td colspan="2"><em>string</em></td>
+</tr>
+<tr class="row-even"><td>enum</td>
+<td colspan="2">kvStore</td>
+</tr>
+<tr class="row-odd"><td rowspan="6"><ul class="first last simple">
 <li><strong>clientPorts</strong></li>
 </ul>
 </td>
 <td colspan="3">Ports used to listen for client requests.</td>
 </tr>
-<tr class="row-odd"><td>type</td>
+<tr class="row-even"><td>type</td>
 <td colspan="2"><em>array</em></td>
 </tr>
-<tr class="row-even"><td>default</td>
+<tr class="row-odd"><td>default</td>
 <td colspan="2">[2379, 4001]</td>
 </tr>
-<tr class="row-odd"><td colspan="3">items</td>
+<tr class="row-even"><td colspan="3">items</td>
 </tr>
-<tr class="row-even"><td><ul class="first last simple">
+<tr class="row-odd"><td><ul class="first last simple">
 <li></li>
 </ul>
 </td>
 <td>type</td>
 <td><em>number</em></td>
 </tr>
-<tr class="row-odd"><td>minItems</td>
+<tr class="row-even"><td>minItems</td>
 <td colspan="2">1</td>
 </tr>
-<tr class="row-even"><td rowspan="3"><ul class="first last simple">
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
 <li>clusterToken</li>
 </ul>
 </td>
 <td colspan="3">Token used during etcd cluster formation. This may be unsafe if an etcd cluster formation has to be restarted, or multiple clusters are created within the same VPC. It is highly recommended that the uuidToken option be used instead.</td>
 </tr>
-<tr class="row-odd"><td>type</td>
+<tr class="row-even"><td>type</td>
 <td colspan="2"><em>string</em></td>
 </tr>
-<tr class="row-even"><td>default</td>
+<tr class="row-odd"><td>default</td>
 <td colspan="2">espouse-monger-rarely</td>
 </tr>
-<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<tr class="row-even"><td rowspan="3"><ul class="first last simple">
 <li>uuidToken</li>
 </ul>
 </td>
 <td colspan="3">If true, uuidgen will be used to generate a unique token for each etcd cluster. uuidToken takes precedence over clusterToken, and if neither are specified then the etcd defaults are used.</td>
 </tr>
-<tr class="row-even"><td>type</td>
+<tr class="row-odd"><td>type</td>
 <td colspan="2"><em>boolean</em></td>
 </tr>
-<tr class="row-odd"><td>default</td>
+<tr class="row-even"><td>default</td>
 <td colspan="2">True</td>
 </tr>
-<tr class="row-even"><td rowspan="6"><ul class="first last simple">
+<tr class="row-odd"><td rowspan="6"><ul class="first last simple">
 <li><strong>peerPorts</strong></li>
 </ul>
 </td>
 <td colspan="3">Ports used for peer to peer communication</td>
 </tr>
-<tr class="row-odd"><td>type</td>
+<tr class="row-even"><td>type</td>
 <td colspan="2"><em>array</em></td>
 </tr>
-<tr class="row-even"><td>default</td>
+<tr class="row-odd"><td>default</td>
 <td colspan="2">[2380]</td>
 </tr>
-<tr class="row-odd"><td colspan="3">items</td>
+<tr class="row-even"><td colspan="3">items</td>
 </tr>
-<tr class="row-even"><td><ul class="first last simple">
+<tr class="row-odd"><td><ul class="first last simple">
 <li></li>
 </ul>
 </td>
 <td>type</td>
 <td><em>number</em></td>
 </tr>
-<tr class="row-odd"><td>minItems</td>
+<tr class="row-even"><td>minItems</td>
 <td colspan="2">1</td>
 </tr>
-<tr class="row-even"><td rowspan="2"><ul class="first last simple">
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
 <li><strong>ssl</strong></li>
 </ul>
 </td>
 <td colspan="3">Whether or not SSL is used for etcd traffic</td>
 </tr>
-<tr class="row-odd"><td>type</td>
+<tr class="row-even"><td>type</td>
 <td colspan="2"><em>boolean</em></td>
 </tr>
-<tr class="row-even"><td rowspan="2"><ul class="first last simple">
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
 <li><strong>version</strong></li>
 </ul>
 </td>
 <td colspan="3">Version of etcd container which will be run</td>
 </tr>
-<tr class="row-odd"><td>type</td>
+<tr class="row-even"><td>type</td>
 <td colspan="2"><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="3">False</td>
 </tr>
 </tbody>
 </table>
@@ -2688,6 +2972,9 @@
 <tr class="row-even"><td>type</td>
 <td><em>string</em></td>
 </tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -2753,6 +3040,9 @@
 </td>
 <td><a class="reference internal" href="#kubenodetaint.json"><span class="std std-ref">Taint Configuration</span></a></td>
 </tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -2810,6 +3100,9 @@
 </td>
 <td>type</td>
 <td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="3">False</td>
 </tr>
 </tbody>
 </table>
@@ -2898,6 +3191,9 @@
 </td>
 <td colspan="2"><a class="reference internal" href="#gkezoneconfig.json"><span class="std std-ref">GKE Zone Configuration</span></a></td>
 </tr>
+<tr class="row-even"><td>additionalProperties</td>
+<td colspan="2">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -2947,6 +3243,9 @@
 <td>type</td>
 <td><em>string</em></td>
 </tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="3">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -2973,6 +3272,15 @@
 </ul>
 </td>
 <td colspan="2">Friendly name for the chart.</td>
+</tr>
+<tr class="row-even"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td rowspan="2"><ul class="first last simple">
+<li>namespace</li>
+</ul>
+</td>
+<td colspan="2">Namespace of the chart.</td>
 </tr>
 <tr class="row-even"><td>type</td>
 <td><em>string</em></td>
@@ -3013,13 +3321,16 @@
 <tr class="row-even"><td>type</td>
 <td><em>string</em></td>
 </tr>
-<tr class="row-odd"><td rowspan="2">oneOf</td>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
+</tr>
+<tr class="row-even"><td rowspan="2">oneOf</td>
 <td colspan="2"><ul class="first last simple">
 <li></li>
 </ul>
 </td>
 </tr>
-<tr class="row-even"><td colspan="2"><ul class="first last simple">
+<tr class="row-odd"><td colspan="2"><ul class="first last simple">
 <li></li>
 </ul>
 </td>
@@ -3114,6 +3425,9 @@
 </td>
 <td><a class="reference internal" href="#helmchart.json"><span class="std std-ref">Helm Chart</span></a></td>
 </tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -3162,6 +3476,9 @@
 <tr class="row-even"><td>type</td>
 <td><em>string</em></td>
 </tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -3200,6 +3517,9 @@
 </tr>
 <tr class="row-even"><td>type</td>
 <td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
 </tr>
 </tbody>
 </table>
@@ -3273,6 +3593,9 @@
 </td>
 <td><a class="reference internal" href="#gkekeypairconfig.json"><span class="std std-ref">GKE Service Account Configuration</span></a></td>
 </tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="3">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -3343,13 +3666,16 @@
 <tr class="row-even"><td>type</td>
 <td><em>string</em></td>
 </tr>
-<tr class="row-odd"><td rowspan="2">anyOf</td>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
+</tr>
+<tr class="row-even"><td rowspan="2">anyOf</td>
 <td colspan="2"><ul class="first last simple">
 <li></li>
 </ul>
 </td>
 </tr>
-<tr class="row-even"><td colspan="2"><ul class="first last simple">
+<tr class="row-odd"><td colspan="2"><ul class="first last simple">
 <li></li>
 </ul>
 </td>
@@ -3361,31 +3687,33 @@
 <span id="kubeauthauthzentry.json"></span><h2>Kubernetes Authentication Authz Entry<a class="headerlink" href="#kubernetes-authentication-authz-entry" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="docutils">
 <colgroup>
-<col width="25%" />
-<col width="25%" />
-<col width="25%" />
-<col width="25%" />
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td colspan="4"><a class="reference external" href="http://judkins.house/apis/k2/v1/kubeAuthAuthzEntry.json">http://judkins.house/apis/k2/v1/kubeAuthAuthzEntry.json</a></td>
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/kubeAuthAuthzEntry.json">http://judkins.house/apis/k2/v1/kubeAuthAuthzEntry.json</a></td>
 </tr>
-<tr class="row-even"><td colspan="4">Kubernetes Authentication Authz Entry</td>
+<tr class="row-even"><td colspan="3">Kubernetes Authentication Authz Entry</td>
 </tr>
 <tr class="row-odd"><td>type</td>
-<td colspan="3"><em>object</em></td>
+<td colspan="2"><em>object</em></td>
 </tr>
-<tr class="row-even"><td colspan="4">properties</td>
+<tr class="row-even"><td colspan="3">properties</td>
 </tr>
-<tr class="row-odd"><td rowspan="6"><ul class="first last simple">
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
 <li>rbac</li>
 </ul>
 </td>
-<td colspan="3">Kubernetes RBAC configuration.</td>
+<td colspan="2">Kubernetes RBAC configuration.</td>
 </tr>
 <tr class="row-even"><td>type</td>
-<td colspan="2"><em>object</em></td>
+<td><em>object</em></td>
 </tr>
-<tr class="row-odd"><td colspan="3">properties</td>
+<tr class="row-odd"><td colspan="2">properties</td>
+</tr>
+<tr class="row-even"><td>additionalProperties</td>
+<td colspan="2">False</td>
 </tr>
 </tbody>
 </table>
@@ -3435,6 +3763,9 @@
 <tr class="row-even"><td>type</td>
 <td><em>string</em></td>
 </tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -3474,6 +3805,9 @@
 <tr class="row-even"><td>type</td>
 <td><em>string</em></td>
 </tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -3505,6 +3839,9 @@
 </ul>
 </td>
 <td><a class="reference internal" href="#kubeauthauthnentry.json"><span class="std std-ref">Kubernetes Authentication Authn Entry</span></a></td>
+</tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td>False</td>
 </tr>
 </tbody>
 </table>
@@ -3570,7 +3907,10 @@
 <td><em>string</em></td>
 </tr>
 <tr class="row-odd"><td>format</td>
-<td>symver</td>
+<td>semver</td>
+</tr>
+<tr class="row-even"><td>additionalProperties</td>
+<td colspan="2">False</td>
 </tr>
 </tbody>
 </table>
@@ -3620,6 +3960,9 @@
 <tr class="row-even"><td>type</td>
 <td><em>string</em></td>
 </tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -3658,6 +4001,9 @@
 </tr>
 <tr class="row-even"><td>type</td>
 <td><em>string</em></td>
+</tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
 </tr>
 </tbody>
 </table>
@@ -3793,6 +4139,9 @@
 <tr class="row-odd"><td>additionalProperties</td>
 <td colspan="3">False</td>
 </tr>
+<tr class="row-even"><td>additionalProperties</td>
+<td colspan="5">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -3864,6 +4213,9 @@
 <tr class="row-even"><td>enum</td>
 <td>cloud, flipbit</td>
 </tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -3871,10 +4223,25 @@
 <span id="nodeconfig.json"></span><h2>Node Configuration<a class="headerlink" href="#node-configuration" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="docutils">
 <colgroup>
-<col width="100%" />
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference external" href="http://judkins.house/apis/k2/v1/nodeConfig.json">http://judkins.house/apis/k2/v1/nodeConfig.json</a></td>
+<tr class="row-odd"><td colspan="3"><a class="reference external" href="http://judkins.house/apis/k2/v1/nodeConfig.json">http://judkins.house/apis/k2/v1/nodeConfig.json</a></td>
+</tr>
+<tr class="row-even"><td rowspan="2">oneOf</td>
+<td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><a class="reference internal" href="#awsnodeconfig.json"><span class="std std-ref">AWS Node Configuration</span></a></td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><a class="reference internal" href="#gkenodeconfig.json"><span class="std std-ref">GKE Node Configuration</span></a></td>
 </tr>
 </tbody>
 </table>
@@ -3919,10 +4286,28 @@
 <td>1</td>
 </tr>
 <tr class="row-even"><td><ul class="first last simple">
-<li>kvStoreConfig</li>
+<li>etcdConfig</li>
 </ul>
 </td>
 <td colspan="2"><a class="reference internal" href="#kvstoreconfig.json"><span class="std std-ref">kvStore Configuration</span></a></td>
+</tr>
+<tr class="row-odd"><td rowspan="4"><ul class="first last simple">
+<li>etcdConfigs</li>
+</ul>
+</td>
+<td>type</td>
+<td><em>array</em></td>
+</tr>
+<tr class="row-even"><td colspan="2">items</td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li></li>
+</ul>
+</td>
+<td><a class="reference internal" href="#kvstoreconfig.json"><span class="std std-ref">kvStore Configuration</span></a></td>
+</tr>
+<tr class="row-even"><td>minItems</td>
+<td>1</td>
 </tr>
 <tr class="row-odd"><td><ul class="first last simple">
 <li>apiServerConfig</li>
@@ -3965,6 +4350,21 @@
 </ul>
 </td>
 <td colspan="2"><a class="reference internal" href="#keypair.json"><span class="std std-ref">Key Pairs Entry for use in K2</span></a></td>
+</tr>
+<tr class="row-even"><td><ul class="first last simple">
+<li>autoScalingConfig</li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">autoScalingConfig.json</span></td>
+</tr>
+<tr class="row-odd"><td><ul class="first last simple">
+<li>schedulingConfig</li>
+</ul>
+</td>
+<td colspan="2"><span class="xref std std-ref">schedulingConfig.json</span></td>
+</tr>
+<tr class="row-even"><td>additionalProperties</td>
+<td colspan="2">False</td>
 </tr>
 </tbody>
 </table>
@@ -4062,6 +4462,9 @@
 <tr class="row-even"><td>type</td>
 <td><em>number</em></td>
 </tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -4092,26 +4495,41 @@
 <tr class="row-even"><td>type</td>
 <td><em>string</em></td>
 </tr>
-<tr class="row-odd"><td rowspan="4"><ul class="first last simple">
-<li><strong>type</strong></li>
+<tr class="row-odd"><td rowspan="3"><ul class="first last simple">
+<li>kind</li>
 </ul>
 </td>
-<td colspan="2">The type of the fabric being used.</td>
+<td colspan="2">Type of weave fabric configuration</td>
 </tr>
 <tr class="row-even"><td>type</td>
 <td><em>string</em></td>
 </tr>
 <tr class="row-odd"><td>enum</td>
+<td>fabric</td>
+</tr>
+<tr class="row-even"><td rowspan="4"><ul class="first last simple">
+<li><strong>type</strong></li>
+</ul>
+</td>
+<td colspan="2">The type of the fabric being used.</td>
+</tr>
+<tr class="row-odd"><td>type</td>
+<td><em>string</em></td>
+</tr>
+<tr class="row-even"><td>enum</td>
 <td>weave</td>
 </tr>
-<tr class="row-even"><td>default</td>
+<tr class="row-odd"><td>default</td>
 <td>weave</td>
 </tr>
-<tr class="row-odd"><td><ul class="first last simple">
+<tr class="row-even"><td><ul class="first last simple">
 <li><strong>options</strong></li>
 </ul>
 </td>
 <td colspan="2"><a class="reference internal" href="#weavefabricoptions.json"><span class="std std-ref">Weave Fabric Options</span></a></td>
+</tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
 </tr>
 </tbody>
 </table>
@@ -4152,6 +4570,9 @@
 <tr class="row-even"><td>type</td>
 <td><em>string</em></td>
 </tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td colspan="2">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -4183,6 +4604,9 @@
 </ul>
 </td>
 <td><a class="reference internal" href="#weavefabriccontainerconfig.json"><span class="std std-ref">Weave Fabric Containers</span></a></td>
+</tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td>False</td>
 </tr>
 </tbody>
 </table>
@@ -4232,6 +4656,9 @@
 <tr class="row-odd"><td>default</td>
 <td>30</td>
 </tr>
+<tr class="row-even"><td>additionalProperties</td>
+<td colspan="2">False</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -4263,6 +4690,9 @@
 </ul>
 </td>
 <td><a class="reference internal" href="#weavefabricnetwork.json"><span class="std std-ref">Weave Fabric Network configuration</span></a></td>
+</tr>
+<tr class="row-odd"><td>additionalProperties</td>
+<td>False</td>
 </tr>
 </tbody>
 </table>
@@ -4306,7 +4736,7 @@
 <li><a class="reference internal" href="#aws-vpc-configuration">AWS VPC Configuration</a></li>
 <li><a class="reference internal" href="#a-bastion-configuration">A Bastion configuration</a></li>
 <li><a class="reference internal" href="#a-load-balanced-bastion-configuration">A Load Balanced Bastion configuration</a></li>
-<li><a class="reference internal" href="#bastionconfig.json">A Bastion configuration</a></li>
+<li><a class="reference internal" href="#bastionconfigsimple.json">A Bastion configuration</a></li>
 <li><a class="reference internal" href="#canal-fabric-configuration">Canal Fabric Configuration</a></li>
 <li><a class="reference internal" href="#canal-fabric-container-options">Canal Fabric Container Options</a></li>
 <li><a class="reference internal" href="#canal-fabric-containers">Canal Fabric Containers</a></li>
@@ -4392,7 +4822,7 @@
       &copy;2017, Samsung CNCT.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

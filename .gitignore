@@ -14,3 +14,5 @@ generated/
 
 clusters/
 ansible/cluster_changes.txt
+docs_bk/
+build/
