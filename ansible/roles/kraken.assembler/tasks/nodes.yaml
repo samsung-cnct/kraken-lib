@@ -1,32 +1,43 @@
 ---
 - name: Set Cluster Fact
   set_fact:
-    cluster: "{{ a_cluster }}"
+    cluster: "{{ cluster_node_tuple.0 }}"
+    nodepool: "{{ cluster_node_tuple.1 }}"
 
 - name: Make sure generated folder for full cloud configs is there
   file:
     path: "{{ config_base }}/{{ cluster.name }}/cloud-config"
     state: directory
 
+- name: Generate systemctl start if there are units to start
+  set_fact:
+    cloud_config: "{{ cloud_config | combine(new_data, recursive=True) }}"
+  vars:
+    # Each of these only needs to be done once.
+    new_runcmd:
+      - "systemctl daemon-reload"
+      - "systemctl restart --no-block {{ unitlist[cluster.name][nodepool.name] | join(' ') }}"
+    # Create a dict for merging back in to cloud_config containing the new lists.
+    new_data: '{{ { cluster.name: { nodepool.name: { "runcmd": new_runcmd } } } }}'
+  when:
+    - distro != "coreos"
+    - unitlist[cluster.name][nodepool.name] | length > 0
+
 - name: Generate node cloud init
   copy:
     dest: "{{ dest_path }}"
     content: |-
       #cloud-config
-      {{ cloud_config[cluster.name][item.name] | to_nice_yaml(indent=2) }}
+      {{ cloud_config[cluster.name][nodepool.name] | to_nice_yaml(indent=2) }}
   vars:
-    dest_path: "{{ config_base }}/{{ cluster.name }}/cloud-config/{{ item.name }}.cloud-config.yaml"
+    dest_path: "{{ config_base }}/{{ cluster.name }}/cloud-config/{{ nodepool.name }}.cloud-config.yaml"
     file_needed: "{{ not (dest_path | is_file) }}"
-    not_etcd_node: "{{ item.etcdConfigs is not defined }}"
+    not_etcd_node: "{{ nodepool.etcdConfigs is not defined }}"
   when:
     - file_needed or not_etcd_node
-  with_items:
-    - "{{ cluster.nodePools }}"
 
 - name: Create compressed cloud-config
   archive:
     path: "{{ dest_path }}"
   vars:
-    dest_path: "{{ config_base }}/{{ cluster.name }}/cloud-config/{{ item.name }}.cloud-config.yaml"
-  with_items:
-    - "{{ cluster.nodePools }}"
+    dest_path: "{{ config_base }}/{{ cluster.name }}/cloud-config/{{ nodepool.name }}.cloud-config.yaml"

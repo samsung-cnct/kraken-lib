@@ -8,11 +8,11 @@
     [Service]
     RemainAfterExit=yes
     Type=oneshot
-    ExecStart=/usr/bin/rkt run \
+    ExecStart={{ rkt.bin }} run \
      --insecure-options=image \
      --net=host \
      --inherit-env=true \
      --volume etc,kind=host,source=/etc,readOnly=false \
      --mount volume=etc,target=/etc \
      quay.io/samsung_cnct/setup-network-environment:v1.0.1-mv
-    ExecStopPost=/usr/bin/rkt gc --mark-only
+    ExecStopPost={{ rkt.bin }} gc --mark-only

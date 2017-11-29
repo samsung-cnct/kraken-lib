@@ -1,8 +1,4 @@
 ---
-- name: Create user-data base dict
-  set_fact:
-    cloud_config: {}
-
 - name: Loop over all nodepools for each cluster
   include: cluster-start.yaml
   with_subelements:

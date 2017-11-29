@@ -12,7 +12,8 @@
     chdir: "{{ config_base }}/{{ cluster.name }}"
   register: tf_etcd_plan_result
 
-- debug:
+- name: Dump the terraform plan
+  debug:
     var: tf_etcd_plan_result
     verbosity: 0
 

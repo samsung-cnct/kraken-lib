@@ -1,0 +1,35 @@
+---
+- name: "Create cloud-init unit for {{ template_name }}"
+  set_fact:
+    cloud_config: "{{ cloud_config | combine(new_data, recursive=True) }}"
+    # save a list of units so we can add one single systemctl start for all of them
+    unitlist: "{{ unitlist | combine(new_units, recursive=True) }}"
+  vars:
+    # load the unit template
+    unitdata: "{{ lookup('template', template_file) | from_yaml | first }}"
+
+    # Create the service or drop-in write_file
+    # We are assuming that no template will create multiple units. If they do, we should fail.
+    query: '"drop-ins"[0]'
+    dropin_exists: "{{ not (unitdata | json_query(query) | is_empty ) }}"
+    dropin: "{{ dropin_exists | ternary(unitdata | json_query(query), {'name': '', 'content': ''}) }}"
+    dest: "{{ dropin_exists | ternary( unitdata.name + '.d/' + dropin.name, unitdata.name ) }}"
+    data: "{{ dropin_exists | ternary( dropin.content, unitdata.content ) }}"
+    write_file:
+      - path: "/etc/systemd/system/{{ dest }}"
+        content: "{{ data }}"
+
+    # extract the lists so we can add new entries to them
+    write_files: "{{ cloud_config[cluster.name][node.name].write_files | default([]) + write_file }}"
+    units: "{{ unitlist[cluster.name][node.name] | default([]) }}"
+
+    # Create a dict for merging back in to cloud_config containing the new lists.
+    new_data: '{{ { cluster.name: { node.name: { "write_files": write_files } } } }}'
+    new_units: '{{ { cluster.name: { node.name: units + [ unitdata.name ] } } }}'
+
+  # Do this with the first template found. This allows us to override a template on a per-kubernetes-version basis.
+  with_first_found:
+    - "templates/{{ kubernetes_minor_versions[ cluster.name ] }}/{{ template_name }}"
+    - "templates/{{ template_name }}"
+  loop_control:
+    loop_var: template_file

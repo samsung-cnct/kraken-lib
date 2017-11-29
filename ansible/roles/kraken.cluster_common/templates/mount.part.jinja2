@@ -1,4 +1,3 @@
-{% for mount in node.nodeConfig.mounts %}
 - name: {{mount.path | replace('/', '-') | replace('-', '', 1)}}.mount
   command: start
   content: |
@@ -10,4 +9,3 @@
     What=/dev/{{mount.device | mapdevice}}
     Where={{mount.path}}
     Type=ext4
-{% endfor %}

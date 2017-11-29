@@ -10,7 +10,7 @@
     EnvironmentFile=/etc/network-environment
     RemainAfterExit=yes
     Type=oneshot
-    ExecStart=/usr/bin/rkt run \
+    ExecStart={{ rkt.bin }} run \
      --insecure-options=image \
      --inherit-env=true \
      --volume input,kind=host,source=/etc/ssl,readOnly=true \
@@ -21,4 +21,4 @@
      --set-env=HOST_NAME=%H \
      {{ drunkensmee }} \
      --exec /assets/generate_worker.sh
-    ExecStopPost=/usr/bin/rkt gc --mark-only
+    ExecStopPost={{ rkt.bin }} gc --mark-only

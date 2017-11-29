@@ -1,0 +1,9 @@
+---
+- name: Add bootcmd to install rkt for {{ node.name }}
+  set_fact:
+    cloud_config: "{{ cloud_config | default({}) | combine(new_cloud_config, recursive=true) }}"
+  vars:
+    command:
+      - "mkdir -p /opt/cnct && wget -qO- https://github.com/rkt/rkt/releases/download/{{ rkt.version }}/rkt-{{ rkt.version }}.tar.gz | tar -C /opt/cnct -xzf - && ln -sf /opt/cnct/rkt-{{ rkt.version }} /opt/cnct/rkt"
+    bootcmds: "{{ cloud_config[cluster.name][node.name].bootcmd | default([]) }}"
+    new_cloud_config: '{{ { cluster.name: { node.name: { "bootcmd": bootcmds + command }}} }}'

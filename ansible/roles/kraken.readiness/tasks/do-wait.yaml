@@ -13,7 +13,8 @@
     needed_nodes: "{{ cluster | expected_nodes(readiness_type, readiness_value) }}"
     retry_interval: 10
 
-- debug:
+- name: Output expectations
+  debug:
     msg: >-
       Expect {{ needed_nodes }} nodes in cluster {{cluster.name}} with readiness type(value)
       {{ readiness_type }}({{ readiness_value }}).
@@ -40,6 +41,7 @@
   when: wait_for_all_hosts
   changed_when: false
 
-- debug:
+- name: Display results
+  debug:
     var: job_get_nodes_result
     verbosity: 0

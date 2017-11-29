@@ -10,7 +10,7 @@
     EnvironmentFile=/etc/network-environment
     RemainAfterExit=yes
     Type=oneshot
-    ExecStart=/usr/bin/rkt run \
+    ExecStart={{ rkt.bin }} run \
      --insecure-options=image \
      --inherit-env=true \
      --volume input,kind=host,source=/etc/ssl,readOnly=true \
@@ -26,4 +26,4 @@
      {% endif %}
      {{ drunkensmee }} \
      --exec /assets/generate_apiserver.sh
-    ExecStopPost=/usr/bin/rkt gc --mark-only
+    ExecStopPost={{ rkt.bin }} gc --mark-only

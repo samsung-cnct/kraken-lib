@@ -3,16 +3,26 @@
   set_fact:
     template_name: "{{ item }}"
 
-- name: "Rendering template {{ template_name }} to service unit"
-  set_fact:
-    cloud_config: "{{ cloud_config | combine(new_data, recursive=True) }}"
+- name: Fail if more than one unit or drop-in was in the template
+  fail:
+    msg: "Templated units or drop-ins should be one per template file: {{ template_name }}"
   vars:
-    unit: "{{ lookup('template', template_file) | from_yaml }}"
-    coreos: "{{ cloud_config[cluster.name][node.name].coreos | default({}) }}"
-    units: "{{ coreos.units | default([]) + unit }}"
-    new_data: '{{ { cluster.name: { node.name: { "coreos": { "units": units } } } } }}'
+    # load the unit template
+    unitdata: "{{ lookup('template', template_file) | from_yaml }}"
+  when:
+    - ( unitdata | length > 1 ) or ( unitdata["drop-ins"] | default([]) | length > 1 )
   with_first_found:
     - "templates/{{ kubernetes_minor_versions[ cluster.name ] }}/{{ template_name }}"
     - "templates/{{ template_name }}"
   loop_control:
     loop_var: template_file
+
+- name: Create coreos systemd units
+  include: cloud_config/coreos/units.yaml
+  when:
+    - distro == "coreos"
+
+- name: Create default systemd units
+  include: cloud_config/default/units.yaml
+  when:
+    - distro != "coreos"

@@ -33,7 +33,8 @@
   when: nodePool.nodeConfig.providerConfig.enablePublicIPs is undefined or
         nodePool.nodeConfig.providerConfig.enablePublicIPs
 
-- debug:
+- name: Display the etcdctl call result
+  debug:
     var: etcdctl_result
     verbosity: 0
 

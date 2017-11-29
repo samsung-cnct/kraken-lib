@@ -10,7 +10,7 @@
     EnvironmentFile=/etc/network-environment
     RemainAfterExit=yes
     Type=oneshot
-    ExecStart=/usr/bin/rkt run \
+    ExecStart={{ rkt.bin }} run \
      --insecure-options=image \
      --inherit-env=true \
      --volume input,kind=host,source=/etc/ssl,readOnly=true \
@@ -24,4 +24,4 @@
      --set-env=EVENTS_HOST_DNS_NAME=*.etcdevents.{{ cluster_node_tuple.1.name }}.{{ cluster_node_tuple.0.name }}.internal \
      {{ drunkensmee }} \
      --exec /assets/generate_etcd.sh -- {{ etcd.name }}
-    ExecStopPost=/usr/bin/rkt gc --mark-only
+    ExecStopPost={{ rkt.bin }} gc --mark-only

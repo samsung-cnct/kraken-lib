@@ -9,7 +9,7 @@
 - set_fact:
     cluster: "{{ cluster_node_tuple.0 }}"
     node: "{{ cluster_node_tuple.1 }}"
-     
+
 - name: Generate cluster UUID
   command: >
     uuidgen
@@ -32,7 +32,8 @@
     - etcd.uuidToken is defined
     - etcd.uuidToken
 
-- debug:
+- name: Dump the UUID
+  debug:
     msg: >
       The UUID for (cluster, nodePool) ({{ cluster_node_tuple.0.name }},
       {{ etcd.name }}) is {{ clusterUuidToken }}

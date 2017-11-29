@@ -1,0 +1,5 @@
+- name: "Generate common mount service units"
+  include: cloud_config/units.yaml
+  with_items:
+    - format-storage.part.jinja2
+    - mount.part.jinja2

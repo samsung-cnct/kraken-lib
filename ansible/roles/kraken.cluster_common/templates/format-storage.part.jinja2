@@ -1,4 +1,3 @@
-{% for mount in node.nodeConfig.mounts %}
 - name: format-storage-{{mount.device | mapdevice}}.service
   command: start
   content: |
@@ -15,4 +14,3 @@
 {% else %}
     ExecStart=/bin/bash -c '(/usr/sbin/blkid -t TYPE=ext4 | /usr/bin/grep /dev/{{mount.device | mapdevice}}) || (/usr/sbin/wipefs -fa /dev/{{mount.device | mapdevice}} && /usr/sbin/mkfs.ext4 /dev/{{mount.device | mapdevice}})'
 {% endif %}
-{% endfor %}

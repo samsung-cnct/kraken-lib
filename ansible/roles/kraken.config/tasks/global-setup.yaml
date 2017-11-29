@@ -13,3 +13,12 @@
     src: query_max_version.jinja2
     dest: "{{ version_outfile | realpath }}"
   when: kraken_action == 'max_k8s_version'
+
+- name: point rkt to custom install
+  set_fact:
+    rkt:
+      bin: /opt/cnct/rkt/rkt
+      stage1: /opt/cnct/rkt/stage1-fly.aci
+      version: "{{ rkt.version }}"
+  when:
+    - distro != "coreos"

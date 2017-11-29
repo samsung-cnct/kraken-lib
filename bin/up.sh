@@ -22,9 +22,9 @@ LOG_FILE=$"/tmp/crash-logs"
 # exit trap for crash app
 trap crash_test_up EXIT
 
-K2_CRASH_APP=$(which k2-crash-application)  
-if [ $? -ne 0 ];then  
-	DISPLAY_SKIPPED_HOSTS=0 ansible-playbook ${K2_VERBOSE} -i ansible/inventory/localhost ansible/up.yaml --extra-vars "${KRAKEN_EXTRA_VARS}kraken_action=up" --tags "${KRAKEN_TAGS}"
+K2_CRASH_APP=$(which k2-crash-application)
+if [ $? -ne 0 ];then
+	DISPLAY_SKIPPED_HOSTS=0 ansible-playbook ${K2_VERBOSE} -i ansible/inventory/localhost ansible/up.yaml --extra-vars "kraken_action=up ${KRAKEN_EXTRA_VARS}" --tags "${KRAKEN_TAGS}"
 else
-	DISPLAY_SKIPPED_HOSTS=0 ansible-playbook ${K2_VERBOSE} -i ansible/inventory/localhost ansible/up.yaml --extra-vars "${KRAKEN_EXTRA_VARS}kraken_action=up" --tags "${KRAKEN_TAGS}" | tee $LOG_FILE
+	DISPLAY_SKIPPED_HOSTS=0 ansible-playbook ${K2_VERBOSE} -i ansible/inventory/localhost ansible/up.yaml --extra-vars "kraken_action=up ${KRAKEN_EXTRA_VARS}" --tags "${KRAKEN_TAGS}" | tee $LOG_FILE
 fi

@@ -10,6 +10,14 @@
   vars:
     base_dict: '{{ { cluster.name: { node.name: {}}} }}'
 
+- name: Create cloud_config base dict
+  set_fact:
+    unitlist: "{{ unitlist | combine(base_list, recursive=true)}}"
+  vars:
+    base_list: '{{ { cluster.name: { node.name: []}} }}'
+  when:
+    - (unitlist[cluster.name] is not defined) or (unitlist[cluster.name][node.name] is not defined)
+
 - name: Make sure generated folder for cloud init is there
   file:
     path: "{{ config_base }}/{{ cluster.name }}"
@@ -34,5 +42,11 @@
     loop_var: a_node
 
 - include: certificate_authority.yaml
+- include: units.yaml
 - include: os_update.yaml
+  when:
+    - distro == "coreos"
+- include: rkt-install.yaml
+  when:
+    - distro != "coreos"
 - include: units.yaml

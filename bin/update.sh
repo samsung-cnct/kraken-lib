@@ -26,9 +26,9 @@ LOG_FILE=$"/tmp/crash-logs"
 # exit trap for crash app
 trap crash_test_update EXIT
 
-K2_CRASH_APP=$(which k2-crash-application)  
-if [ $? -ne 0 ];then  
-	DISPLAY_SKIPPED_HOSTS=0 ansible-playbook ${K2_VERBOSE} -i ansible/inventory/localhost ansible/update.yaml --extra-vars "${KRAKEN_EXTRA_VARS}kraken_action=update" || show_update_error
+K2_CRASH_APP=$(which k2-crash-application)
+if [ $? -ne 0 ];then
+	DISPLAY_SKIPPED_HOSTS=0 ansible-playbook ${K2_VERBOSE} -i ansible/inventory/localhost ansible/update.yaml --extra-vars "kraken_action=update ${KRAKEN_EXTRA_VARS}" || show_update_error
 else
-	DISPLAY_SKIPPED_HOSTS=0 ansible-playbook ${K2_VERBOSE} -i ansible/inventory/localhost ansible/update.yaml --extra-vars "${KRAKEN_EXTRA_VARS}kraken_action=update" | tee $LOG_FILE
+	DISPLAY_SKIPPED_HOSTS=0 ansible-playbook ${K2_VERBOSE} -i ansible/inventory/localhost ansible/update.yaml --extra-vars "kraken_action=update ${KRAKEN_EXTRA_VARS}" | tee $LOG_FILE
 fi

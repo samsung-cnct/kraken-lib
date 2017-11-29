@@ -21,8 +21,8 @@
     KillMode=none
     ExecStartPre=/bin/bash -xc 'while [[ $(/usr/bin/dig SRV +noall +short +answer _etcd-server{% if etcd.ssl %}-ssl{% endif %}._tcp.{{ etcd.name }}.{{ cluster_node_tuple.1.name }}.{{ cluster_node_tuple.0.name }}.internal | /usr/bin/wc -l) -ne  {{ cluster_node_tuple.1.count }} ]] ; do sleep 1 ; done'
     ExecStartPre=/usr/bin/mkdir -p /ephemeral/{{etcd.name}}
-    ExecStart=/usr/bin/rkt run --net=host \
-     --stage1-path=/usr/lib/rkt/stage1-images/stage1-fly.aci \
+    ExecStart={{ rkt.bin }} run --net=host \
+     --stage1-path={{ rkt.stage1 }} \
      --insecure-options=image \
      --inherit-env=true \
 {% if etcd.ssl == true %}
@@ -58,4 +58,4 @@
      --listen-client-urls {% for port in etcd.clientPorts %}{% if loop.index > 1 %},{% endif %}{% if etcd.ssl == true %}https{% else %}http{% endif %}://127.0.0.1:{{port}},{% if etcd.ssl == true %}https{% else %}http{% endif %}://${DEFAULT_IPV4}:{{port}}{% endfor %} \
      --listen-peer-urls {% for port in etcd.peerPorts %}{% if loop.index > 1 %},{% endif %}{% if etcd.ssl == true %}https{% else %}http{% endif %}://${DEFAULT_IPV4}:{{port}}{% endfor %} \
      ---
-    ExecStopPost=/usr/bin/rkt gc --mark-only
+    ExecStopPost={{ rkt.bin }} gc --mark-only
