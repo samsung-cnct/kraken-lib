@@ -87,10 +87,10 @@ definitions:
       options:
         containers:
           weave:
-            version: 2.1.1
+            version: 2.1.2
             location: weaveworks/weave-kube
           weave_npc:
-            version: 2.1.1
+            version: 2.1.2
             location: weaveworks/weave-npc
         network:
           network: 10.128.0.0/10
