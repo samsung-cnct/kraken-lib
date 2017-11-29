@@ -7,15 +7,15 @@
       }
     - {
         role: 'roles/kraken.cluster_common',
-        tags: [ 'assembler', 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun', 'post_provider' ]
+        tags: [ 'assembler', 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun', 'post_provider', 'pre_provider' ]
       }
     - {
         role: 'roles/kraken.nodePool/kraken.nodePool.selector',
-        tags: [ 'assembler', 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun' ]
+        tags: [ 'assembler', 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun', 'pre_provider' ]
       }
     - {
         role: 'roles/kraken.assembler',
-        tags: [ 'assembler', 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun' ]
+        tags: [ 'assembler', 'provider', 'ssh', 'readiness', 'services', 'all', 'dryrun', 'pre_provider' ]
       }
     - {
         role: 'roles/kraken.provider/kraken.provider.selector',

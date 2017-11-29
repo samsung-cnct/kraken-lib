@@ -133,7 +133,8 @@ fabric_only,services_only
 - roles/kraken.fabric/kraken.fabric.selector
 
 ### fabric_only
- **: Render and execute kubernetes config yamls for creating the nework fabric.** Useful for development and production upgrades of a network **
+ **: Render and execute kubernetes config yamls for creating the nework fabric.**
+ **: Useful for development and production upgrades of a network**
 - roles/kraken.fabric/kraken.fabric.selector
 
 
@@ -144,6 +145,13 @@ fabric_only,services_only
 - roles/kraken.nodePool/kraken.nodePool.selector
 - roles/kraken.assembler
 - roles/kraken.provider/kraken.provider.selector
+
+### pre_provider
+ **: create cloud-config files**
+- roles/kraken.config
+- roles/kraken.cluster_common
+- roles/kraken.nodePool
+- roles/kraken.assembler
 
 ### post_provider
  **: Assumes a set of machines has been created and has nodes in etcd, master and cluster pools**
