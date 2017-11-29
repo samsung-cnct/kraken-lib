@@ -34,10 +34,10 @@ definitions:
             version: v3.0.9
             location: quay.io/coreos/etcd
           calicoCni:
-            version: v1.10.0
+            version: v1.11.0
             location: calico/cni
           calicoNode:
-            version: v2.6.2
+            version: v2.6.3
             location: quay.io/calico/node
           flannel:
             version: v0.9.1

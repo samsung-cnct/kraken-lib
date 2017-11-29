@@ -35,10 +35,10 @@ definitions:
       options:
         containers:
           calicoCni:
-            version: v1.10.0
+            version: v1.11.1
             location: quay.io/calico/cni
           calicoNode:
-            version: v2.6.2
+            version: v2.6.3
             location: quay.io/calico/node
           flannel:
             version: v0.9.1
@@ -135,7 +135,7 @@ definitions:
     - &defaultKube
       name: defaultKube
       kind: kubernetes
-      version: v1.8.3
+      version: v1.8.4
       hyperkubeLocation: gcr.io/google_containers/hyperkube
 
   containerConfigs:
@@ -156,7 +156,7 @@ definitions:
       name: defaultCoreOs
       kind: os
       type: coreOs
-      version: 1465.7.0
+      version: 1520.8.0
       channel: stable
       # If rebootStrategy is anything other than "off" then the version of
       # CoreOS specified above will not be pinned.
