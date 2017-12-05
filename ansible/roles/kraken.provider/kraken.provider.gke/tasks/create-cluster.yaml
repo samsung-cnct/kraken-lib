@@ -9,6 +9,10 @@
   register: deployment_result
   ignore_errors: yes
 
+- name: Fail if RESOURCE_ERROR occurs when deploy cluster
+  fail: "msg='Deployment {{ cluster.name }}-k2-deployment failed with: {{ deployment_result.stderr }}'"
+  when: (deployment_result is defined) and ("RESOURCE_ERROR" in deployment_result.stderr)
+
 - name: Inspect the failed deployments
   command: >
     gcloud deployment-manager deployments describe {{ cluster.name }}-k2-deployment
