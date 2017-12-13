@@ -49,8 +49,7 @@ case $key in
   shift
   ;;
   -v|--verbose)
-  K2_VERBOSE="$2"
-  shift
+  K2_VERBOSE="-vvv"
   ;;
   -p|--provider)
   KRAKEN_PROVIDER="$2"

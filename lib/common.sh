@@ -57,8 +57,8 @@ function generate_config {
 
 function show_help {
   inf "Usage: \n"
-  inf "[up|down].sh --generate <path to file> - Generate a sensible defaults config at <path to file>"
-  inf "[up|down].sh --output <path to cluster state output> --config <path to cluster config file> --tags <only run roles tagged with>"
+  inf "[up|down].sh --generate [<path to file>] - Generate a sensible defaults config at <path to file>"
+  inf "[up|down].sh [--output <path to cluster state output>] [--config <path to cluster config file>] [--tags <only run roles tagged with>] [--verbose]"
   inf "[update].sh --nodepools <comma,separated,nodepools>"
 
   inf "\nFor example:"
@@ -67,7 +67,6 @@ function show_help {
   inf ""
   inf "[up].sh --output \${HOME}/.kraken/myclusterstate --config \${HOME}/.kraken/myclusterconfig.yaml --tags config,services"
   inf "[up].sh --config \${HOME}/.kraken/myclusterconfig.yaml"
-
 }
 
 function show_post_cluster {
