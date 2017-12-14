@@ -1,0 +1,4 @@
+#!/bin/sh
+
+ssh-keygen -f /root/.ssh/id_rsa -t ecdsa -b 1024 -t rsa -N ''
+chmod og-wrx /root/.ssh/id_rsa

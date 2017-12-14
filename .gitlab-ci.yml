@@ -1,0 +1,219 @@
+---
+# This pipeline requires 7 variables to be set in the CI/CD Settings
+# hint for creating the base64 encoded content: `cat .ssh/id_rsa|base64|pbcopy`
+
+# AWS_CREDENTIALS - base64 encoded credentials file (think ~/.aws/credentials)
+# AWS_CONFIG - base64 encoded config file (think ~/.aws/config)
+# GKE_CONFIG - base64 encoded json file (think ~/.config/gcloud/someconfig.json)
+# REGISTRY_PASSWORD - robot token for kraken_lib_rw
+# REGISTRY_PASSWORD_K2 - robot token for k2_rw
+image: docker:latest
+
+services:
+  - docker:dind
+
+variables:
+  DOCKER_HOST: tcp://localhost:2375
+  DOCKER_DRIVER: overlay2
+  REGISTRY_USER: samsung_cnct
+  IMAGE_NAME: kraken-lib
+  REGISTRY: quay.io
+  ROBOT_ACCOUNT: kraken_lib_rw
+  ROBOT_ACCOUNT_K2: k2_rw
+
+  ANSIBLE_LINT: "quay.io/samsung_cnct/ansible-lint:latest"
+  KRAKEN_TOOLS: "quay.io/samsung_cnct/kraken-tools:latest"
+  E2E_TESTER: "quay.io/samsung_cnct/e2etester:0.2"
+
+stages:
+  - vet
+  - config-generation
+  - pre-test
+  - test
+  - test-e2e
+  - cleanup
+  - build
+  - publish
+
+vet:ansible-lint:
+  stage: vet
+  image: $ANSIBLE_LINT
+  script:
+    - ls ansible/*.yaml ansible/**/*.yaml | xargs -I {} ansible-lint {}
+
+config-generation:create-aws-config:
+  stage: config-generation
+  only:
+    - tags
+    - branches
+  image: $KRAKEN_TOOLS
+  artifacts:
+    paths:
+      - $CI_PROJECT_DIR/cluster/aws/config.yaml
+    expire_in: 2 hour
+  script:
+    - hack/gen-test-config.sh aws
+
+config-generation:create-gke-config:
+  stage: config-generation
+  only:
+    - tags
+    - branches
+  image: $KRAKEN_TOOLS
+  artifacts: 
+    paths:
+      - $CI_PROJECT_DIR/cluster/gke/config.yaml 
+    expire_in: 2 hour
+  script:
+    - hack/gen-test-config.sh gke
+
+test:aws-dry-run:
+  stage: pre-test
+  only:
+    - tags
+    - branches
+  variables:
+    JOB_BASE_NAME: ${CI_PROJECT_NAME}
+    BUILD_ID: $CI_PIPELINE_ID
+  image: $KRAKEN_TOOLS
+  script:
+    - mkdir -p /root/.ssh /root/.aws/
+    - ./hack/key_gen
+    - echo $AWS_CREDENTIALS | base64 -d > /root/.aws/credentials
+    - echo $AWS_CONFIG | base64 -d > /root/.aws/config
+    - >-
+      PWD=`pwd` ./bin/up.sh 
+      --config $CI_PROJECT_DIR/cluster/aws/config.yaml 
+      --output $PWD/cluster/aws/ 
+      --tags dryrun
+
+test:cloud-aws:
+  stage: test
+  image: $KRAKEN_TOOLS
+  artifacts: 
+    paths:
+      - $CI_PROJECT_DIR/cluster/aws/**
+    expire_in: 2 hour
+  script: 
+    - mkdir -p /root/.ssh /root/.aws/
+    - ./hack/key_gen
+    - echo $AWS_CREDENTIALS | base64 -d > /root/.aws/credentials
+    - echo $AWS_CONFIG | base64 -d > /root/.aws/config
+    - ./bin/up.sh --config $CI_PROJECT_DIR/cluster/aws/config.yaml --output $CI_PROJECT_DIR/cluster/aws/ --verbose "-vvv"
+
+test:cloud-gke:
+  stage: test
+  image: $KRAKEN_TOOLS
+  artifacts: 
+    paths:
+      - $CI_PROJECT_DIR/cluster/gke/**
+    expire_in: 2 hour
+  script:
+    - mkdir -p /root/.ssh /root/.config/gcloud/
+    - ./hack/key_gen
+    - echo $GKE_CONFIG | base64 -d > /root/.config/gcloud/patrickRobot.json
+    - ./bin/up.sh --config $CI_PROJECT_DIR/cluster/gke/config.yaml --output $CI_PROJECT_DIR/cluster/gke/ --verbose "-vvv"
+
+test-e2e:e2e:
+  stage: test-e2e
+  only:
+    - tags
+    - branches
+  image: $E2E_TESTER
+  allow_failure: true
+  script: 
+    - mkdir -p /root/.ssh /root/.aws/
+    - ./hack/key_gen
+    - echo $AWS_CREDENTIALS | base64 -d > /root/.aws/credentials
+    - echo $AWS_CONFIG | base64 -d > /root/.aws/config
+    - build-scripts/conformance-tests "v1.8.4" krakenlib-$CI_PIPELINE_ID /var/opt/gitlab
+
+cleanup:cloud-aws:
+  stage: cleanup
+  image: $KRAKEN_TOOLS
+  when: always
+  script: 
+    - mkdir -p /root/.ssh /root/.aws/
+    - ./hack/key_gen
+    - echo $AWS_CREDENTIALS | base64 -d > /root/.aws/credentials
+    - echo $AWS_CONFIG | base64 -d > /root/.aws/config
+    - ./bin/down.sh --config $CI_PROJECT_DIR/cluster/aws/config.yaml --output $CI_PROJECT_DIR/cluster/aws/ --verbose "-vvv"
+
+cleanup:cloud-gke:
+  stage: cleanup
+  image: $KRAKEN_TOOLS
+  when: always
+  script:
+    - mkdir -p /root/.ssh /root/.config/gcloud/
+    - ./hack/key_gen
+    - echo $GKE_CONFIG | base64 -d > /root/.config/gcloud/patrickRobot.json
+    - ./bin/down.sh --config $CI_PROJECT_DIR/cluster/gke/config.yaml --output $CI_PROJECT_DIR/cluster/gke/ --verbose "-vvv"
+
+# build and publish kraken-lib and backwards compatibility project name "K2"
+build:build-latest-master-quay:
+  stage: build
+  only:
+    - master
+  variables:
+    IMAGE_URI: $CI_REGISTRY_IMAGE:branch-$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID
+  before_script:
+    - docker info
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+  script:
+    - docker build -t $IMAGE_URI docker/
+    - docker push $IMAGE_URI
+
+build:build-tagged-image-quay:
+  stage: build
+  only:
+    - tags
+    - /v[0-9]+\.[0-9]+(\.[0-9]+[a-z]?)?/
+  variables:
+    IMAGE_URI: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+  before_script:
+    - docker info
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+  script:
+    - docker build -t $IMAGE_URI docker/
+    - docker push $IMAGE_URI
+
+publish:publish-latest-master-quay:
+  stage: publish
+  only:
+    - master
+  variables:
+    IMAGE_URI: $CI_REGISTRY_IMAGE:branch-$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID
+  before_script:
+    - docker info
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+  script:
+    - docker pull $IMAGE_URI
+    - docker login ${REGISTRY} -u ${REGISTRY_USER}+${ROBOT_ACCOUNT} -p ${REGISTRY_PASSWORD}
+    # Any merge to master (i.e. a successful CI pass) will be tagged and pushed as latest
+    - docker tag ${IMAGE_URI} ${REGISTRY}/${REGISTRY_USER}/${IMAGE_NAME}:latest
+    - docker push ${REGISTRY}/${REGISTRY_USER}/${IMAGE_NAME}:latest
+    # backwards compatibility 
+    - docker login ${REGISTRY} -u ${REGISTRY_USER}+${ROBOT_ACCOUNT_K2} -p ${REGISTRY_PASSWORD_K2}
+    - docker tag ${IMAGE_URI} k2/${REGISTRY_USER}/k2:latest
+    - docker push k2/${REGISTRY_USER}/k2:latest
+
+publish:publish-tagged-image-quay:
+  stage: publish
+  only:
+    - tags
+    - /v[0-9]+\.[0-9]+(\.[0-9]+[a-z]?)?/
+  variables:
+    IMAGE_URI: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+  before_script:
+    - docker info
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+  script:
+    - docker pull $IMAGE_URI
+    - docker login ${REGISTRY} -u ${REGISTRY_USER}+${ROBOT_ACCOUNT} -p ${REGISTRY_PASSWORD}
+    # A tag push to master will be pushed to Quay with that tag
+    - docker tag ${IMAGE_URI} ${REGISTRY}/${REGISTRY_USER}/${IMAGE_NAME}:$CI_COMMIT_TAG
+    - docker push ${REGISTRY}/${REGISTRY_USER}/${IMAGE_NAME}:$CI_COMMIT_TAG
+    # backwards compatibility
+    - docker login ${REGISTRY} -u ${REGISTRY_USER}+${ROBOT_ACCOUNT_K2} -p ${REGISTRY_PASSWORD_K2}
+    - docker tag ${IMAGE_URI} ${REGISTRY}/${REGISTRY_USER}/k2:$CI_COMMIT_TAG
+    - docker push ${REGISTRY}/${REGISTRY_USER}/k2:$CI_COMMIT_TAG

@@ -1,3 +1,6 @@
+[![pipeline status](https://git.cnct.io/common-tools/samsung-cnct_kraken-lib/badges/master/pipeline.svg)](https://git.cnct.io/common-tools/samsung-cnct_kraken-lib/commits/master)
+
+
 # __kraken-lib__ Deploys a __Kubernetes__ Cluster on top of __CoreOS__ using __Terraform__  and __Ansible__
 
 [![Docker Repository on Quay](https://quay.io/repository/samsung_cnct/k2/status "Docker Repository on Quay")](https://quay.io/repository/samsung_cnct/k2)
