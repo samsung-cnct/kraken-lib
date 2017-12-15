@@ -1,9 +1,4 @@
 ---
-
-- name: Set list of nodepools to be updated
-  set_fact:
-    nodepools_to_update: "{{ update_nodepools.split(',') }}"
-
 - name: Update nodepools, if needed
   command: >
     gcloud container clusters upgrade {{ cluster.name }}
@@ -15,3 +10,5 @@
       --quiet
   when: (item.kubeConfig is defined) and (item.kubeConfig.version is defined) and (item.name in nodepools_to_update) and update_nodepools != ""
   with_items: "{{ cluster.nodePools }}"
+  vars:
+    nodepools_to_update: "{{ update_nodepools.split(',') }}"

@@ -1,16 +1,11 @@
 ---
 
-- set_fact:
+- name: set "cluster"
+  set_fact:
     cluster: "{{ a_cluster }}"
-
-- set_fact:
-    aws_region: "{{ cluster.providerConfig.region }}"
-    kubectl: "{{ kubectl_commands[cluster.name] }}"
-    kubeconfig: "{{ config_base }}/{{ cluster.name }}/admin.kubeconfig"
 
 # because BOTO2 doesn't support AWS_SHARED_CREDENTIALS_FILE environment variable, do some mangling
 - include: aws_config.yaml
-  when: cluster.providerConfig.provider == 'aws'
 
 - name: Gather EC2 facts
   ec2_remote_facts:
@@ -26,20 +21,18 @@
     msg: "Failed to look up EC2 information. Check your AWS credentials, or try restarting Docker."
   when: (instance_info | is_empty)
 
-- name: Make a list of nodepools in this cluster
-  set_fact:
-    cluster_nodepool_names: "{{ cluster.nodePools | map(attribute='name') | list }}"
-
 - name: Fail when nodepools passed do not exist
   fail:
     msg: "You passed a nodepool that does not exist in this cluster. Please make sure to pass --nodepools <comma,separated,list,of,nodepools> to update action."
   when: item not in cluster_nodepool_names
   with_items:
     - "{{nodepools_to_update}}"
+  vars:
+    cluster_nodepool_names: "{{ cluster.nodePools | map(attribute='name') | list }}"
 
 - include: update-nodes.yaml
   with_items:
     - "{{ cluster.nodePools }}"
   loop_control:
-    loop_var: a_nodepool
-  when: a_nodepool.name in nodepools_to_update
+    loop_var: nodepool
+  when: nodepool.name in nodepools_to_update

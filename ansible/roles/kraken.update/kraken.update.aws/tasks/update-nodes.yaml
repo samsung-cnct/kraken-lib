@@ -1,32 +1,22 @@
 ---
-
-- set_fact:
-    nodepool: "{{ a_nodepool }}"
-
-- name: Set Expected Node Count
-  set_fact:
-    expected_node_count: "{{ nodepool.count }}"
-
 - name: Collect nodes
   command: >
-   {{ kubectl }} --kubeconfig={{ kubeconfig }} get nodes -l nodepool={{ nodepool.name }} -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}'
+    {{ kubectl }} --kubeconfig={{ kubeconfig }} get nodes
+      -l nodepool={{ nodepool.name }}
+      -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}'
   register: node_names
 
-- name: Set node names dict to empty
-  set_fact:
-    node_names_and_instance_ids: {}
-
-- name: Create dict with node names and instance ids
-  set_fact:
-    node_names_and_instance_ids: "{{ node_names_and_instance_ids | combine( {item.0: item.1} ) }}"
+- name: Drain and Delete Nodes
+  include: delete-node.yaml
   with_together:
     - "{{ instance_info.instances|map(attribute='private_dns_name')|list }}"
     - "{{ instance_info.instances|map(attribute='id')|list }}"
-  when: item.0 in node_names.stdout_lines
-
-- name: Delete and Terminate Nodes
-  set_fact:
-    node_destruction: "{{ item.key |delete_and_terminate_node_filter(item.value, expected_node_count, kubeconfig, aws_region, nodepool.name) }}"
-  with_dict: "{{ node_names_and_instance_ids }}"
-  failed_when: node_destruction == False
-  when: node_names_and_instance_ids is defined #this will keeps things from breaking if etcd nodes accidentally get passed.
+  loop_control:
+    loop_var: aws_nodes
+  vars:
+    expected_node_count: "{{ nodepool.count }}"
+    aws_node_name: "{{ aws_nodes.0 }}"
+    aws_node_id: "{{ aws_nodes.1 }}"
+  when:
+    - aws_node_name in node_names.stdout_lines
+    - nodepool.etcdConfigs is not defined
