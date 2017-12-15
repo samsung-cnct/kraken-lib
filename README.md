@@ -14,15 +14,15 @@ following instructions are intended for developers working on kraken-lib.
 ## What is kraken-lib?
 kraken-lib is an orchestration and cluster-level management system for [Kubernetes](https://kubernetes.io) that creates a production-scale Kubernetes cluster on a range of platforms using default settings. When you're ready to optimize your cluster for your own environment and use case, you can deploy with kraken-lib's rich set of configurable options.  
 
-We (Samsung CNCT) built this tool to aid in our own research into high performance and reliability for the Kubernetes control plane. Realizing this would be a useful tool for the public at large, we released it as [kraken](https://github.com/samsung-cnct/kraken) (now kraken-v1) in mid 2016. This first release was great, but we had developed it quickly and just for research. After using it ourselves for almost a year and identifying some pain points, we deemed it best to build anew, bringing the best parts forward. Thus sprouted kraken-lib our second release.
+We (Samsung CNCT) built this tool to aid in our own research into high performance and reliability for the Kubernetes control plane. Realizing this would be a useful tool for the public at large, we released it as kraken (now [kraken-v1](https://github.com/samsung-cnct/kraken-old)) in mid 2016. This first release was great, but we had developed it quickly and just for research. After using it ourselves for almost a year and identifying some pain points, we deemed it best to build anew, bringing the best parts forward. Thus sprouted kraken-lib our second release.
 
-It continues to use Ansible and Terraform because of the flexible and powerful abstractions these tools provide at the right layers. kraken-lib provides the same functionality as kraken-v1 but with much cleaner internal abstractions. This more easily facilitates external and internal contributions. It also enables us to quickly improve and evolve with the Kubernetes ecosystem as a whole.
+It continues to use Ansible and Terraform because of the flexible and powerful abstractions these tools provide at the right layers. kraken-lib provides the same functionality but with much cleaner internal abstractions. This more easily facilitates external and internal contributions. It also enables us to quickly improve and evolve with the Kubernetes ecosystem as a whole.
 
 ## Who and What is it For?
 kraken-lib is targeted at operations teams who support Kubernetes, a practice becoming known as "ClusterOps." It provides a single interface where ClusterOps teams can manage Kubernetes clusters across all environments.
 
-kraken-lib uses a single file to drive cluster configuration, enabling you to check the file into a VCS of your choice and solving two major problems:
-1. Use version control for your cluster configuration as you promote changes from dev through production, for either existing cluster configurations or brand-new ones;
+kraken-lib uses a single file to drive cluster configuration, enabling you to check the file into a VCS of your choice and solve two major problems:
+1. Use version control for your cluster configuration as you promote changes from dev through production, for either existing cluster configurations or brand-new ones.
 2. Enable continuous integration for developer applications against sandboxed and transient Kubernetes clusters. kraken-lib provides a destroy command that cleans up all traces of the temporary infrastructure.
 
 We believe solving these two problems is a baseline for effectively and efficiently nurturing a Kubernetes-based infrastructure.
@@ -82,7 +82,7 @@ You will need to have the following:
   - Create Route 53 records
   - Create IAM roles for EC2 instances
 
-### Running without tools Docker image
+### Running without kraken-tools Docker image
 
 You will need the following installed on your machine:
 
@@ -101,7 +101,7 @@ You will need the following installed on your machine:
 - kubectl
 - Helm
 
-For the specific version of Python modules (including Ansible) that are expected, see [kraken-tools](https://github.com/samsung-cnct/k2-tools/blob/master/requirements.txt). For the versions of all other dependecies, see the kraken-tools [Dockerfile](https://github.com/samsung-cnct/k2-tools/blob/master/Dockerfile).
+For the specific version of Python modules (including Ansible) that are expected, see [kraken-tools](https://github.com/samsung-cnct/k2-tools/blob/master/requirements.txt). For the versions of all other dependencies, see the kraken-tools [Dockerfile](https://github.com/samsung-cnct/k2-tools/blob/master/Dockerfile).
 
 ## The kraken-lib Image
 
@@ -503,7 +503,7 @@ You can update all or some of your control plane and cluster nodes (but not etcd
 On GKE nodes, it is not possible to update the control plane. Cluster node updates are possible. The mechanics of deleting and updating nodes are handled by GKE in this case, not kraken-lib.
 
 #### Running kraken-lib update on node pools
-You can specify different versions of Kubernetes in each node pool. This may affect the compatibility of your cluster's kraken-lib services (see below). You can also update node pool counts and instance types. The update action has a required `--nodepools` or `-n` flag followed by a comma-separated list of the names of the node pools you want to update. Please be patient; this process may take a while.
+You can specify different versions of Kubernetes in each node pool. This may affect the compatibility of your cluster's kraken-lib services (see below). You can also update node pool count and instance types. The update action has a required `--nodepools` or `-n` flag followed by a comma-separated list of the names of the node pools you want to update. Please be patient; this process may take a while.
 
 - Step 1: Make appropriate changes to configuration file
 - Step 2: Run
