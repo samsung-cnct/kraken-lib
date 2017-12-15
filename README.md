@@ -1,10 +1,7 @@
-[![pipeline status](https://git.cnct.io/common-tools/samsung-cnct_kraken-lib/badges/master/pipeline.svg)](https://git.cnct.io/common-tools/samsung-cnct_kraken-lib/commits/master)
-
-
 # __kraken-lib__ Deploys a __Kubernetes__ Cluster on top of __CoreOS__ using __Terraform__  and __Ansible__
 
 [![Docker Repository on Quay](https://quay.io/repository/samsung_cnct/k2/status "Docker Repository on Quay")](https://quay.io/repository/samsung_cnct/k2)
-
+[![pipeline status](https://git.cnct.io/common-tools/samsung-cnct_kraken-lib/badges/master/pipeline.svg)](https://git.cnct.io/common-tools/samsung-cnct_kraken-lib/commits/master)
 <a href="https://github.com/cncf/k8s-conformance/tree/master/v1.8/kraken"><img src="https://raw.githubusercontent.com/cncf/artwork/master/kubernetes/certified-kubernetes/1.8/color/certified_kubernetes_1.8_color.png" width="80" align="right"></a>
 <a href="https://github.com/cncf/k8s-conformance/tree/master/v1.7/kraken"><img src="https://raw.githubusercontent.com/cncf/artwork/master/kubernetes/certified-kubernetes/1.7/color/certified_kubernetes_1.7_color.png" width="80" align="right"></a>
 
