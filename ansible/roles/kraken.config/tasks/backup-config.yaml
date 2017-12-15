@@ -1,0 +1,13 @@
+---
+- name: Ensure cluster directories exist
+  file:
+    path: "{{ config_base }}/{{ cluster.name }}"
+    state: directory
+
+- name: Backup the configuration file
+  copy:
+    src: "{{ config_file }}"
+    dest: "{{ config_base }}/{{ cluster.name }}/{{ config_file | basename }}"
+    backup: yes
+  notify:
+    - "Clean-up old configuration backup files"

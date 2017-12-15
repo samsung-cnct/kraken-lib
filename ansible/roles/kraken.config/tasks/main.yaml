@@ -31,6 +31,13 @@
 - name: Validate the config against the schema
   include: validate-config.yaml
 
+- name: Backup the configuration file
+  include: backup-config.yaml
+  with_items:
+    - "{{ kraken_config.clusters }}"
+  loop_control:
+    loop_var: cluster
+
 - name: Verify and set global facts
   include: global-setup.yaml
 

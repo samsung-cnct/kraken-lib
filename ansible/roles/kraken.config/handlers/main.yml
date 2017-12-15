@@ -1,0 +1,4 @@
+---
+- name: Clean-up old configuration backup files
+  shell: "find {{ config_base }}/{{ cluster.name }} -maxdepth 1 -iname '{{ config_file | basename }}.*@*~' \
+          -type f -print0 | xargs -0r ls -1t | tail -n+2 | xargs -r rm"
