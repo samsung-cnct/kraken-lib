@@ -117,5 +117,5 @@ fi
 
 echo -e "Mappings:\n$(tr ' ' '\n' <<< "$MAPPINGS" | grep -e -v '-v' | sort)"
 echo ""
-echo "Running bash in k2 container. Use up.sh, down.sh, etc."
+echo "Running bash in k2 container. Use up, down, update."
 docker run ${MAPPINGS} -e HOME=${MYHOME} --rm=true -it ${IMAGE} /bin/bash --rcfile ${MYHOME}/.bashrc
