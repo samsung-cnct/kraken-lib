@@ -60,9 +60,9 @@ config-generation:create-gke-config:
     - tags
     - branches
   image: $KRAKEN_TOOLS
-  artifacts: 
+  artifacts:
     paths:
-      - $CI_PROJECT_DIR/cluster/gke/config.yaml 
+      - $CI_PROJECT_DIR/cluster/gke/config.yaml
     expire_in: 2 hour
   script:
     - hack/gen-test-config.sh gke
@@ -82,19 +82,19 @@ test:aws-dry-run:
     - echo $AWS_CREDENTIALS | base64 -d > /root/.aws/credentials
     - echo $AWS_CONFIG | base64 -d > /root/.aws/config
     - >-
-      PWD=`pwd` ./bin/up.sh 
-      --config $CI_PROJECT_DIR/cluster/aws/config.yaml 
-      --output $PWD/cluster/aws/ 
+      PWD=`pwd` ./bin/up.sh
+      --config $CI_PROJECT_DIR/cluster/aws/config.yaml
+      --output $PWD/cluster/aws/
       --tags dryrun
 
 test:cloud-aws:
   stage: test
   image: $KRAKEN_TOOLS
-  artifacts: 
+  artifacts:
     paths:
       - $CI_PROJECT_DIR/cluster/aws/**
     expire_in: 2 hour
-  script: 
+  script:
     - mkdir -p /root/.ssh /root/.aws/
     - ./hack/key_gen
     - echo $AWS_CREDENTIALS | base64 -d > /root/.aws/credentials
@@ -104,7 +104,7 @@ test:cloud-aws:
 test:cloud-gke:
   stage: test
   image: $KRAKEN_TOOLS
-  artifacts: 
+  artifacts:
     paths:
       - $CI_PROJECT_DIR/cluster/gke/**
     expire_in: 2 hour
@@ -121,7 +121,7 @@ test-e2e:e2e:
     - branches
   image: $E2E_TESTER
   allow_failure: true
-  script: 
+  script:
     - mkdir -p /root/.ssh /root/.aws/
     - ./hack/key_gen
     - echo $AWS_CREDENTIALS | base64 -d > /root/.aws/credentials
@@ -132,7 +132,7 @@ cleanup:cloud-aws:
   stage: cleanup
   image: $KRAKEN_TOOLS
   when: always
-  script: 
+  script:
     - mkdir -p /root/.ssh /root/.aws/
     - ./hack/key_gen
     - echo $AWS_CREDENTIALS | base64 -d > /root/.aws/credentials
@@ -192,10 +192,10 @@ publish:publish-latest-master-quay:
     # Any merge to master (i.e. a successful CI pass) will be tagged and pushed as latest
     - docker tag ${IMAGE_URI} ${REGISTRY}/${REGISTRY_USER}/${IMAGE_NAME}:latest
     - docker push ${REGISTRY}/${REGISTRY_USER}/${IMAGE_NAME}:latest
-    # backwards compatibility 
+    # backwards compatibility
     - docker login ${REGISTRY} -u ${REGISTRY_USER}+${ROBOT_ACCOUNT_K2} -p ${REGISTRY_PASSWORD_K2}
-    - docker tag ${IMAGE_URI} k2/${REGISTRY_USER}/k2:latest
-    - docker push k2/${REGISTRY_USER}/k2:latest
+    - docker tag ${IMAGE_URI} ${REGISTRY}/${REGISTRY_USER}/k2:latest
+    - docker push ${REGISTRY}/${REGISTRY_USER}/k2:latest
 
 publish:publish-tagged-image-quay:
   stage: publish
