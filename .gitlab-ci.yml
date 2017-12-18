@@ -166,8 +166,9 @@ build:build-latest-master-quay:
 build:build-tagged-image-quay:
   stage: build
   only:
-    - tags
     - /v[0-9]+\.[0-9]+(\.[0-9]+[a-z]?)?/
+  except:
+    - branches
   variables:
     IMAGE_URI: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
   before_script:
