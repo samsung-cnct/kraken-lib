@@ -1,3 +1,3 @@
 # AWS specific node configuration
 
-No provider-spcific configuration for AWS
+No provider-specific configuration for AWS

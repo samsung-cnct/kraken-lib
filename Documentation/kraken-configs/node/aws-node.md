@@ -4,8 +4,8 @@
 | Key Name       | Required     | Type         | Description      |
 | -------------- | ------------ | ----------   | ---------------- |
 | mounts         |              | Object Array |                  |
-| providerConfig |              | Object       | provider details |
-| taints         |  Optional    | Object Array | restrict node to only allow pods that tolerate the taints |
+| providerConfig |              | Object       | Provider details |
+| taints         |  Optional    | Object Array | Restrict node to only allow pods that tolerate the taints |
 
 ## Mounts Options
 | Key Name       | Required     | Type         | Description  |
@@ -17,19 +17,19 @@
 ## Provider Options
 | Key Name       | Required     | Type         | Description  |
 | -------------- | ------------ | ----------   | ------------ |
-| provider       | __Required__ | String       | provider     |
-| type           | __Required__ | String       | type of node to be launched - will vary depending on provider |
+| provider       | __Required__ | String       | Provider     |
+| type           | __Required__ | String       | Type of node to be launched - will vary depending on provider |
 | subnet         | __Required__ | String Array | Describes AWS subnets to be created per AZ |
-| label          |   Optional   | Object Array | Array of labels to apply to kubernetes nodes. ( defaultAwsMasterNode, defaultAwsClusterNode, defaultAwsSpecialNode) |
-| tags           |   Optional   | Object Array | Array of tags to apply to node. |
-| storage        | __Required__ | Object Array | Array of storage volume specs. |
+| label          |   Optional   | Object Array | Array of labels to apply to kubernetes nodes ( defaultAwsMasterNode, defaultAwsClusterNode, defaultAwsSpecialNode) |
+| tags           |   Optional   | Object Array | Array of tags to apply to node |
+| storage        | __Required__ | Object Array | Array of storage volume specs |
 
 ## [Taints Options](https://kubernetes.io/docs/user-guide/kubectl/v1.7/#taint)
 | Key Name       | Required     | Type         | Description  |
 | -------------- | ------------ | ----------   | ------------ |
-| key            | __Required__ | string       | must match key when adding toleration to pod |
+| key            | __Required__ | string       | Must match key when adding toleration to pod |
 | value          | __Required__ | string       | Can be "" if no value desired |
-| effect         | __Required__ | string       | must be NoSchedule, PreferNoSchedule or NoExecute |
+| effect         | __Required__ | string       | Must be NoSchedule, PreferNoSchedule or NoExecute |
 
 ### Storage Options
 | Key Name | Required | Type | Description|

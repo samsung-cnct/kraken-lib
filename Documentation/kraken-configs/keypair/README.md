@@ -1,5 +1,5 @@
 # Key pair configurations
-Provider - specific node configuration options
+Provider-specific node configuration options
 
 * `aws` - [aws keypairs](aws.md)
 * `gke` - [gke keypairs](gke.md)
@@ -9,9 +9,9 @@ Provider - specific node configuration options
 | Key Name       | Required     | Type   | Description|
 | -------------- | ------------ | ------ | ---------- |
 | name           | __Required__ | String | Keypair name |
-| kind           | __Required__ | String | keypair |
-| publickeyFile  | Optional     | String | Path to public key material. |
-| privatekeyFile | Optional     | String | Path to private key. |
+| kind           | __Required__ | String | Keypair |
+| publickeyFile  | Optional     | String | Path to public key material |
+| privatekeyFile | Optional     | String | Path to private key |
 
 ```yaml
 keyPairs:

@@ -1,9 +1,9 @@
 # Node Configurations for node on GKE
 | Key Name       | Required     | Type         | Description      |
 | -------------- | ------------ | ----------   | ---------------- |
-| name           | __Required__ | string       | name of node     |
-| providerConfig | __Required__ | Object       | provider details |
-| taints         |  Optional    | Object Array | restrict node to only allow pods that tolerate the taints |
+| name           | __Required__ | string       | Name of node     |
+| providerConfig | __Required__ | Object       | Provider details |
+| taints         |  Optional    | Object Array | Restrict node to only allow pods that tolerate the taints |
 
 
 ## ProviderConfig Options
@@ -25,9 +25,9 @@
 ## [Taints Options](https://kubernetes.io/docs/user-guide/kubectl/v1.7/#taint)
 | Key Name       | Required     | Type         | Description  |
 | -------------- | ------------ | ----------   | ------------ |
-| key            | __Required__ | string       | must match key when adding toleration to pod |
+| key            | __Required__ | string       | Must match key when adding toleration to pod |
 | value          | __Required__ | string       | Can be "" if no value desired |
-| effect         | __Required__ | string       | must be NoSchedule, PreferNoSchedule or NoExecute |
+| effect         | __Required__ | string       | Must be NoSchedule, PreferNoSchedule or NoExecute |
 
 ### autoscaling options
 | Key Name | Required | Type | Description|
@@ -38,14 +38,14 @@
 ### label options
 | Key Name | Required | Type | Description|
 | --- | --- | --- | --- |
-| name | __Required__ | String | label name |
-| value | __Required__ | String | label value |
+| name | __Required__ | String | Label name |
+| value | __Required__ | String | Label value |
 
 ### metadata options
 | Key Name | Required | Type | Description|
 | --- | --- | --- | --- |
-| name | __Required__ | String | metadata name |
-| value | __Required__ | String | metadata value |
+| name | __Required__ | String | Metadata name |
+| value | __Required__ | String | Metadata value |
 
 
 ## Examples

@@ -14,4 +14,4 @@
 /sphinx/            @davidewatson
 /hack/dockerdev/    @joejulian
 
-#ansible directory should be broken up by role
+# Ansible directory should be broken up by role

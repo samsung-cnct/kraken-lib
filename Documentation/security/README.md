@@ -22,7 +22,7 @@ Below is the sequence of getting/validating auth.
 
 ## Configuration
 By default, Auth is disabled in Kraken.
-To enable this see below example in for config.yaml
+To enable this see below example in config.yaml
 ```yaml
 definitions:
   ...
@@ -133,11 +133,11 @@ It should be accessible from the user side but also cluster side.
 The chart `openldap` is used for authentication backend of `dex`.
 
 ## Endpoints
-By default, it exposes ports 30443, 30080 for `dex`.
-User should use same URI which defined in config.yaml.
-And a port 31080 also exposed for phpLDAPadmin which included in `openldap`.
+By default, the chart exposes ports 30443, 30080 for `dex`.
+The user should use same URI which is defined in the config.yaml,
+and port 31080 is also exposed for phpLDAPadmin which is included in `openldap`.
 
-To access there, following ingress configuration is required.
+To access the service, the following ingress configuration is required.
 ```yaml
 definitions:
   ...
@@ -401,8 +401,7 @@ switched to context "dex".
 ```
 
 ## RBAC
-It succeed to login but cant have proper right to access kube-apsierver yet.
-Check it.
+It should have succeeded to login, however, we don't have the proper rights to access kube-apiserver yet, you can verify this by doing the following:
 
 ```bash
 $ kubectl get pod
@@ -415,8 +414,7 @@ openldap         10.34.87.98     <none>        389/TCP,636/TCP   2h
 openldap-admin   10.36.175.105   <nodes>       80/TCP            2h
 ```
 
-It can get service info, but not pod info.
-Cause Kraken assign below policy default.
+We can get service info, but not pod info, because Kraken, by default, assigns the ClusterRole to be:
 
 ```yaml
 ---
@@ -474,7 +472,8 @@ roleRef:
   apiVersion: rbac.authorization.k8s.io/v1beta1
 ```
 
-Now it can create deploy to its namespace.
+Now we can deploy to the cnct namespace.
+
 ```bash
 $ kubectl run tomcat --image=tomcat --namespace=cnct
 deployment "tomcat" created
@@ -487,12 +486,12 @@ tomcat-1609341292-8qdbm   0/1       ContainerCreating   0          7s
 ## ToDo
 #### Configuration
 1. Certificates
-To use dex for auth, passing dex's ca certificates is required.
+To use dex for auth, passing dex ca certificates is required.
 But there is size limitation using cloud-init with AWS.
-Now it just use same CA what kube apiserver uses.
+Now it just uses the same CA as the kube apiserver uses.
 Need another channel for passing it from given services to each VM instances.
 
-And to find/set dex'services configuration like issuer URL.
+And to find/set dex services configuration like issuer URL.
 From now Kraken just assumes that it is located under 'values.Dex.Issuer'
 The path is hard coded under kraken.config. Should be changed.
 
@@ -506,7 +505,7 @@ Currently kubectl has a feature like 'login'.
 This implementation on Kraken is not convenient yet.
 Need to setting JWT token to kubectl manually.
 There is workaround script but not good so.
-Better reimplement DexApp and create a feature to kubecli to get auth token and set it given kubeconfig.
+Better reimplement DexApp and create a feature to kubectl to get auth token and set it given kubeconfig.
 
 #### Auto sync RBAC and LDAP
 When new LDAP objects is registered, related user or group's RBAC resources should be created.

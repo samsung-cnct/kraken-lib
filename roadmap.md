@@ -7,7 +7,7 @@ This roadmap only includes large-effort issues we believe to be of strategic imp
 ## Work Planned ##
 Below are the main features to which we have agreed, ordered by when we'll start them. Also included are some general notes for feature expectations. The notes should not be viewed as complete requirements, merely directionally correct.
 
-1. Monitoring 
+1. Monitoring
     * resource usage broken down by namespace and node(?)
     * resource usage over time
     * resource availability over time (not just constant minus previous, capacity can change)
@@ -28,7 +28,7 @@ Below are the main features to which we have agreed, ordered by when we'll start
     * Ansible tasks
     * go libraries
 1. Save kraken-lib state to cluster (#125)
-1. Multiple admins operating at once 
+1. Multiple admins operating at once
     * locks on storing Terraform and kraken-lib state in etcd
 1. Cluster modification plan
     * a clear output of what will change during a 'dry run'
@@ -36,7 +36,7 @@ Below are the main features to which we have agreed, ordered by when we'll start
 1. kraken-lib full marketing plan implementation
     * blogs/presentations/customer testimonials/white paper
     * doc PRs for adding to Kubernetes docs
-    * other items as they bubble up from ongoing marketing/user=definition discussions
+    * other items as they bubble up from ongoing marketing/user definition discussions
     * public Slack channel
     * PRs to Kubernetes docs to put kraken in the right locations
     * Kubernetes demo

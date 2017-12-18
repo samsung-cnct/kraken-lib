@@ -6,9 +6,9 @@ Taints and tolerations work together to ensure that pods are not scheduled onto 
 ## [Taint Options](https://kubernetes.io/docs/user-guide/kubectl/v1.7/#taint)
 | Key Name       | Required     | Type         | Description  |
 | -------------- | ------------ | ----------   | ------------ |
-| key            | __Required__ | string       | must match key when adding toleration to pod |
-| value          | __Required__ | string       | Can be "" if no value desired |
-| effect         | __Required__ | string       | must be NoSchedule, PreferNoSchedule or NoExecute |
+| key            | __Required__ | String       | Must match key when adding toleration to pod |
+| value          | __Required__ | String       | Can be "" if no value desired |
+| effect         | __Required__ | String       | Must be NoSchedule, PreferNoSchedule or NoExecute |
 
 ## Example
 ```yaml

@@ -1,12 +1,12 @@
 # Upgrading Kubernetes
 
 Kubernetes features advance, evolve, and deprecate fast enough that CNCT needs
-to support targed configurations for each Kubernetes release.
+to support targeted configurations for each Kubernetes release.
 
 
 ## Configuration Branching
 
-Example version notation: when Kubernetes releases 1.7, `N` means `v1.7`, while `N-1` means `v1.6`. 
+Example version notation: when Kubernetes releases 1.7, `N` means `v1.7`, while `N-1` means `v1.6`.
 
 For each new release `N` of Kubernetes, we should:
 
@@ -26,7 +26,7 @@ sh hack/clone_version_config.sh copy_default v1.7
 
 ### Updating Cluster Configuration
 
-Various parts of the cluster configuration have version-specific mapping. In 
+Various parts of the cluster configuration have version-specific mapping. In
 particular, the files `kraken.config/files/config.yaml` and `gke-config.yaml`
 are probably of interest.
 
@@ -54,9 +54,9 @@ Examples:
 ```
 
 When introducing a new version of Kubernetes, preceding configuration details may
-still be valid. If changes are necessary, copy the referenced block within the 
-YAML (e.g. `defaultCanalFabric16`), update its names and references accordingly 
+still be valid. If changes are necessary, copy the referenced block within the
+YAML (e.g. `defaultCanalFabric16`), update its names and references accordingly
 (e.g. rename to `defaultCanalFabric17`). *DO NOT* alter configuration of preceding
-versions. 
+versions.
 
-[1]: https://github.com/samsung-cnct/k2-tools
+[1]: https://github.com/samsung-cnct/kraken-tools

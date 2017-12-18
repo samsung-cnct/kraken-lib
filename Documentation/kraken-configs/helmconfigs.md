@@ -1,6 +1,6 @@
 # Kubernetes Helm configuration
 
-These are helm charts to be installed on cluster startup
+These are helm charts to be installed on cluster startup.
 
 ## Options
 ### Root Options

@@ -2,19 +2,19 @@
 
 ## Usage
 
-User can use certain part of ansible roles under /Kraken/roles directory through tags. To use tags with commands, user should set environment variable ( $KRAKEN_TAGS ) for the session bash executes those commands .
+User can specify subset parts of ansible roles under /Kraken/roles directory through tags. To use tags with commands, user should set environment variable ( $KRAKEN_TAGS ) for the session in which bash executes those commands.
 
 ### Run with tag through kraken-lib image
 
 User should set an env variable for tag inside of the container that executes a command.
-For exmple. if you can set  $KRAKEN_TAGS as 'dryrun' to run shell script without spinning up actual cluster
+For example, you can set  $KRAKEN_TAGS as 'dryrun' to run shell script without spinning up actual cluster.
 
 
 ```bash
 $ docker run $K2OPTS -e KRAKEN_TAGS="dryrun" quay.io/samsung_cnct/k2:latest ./bin/up.sh --config $HOME/.kraken/${CLUSTER}.yaml
 ```
 
-Then you can verify those tags through stdout when run some commands such as 'up.sh'
+Then you can verify those tags through stdout when running commands such as 'up.sh'
 ```bash
 ...
 WARNING: --output not specified. Using $HOME/.kraken as location
@@ -22,14 +22,14 @@ WARNING: Using 'dryrun' as tags
 ...
 ```
 
-User are also able to use **multiple tags** using delimeter : ','
+Users can set **multiple tags** using the ',' delimiter
 ```bash
 $ docker run $K2OPTS -e KRAKEN_TAGS="fabric_only,services_only" quay.io/samsung_cnct/k2:latest ./bin/up.sh --config $HOME/.kraken/${CLUSTER}.yaml
 ```
 
 ### Run with tags through Kraken-tools image for using local Kraken repository
-Like example above, you can set  $KRAKEN_TAGS as 'dryrun' to run shell script without spinning up
-clusters
+Like the example above, you can set $KRAKEN_TAGS as 'dryrun' to run shell script without spinning up
+clusters.
 
 ```bash
 $ .${YOURK2PATH}/hack/dockerdev -c ~/.kraken/${CLUSTER}.yaml
@@ -49,19 +49,19 @@ $ echo $KRAKEN_TAGS
 dryrun
 ```
 
-After setting up env variables you can execute up.sh without spinning up actual cluster
+After setting up env variables you can execute up.sh without spinning up an actual cluster
 ```bash
 $ ./bin/up.sh --config ~/.kraken/${CLUSTER}.yaml
 ```
 
-Then you can verify those tags through stdout when run some commands such as 'up.sh'
+Then you can verify those tags through stdout when running commands like 'up.sh'
 ```bash
 ...
 WARNING: --output not specified. Using $HOME/.kraken as location
 WARNING: Using 'dryrun' as tags
 ...
 ```
-Or you can set multiple tags using ',' for delimeter
+Or you can set multiple tags using the ',' delimiter
 ```bash
 $ export KRAKEN_TAGS="fabric_only,services_only"
 $ echo $KRAKEN_TAGS
@@ -89,10 +89,10 @@ fabric_only,services_only
 ## List of tags and usage for ansible roles
 
 ### always
-**: The tag forces ansible to run a role that have 'always' tag. Use this for default role such as 'kraken.config'.**
+**: This tag forces ansible to run roles with the 'always' tag. Use this for default roles such as 'kraken.config'**
 
 ### all
- **: If no tags are specified, this 'all' tag will be default tag.**
+ **: If no tags are specified, the default tag is 'all'**
 - roles/kraken.config
 - roles/kraken.cluster_common
 - roles/kraken.nodePool/kraken.nodePool.selector
@@ -109,7 +109,7 @@ fabric_only,services_only
 - roles/kraken.post
 
 ### dryrun
- **: Execute all codepaths to build any physical resources without spinning up actual cluster.**
+ **: Execute all codepaths to build any physical resources without spinning up an actual cluster**
 - roles/kraken.config
 - roles/kraken.cluster_common
 - roles/kraken.nodePool/kraken.nodePool.selector
@@ -133,13 +133,13 @@ fabric_only,services_only
 - roles/kraken.fabric/kraken.fabric.selector
 
 ### fabric_only
- **: Render and execute kubernetes config yamls for creating the nework fabric.**
+ **: Render and execute kubernetes config yamls for creating the network fabric**
  **: Useful for development and production upgrades of a network**
 - roles/kraken.fabric/kraken.fabric.selector
 
 
 ### provider
- **: Render and spins up unconfigured kubernetes cluster on cloud such as AWS or GKE.**
+ **: Render and spin up an unconfigured kubernetes cluster on a cloud, such as AWS or GKE**
 - roles/kraken.config
 - roles/kraken.cluster_common
 - roles/kraken.nodePool/kraken.nodePool.selector
@@ -155,7 +155,7 @@ fabric_only,services_only
 
 ### post_provider
  **: Assumes a set of machines has been created and has nodes in etcd, master and cluster pools**
- **: Requires manually setting krakenconfig cli variable**
+ **: Requires manually setting the krakenconfig cli variable**
 - roles/kraken.config
 - roles/kraken.cluster_common
 - roles/kraken.access
@@ -173,7 +173,7 @@ fabric_only,services_only
 - roles/kraken.ssh/kraken.ssh.selector
 
 ### ssh
-**: To test ssh, spins up actual cluster including fabric config and ssh config**
+**: To test ssh, spins up an actual cluster including fabric config and ssh config**
 - roles/kraken.config
 - roles/kraken.cluster_common
 - roles/kraken.nodePool/kraken.nodePool.selector
@@ -183,12 +183,12 @@ fabric_only,services_only
 - roles/kraken.ssh/kraken.ssh.selector
 
 ### access_only
-**: To setup things to access kubernetes cluster**
+**: To setup things to access the kubernetes cluster**
 - roles/kraken.config
 - roles/kraken.access
 
 ### rbac_only
-**: To setup RBAC  (role based access control) for the cluster**
+**: To setup RBAC (role based access control) for the cluster**
 - roles/kraken.config
 - roles/kraken.rbac
 
@@ -198,7 +198,7 @@ fabric_only,services_only
 
 
 ### readiness
-**: To test readinees which waits for when api server is ready, spins up actual cluster except for  ssh setup and services setup**
+**: To test readiness which waits for when api server is ready, spins up actual cluster except for ssh setup and services setup**
 - roles/kraken.config
 - roles/kraken.cluster_common
 - roles/kraken.nodePool/kraken.nodePool.selector
@@ -211,7 +211,7 @@ fabric_only,services_only
 - roles/kraken.post
 
 ### services
-**: To test services which installs kraken service on kubernetes cluster, it spins up actual cluster except for ssh setup for nodes**
+**: To test services which installs kraken services on kubernetes cluster, it spins up actual cluster except for ssh setup for nodes**
 - roles/kraken.config
 - roles/kraken.cluster_common
 - roles/kraken.nodePool/kraken.nodePool.selector
@@ -229,5 +229,5 @@ fabric_only,services_only
 - roles/kraken.post
 
 ### clean_only
-**:To test removing  config base directory and cluser.status.lock file**
+**:To test removing config base directory and cluser.status.lock file**
 - roles/kraken.clean

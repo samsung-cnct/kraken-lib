@@ -4,9 +4,9 @@
 ### Root Options
 | Key Name | Required     | Type    | Description  |
 | -------- | ------------ | ------  | ------------ |
-| name     | __Required__ | String  | name for DNS |
-| kind     | __Required__ | String  | dns          |
-| kubedns  | __Required__ | Object  | kubedns info |
+| name     | __Required__ | String  | Name for DNS |
+| kind     | __Required__ | String  | Dns          |
+| kubedns  | __Required__ | Object  | Kubedns info |
 
 
 ### KubeDNS Options
@@ -28,7 +28,7 @@ dnsConfig:
       namespace: kube-system
 ```
 
-Reminder that cluster_ip and dns_domain should match dns and domain in the deployment section of the config :
+Reminder that cluster_ip and dns_domain should match dns and domain in the deployment section of the config:
 ```yaml
 deployment:
   clusters:
