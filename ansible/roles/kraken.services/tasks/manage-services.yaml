@@ -40,7 +40,7 @@
     regex: "^.*: "
 
 - name: Wait for tiller to be ready
-  command: "{{ kubectl }} --kubeconfig={{ kubeconfig }} --namespace=kube-system get deploy tiller-deploy -o json"
+  command: "{{ kubectl }} --kubeconfig={{ kubeconfig }} --namespace=kraken get deploy tiller-deploy -o json"
   register: output
   until: (output | succeeded) and ((output.stdout | from_json).status.availableReplicas | default(0)) > 0
   retries: 600

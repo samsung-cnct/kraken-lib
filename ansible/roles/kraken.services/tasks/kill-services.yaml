@@ -17,7 +17,6 @@
   set_fact:
     helm_path: "{{ helm_command | dirname }}"
 
-
 - name: Build a list of namespaces used for services
   set_fact:
     cluster_namespaces: "{{ cluster_namespaces + [item.namespace | default('kube-system')] }}"
@@ -27,9 +26,9 @@
   set_fact:
     cluster_namespaces: "{{ cluster_namespaces | unique | reject('search', 'kube-system') | list }}"
 
-- name: See if tiller rc if present
+- name: See if tiller rc is present
   command: >
-      {{ kubectl }} --kubeconfig={{ kubeconfig }} get deployment {{ tiller }} --namespace=kube-system
+      {{ kubectl }} --kubeconfig={{ kubeconfig }} get deployment {{ tiller }} --namespace=kraken
   register: tiller_present
   when: kubeconfig | is_file
   ignore_errors: yes
@@ -37,7 +36,7 @@
 
 - name: Clean up releases
   command: >
-    {{ helm_command }} delete --purge {{ item.name }}
+    {{ helm_command }} delete --purge {{ item.name }} --tiller-namespace kraken
   environment:
     KUBECONFIG: "{{ kubeconfig }}"
     HELM_HOME: "{{ helm_home }}"
@@ -50,7 +49,7 @@
 
 - name: Clean up tiller if present
   command: >
-    {{ kubectl }} --kubeconfig={{ kubeconfig }} delete deployment {{ tiller }} --namespace=kube-system
+    {{ kubectl }} --kubeconfig={{ kubeconfig }} delete deployment {{ tiller }} --namespace=kraken
   when:
     - not (tiller_present | skipped)
     - tiller_present.stderr.find("Error") != -1

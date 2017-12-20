@@ -361,7 +361,7 @@ default       kafka-monitor                1         1         1            1   
 default       kibana-logging               3         3         3            3           3m
 kube-system   heapster-standalone          1         1         1            1           3m
 kube-system   kube-dns                     1         1         1            1           3m
-kube-system   tiller-deploy                1         1         1            1           3m
+kraken        tiller-deploy                1         1         1            1           3m
 
 ```
 
