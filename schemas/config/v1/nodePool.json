@@ -31,7 +31,12 @@
     "nodeConfig": { "$ref": "nodeConfig.json" },
     "keyPair": { "$ref": "keyPair.json" },
     "autoScalingConfig": { "$ref": "autoScalingConfig.json" },
-    "schedulingConfig": {"$ref": "schedulingConfig.json"}
+    "schedulingConfig": {"$ref": "schedulingConfig.json"},
+    "taints": {
+      "description": "List of AWS taints to associate with the kubernetes node",
+      "items": { "$ref": "kubeNodeTaint.json" },
+      "type": "array"
+    }
   },
   "required": [
     "name",
