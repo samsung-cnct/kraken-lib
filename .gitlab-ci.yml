@@ -126,7 +126,7 @@ test-e2e:e2e:
     - ./hack/key_gen
     - echo $AWS_CREDENTIALS | base64 -d > /root/.aws/credentials
     - echo $AWS_CONFIG | base64 -d > /root/.aws/config
-    - build-scripts/conformance-tests "v1.8.4" krakenlib-$CI_PIPELINE_ID /var/opt/gitlab
+    - build-scripts/conformance-tests "v1.8.5" krakenlib-$CI_PIPELINE_ID /var/opt/gitlab
 
 cleanup:cloud-aws:
   stage: cleanup
