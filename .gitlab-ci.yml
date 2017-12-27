@@ -50,7 +50,7 @@ config-generation:create-aws-config:
   artifacts:
     paths:
       - $CI_PROJECT_DIR/cluster/aws/config.yaml
-    expire_in: 2 hour
+    expire_in: 14 day
   script:
     - hack/gen-test-config.sh aws
 
@@ -63,7 +63,7 @@ config-generation:create-gke-config:
   artifacts:
     paths:
       - $CI_PROJECT_DIR/cluster/gke/config.yaml
-    expire_in: 2 hour
+    expire_in: 14 day 
   script:
     - hack/gen-test-config.sh gke
 
@@ -93,7 +93,7 @@ test:cloud-aws:
   artifacts:
     paths:
       - $CI_PROJECT_DIR/cluster/aws/**
-    expire_in: 2 hour
+    expire_in: 14 day
   script:
     - mkdir -p /root/.ssh /root/.aws/
     - ./hack/key_gen
@@ -107,7 +107,7 @@ test:cloud-gke:
   artifacts:
     paths:
       - $CI_PROJECT_DIR/cluster/gke/**
-    expire_in: 2 hour
+    expire_in: 14 day
   script:
     - mkdir -p /root/.ssh /root/.config/gcloud/
     - ./hack/key_gen
