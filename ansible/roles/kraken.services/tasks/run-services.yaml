@@ -182,7 +182,7 @@
     - helm_command is defined
     - item.repo is defined
 
-- name: Install charts from registry
+- name: Install charts from registry by version
   command: >
     {{ helm_command }} registry install {{ item.registry }}/{{ item.chart }}@{{ item.version }}  --
       --tiller-namespace kraken
@@ -197,7 +197,24 @@
   when:
     - cluster_services is defined
     - helm_command is defined
-    - item.registry is defined
+    - item.registry is defined and item.version is defined
+
+- name: Install charts from registry by channel
+  command: >
+      {{ helm_command }} registry install {{ item.registry }}/{{ item.chart }}:{{ item.channel }}  --
+      --tiller-namespace kraken
+      --name {{ item.name }}
+      --namespace {{ item.namespace | default('default') }}
+      --values {{ config_base }}/{{ cluster.name }}/{{ item.registry }}-{{ item.name | replace('/','_') }}.helmvalues
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+    HELM_HOME: "{{ helm_home }}"
+    PATH: "{{ helm_path }}:{{ ansible_env.PATH }}"
+  with_items: "{{ cluster_services }}"
+  when:
+    - cluster_services is defined
+    - helm_command is defined
+    - item.registry is defined and item.channel is defined
 
 - name: Set cluster-autoscaling version
   set_fact:

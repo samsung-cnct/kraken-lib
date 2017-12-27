@@ -52,10 +52,6 @@ deployment:
           - https://www.googleapis.com/auth/logging.write
           - https://www.googleapis.com/auth/monitoring
   clusterServices:
-    repos:
-      -
-        name: atlas
-        url: http://atlas.cnct.io
     services:
       -
         name: podpincher

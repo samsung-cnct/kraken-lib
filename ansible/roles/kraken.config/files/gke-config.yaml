@@ -15,8 +15,6 @@ definitions:
       name: defaultHelm
       kind: helm
       repos:
-        - name: atlas
-          url: http://atlas.cnct.io
         - name: stable
           url: https://kubernetes-charts.storage.googleapis.com
       charts: []

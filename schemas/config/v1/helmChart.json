@@ -29,13 +29,17 @@
     "version": {
       "description": "Version of the chart to deploy - referenced by helm application.",
       "type": "string"
+    },
+    "channel": {
+      "description": "Channel of the chart to deploy - referenced by helm application.",
+      "enum": [ "stable", "beta", "alpha" ],
+      "type": "string"
     }
   },
 
   "required": [
     "name",
-    "chart",
-    "version"
+    "chart"
   ],
 
   "oneOf": [
@@ -43,6 +47,13 @@
           [ "repo" ] },
       { "required":
           [ "registry" ] }
+  ],
+
+  "oneOf": [
+      { "required":
+          [ "version" ] },
+      { "required":
+          [ "channel" ] }
   ],
   "additionalProperties": false,
   "type": "object"

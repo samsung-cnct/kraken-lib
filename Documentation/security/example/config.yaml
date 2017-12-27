@@ -7,25 +7,14 @@ definitions:
       name: defaultHelm
       kind: helm
       repos:
-        - name: atlas
-          url: http://atlas.cnct.io
         - name: stable
           url: https://kubernetes-charts.storage.googleapis.com
       charts:
-      - name: openldap
-        repo: atlas
-        chart: openldap
-        version: 0.1.0
-        namespace: kube-auth
-        values:
-          OpenLdap:
-            Domain: local.io
-            AdminPassword: admin
       -
         name: dex
-        repo: atlas
-        chart: dex
-        version: 0.1.0
+        registry: quay.io
+        chart: samsung_cnct/dex
+        version: 0.1.1-0
         namespace: kube-auth
         values:
           Dex:
