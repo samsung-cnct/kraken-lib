@@ -38,6 +38,7 @@
     {{ kubectl }} --kubeconfig={{ kubeconfig }} apply -f "{{ item }}" --record
   with_first_found:
     - files:
+      - "{{ kubernetes_minor_versions[ cluster.name ] }}/helm-rbac-config.yaml"
       - helm-rbac-config.yaml
       skip: true
   when: helm_command is defined

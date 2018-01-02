@@ -1,10 +1,8 @@
 # Calico Roles
-#  lifted directly from https://github.com/projectcalico/canal/blob/master/k8s-install/1.7/rbac.yaml
-#   there is (12/28) no 1.8 or 1.9 rbac yamls.
-#   hand edited to not use v1beta rbac API
+
 ---
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1
+apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: canal
   namespace: kube-networking
@@ -67,9 +65,8 @@ rules:
 ---
 # Flannel roles
 # Pulled from https://github.com/coreos/flannel/blob/master/Documentation/kube-flannel-rbac.yml
-#  updates by PAC 12/27 due to rbac going GA
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1
+apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: flannel
 rules:
@@ -95,7 +92,7 @@ rules:
 
 ---
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
+apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: flannel
 roleRef:
@@ -108,7 +105,7 @@ subjects:
   namespace: kube-networking
 
 ---
-apiVersion: rbac.authorization.k8s.io/v1
+apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
   name: canal

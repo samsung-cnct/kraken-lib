@@ -36,7 +36,7 @@ definitions:
             version: v1.11.1
             location: quay.io/calico/cni
           calicoNode:
-            version: v2.6.3
+            version: v2.6.5
             location: quay.io/calico/node
           flannel:
             version: v0.9.1
@@ -95,7 +95,25 @@ definitions:
           nodeConnectionLimit: 30
 
   kvStoreConfigs:
-    - &defaultEtcd
+    - &etcd19AndLater
+      name: etcd
+      kind: kvStore
+      type: etcd
+      uuidToken: true
+      clientPorts: [2379, 4001]
+      peerPorts: [2380]
+      ssl: true
+      version: v3.1.10
+    - &etcdEvents19AndLater
+      name: etcdEvents
+      kind: kvStore
+      type: etcd
+      uuidToken: true
+      clientPorts: [2381]
+      peerPorts: [2382]
+      ssl: true
+      version: v3.1.10
+    - &etcd18AndEarlier
       name: etcd
       kind: kvStore
       type: etcd
@@ -104,7 +122,7 @@ definitions:
       peerPorts: [2380]
       ssl: true
       version: v3.0.17
-    - &defaultEtcdEvents
+    - &etcdEvents18AndEarlier
       name: etcdEvents
       kind: kvStore
       type: etcd
@@ -120,9 +138,9 @@ definitions:
       kind: apiServer
       loadBalancer: cloud
       state:
-        etcd: *defaultEtcd
+        etcd: *etcd19AndLater
       events:
-        etcd: *defaultEtcdEvents
+        etcd: *etcdEvents19AndLater
 
   bastionConfigs:
     - &defaultBastion
@@ -133,7 +151,7 @@ definitions:
     - &defaultKube
       name: defaultKube
       kind: kubernetes
-      version: v1.8.5
+      version: v1.9.0
       hyperkubeLocation: gcr.io/google_containers/hyperkube
 
   containerConfigs:
@@ -160,7 +178,7 @@ definitions:
       # CoreOS specified above will not be pinned.
       rebootStrategy: "off"
       locksmith:
-        etcdConfig: *defaultEtcd
+        etcdConfig: *etcd19AndLater
         setMax: 1
         windowStart: 04:00
         windowLength: 2h
@@ -397,7 +415,7 @@ deployment:
           # configuration is required to tolerate a single node failure during
           # node upgrades.
           count: 5
-          etcdConfigs: [*defaultEtcd, *defaultEtcdEvents]
+          etcdConfigs: [*etcd19AndLater, *etcdEvents19AndLater]
           containerConfig: *defaultDocker
           osConfig: *defaultCoreOs
           nodeConfig: *defaultAwsEtcdNode

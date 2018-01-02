@@ -408,7 +408,7 @@ We can get service info, but not pod info, because Kraken, by default, assigns t
 ```yaml
 ---
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: default
 rules:
@@ -436,7 +436,7 @@ metadata:
   name: cnct
 ---
 kind: Role
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   namespace: cnct
   name: cnct
@@ -446,7 +446,7 @@ rules:
     verbs: ["*"]
 ---
 kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: cnct
   namespace: cnct
@@ -458,7 +458,7 @@ roleRef:
   kind: Role
   namespace: cnct
   name: cnct
-  apiVersion: rbac.authorization.k8s.io/v1beta1
+  apiVersion: rbac.authorization.k8s.io/v1
 ```
 
 Now we can deploy to the cnct namespace.

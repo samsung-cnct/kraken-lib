@@ -5,7 +5,7 @@ metadata:
   name: cnct
 ---
 kind: Role
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   namespace: cnct
   name: cnct
@@ -15,7 +15,7 @@ rules:
     verbs: ["*"]
 ---
 kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: cnct
   namespace: cnct
@@ -27,4 +27,4 @@ roleRef:
   kind: Role
   namespace: cnct
   name: cnct
-  apiVersion: rbac.authorization.k8s.io/v1beta1
+  apiVersion: rbac.authorization.k8s.io/v1

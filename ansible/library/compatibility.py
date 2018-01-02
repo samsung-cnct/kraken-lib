@@ -122,7 +122,7 @@ def check_k8s_calico_mismatch(config):
                                                  k8s_version)
             containers = fabric_config['options']['containers']
             calico_node_version = get_version(containers['calicoNode']['version'])
-            if calico_node_version != required_calico_node_version:
+            if calico_node_version < required_calico_node_version:
                 incompatible = True
                 explaination = template.format(cluster=cluster['name'],
                                                nodepool=nodepool['name'])

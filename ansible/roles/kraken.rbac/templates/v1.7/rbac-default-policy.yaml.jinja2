@@ -1,5 +1,5 @@
 ---
-apiVersion: rbac.authorization.k8s.io/v1
+apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
   name: admin
@@ -10,7 +10,7 @@ rules:
   - nonResourceURLs: ["*"]
     verbs: ["*"]
 ---
-apiVersion: rbac.authorization.k8s.io/v1
+apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
   name: default
@@ -29,7 +29,7 @@ rules:
   - nonResourceURLs: ["*"]
     verbs: ["get", "watch", "list"]
 ---
-apiVersion: rbac.authorization.k8s.io/v1
+apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
   name: kubelet
@@ -58,7 +58,7 @@ rules:
   - nonResourceURLs: ["*"]
     verbs: ["*"]
 ---
-apiVersion: rbac.authorization.k8s.io/v1
+apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
   name: proxy
@@ -83,7 +83,7 @@ rules:
     verbs: ["*"]
 ---
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
+apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: default
 subjects:
@@ -95,7 +95,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ---
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
+apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: kubelet
 subjects:
@@ -107,7 +107,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ---
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
+apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: proxy
 subjects:
@@ -119,7 +119,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ---
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
+apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: kube-system
 subjects:
@@ -132,7 +132,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ---
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
+apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: kube-networking
 subjects:
@@ -145,7 +145,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ---
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
+apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: kube-auth
 subjects:
