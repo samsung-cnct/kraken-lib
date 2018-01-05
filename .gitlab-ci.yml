@@ -23,6 +23,8 @@ variables:
   KUBERNETES_E2E_TEST_VERSION: v1.9.0
   ANSIBLE_LINT: "quay.io/samsung_cnct/ansible-lint:latest"
   KRAKEN_TOOLS: "quay.io/samsung_cnct/kraken-tools:latest"
+  # this is used to build tagged versions of kraken-lib
+  KRAKEN_TOOLS_TAGGED: "quay.io/samsung_cnct/kraken-tools:v0.8"
   E2E_TESTER: "quay.io/samsung_cnct/e2etester:0.2"
 
 stages:
@@ -208,6 +210,7 @@ build:build-tagged-image-quay:
   before_script:
     - docker info
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - build-scripts/docker-update.sh $KRAKEN_TOOLS_TAGGED docker/Dockerfile
   script:
     - docker build -t $IMAGE_URI docker/
     - docker push $IMAGE_URI
