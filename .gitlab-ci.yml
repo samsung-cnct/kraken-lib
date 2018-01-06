@@ -140,6 +140,7 @@ test:cloud-aws:
   stage: test
   image: $KRAKEN_TOOLS
   artifacts:
+    when: always
     paths:
       - $CI_PROJECT_DIR/cluster/aws/**
     expire_in: 14 day
@@ -152,6 +153,7 @@ test:cloud-gke:
   stage: test
   image: $KRAKEN_TOOLS
   artifacts:
+    when: always
     paths:
       - $CI_PROJECT_DIR/cluster/gke/**
     expire_in: 14 day
