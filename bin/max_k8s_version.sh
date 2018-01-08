@@ -23,7 +23,7 @@ source "${my_dir}/../lib/kraken_arguments.sh"
 
 # setup a sigint trap
 trap control_c SIGINT
-LOCAL_KEV="kraken_action=max_k8s_version version_outfile=${OUTFILE}"
+LOCAL_KEV=" kraken_action=max_k8s_version version_outfile=${OUTFILE}"
 
 function runcmd(){
     echo "$(ansible-playbook ${K2_VERBOSE} \
