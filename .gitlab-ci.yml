@@ -24,7 +24,7 @@ variables:
   ANSIBLE_LINT: "quay.io/samsung_cnct/ansible-lint:latest"
   KRAKEN_TOOLS: "quay.io/samsung_cnct/kraken-tools:latest"
   # this is used to build tagged versions of kraken-lib
-  KRAKEN_TOOLS_TAGGED: "quay.io/samsung_cnct/kraken-tools:v0.8"
+  KRAKEN_TOOLS_TAGGED: "quay.io/samsung_cnct/kraken-tools:v0.9"
   E2E_TESTER: "quay.io/samsung_cnct/e2etester:0.2"
 
 stages:
