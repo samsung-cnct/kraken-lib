@@ -35,10 +35,7 @@ Examples:
 ```yaml
   kubeConfigs:
     - &defaultKube
-      name: defaultKube
-      kind: kubernetes
-      version: "v1.7.1"   # << UPDATE THIS VERSION TO NEWEST
-      hyperkubeLocation: gcr.io/google_containers/hyperkube
+      <<: *defaultKube19  #  this needs to be updated to the newest kube stanza
 ```
 
 ```yaml
@@ -58,5 +55,10 @@ still be valid. If changes are necessary, copy the referenced block within the
 YAML (e.g. `defaultCanalFabric16`), update its names and references accordingly
 (e.g. rename to `defaultCanalFabric17`). *DO NOT* alter configuration of preceding
 versions.
+
+### Branch Naming
+For ease of testing, any branch that updates the supported versions of kubernetes
+should have 'test-all' in the branch name.  This will cause gitlab CI to excercise
+all of the supported versions of kubernetes. 
 
 [1]: https://github.com/samsung-cnct/kraken-tools

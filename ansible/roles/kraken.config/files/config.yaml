@@ -131,6 +131,11 @@ definitions:
       peerPorts: [2382]
       ssl: true
       version: v3.0.17
+    - &etcdDefault
+      <<: *etcd19AndLater
+    - &etcdEventsDefault
+      <<: *etcdEvents19AndLater
+
 
   apiServerConfigs:
     - &defaultApiServer
@@ -138,9 +143,9 @@ definitions:
       kind: apiServer
       loadBalancer: cloud
       state:
-        etcd: *etcd19AndLater
+        etcd: *etcdDefault
       events:
-        etcd: *etcdEvents19AndLater
+        etcd: *etcdEventsDefault
 
   bastionConfigs:
     - &defaultBastion
@@ -148,11 +153,23 @@ definitions:
       kind: bastion
 
   kubeConfigs:
-    - &defaultKube
-      name: defaultKube
+    - &defaultKube19
+      name: defaultKube19
       kind: kubernetes
       version: v1.9.0
       hyperkubeLocation: gcr.io/google_containers/hyperkube
+    - &defaultKube18
+      name: defaultKube18
+      kind: kubernetes
+      version: v1.8.5
+      hyperkubeLocation: gcr.io/google_containers/hyperkube
+    - &defaultKube17
+      name: defaultKube17
+      kind: kubernetes
+      version: v1.7.11
+      hyperkubeLocation: gcr.io/google_containers/hyperkube
+    - &defaultKube
+      <<: *defaultKube19
 
   containerConfigs:
     - &defaultDocker
@@ -178,7 +195,7 @@ definitions:
       # CoreOS specified above will not be pinned.
       rebootStrategy: "off"
       locksmith:
-        etcdConfig: *etcd19AndLater
+        etcdConfig: *etcdDefault
         setMax: 1
         windowStart: 04:00
         windowLength: 2h
@@ -415,7 +432,7 @@ deployment:
           # configuration is required to tolerate a single node failure during
           # node upgrades.
           count: 5
-          etcdConfigs: [*etcd19AndLater, *etcdEvents19AndLater]
+          etcdConfigs: [*etcdDefault, *etcdEventsDefault]
           containerConfig: *defaultDocker
           osConfig: *defaultCoreOs
           nodeConfig: *defaultAwsEtcdNode

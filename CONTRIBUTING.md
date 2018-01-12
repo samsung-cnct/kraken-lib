@@ -89,6 +89,7 @@ Please submit all contributions as pull requests, using this process:
    * To quickly create a topic branch based on the master:
      `git checkout -b fix/master/my_contribution master`
    * Avoid working directly on the master branch
+   * If your change probably affects backwards compatability, please include 'test-all' in the feature branch name.  This will cause our CI to run against all supported versions of kubernetes. Example branch name: 'support-k8s-1.10-test-all'
 3. Commit your changes to a topic branch in your fork
    * Check for unnecessary whitespace with `git diff --check` before committing
    * Make sure your commit messages are in the proper format

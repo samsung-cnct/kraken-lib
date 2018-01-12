@@ -21,6 +21,8 @@ variables:
   ROBOT_ACCOUNT: kraken_lib_rw
   ROBOT_ACCOUNT_K2: k2_rw
   KUBERNETES_E2E_TEST_VERSION: v1.9.0
+  KUBERNETES_E2E_TEST_VERSION_MINUS_ONE: v1.8.5
+  KUBERNETES_E2E_TEST_VERSION_MINUS_TWO: v1.7.11
   ANSIBLE_LINT: "quay.io/samsung_cnct/ansible-lint:latest"
   KRAKEN_TOOLS: "quay.io/samsung_cnct/kraken-tools:latest"
   # this is used to build tagged versions of kraken-lib
@@ -73,7 +75,7 @@ config-generation:create-ssh-keys:
       - ${CI_PROJECT_DIR}/.ssh/
     expire_in: 14 day
 
-config-generation:create-aws-config:
+config-generation:create-aws-config-default:
   stage: config-generation
   only:
     - tags
@@ -81,12 +83,43 @@ config-generation:create-aws-config:
   image: $KRAKEN_TOOLS
   artifacts:
     paths:
-      - $CI_PROJECT_DIR/cluster/aws/config.yaml
+      - $CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION/config.yaml
+    expire_in: 14 day
+    when: always
+  before_script:
+    - echo "We don't need secrets to generate config."
+  script:
+    - hack/gen-test-config.sh aws $KUBERNETES_E2E_TEST_VERSION
+
+config-generation:create-aws-config-minus-one:
+  stage: config-generation
+  only:
+    - "/master/"
+    - "/.*test-all.*/"
+  image: $KRAKEN_TOOLS
+  artifacts:
+    paths:
+      - $CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION_MINUS_ONE/config.yaml
     expire_in: 14 day
   before_script:
     - echo "We don't need secrets to generate config."
   script:
-    - hack/gen-test-config.sh aws
+    - hack/gen-test-config.sh aws $KUBERNETES_E2E_TEST_VERSION_MINUS_ONE
+
+config-generation:create-aws-config-minus-two:
+  stage: config-generation
+  only:
+    - "/master/"
+    - "/.*test-all.*/"
+  image: $KRAKEN_TOOLS
+  artifacts:
+    paths:
+      - $CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION_MINUS_TWO/config.yaml
+    expire_in: 14 day
+  before_script:
+    - echo "We don't need secrets to generate config."
+  script:
+    - hack/gen-test-config.sh aws $KUBERNETES_E2E_TEST_VERSION_MINUS_TWO
 
 config-generation:create-gke-config:
   stage: config-generation
@@ -96,12 +129,13 @@ config-generation:create-gke-config:
   image: $KRAKEN_TOOLS
   artifacts:
     paths:
-      - $CI_PROJECT_DIR/cluster/gke/config.yaml
+      - $CI_PROJECT_DIR/cluster/gke-$KUBERNETES_E2E_TEST_VERSION/config.yaml
     expire_in: 14 day 
+    when: always
   before_script:
     - echo "We don't need secrets to generate config."
   script:
-    - hack/gen-test-config.sh gke
+    - hack/gen-test-config.sh gke $KUBERNETES_E2E_TEST_VERSION
 
 
 # Fail as early as possible if the generated dependencies somehow are missing.
@@ -110,15 +144,15 @@ test:validate-config:
   script:
     - echo "When this job fails, something's wrong in your CI config."
     - test -f /root/.ssh/id_rsa || exit $?
-    - test -f $CI_PROJECT_DIR/cluster/gke/config.yaml || exit $?
-    - test -f $CI_PROJECT_DIR/cluster/aws/config.yaml || exit $?
+    - test -f $CI_PROJECT_DIR/cluster/gke-$KUBERNETES_E2E_TEST_VERSION/config.yaml || exit $?
+    - test -f $CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION/config.yaml || exit $?
     - test -s /root/.aws/config || exit $?
     - test -s /root/.aws/credentials || exit $?
     - test -s /root/.config/gcloud/patrickRobot.json || exit $?
 
 
 
-test:aws-dry-run:
+test:aws-dry-run-default:
   stage: pre-test
   only:
     - tags
@@ -130,23 +164,87 @@ test:aws-dry-run:
   script:
     - >-
       PWD=`pwd` ./bin/up.sh
-      --config $CI_PROJECT_DIR/cluster/aws/config.yaml
-      --output $PWD/cluster/aws/
+      --config $CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION/config.yaml
+      --output $PWD/cluster/aws-$KUBERNETES_E2E_TEST_VERSION/
       --tags dryrun
 
+test:aws-dry-run-minus-one:
+  stage: pre-test
+  only:
+    - "/master/"
+    - "/.*test-all.*/"
+  variables:
+    JOB_BASE_NAME: ${CI_PROJECT_NAME}
+    BUILD_ID: $CI_PIPELINE_ID
+  image: $KRAKEN_TOOLS
+  script:
+    - >-
+      PWD=`pwd` ./bin/up.sh
+      --config $CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION_MINUS_ONE/config.yaml
+      --output $PWD/cluster/aws-$KUBERNETES_E2E_TEST_VERSION_MINUS_ONE/
+      --tags dryrun
+
+test:aws-dry-run-minus-two:
+  stage: pre-test
+  only:
+    - "/master/"
+    - "/.*test-all.*/"
+  variables:
+    JOB_BASE_NAME: ${CI_PROJECT_NAME}
+    BUILD_ID: $CI_PIPELINE_ID
+  image: $KRAKEN_TOOLS
+  script:
+    - >-
+      PWD=`pwd` ./bin/up.sh
+      --config $CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION_MINUS_TWO/config.yaml
+      --output $PWD/cluster/aws-$KUBERNETES_E2E_TEST_VERSION_MINUS_TWO/
+      --tags dryrun
 
 # Setup a cluster in AWS
-test:cloud-aws:
+test:cloud-aws-default:
   stage: test
   image: $KRAKEN_TOOLS
   artifacts:
     when: always
     paths:
-      - $CI_PROJECT_DIR/cluster/aws/**
+      - $CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION/**
     expire_in: 14 day
   script:
-    - test -f "$CI_PROJECT_DIR/cluster/aws/config.yaml" || exit $?
-    - ./bin/up.sh --config $CI_PROJECT_DIR/cluster/aws/config.yaml --output $CI_PROJECT_DIR/cluster/aws/ --verbose "-vvv"
+    - test -f "$CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION/config.yaml" || exit $?
+    - ./bin/up.sh --config $CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION/config.yaml --output $CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION/ --verbose "-vvv"
+
+# Setup a cluster in AWS
+test:cloud-aws-minus-one:
+  stage: test
+  only:
+    - "/master/"
+    - "/.*test-all.*/"
+  image: $KRAKEN_TOOLS
+  artifacts:
+    when: always
+    paths:
+      - $CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION_MINUS_ONE/**
+    expire_in: 14 day
+  script:
+    - test -f "$CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION_MINUS_ONE/config.yaml" || exit $?
+    - ./bin/up.sh --config $CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION_MINUS_ONE/config.yaml --output $CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION_MINUS_ONE/ --verbose "-vvv"
+
+# Setup a cluster in AWS
+test:cloud-aws-minus-two:
+  stage: test
+  only:
+    - "/master/"
+    - "/.*test-all.*/"
+  image: $KRAKEN_TOOLS
+  artifacts:
+    when: always
+    paths:
+      - $CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION_MINUS_TWO/**
+    expire_in: 14 day
+  script:
+    - test -f "$CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION_MINUS_TWO/config.yaml" || exit $?
+    - ./bin/up.sh --config $CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION_MINUS_TWO/config.yaml --output $CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION_MINUS_TWO/ --verbose "-vvv"
+
 
 # Setup a cluster in GKE
 test:cloud-gke:
@@ -155,11 +253,11 @@ test:cloud-gke:
   artifacts:
     when: always
     paths:
-      - $CI_PROJECT_DIR/cluster/gke/**
+      - $CI_PROJECT_DIR/cluster/gke-$KUBERNETES_E2E_TEST_VERSION/**
     expire_in: 14 day
   script:
-    - test -f "$CI_PROJECT_DIR/cluster/gke/config.yaml" || exit $?
-    - ./bin/up.sh --config $CI_PROJECT_DIR/cluster/gke/config.yaml --output $CI_PROJECT_DIR/cluster/gke/ --verbose "-vvv"
+    - test -f "$CI_PROJECT_DIR/cluster/gke-$KUBERNETES_E2E_TEST_VERSION/config.yaml" || exit $?
+    - ./bin/up.sh --config $CI_PROJECT_DIR/cluster/gke-$KUBERNETES_E2E_TEST_VERSION/config.yaml --output $CI_PROJECT_DIR/cluster/gke-$KUBERNETES_E2E_TEST_VERSION/ --verbose "-vvv"
 
 test-e2e:e2e:
   stage: test-e2e
@@ -169,23 +267,66 @@ test-e2e:e2e:
   image: $E2E_TESTER
   allow_failure: true
   script:
-    - build-scripts/conformance-tests "${KUBERNETES_E2E_TEST_VERSION}" krakenlib-$CI_PIPELINE_ID /var/opt/gitlab
+    - build-scripts/conformance-tests "${KUBERNETES_E2E_TEST_VERSION}" krakenlib-$CI_PIPELINE_ID-$KUBERNETES_E2E_TEST_VERSION /var/opt/gitlab
 
-cleanup:cloud-aws:
+test-e2e:e2e-minus-one:
+  stage: test-e2e
+  only:
+    - "/master/"
+    - "/.*test-all.*/"
+  image: $E2E_TESTER
+  allow_failure: true
+  script:
+    - build-scripts/conformance-tests "${KUBERNETES_E2E_TEST_VERSION_MINUS_ONE}" krakenlib-$CI_PIPELINE_ID-$KUBERNETES_E2E_TEST_VERSION_MINUS_ONE /var/opt/gitlab
+
+test-e2e:e2e-minus-two:
+  stage: test-e2e
+  only:
+    - "/master/"
+    - "/.*test-all.*/"
+  image: $E2E_TESTER
+  allow_failure: true
+  script:
+    - build-scripts/conformance-tests "${KUBERNETES_E2E_TEST_VERSION_MINUS_TWO}" krakenlib-$CI_PIPELINE_ID-$KUBERNETES_E2E_TEST_VERSION_MINUS_TWO /var/opt/gitlab
+
+
+cleanup:cloud-aws-default:
   stage: cleanup
   image: $KRAKEN_TOOLS
   when: always
   script:
-    - test -f "$CI_PROJECT_DIR/cluster/aws/config.yaml" || exit $?
-    - ./bin/down.sh --config $CI_PROJECT_DIR/cluster/aws/config.yaml --output $CI_PROJECT_DIR/cluster/aws/ --verbose "-vvv"
+    - test -f "$CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION/config.yaml" || exit $?
+    - ./bin/down.sh --config $CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION/config.yaml --output $CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION/ --verbose "-vvv"
+
+cleanup:cloud-aws-default-minus-one:
+  stage: cleanup
+  image: $KRAKEN_TOOLS
+  only:
+    - "/master/"
+    - "/.*test-all.*/"
+  when: always
+  script:
+    - test -f "$CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION_MINUS_ONE/config.yaml" || exit $?
+    - ./bin/down.sh --config $CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION_MINUS_ONE/config.yaml --output $CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION_MINUS_ONE/ --verbose "-vvv"
+
+cleanup:cloud-aws-default-minus-two:
+  stage: cleanup
+  image: $KRAKEN_TOOLS
+  only:
+    - "/master/"
+    - "/.*test-all.*/"
+  when: always
+  script:
+    - test -f "$CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION_MINUS_TWO/config.yaml" || exit $?
+    - ./bin/down.sh --config $CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION_MINUS_TWO/config.yaml --output $CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION_MINUS_TWO/ --verbose "-vvv"
 
 cleanup:cloud-gke:
   stage: cleanup
   image: $KRAKEN_TOOLS
   when: always
   script:
-    - test -f "$CI_PROJECT_DIR/cluster/gke/config.yaml" || exit $?
-    - ./bin/down.sh --config $CI_PROJECT_DIR/cluster/gke/config.yaml --output $CI_PROJECT_DIR/cluster/gke/ --verbose "-vvv"
+    - test -f "$CI_PROJECT_DIR/cluster/gke-$KUBERNETES_E2E_TEST_VERSION/config.yaml" || exit $?
+    - ./bin/down.sh --config $CI_PROJECT_DIR/cluster/gke-$KUBERNETES_E2E_TEST_VERSION/config.yaml --output $CI_PROJECT_DIR/cluster/gke-$KUBERNETES_E2E_TEST_VERSION/ --verbose "-vvv"
 
 # build and publish kraken-lib and backwards compatibility project name "K2"
 build:build-latest-master-quay:
