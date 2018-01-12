@@ -1,4 +1,7 @@
 #!/bin/sh
+#  using sh instead of bash because the target container, `docker:latest` does
+#  not contain /bin/bash
+#
 #  this script will update the checked in dockerfile to use a passed in parameter
 #  for the tag on the source image
 #  expects first argument to be source tag
