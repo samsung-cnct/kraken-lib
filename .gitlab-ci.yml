@@ -39,6 +39,14 @@ stages:
   - build
   - publish
 
+#This is the *Default* before_script; some jobs override, and therefore must reference it through YAML pointers.
+before_script: &setup_credentials
+  - mkdir -p /root/.aws /root/.config/gcloud
+  - echo "$AWS_CREDENTIALS" | base64 -d > /root/.aws/credentials
+  - echo "$AWS_CONFIG" | base64 -d > /root/.aws/config
+  - echo "$GKE_CONFIG" | base64 -d > /root/.config/gcloud/patrickRobot.json
+  - mkdir -p /root/.ssh
+  - cp -v ${CI_PROJECT_DIR}/.ssh/id_rsa* /root/.ssh/
 
 # This is the *Default* before_script; some jobs override, and therefore must reference it through YAML pointers.
 before_script: &setup_credentials
@@ -137,6 +145,20 @@ config-generation:create-gke-config:
   script:
     - hack/gen-test-config.sh gke $KUBERNETES_E2E_TEST_VERSION
 
+config-generation:create-gke-config:
+  stage: config-generation
+  only:
+    - tags
+    - branches
+  image: $KRAKEN_TOOLS
+  artifacts:
+    paths:
+      - $CI_PROJECT_DIR/cluster/gke/config.yaml
+    expire_in: 14 day 
+  before_script:
+    - echo "We don't need secrets to generate config."
+  script:
+    - hack/gen-test-config.sh gke
 
 # Fail as early as possible if the generated dependencies somehow are missing.
 test:validate-config:
@@ -150,6 +172,17 @@ test:validate-config:
     - test -s /root/.aws/credentials || exit $?
     - test -s /root/.config/gcloud/patrickRobot.json || exit $?
 
+# Fail as early as possible if the generated dependencies somehow are missing.
+test:validate-config:
+  stage: pre-test
+  script:
+    - echo "When this job fails, something's wrong in your CI config."
+    - test -f /root/.ssh/id_rsa || exit $?
+    - test -f $CI_PROJECT_DIR/cluster/gke/config.yaml || exit $?
+    - test -f $CI_PROJECT_DIR/cluster/aws/config.yaml || exit $?
+    - test -s /root/.aws/config || exit $?
+    - test -s /root/.aws/credentials || exit $?
+    - test -s /root/.config/gcloud/patrickRobot.json || exit $?
 
 
 test:aws-dry-run-default:
@@ -353,10 +386,10 @@ build:build-tagged-image-quay:
   before_script:
     - docker info
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - build-scripts/docker-update.sh $KRAKEN_TOOLS_TAGGED docker/Dockerfile
+    - ./build-scripts/docker-update.sh $KRAKEN_TOOLS_TAGGED docker/Dockerfile
   script:
     - docker build -t $IMAGE_URI docker/
-    - docker push $IMAGE_URI
+    - docker push $IMAGE_URI 
 
 publish:publish-latest-master-quay:
   stage: publish
