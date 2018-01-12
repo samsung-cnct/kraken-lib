@@ -142,8 +142,8 @@ test:validate-config:
   script:
     - echo "When this job fails, something's wrong in your CI config."
     - test -f /root/.ssh/id_rsa || exit $?
-    - test -f $CI_PROJECT_DIR/cluster/gke/config.yaml || exit $?
-    - test -f $CI_PROJECT_DIR/cluster/aws/config.yaml || exit $?
+    - test -f $CI_PROJECT_DIR/cluster/gke-$KUBERNETES_E2E_TEST_VERSION/config.yaml || exit $?
+    - test -f $CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION/config.yaml || exit $?
     - test -s /root/.aws/config || exit $?
     - test -s /root/.aws/credentials || exit $?
     - test -s /root/.config/gcloud/patrickRobot.json || exit $?
