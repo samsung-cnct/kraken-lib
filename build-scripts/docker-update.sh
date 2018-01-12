@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #  this script will update the checked in dockerfile to use a passed in parameter
 #  for the tag on the source image
 #  expects first argument to be source tag
