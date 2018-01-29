@@ -1,0 +1,79 @@
+#!/bin/bash
+#
+# This script is the main controlling test script to run
+# the kubernetes benchmark tests w/kube-bench. This script
+# assumes you are executing inside a kraken-tools container
+#
+# In regards to reporting this script just reports:
+#   - pass/total checks for each node
+#   - cluster summary which simply sums node results
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+CLUSTER_CONF_DIR=${1:?The cluster configuration directory is required}
+CLUSTER_CONF=${CLUSTER_CONF_DIR}/${2:-config.yaml}
+CLUSTER_TEST_RESULTS=./build/tests
+
+REMOTE_BENCHMARK_DIR=/home/core/benchmark-test
+REMOTE_BENCHMARK_CONF=${REMOTE_BENCHMARK_DIR}/kraken-conf
+
+# This function gets the name of the cluster from the kraken config file.
+get_cluster_name() {
+  local conf_file=$1
+  grep '^[[:space:]]\{4\}- name' ${conf_file} | awk '{print $3}'
+}
+
+# This function gets the names of the nodes execpt etcd nodes from the ssh_config file
+get_node_names() {
+  local ssh_config=$1
+  grep -o "Host .*" "${ssh_config}" | grep -v etcd | awk '{print $2}' | tr '\n' ' '
+}
+
+main() {
+  local cluster_name=$(get_cluster_name ${CLUSTER_CONF})
+  local cluster_ssh_config=${CLUSTER_CONF_DIR}/${cluster_name}/ssh_config
+
+  declare -a cluster_nodes
+  cluster_nodes=$(get_node_names ${cluster_ssh_config})
+  
+  local cluster_pass_checks=0
+  local cluster_total_checks=0
+  mkdir -p ${CLUSTER_TEST_RESULTS}
+  
+  for node in ${cluster_nodes[@]}; do
+    printf "\nSetting up node (%s)\n" "${node}"
+    ssh -qF ${cluster_ssh_config} ${node} "mkdir -p ${REMOTE_BENCHMARK_DIR}"
+  
+    printf "Sending test script to node\n"
+    scp -qF ${cluster_ssh_config} ./hack/benchmark-test.sh ${node}:${REMOTE_BENCHMARK_DIR}
+
+    printf "Sending configs to node\n"
+    scp -rpqF ${cluster_ssh_config} ./build-scripts/benchmark-conf ${node}:${REMOTE_BENCHMARK_CONF}
+
+    printf "Executing test on node\n"
+    ssh -qF ${cluster_ssh_config} core@${node} "cd ${REMOTE_BENCHMARK_DIR}; ./benchmark-test.sh ${node}"
+
+    printf "Getting test results from node\n"
+    scp -qF ${cluster_ssh_config} ${node}:${REMOTE_BENCHMARK_DIR}/*results* ${CLUSTER_TEST_RESULTS}
+
+    local pass_checks=$(grep -o "[0-9]\+ checks PASS" ${CLUSTER_TEST_RESULTS}/*${node}-results.txt | awk '{print $1}')
+    local fail_checks=$(grep -o "[0-9]\+ checks FAIL" ${CLUSTER_TEST_RESULTS}/*${node}-results.txt | awk '{print $1}')
+    local total_checks=$(expr ${pass_checks} + ${fail_checks})
+    cluster_pass_checks=$(expr ${pass_checks} + ${cluster_pass_checks})
+    cluster_total_checks=$(expr ${total_checks} + ${cluster_total_checks})
+    printf "Summary of test for node (%s): %d/%d passed checks\n" "${node}" "${pass_checks}" "${total_checks}"
+
+    printf "Cleaning up node\n"
+    ssh -qF ${cluster_ssh_config} ${node} "rm -rf ${REMOTE_BENCHMARK_DIR}"
+  done
+
+  echo "Summary of tests for cluster: ${cluster_pass_checks}/${cluster_total_checks} passed checks" > ${CLUSTER_TEST_RESULTS}/cluster-results.txt
+  cat ${CLUSTER_TEST_RESULTS}/cluster-results.txt
+
+  # return success only if all checks passed
+  exit $(expr ${cluster_total_checks} - ${cluster_pass_checks})
+}
+
+main "$@"

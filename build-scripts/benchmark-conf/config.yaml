@@ -1,0 +1,73 @@
+---
+## Controls Files. 
+# These are YAML files that hold all the details for running checks.
+#
+## Uncomment to use different control file paths.
+# masterControls: ./cfg/master.yaml
+# nodeControls: ./cfg/node.yaml
+# federatedControls: ./cfg/federated.yaml
+
+master:
+  components:
+    - apiserver
+    - scheduler
+    - controllermanager
+    # kubernetes is a component to cover the config file /etc/kubernetes/config that is referred to in the benchmark
+    - kubernetes
+
+  kubernetes:
+    defaultconf: /etc/kubernetes/config
+
+  apiserver:
+    bins:
+      - "hyperkube apiserver"
+    defaultpodspec: /etc/kubernetes/manifests/kube-apiserver.yaml
+
+  scheduler:
+    bins:
+      - "hyperkube scheduler"
+    defaultpodspec: /etc/kubernetes/manifests/scheduler.yaml
+
+  controllermanager:
+    bins:
+      - "hyperkube controller-manager"
+    defaultpodspec: /etc/kubernetes/manifests/controller-manager.yaml
+
+  etcd:
+    optional: true
+    bins:
+      - "etcd"
+    confs:
+      - /etc/etcd/etcd.conf
+    defaultconf: /etc/etcd/etcd.conf
+
+    podspecs:
+      - /etc/kubernetes/manifests/etcd.yaml
+    defaultpodspec: /etc/kubernetes/manifests/etcd.yaml
+
+  flanneld:
+    optional: true
+    bins:
+      - flanneld
+    defaultconf: /etc/sysconfig/flanneld
+
+
+node:
+  components:
+    - kubelet
+    - proxy
+    # kubernetes is a component to cover the config file /etc/kubernetes/config that is referred to in the benchmark
+    - kubernetes
+
+  kubernetes:
+    defaultconf: /etc/kubernetes/config    
+
+  kubelet:
+    bins:
+      - "hyperkube kubelet"
+    defaultunitfile: /etc/systemd/system/kubelet.service
+  
+  proxy:
+    bins:
+      - "hyperkube proxy"
+    defaultpodspec: /etc/kubernetes/manifests/kube-proxy.yaml

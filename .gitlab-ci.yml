@@ -34,6 +34,7 @@ stages:
   - config-generation
   - pre-test
   - test
+  - test-security
   - test-e2e
   - cleanup
   - build
@@ -255,6 +256,48 @@ test:cloud-gke:
   script:
     - test -f "$CI_PROJECT_DIR/cluster/gke-$KUBERNETES_E2E_TEST_VERSION/config.yaml" || exit $?
     - ./bin/up.sh --config $CI_PROJECT_DIR/cluster/gke-$KUBERNETES_E2E_TEST_VERSION/config.yaml --output $CI_PROJECT_DIR/cluster/gke-$KUBERNETES_E2E_TEST_VERSION/ --verbose "-vvv"
+
+test-security:benchmark:
+  stage: test-security
+  only:
+    - tags
+    - branches
+  image: $KRAKEN_TOOLS
+  artifacts:
+    paths:
+      - $CI_PROJECT_DIR/build/tests/**
+    expire_in: 14 day
+  allow_failure: true
+  script:
+    - build-scripts/benchmark-tests "$CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION"
+
+test-security:benchmark-minus-one:
+  stage: test-security
+  only:
+    - "/master/"
+    - "/.*test-all.*/"
+  image: $KRAKEN_TOOLS
+  artifacts:
+    paths:
+      - $CI_PROJECT_DIR/build/tests/**
+    expire_in: 14 day
+  allow_failure: true
+  script:
+    - build-scripts/benchmark-tests "$CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION_MINUS_ONE"
+
+test-security:benchmark-minus-two:
+  stage: test-security
+  only:
+    - "/master/"
+    - "/.*test-all.*/"
+  image: $KRAKEN_TOOLS
+  artifacts:
+    paths:
+      - $CI_PROJECT_DIR/build/tests/**
+    expire_in: 14 day
+  allow_failure: true
+  script:
+    - build-scripts/benchmark-tests "$CI_PROJECT_DIR/cluster/aws-$KUBERNETES_E2E_TEST_VERSION_MINUS_TWO"
 
 test-e2e:e2e:
   stage: test-e2e
