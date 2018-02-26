@@ -189,7 +189,7 @@ definitions:
       name: defaultCoreOs
       kind: os
       type: coreOs
-      version: 1520.8.0
+      version: 1353.8.0
       channel: stable
       # If rebootStrategy is anything other than "off" then the version of
       # CoreOS specified above will not be pinned.
